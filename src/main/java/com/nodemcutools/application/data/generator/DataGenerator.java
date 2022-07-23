@@ -29,7 +29,7 @@ public class DataGenerator {
 
             logger.info("... generating 2 User entities...");
             User user = new User();
-            user.setName("John Normal");
+            user.setName("invitado");
             user.setUsername("user");
             user.setHashedPassword(passwordEncoder.encode("user"));
             user.setProfilePictureUrl(
@@ -37,11 +37,10 @@ public class DataGenerator {
             user.setRoles(Collections.singleton(Role.USER));
             userRepository.save(user);
             User admin = new User();
-            admin.setName("Emma Powerful");
-            admin.setUsername("admin");
+            admin.setName("rub`n");
+            admin.setUsername("rubn");
             admin.setHashedPassword(passwordEncoder.encode("admin"));
-            admin.setProfilePictureUrl(
-                    "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80");
+            admin.setProfilePictureUrl("images/dualidad.jpg");
             admin.setRoles(Set.of(Role.USER, Role.ADMIN));
             userRepository.save(admin);
 
