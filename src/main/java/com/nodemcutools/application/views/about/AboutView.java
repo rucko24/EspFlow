@@ -17,12 +17,14 @@ public class AboutView extends VerticalLayout {
     public AboutView() {
         setSpacing(false);
 
-        Image img = new Image("images/empty-plant.png", "placeholder plant");
-        img.setWidth("200px");
+        Image img = new Image("images/ESP8285H08.jpeg", "placeholder plant");
+        img.setWidth("30%");
+        img.getStyle().set("border-radius","2em");
+        img.getStyle().set("border","2px solid red");
         add(img);
 
-        add(new H2("This place intentionally left empty"));
-        add(new Paragraph("It’s a place where you can grow your own UI 🤗"));
+        add(new H2("Some tools for esp32 family"));
+        add(new Paragraph("like flashing tool with esptool.py and JSSC for com port 🔥"));
 
         setSizeFull();
         setJustifyContentMode(JustifyContentMode.CENTER);
