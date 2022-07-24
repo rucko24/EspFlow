@@ -1,71 +1,86 @@
 package com.nodemcutools.application.views.flashesp32;
 
+import com.nodemcutools.application.data.util.NotificationsUtils;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
+import com.vaadin.flow.component.upload.UploadI18N;
+import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.MediaType;
 
 import javax.annotation.PostConstruct;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Log4j2
 @UIScope
 @SpringComponent
 @RequiredArgsConstructor
-public class DivFlashUploader extends Div {
+public class DivFlashUploader extends Div implements NotificationsUtils {
 
     @PostConstruct
     public void constructDiv() {
         removeAll();
-        final MemoryBuffer memoryBuffer = new MemoryBuffer();
-        final Upload upload = new Upload(memoryBuffer);
+        final FileBuffer buffer = new FileBuffer();
+        final Upload upload = new Upload(buffer);
 
+        AtomicReference<String> fileName = new AtomicReference<>();
         upload.addSucceededListener(event -> {
             upload.getElement()
                     .executeJs("this.shadowRoot.querySelector('vaadin-upload-file').className = 'meta'");
             // Get information about the uploaded file
-            try (var input = new BufferedInputStream(memoryBuffer.getInputStream())) {
+            try (var input = new BufferedInputStream(buffer.getInputStream())) {
 
             } catch (IOException ex) {
 
             }
-            String fileName = event.getFileName();
+            fileName.set(event.getFileName());
             long contentLength = event.getContentLength();
             String mimeType = event.getMIMEType();
 
             // Do something with the file data
             // processFile(fileData, fileName, contentLength, mimeType);
         });
+        log.info("Nombre del fichero: {}", fileName.get());
+
         upload.addStartedListener(e -> {
+            upload.getElement()
+                    .executeJs("this.shadowRoot.querySelector('vaadin-upload-file').className = 'meta'");
             log.info("Handling upload of " + e.getFileName() + " ("
                     + e.getContentLength() + " bytes) started");
         });
 
         upload.addFileRejectedListener(event -> {
             String errorMessage = event.getErrorMessage();
-
-            Notification notification = Notification.show(
-                    errorMessage,
-                    5000,
-                    Notification.Position.MIDDLE
-            );
-            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+            this.showError(errorMessage);
         });
 
-        upload.setAcceptedFileTypes("application/octet-stream", ".bin");
+        upload.addSucceededListener(event -> {
+        });
+
+        upload.addFailedListener( e -> {
+            log.error("Error addFailed Listernet {}", e.getReason().getMessage());
+            showError(e.getReason().getMessage());
+        });
+
+        upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
+        upload.setAutoUpload(Boolean.FALSE);
         upload.getStyle().set("display","flex");
         upload.getStyle().set("border", "none");
         upload.getStyle().set("padding", "0");
         upload.getStyle().set("margin-left", "10px");
+        final UploadExamplesI18N uploadI18N = new UploadExamplesI18N();
+        uploadI18N.getAddFiles().setOne("Select firmware...");
+        uploadI18N.getDropFiles().setOne("Drop FIRMWARE here...");
+        upload.setI18n(uploadI18N);
         final Div divUploader = new Div(upload);
 
         final H3 h3 = new H3("Firmware");
@@ -90,5 +105,37 @@ public class DivFlashUploader extends Div {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+
+    }
+
+    private class UploadExamplesI18N extends UploadI18N {
+        public UploadExamplesI18N() {
+            setDropFiles(new DropFiles()
+                    .setOne("Drop file here")
+                    .setMany("Drop files here"));
+            setAddFiles(new AddFiles()
+                    .setOne("Upload File...")
+                    .setMany("Upload Files..."));
+            setCancel("Cancel");
+            setError(new Error()
+                    .setTooManyFiles("Too Many Files.")
+                    .setFileIsTooBig("File is Too Big.")
+                    .setIncorrectFileType("Incorrect File Type."));
+            setUploading(new Uploading()
+                    .setStatus(new Uploading.Status()
+                            .setConnecting("Connecting...")
+                            .setStalled("Stalled")
+                            .setProcessing("Processing File...")
+                            .setHeld("Queued"))
+                    .setRemainingTime(new Uploading.RemainingTime()
+                            .setPrefix("remaining time: ")
+                            .setUnknown("unknown remaining time"))
+                    .setError(new Uploading.Error()
+                            .setServerUnavailable("Upload failed, please try again later")
+                            .setUnexpectedServerError("Upload failed due to server error")
+                            .setForbidden("Upload forbidden")));
+            setUnits(new Units()
+                    .setSize(Arrays.asList("B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")));
+        }
     }
 }
