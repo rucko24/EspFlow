@@ -1,4 +1,5 @@
 @import url('./main-layout.css');
+@import url('components/vaadin-upload-file.css');
 @import url('line-awesome/dist/line-awesome/css/line-awesome.min.css');
 @import url('@fontsource/cairo');
 
