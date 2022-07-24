@@ -20,6 +20,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -34,19 +35,23 @@ import lombok.extern.log4j.Log4j2;
 import javax.annotation.PostConstruct;
 import javax.annotation.security.RolesAllowed;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Log4j2
 @UIScope
 @PageTitle("Flash Esp32+")
-@Route(value = "flash-esp32+", layout = MainLayout.class)
+@Route(value = "flash-esp32", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
 public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeaderDiv {
 
+    private static final String MARGIN_TOP = "margin-top";
+    private static final String MARGIN_LEFT = "margin-left";
+    private static final String MARGIN = "margin";
+    private static final String MARGIN_10_PX = "10px";
+    private static final String AUTO = "auto";
+    private static final String DISPLAY = "display";
     public static final String BOX_SHADOW_PROPERTY = "box-shadow";
-
     public static final String BOX_SHADOW_VALUE = "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)";
     private final CommandService commandService;
     private final ComPortService comPortService;
@@ -65,34 +70,16 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
     @PostConstruct
     public void init() {
         super.setSizeFull();
-        final var headerPorts = this.getPorts();
-//        final var baudRate = this.getBaudRates();
-//        final var flashMode = this.getFlashMode();
-//        final var rowConsole = this.rowConsole();
+        final var divRowPort = this.rowPorts();
+        final var divRowBaudRate = this.rowBaudRates();
+        final var divRowFlashMode = this.rowFlashMode();
+        final var divRowEraseFlash = this.rowEraseFlash();
+        final var divRowConsole = this.rowConsole();
 
-//        this.add(headerPorts, baudRate, flashMode, this.rowEraseFlash(), rowConsole);
-
-//        this.setFlexGrow(1, rowConsole);
-//        final VerticalLayout verticalLayout = new VerticalLayout();
-//        verticalLayout.add(headerPorts);
-        super.add(headerPorts);
-    }
-
-    /**
-     * Show console output
-     *
-     * @return HorizontalLayout
-     */
-    public HorizontalLayout rowConsole() {
-        final HorizontalLayout row = new HorizontalLayout();
-        row.setSizeFull();
-        textArea.setSizeFull();
-        textArea.setClearButtonVisible(Boolean.TRUE);
-        textArea.getStyle().set("overflow-y", "auto");
-        row.getStyle().set("overflow-y", "hidden");
-        final Label labelConsole = new Label("Console");
-        row.add(labelConsole, textArea);
-        return row;
+        final VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowConsole);
+        verticalLayout.setFlexGrow(1, divRowConsole);
+        super.add(verticalLayout);
     }
 
     public H2 getEspToolVersion() {
@@ -106,29 +93,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         return h2;
     }
 
-    public HorizontalLayout getBaudRates() {
-        final HorizontalLayout row = new HorizontalLayout();
-        final Label label = new Label("Baud rate");
-        baudRatesRadioButtonGroup.setItems(BaudRates.values());
-        baudRatesRadioButtonGroup.setValue(BaudRates.BAUD_RATE_9600);
-        row.add(label, this.baudRatesRadioButtonGroup);
-        Stream.of(label, this.baudRatesRadioButtonGroup)
-                .forEach((component) -> row.setVerticalComponentAlignment(Alignment.CENTER, component));
-        return row;
-    }
-
-    public HorizontalLayout getFlashMode() {
-        final HorizontalLayout row = new HorizontalLayout();
-        final Label label = new Label("Flash mode");
-        this.flashModeRadioButtonGroup.setItems(FlashMode.values());
-        this.flashModeRadioButtonGroup.setValue(FlashMode.DUAL_IO);
-        row.add(label, flashModeRadioButtonGroup);
-        Stream.of(label, flashModeRadioButtonGroup)
-                .forEach((component) -> row.setVerticalComponentAlignment(Alignment.CENTER, component));
-        return row;
-    }
-
-    public Div getPorts() {
+    public Div rowPorts() {
         final HorizontalLayout header = new HorizontalLayout();
         header.setWidthFull();
 
@@ -139,7 +104,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
 
         this.scanPort.addClickListener(e -> {
             textArea.getElement().getChildren()
-                    .forEach(System.out::println);
+                    .forEach(log::info);
             comboBox.setItems(this.comPortService.getPortsList());
         });
 
@@ -154,63 +119,123 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         killProcess.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
         final Div divLabel = new Div(new H3("Serial port"));
-        divLabel.getStyle().set("margin","10px 10px");
-        divLabel.getStyle().set("white-space","pre");
-        final Div divCombo = new Div(this.comboBox);
-        divCombo.getStyle().set("margin","10px 10px");
+        divLabel.getStyle().set("white-space", "pre");
+        divLabel.getStyle().set("white-space", "pre");
+        final Div divCombo = this.createDiv(this.comboBox, MARGIN, MARGIN_10_PX);
 
         final Div divHeader = new Div(divLabel, divCombo);
         divHeader.setWidthFull();
-        divHeader.getStyle().set("display","flex");
-        divHeader.getStyle().set("margin","10px 10px");
-        divHeader.getStyle().set("align-items","baseline");
+        divHeader.getStyle().set(DISPLAY, "flex");
+        divHeader.getStyle().set(MARGIN, "10px 10px");
+        divHeader.getStyle().set("align-items", "baseline");
 
-        final Div divScanPort = new Div(scanPort);
-        divScanPort.getStyle().set("margin","10px 10px");
-        final Div divInputCommand = new Div(inputCommand);
-        divInputCommand.getStyle().set("margin","10px 10px");
+        final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
+        final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
         divHeader.add(divScanPort, divInputCommand);
 
-        final Div divReadCommand = new Div(validateInput);
-        divReadCommand.getStyle().set("margin", "10px, 10px");
-        final Div divKillProcess = new Div(killProcess);
-        divKillProcess.getStyle().set("margin", "10px 10px");
+        final Div divReadCommand = this.createDiv(validateInput, MARGIN, MARGIN_10_PX);
+        final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
         divHeader.add(divReadCommand, divKillProcess);
 
         final Hr hr = new Hr();
         hr.setHeight("6px");
-        hr.getStyle().set("background-image","linear-gradient(#e0260b, #e0260b),\n" +
+        hr.getStyle().set("background-image", "linear-gradient(#e0260b, #e0260b),\n" +
                 "        linear-gradient(#e0260b, #e0260b)");
-        hr.getStyle().set("background-size","100% 3px, 100% 1px");
+        hr.getStyle().set("background-size", "100% 3px, 100% 1px");
         final Div divH2espToolVersion = new Div(h2EspToolVersion, hr);
-        divH2espToolVersion.getStyle().set("margin", "10px 10px");
+        divH2espToolVersion.getStyle().set(MARGIN_TOP, AUTO);
         final Div divEndForH2EspToolVersion = new Div(divH2espToolVersion);
         divEndForH2EspToolVersion.setWidthFull();
-        divEndForH2EspToolVersion.getStyle().set("display","flex");
-        divEndForH2EspToolVersion.getStyle().set("justify-content","center");
+        divEndForH2EspToolVersion.getStyle().set(DISPLAY, "flex");
+        divEndForH2EspToolVersion.getStyle().set("justify-content", "center");
 
         final Div divSpaceAround = new Div(divHeader, divEndForH2EspToolVersion);
         divSpaceAround.setWidthFull();
-        divSpaceAround.getStyle().set("display","flex");
-        divSpaceAround.getStyle().set("justify-content","space-around");
-
-//        header.add(label, this.comboBox, scanPort, inputCommand, validateInput, killProcess, esptoolVersion);
-//        header.setAlignItems(Alignment.CENTER);
-//        header.setFlexGrow(1, esptoolVerion);
+        divSpaceAround.getStyle().set(DISPLAY, "flex");
+        divSpaceAround.getStyle().set("justify-content", "space-around");
 
         return divSpaceAround;
     }
 
-    public HorizontalLayout rowEraseFlash() {
-        final HorizontalLayout row = new HorizontalLayout();
-        final Label label = new Label("Erase flash");
+    public Div rowBaudRates() {
+        baudRatesRadioButtonGroup.setItems(BaudRates.values());
+        baudRatesRadioButtonGroup.setValue(BaudRates.BAUD_RATE_9600);
+
+        final H3 h3 = new H3("Baud rate");
+        h3.getStyle().set(MARGIN_TOP, AUTO);
+        final Div divH2BaudRate = new Div(h3);
+        final Div divBaudRateRadioButton = this.createDiv(baudRatesRadioButtonGroup, MARGIN_LEFT, MARGIN_10_PX);
+
+        final Div div = new Div(divH2BaudRate, divBaudRateRadioButton);
+        div.setWidthFull();
+        div.getStyle().set(DISPLAY, "flex");
+        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+
+        return div;
+    }
+
+    public Div rowFlashMode() {
+        final H3 h3 = new H3("Flash mode");
+        h3.getStyle().set(MARGIN_TOP, AUTO);
+        final Div divh3FlashMode = new Div(h3);
+
+        this.flashModeRadioButtonGroup.setItems(FlashMode.values());
+        this.flashModeRadioButtonGroup.setValue(FlashMode.DUAL_IO);
+
+        final Div divFlashRadioButton = this.createDiv(flashModeRadioButtonGroup, MARGIN_LEFT, MARGIN_10_PX);
+
+        final Div div = new Div(divh3FlashMode, divFlashRadioButton);
+        div.setWidthFull();
+        div.getStyle().set(DISPLAY, "flex");
+        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+
+        return div;
+    }
+
+    public Div rowEraseFlash() {
+        final H3 h3 = new H3("Erase flash");
+        h3.getStyle().set(MARGIN_TOP, AUTO);
+        final Div divh3EraseFlash = new Div(h3);
+
         this.eraseRadioButtons.setItems("no", "yes, wipes all data");
         this.eraseRadioButtons.setValue("no");
-        row.add(label, this.eraseRadioButtons);
-        Stream.of(label, this.eraseRadioButtons)
-                .forEach((component) -> row.setVerticalComponentAlignment(Alignment.CENTER, component));
-        row.setFlexGrow(1, flashModeRadioButtonGroup);
-        return row;
+        final Div divEraseRadioButton = this.createDiv(eraseRadioButtons, MARGIN_LEFT, MARGIN_10_PX);
+
+        final Div div = new Div(divh3EraseFlash, divEraseRadioButton);
+        div.setWidthFull();
+        div.getStyle().set(DISPLAY, "flex");
+        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+
+        return div;
+    }
+
+    /**
+     * Show console output
+     *
+     * @return HorizontalLayout
+     */
+    public Div rowConsole() {
+        final H3 h3 = new H3("Console");
+        h3.getStyle().set(MARGIN_TOP,AUTO);
+        final Div divH3 = new Div(h3);
+
+        textArea.setClearButtonVisible(Boolean.TRUE);
+        textArea.setSizeFull();
+        textArea.getStyle().set("overflow-y", AUTO);
+        textArea.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+
+        final Div divTextArea = new Div(textArea);
+        divTextArea.setSizeFull();
+        divTextArea.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+        divTextArea.getStyle().set("margin-right", MARGIN_10_PX);
+        divTextArea.getStyle().set("overflow-y", "hidden");
+
+        final Div div = new Div(divH3, divTextArea);
+        div.setWidthFull();
+        div.getStyle().set(DISPLAY, "flex");
+        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+
+        return div;
     }
 
     @SneakyThrows
@@ -218,7 +243,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         this.labelPin.setTitle("Ping to google");
         this.killProcess.addClickListener(e -> {
             textArea.getElement().getChildren()
-                    .forEach(System.out::println);
+                    .forEach(log::info);
 
             ui.access(() -> Notification.show("Pid ".concat(this.commandService.getListProcess()
                     .stream()
