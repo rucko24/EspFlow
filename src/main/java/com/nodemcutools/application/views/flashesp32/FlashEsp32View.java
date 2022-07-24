@@ -24,6 +24,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.MultiFileReceiver;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -34,6 +37,17 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.RolesAllowed;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -74,10 +88,12 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         final var divRowBaudRate = this.rowBaudRates();
         final var divRowFlashMode = this.rowFlashMode();
         final var divRowEraseFlash = this.rowEraseFlash();
+        final var divRowUploaderFlash = this.rowUploadingFlash();
         final var divRowConsole = this.rowConsole();
 
         final VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowConsole);
+        verticalLayout.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowUploaderFlash,
+                divRowConsole);
         verticalLayout.setFlexGrow(1, divRowConsole);
         super.add(verticalLayout);
     }
@@ -209,6 +225,47 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         return div;
     }
 
+    private Div rowUploadingFlash() {
+        final MemoryBuffer memoryBuffer = new MemoryBuffer();
+        final Upload upload = new Upload(memoryBuffer);
+
+        upload.addSucceededListener(event -> {
+            // Get information about the uploaded file
+            try(var fileData = new BufferedInputStream(memoryBuffer.getInputStream())) {
+
+            } catch(IOException ex) {
+
+            }
+            String fileName = event.getFileName();
+            long contentLength = event.getContentLength();
+            String mimeType = event.getMIMEType();
+
+            // Do something with the file data
+            // processFile(fileData, fileName, contentLength, mimeType);
+        });
+        upload.addStartedListener(e -> {
+            log.info("Handling upload of " + e.getFileName() + " ("
+                    + e.getContentLength() + " bytes) started");
+        });
+
+        upload.setWidthFull();
+        upload.getStyle().set("border","none");
+        upload.getStyle().set("padding","0");
+        upload.getStyle().set("margin-left","10px");
+        final Div divUploader = new Div(upload);
+
+        final H3 h3 = new H3("Firmware");
+        h3.getStyle().set(MARGIN_TOP, AUTO);
+        final Div divH3 = new Div(h3);
+
+        final Div div = new Div(divH3, divUploader);
+        div.setWidthFull();
+        div.getStyle().set(DISPLAY, "flex");
+        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+
+        return div;
+    }
+
     /**
      * Show console output
      *
@@ -222,7 +279,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         textArea.setClearButtonVisible(Boolean.TRUE);
         textArea.setSizeFull();
         textArea.getStyle().set("overflow-y", AUTO);
-        textArea.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+//        textArea.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
         final Div divTextArea = new Div(textArea);
         divTextArea.setSizeFull();
@@ -250,7 +307,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
                     .map(String::valueOf)
                     .collect(Collectors.joining(" ")))));
 
-            //this.commandService.killProcess();
+            this.commandService.killProcess(Long.valueOf(this.inputCommand.getValue()));
         });
 
         this.validateInput.addClickListener(e -> {
