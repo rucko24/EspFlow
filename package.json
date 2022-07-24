@@ -2,12 +2,14 @@
   "name": "no-name",
   "license": "UNLICENSED",
   "dependencies": {
+    "@fontsource/cairo": "4.5.0",
     "@polymer/iron-icon": "3.0.1",
     "@polymer/iron-iconset-svg": "3.0.1",
     "@polymer/iron-list": "3.1.0",
     "@polymer/iron-meta": "3.0.1",
     "@polymer/iron-resizable-behavior": "3.0.1",
     "@polymer/polymer": "3.5.1",
+    "@vaadin-component-factory/vcf-nav": "1.0.6",
     "@vaadin/accordion": "23.1.2",
     "@vaadin/app-layout": "23.1.2",
     "@vaadin/avatar": "23.1.2",
@@ -117,6 +119,7 @@
     "@vaadin/virtual-list": "23.1.2",
     "construct-style-sheets-polyfill": "3.1.0",
     "date-fns": "2.28.0",
+    "line-awesome": "1.3.0",
     "lit": "2.2.6"
   },
   "devDependencies": {
@@ -257,16 +260,22 @@
     "construct-style-sheets-polyfill": "$construct-style-sheets-polyfill",
     "lit": "$lit",
     "@polymer/polymer": "$@polymer/polymer",
-    "chokidar": "$chokidar"
+    "chokidar": "$chokidar",
+    "date-fns": "$date-fns",
+    "@fontsource/cairo": "$@fontsource/cairo",
+    "@vaadin-component-factory/vcf-nav": "$@vaadin-component-factory/vcf-nav",
+    "line-awesome": "$line-awesome"
   },
   "vaadin": {
     "dependencies": {
+      "@fontsource/cairo": "4.5.0",
       "@polymer/iron-icon": "3.0.1",
       "@polymer/iron-iconset-svg": "3.0.1",
       "@polymer/iron-list": "3.1.0",
       "@polymer/iron-meta": "3.0.1",
       "@polymer/iron-resizable-behavior": "3.0.1",
       "@polymer/polymer": "3.4.1",
+      "@vaadin-component-factory/vcf-nav": "1.0.6",
       "@vaadin/accordion": "23.1.2",
       "@vaadin/app-layout": "23.1.2",
       "@vaadin/avatar": "23.1.2",
@@ -375,6 +384,7 @@
       "@vaadin/virtual-list": "23.1.2",
       "construct-style-sheets-polyfill": "3.1.0",
       "date-fns": "2.28.0",
+      "line-awesome": "1.3.0",
       "lit": "2.2.3"
     },
     "devDependencies": {
@@ -400,6 +410,6 @@
       "workbox-precaching": "6.5.0",
       "workbox-webpack-plugin": "6.5.0"
     },
-    "hash": "1046c8f1684d8d9f5e6ed2ca756fcc3be2ffbb9c0e30bb3a6aaedf3aebc1bdd5"
+    "hash": "79bbea5d53bec2a10b16b7ae82bc1f714df568094395806e1958fc0eadd8ea7d"
   }
 }
