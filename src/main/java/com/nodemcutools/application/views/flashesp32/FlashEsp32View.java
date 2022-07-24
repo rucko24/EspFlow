@@ -2,32 +2,18 @@ package com.nodemcutools.application.views.flashesp32;
 
 import com.nodemcutools.application.data.BaudRates;
 import com.nodemcutools.application.data.FlashMode;
-import com.nodemcutools.application.data.service.ComPortService;
 import com.nodemcutools.application.data.service.CommandService;
 import com.nodemcutools.application.data.util.ResponsiveHeaderDiv;
 import com.nodemcutools.application.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.MultiFileReceiver;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -38,18 +24,6 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.RolesAllowed;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.stream.Collectors;
 
 @Log4j2
 @UIScope
@@ -60,30 +34,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeaderDiv {
 
-    private static final String MARGIN_TOP = "margin-top";
-    private static final String MARGIN_LEFT = "margin-left";
-    private static final String MARGIN = "margin";
-    private static final String MARGIN_10_PX = "10px";
-    private static final String AUTO = "auto";
-    private static final String DISPLAY = "display";
+    public static final String MARGIN_TOP = "margin-top";
+    public static final String MARGIN_LEFT = "margin-left";
+    public static final String MARGIN = "margin";
+    public static final String MARGIN_10_PX = "10px";
+    public static final String AUTO = "auto";
+    public static final String DISPLAY = "display";
     public static final String BOX_SHADOW_PROPERTY = "box-shadow";
     public static final String BOX_SHADOW_VALUE = "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)";
+    private final DivFlashUploader divFlashUploader;
+    private final DivHeaderPorts divHeaderPorts;
+
     private final CommandService commandService;
-    private final ComPortService comPortService;
-    private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
-    private final Button validateInput = new Button(VaadinIcon.CHECK.create());
-    private final Button killProcess = new Button(VaadinIcon.STOP.create());
-    private final ComboBox<String> comboBox = new ComboBox<>();
-    private final Label labelPin = new Label("Ping to google");
     private final RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<String> eraseRadioButtons = new RadioButtonGroup<>();
-
     private final TextArea textArea = new TextArea();
-    private final TextField inputCommand = new TextField();
 
     @PostConstruct
-    public void init() {
+    public void constructEsp21View() {
+        super.removeAll();
         super.setSizeFull();
         final var divRowPort = this.rowPorts();
         final var divRowBaudRate = this.rowBaudRates();
@@ -95,83 +65,13 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         final VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowUploaderFlash,
                 divRowConsole);
+
         verticalLayout.setFlexGrow(1, divRowConsole);
         super.add(verticalLayout);
     }
 
-    public H2 getEspToolVersion() {
-        final H2 h2 = new H2();
-        this.commandService.esptoolVersion()
-                .subscribe((String esptoolVersion) -> {
-                    if (getUI().isPresent()) {
-                        getUI().get().access(() -> h2.setText(esptoolVersion));
-                    }
-                });
-        return h2;
-    }
-
     public Div rowPorts() {
-        final HorizontalLayout header = new HorizontalLayout();
-        header.setWidthFull();
-
-        final Label label = new Label("Serial port");
-        label.setWidth("30px");
-        comboBox.setClearButtonVisible(true);
-        comboBox.setPlaceholder("com port");
-
-        this.scanPort.addClickListener(e -> {
-            textArea.getElement().getChildren()
-                    .forEach(log::info);
-            comboBox.setItems(this.comPortService.getPortsList());
-        });
-
-        final H2 h2EspToolVersion = getEspToolVersion();
-        h2EspToolVersion.addClassName("pulse");
-        final HorizontalLayout esptoolVersion = new HorizontalLayout(h2EspToolVersion);
-        esptoolVersion.setAlignItems(Alignment.END);
-        esptoolVersion.setJustifyContentMode(JustifyContentMode.END);
-
-        inputCommand.setPlaceholder("input command");
-        inputCommand.setClearButtonVisible(Boolean.TRUE);
-        killProcess.addThemeVariants(ButtonVariant.LUMO_ERROR);
-
-        final Div divLabel = new Div(new H3("Serial port"));
-        divLabel.getStyle().set("white-space", "pre");
-        divLabel.getStyle().set("white-space", "pre");
-        final Div divCombo = this.createDiv(this.comboBox, MARGIN, MARGIN_10_PX);
-
-        final Div divHeader = new Div(divLabel, divCombo);
-        divHeader.setWidthFull();
-        divHeader.getStyle().set(DISPLAY, "flex");
-        divHeader.getStyle().set(MARGIN, "10px 10px");
-        divHeader.getStyle().set("align-items", "baseline");
-
-        final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
-        final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
-        divHeader.add(divScanPort, divInputCommand);
-
-        final Div divReadCommand = this.createDiv(validateInput, MARGIN, MARGIN_10_PX);
-        final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
-        divHeader.add(divReadCommand, divKillProcess);
-
-        final Hr hr = new Hr();
-        hr.setHeight("6px");
-        hr.getStyle().set("background-image", "linear-gradient(#e0260b, #e0260b),\n" +
-                "        linear-gradient(#e0260b, #e0260b)");
-        hr.getStyle().set("background-size", "100% 3px, 100% 1px");
-        final Div divH2espToolVersion = new Div(h2EspToolVersion, hr);
-        divH2espToolVersion.getStyle().set(MARGIN_TOP, AUTO);
-        final Div divEndForH2EspToolVersion = new Div(divH2espToolVersion);
-        divEndForH2EspToolVersion.setWidthFull();
-        divEndForH2EspToolVersion.getStyle().set(DISPLAY, "flex");
-        divEndForH2EspToolVersion.getStyle().set("justify-content", "center");
-
-        final Div divSpaceAround = new Div(divHeader, divEndForH2EspToolVersion);
-        divSpaceAround.setWidthFull();
-        divSpaceAround.getStyle().set(DISPLAY, "flex");
-        divSpaceAround.getStyle().set("justify-content", "space-around");
-
-        return divSpaceAround;
+        return this.divHeaderPorts;
     }
 
     public Div rowBaudRates() {
@@ -227,58 +127,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
     }
 
     private Div rowUploadingFlash() {
-        final MemoryBuffer memoryBuffer = new MemoryBuffer();
-        final Upload upload = new Upload(memoryBuffer);
-
-        upload.addSucceededListener(event -> {
-            // Get information about the uploaded file
-            try(var input = new BufferedInputStream(memoryBuffer.getInputStream())) {
-
-            } catch(IOException ex) {
-
-            }
-            String fileName = event.getFileName();
-            long contentLength = event.getContentLength();
-            String mimeType = event.getMIMEType();
-
-            // Do something with the file data
-            // processFile(fileData, fileName, contentLength, mimeType);
-        });
-        upload.addStartedListener(e -> {
-            log.info("Handling upload of " + e.getFileName() + " ("
-                    + e.getContentLength() + " bytes) started");
-        });
-
-        upload.addFileRejectedListener(event -> {
-            String errorMessage = event.getErrorMessage();
-
-            Notification notification = Notification.show(
-                    errorMessage,
-                    5000,
-                    Notification.Position.MIDDLE
-            );
-            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-        });
-
-        upload.setWidthFull();
-        upload.setAcceptedFileTypes("application/octet-stream",".bin");
-        upload.getStyle().set("border","none");
-        upload.getStyle().set("padding","0");
-        upload.getStyle().set("margin-left","10px");
-        final Div divUploader = new Div(upload);
-
-        final H3 h3 = new H3("Firmware");
-        h3.getStyle().set(MARGIN_TOP, AUTO);
-        final Div divH3 = new Div(h3);
-
-        final Div div = new Div(divH3, divUploader);
-        div.setWidthFull();
-        div.getStyle().set(DISPLAY, "flex");
-        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-        // dentro del slot "file-list"
-        // propiedad part="meta" darle width: 100% o a 0px, para que el nombre del fichero se vea completo en Horizontal
-        //https://github.com/tarekoraby/upload-demo/blob/main/src/main/java/org/vaadin/example/MainView.java
-        return div;
+        return this.divFlashUploader;
     }
 
     /**
@@ -288,7 +137,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
      */
     public Div rowConsole() {
         final H3 h3 = new H3("Console");
-        h3.getStyle().set(MARGIN_TOP,AUTO);
+        h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divH3 = new Div(h3);
 
         textArea.setClearButtonVisible(Boolean.TRUE);
@@ -309,25 +158,11 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
 
         return div;
     }
-
     @SneakyThrows
     public void consoleOutput(final UI ui) {
-        this.labelPin.setTitle("Ping to google");
-        this.killProcess.addClickListener(e -> {
-            textArea.getElement().getChildren()
-                    .forEach(log::info);
-
-            ui.access(() -> Notification.show("Pid ".concat(this.commandService.getListProcess()
-                    .stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(" ")))));
-
-            this.commandService.killProcess(Long.valueOf(this.inputCommand.getValue()));
-        });
-
-        this.validateInput.addClickListener(e -> {
-            if (!inputCommand.getValue().isEmpty()) {
-                final String command = inputCommand.getValue();
+        this.divHeaderPorts.getValidateInput().addClickListener(e -> {
+            if (!this.divHeaderPorts.getInputCommand().getValue().isEmpty()) {
+                final String command = this.divHeaderPorts.getInputCommand().getValue();
                 this.commandService.processInputStream(command.split(" "))
                         .doOnError((Throwable error) -> {
                             ui.access(() -> {
@@ -337,14 +172,12 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
                         })
                         .subscribe((String line) -> {
                             ui.access(() -> {
-                                log.info("Salida: {}", line);
-                                this.textArea.setValue(textArea.getValue().concat(line));
+                                log.info("Salida: {}", "");
+                                this.textArea.setValue(textArea.getValue().concat("line"));
                             });
                         });
             }
         });
-
-
     }
 
     @Override
@@ -357,7 +190,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
-            this.consoleOutput(ui);
+//            this.consoleOutput(ui);
         }
     }
 
