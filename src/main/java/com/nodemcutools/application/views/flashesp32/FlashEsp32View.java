@@ -275,7 +275,9 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         div.setWidthFull();
         div.getStyle().set(DISPLAY, "flex");
         div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-
+        // dentro del slot "file-list"
+        // propiedad part="meta" darle width: 100% o a 0px, para que el nombre del fichero se vea completo en Horizontal
+        //https://github.com/tarekoraby/upload-demo/blob/main/src/main/java/org/vaadin/example/MainView.java
         return div;
     }
 
