@@ -47,14 +47,16 @@ public class CommandService {
         return process;
     }
 
-    public void killProcess() {
-        log.info("killing pid: {}", listProcess);
-
-        this.execute("kill", listProcess.get(0).toString());
+    public void killProcess(final Long pid) {
+        if(listProcess.contains(pid)) {
+            log.info("killing pid: {}", listProcess);
+            this.execute("kill", pid.toString());
+        }
     }
 
     /**
      * @param commands
+     *
      * @return Flux<String>
      */
     public Flux<String> processInputStream(final String... commands) {
