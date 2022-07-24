@@ -23,8 +23,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class DivFlashUploader extends Div {
 
-//    private MemoryBuffer memoryBuffer;
-
     @PostConstruct
     public void constructDiv() {
         removeAll();
@@ -32,6 +30,8 @@ public class DivFlashUploader extends Div {
         final Upload upload = new Upload(memoryBuffer);
 
         upload.addSucceededListener(event -> {
+            upload.getElement()
+                    .executeJs("this.shadowRoot.querySelector('vaadin-upload-file').className = 'meta'");
             // Get information about the uploaded file
             try (var input = new BufferedInputStream(memoryBuffer.getInputStream())) {
 
@@ -61,8 +61,8 @@ public class DivFlashUploader extends Div {
             notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         });
 
-        upload.setWidthFull();
         upload.setAcceptedFileTypes("application/octet-stream", ".bin");
+        upload.getStyle().set("display","flex");
         upload.getStyle().set("border", "none");
         upload.getStyle().set("padding", "0");
         upload.getStyle().set("margin-left", "10px");
