@@ -19,6 +19,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -231,7 +232,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
 
         upload.addSucceededListener(event -> {
             // Get information about the uploaded file
-            try(var fileData = new BufferedInputStream(memoryBuffer.getInputStream())) {
+            try(var input = new BufferedInputStream(memoryBuffer.getInputStream())) {
 
             } catch(IOException ex) {
 
@@ -248,7 +249,19 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
                     + e.getContentLength() + " bytes) started");
         });
 
+        upload.addFileRejectedListener(event -> {
+            String errorMessage = event.getErrorMessage();
+
+            Notification notification = Notification.show(
+                    errorMessage,
+                    5000,
+                    Notification.Position.MIDDLE
+            );
+            notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        });
+
         upload.setWidthFull();
+        upload.setAcceptedFileTypes("application/octet-stream",".bin");
         upload.getStyle().set("border","none");
         upload.getStyle().set("padding","0");
         upload.getStyle().set("margin-left","10px");
