@@ -190,7 +190,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
-//            this.consoleOutput(ui);
+            this.consoleOutput(ui);
         }
     }
 
