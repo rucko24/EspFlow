@@ -228,12 +228,12 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         divTextArea.setSizeFull();
         divTextArea.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         divTextArea.getStyle().set("margin-right", MARGIN_10_PX);
-        divTextArea.getStyle().set("overflow-y", "hidden");
 
         final Div div = new Div(divH3, divTextArea);
         div.setWidthFull();
         div.getStyle().set(DISPLAY, "flex");
         div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+        div.getStyle().set("overflow-y", "hidden");
 
         return div;
     }
