@@ -70,7 +70,7 @@ public class MainLayout extends AppLayout {
         nav.addClassNames("app-nav");
 
         if (accessChecker.hasAccess(FlashEsp32View.class)) {
-            nav.addItem(new AppNavItem("Flash Esp32+", FlashEsp32View.class, "lab la-gripfire"));
+            nav.addItem(new AppNavItem("🔥 Flash Esp32+", FlashEsp32View.class));
 
         }
         if (accessChecker.hasAccess(AboutView.class)) {
