@@ -1,6 +1,6 @@
 package com.nodemcutools.application.data.generator;
 
-import com.nodemcutools.application.data.Role;
+import com.nodemcutools.application.data.enums.Role;
 import com.nodemcutools.application.data.entity.User;
 import com.nodemcutools.application.data.service.UserRepository;
 import com.vaadin.flow.spring.annotation.SpringComponent;

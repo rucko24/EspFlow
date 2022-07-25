@@ -1,7 +1,7 @@
 package com.nodemcutools.application.views.flashesp32;
 
-import com.nodemcutools.application.data.BaudRates;
-import com.nodemcutools.application.data.FlashMode;
+import com.nodemcutools.application.data.enums.BaudRates;
+import com.nodemcutools.application.data.enums.FlashMode;
 import com.nodemcutools.application.data.service.CommandService;
 import com.nodemcutools.application.data.util.ResponsiveHeaderDiv;
 import com.nodemcutools.application.views.MainLayout;
@@ -34,6 +34,9 @@ import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_10_P
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_LEFT;
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_TOP;
 
+/**
+ * @author rubn
+ */
 @Log4j2
 @UIScope
 @SpringComponent
@@ -172,20 +175,26 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
                 this.subscribeThis(this.commandService.processInputStream(command.split(" ")), ui);
             }
         });
+        //esptool.py -p /dev/ttyUSB0 flash_id
+        this.divHeaderPorts.getComboBoxSerialPort().addValueChangeListener((event) -> {
+            final String port = event.getValue().trim();
+            this.subscribeThis(
+                    this.commandService.processInputStream("esptool.py", "-p", port, "flash_id"), ui);
+        });
     }
 
     public void subscribeThis(Flux<String> flux, final UI ui) {
         flux.doOnError((Throwable error) ->
-                    ui.access(() -> {
-                        log.info("Error: {}", error);
-                        this.textArea.setValue(textArea.getValue().concat(error.getMessage()));
-                    })
+                        ui.access(() -> {
+                            log.info("Error: {}", error);
+                            this.textArea.setValue(textArea.getValue().concat(error.getMessage()));
+                        })
                 )
                 .subscribe((String line) ->
-                    ui.access(() -> {
-                        log.info("Salida: {}", line);
-                        this.textArea.setValue(textArea.getValue().concat(line));
-                    })
+                        ui.access(() -> {
+                            log.info("Salida: {}", line);
+                            this.textArea.setValue(textArea.getValue().concat(line));
+                        })
                 );
     }
 

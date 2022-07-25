@@ -1,4 +1,4 @@
-package com.nodemcutools.application.data;
+package com.nodemcutools.application.data.enums;
 
 import jssc.SerialPort;
 import lombok.Getter;

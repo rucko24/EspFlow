@@ -1,4 +1,4 @@
-package com.nodemcutools.application.data;
+package com.nodemcutools.application.data.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

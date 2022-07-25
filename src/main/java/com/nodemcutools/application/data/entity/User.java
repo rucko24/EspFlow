@@ -1,7 +1,7 @@
 package com.nodemcutools.application.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.nodemcutools.application.data.Role;
+import com.nodemcutools.application.data.enums.Role;
 import java.util.Set;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;

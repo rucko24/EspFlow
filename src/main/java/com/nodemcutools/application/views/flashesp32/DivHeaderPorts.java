@@ -154,6 +154,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
             this.commandService.killProcess(Long.valueOf(this.inputCommand.getValue()));
         });
+
     }
 
     @Override
