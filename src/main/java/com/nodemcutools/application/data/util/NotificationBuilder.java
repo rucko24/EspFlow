@@ -11,7 +11,7 @@ import java.util.Objects;
  * @author rubn
  */
 @Log4j2
-public class Notification {
+public class NotificationBuilder {
 
 
     public static Text builder() {
