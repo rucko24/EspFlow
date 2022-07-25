@@ -1,6 +1,6 @@
 package com.nodemcutools.application.views.flashesp32;
 
-import com.nodemcutools.application.data.util.Notification;
+import com.nodemcutools.application.data.util.NotificationBuilder;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
@@ -23,6 +23,12 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
+import static com.nodemcutools.application.data.util.UiToolConstants.DISPLAY;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_10_PX;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_LEFT;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_TOP;
 
 @Log4j2
 @Getter
@@ -47,8 +53,8 @@ public class DivFlashUploader extends Div {
 
         super.add(divH3Firmware, divUploader);
         super.setWidthFull();
-        super.getStyle().set(FlashEsp32View.DISPLAY, "flex");
-        super.getStyle().set(FlashEsp32View.MARGIN_LEFT, FlashEsp32View.MARGIN_10_PX);
+        super.getStyle().set(DISPLAY, "flex");
+        super.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
     }
 
     private void uploadInitialConfig() {
@@ -80,7 +86,7 @@ public class DivFlashUploader extends Div {
         });
 
         upload.addFileRejectedListener(event -> {
-            Notification.builder()
+            NotificationBuilder.builder()
                     .withText(event.getErrorMessage())
                     .withPosition(Position.MIDDLE)
                     .withDuration(3000)
@@ -104,7 +110,7 @@ public class DivFlashUploader extends Div {
 
     private Div h3Firmware() {
         final H3 h3 = new H3("Firmware");
-        h3.getStyle().set(FlashEsp32View.MARGIN_TOP, FlashEsp32View.AUTO);
+        h3.getStyle().set(MARGIN_TOP, AUTO);
         return new Div(h3);
     }
 

@@ -2,6 +2,7 @@ package com.nodemcutools.application.views.flashesp32;
 
 import com.nodemcutools.application.data.service.ComPortService;
 import com.nodemcutools.application.data.service.CommandService;
+import com.nodemcutools.application.data.util.NotificationBuilder;
 import com.nodemcutools.application.data.util.ResponsiveHeaderDiv;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -15,6 +16,8 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -23,13 +26,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.PostConstruct;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.nodemcutools.application.views.flashesp32.FlashEsp32View.AUTO;
-import static com.nodemcutools.application.views.flashesp32.FlashEsp32View.DISPLAY;
-import static com.nodemcutools.application.views.flashesp32.FlashEsp32View.MARGIN;
-import static com.nodemcutools.application.views.flashesp32.FlashEsp32View.MARGIN_10_PX;
-import static com.nodemcutools.application.views.flashesp32.FlashEsp32View.MARGIN_TOP;
+import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
+import static com.nodemcutools.application.data.util.UiToolConstants.BOX_SHADOW_PROPERTY;
+import static com.nodemcutools.application.data.util.UiToolConstants.BOX_SHADOW_VALUE;
+import static com.nodemcutools.application.data.util.UiToolConstants.DISPLAY;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_10_PX;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_TOP;
 
 @Log4j2
 @Getter
@@ -75,6 +81,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         hr.getStyle().set("background-image", "linear-gradient(#e0260b, #e0260b),\n" +
                 "        linear-gradient(#e0260b, #e0260b)");
         hr.getStyle().set("background-size", "100% 3px, 100% 1px");
+        hr.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
         final H2 h2EspToolVersion = getEspToolVersion();
         final Div divH2espToolVersion = new Div(h2EspToolVersion, hr);
@@ -118,8 +125,27 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private void initListeners(final UI ui) {
         this.scanPort.addClickListener(e -> {
-            comboBoxSerialPort.setItems(this.comPortService.getPortsList());
+            final Set<String> ports = this.comPortService.getPortsList();
+            if (!ports.isEmpty()) {
+                comboBoxSerialPort.setItems(ports); //set port items to combo
+                NotificationBuilder.builder()
+                        .withText("Port found!")
+                        .withPosition(Position.MIDDLE)
+                        .withDuration(3000)
+                        .withIcon(VaadinIcon.INFO_CIRCLE)
+                        .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
+                        .make();
+            } else {
+                NotificationBuilder.builder()
+                        .withText("Port not found!")
+                        .withPosition(Position.MIDDLE)
+                        .withDuration(3000)
+                        .withIcon(VaadinIcon.WARNING)
+                        .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                        .make();
+            }
         });
+
         this.killProcess.addClickListener(e -> {
             ui.access(() -> Notification.show("Pid ".concat(this.commandService.getListProcess()
                     .stream()

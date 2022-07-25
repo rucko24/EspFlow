@@ -17,16 +17,26 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.RolesAllowed;
 
+import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
+import static com.nodemcutools.application.data.util.UiToolConstants.DISPLAY;
+import static com.nodemcutools.application.data.util.UiToolConstants.DMESG_GREP_TTY;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_10_PX;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_LEFT;
+import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_TOP;
+
 @Log4j2
 @UIScope
+@SpringComponent
 @PageTitle("Flash Esp32+")
 @Route(value = "flash-esp32", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
@@ -34,17 +44,8 @@ import javax.annotation.security.RolesAllowed;
 @RequiredArgsConstructor
 public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeaderDiv {
 
-    public static final String MARGIN_TOP = "margin-top";
-    public static final String MARGIN_LEFT = "margin-left";
-    public static final String MARGIN = "margin";
-    public static final String MARGIN_10_PX = "10px";
-    public static final String AUTO = "auto";
-    public static final String DISPLAY = "display";
-    public static final String BOX_SHADOW_PROPERTY = "box-shadow";
-    public static final String BOX_SHADOW_VALUE = "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)";
     private final DivFlashUploader divFlashUploader;
     private final DivHeaderPorts divHeaderPorts;
-
     private final CommandService commandService;
     private final RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
@@ -158,26 +159,34 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
 
         return div;
     }
+
     @SneakyThrows
     public void consoleOutput(final UI ui) {
         this.divHeaderPorts.getValidateInput().addClickListener(e -> {
-            if (!this.divHeaderPorts.getInputCommand().getValue().isEmpty()) {
-                final String command = this.divHeaderPorts.getInputCommand().getValue();
-                this.commandService.processInputStream(command.split(" "))
-                        .doOnError((Throwable error) -> {
-                            ui.access(() -> {
-                                log.info("Salida: {}", error);
-                                this.textArea.setValue(textArea.getValue().concat(error.getMessage()));
-                            });
-                        })
-                        .subscribe((String line) -> {
-                            ui.access(() -> {
-                                log.info("Salida: {}", "");
-                                this.textArea.setValue(textArea.getValue().concat("line"));
-                            });
-                        });
+            final String command = this.divHeaderPorts.getInputCommand().getValue().trim();
+            if (command.equals(DMESG_GREP_TTY)) {
+                this.subscribeThis(this.commandService.executeDmesgForTtyPort(), ui);
+                return;
+            }
+            if (!command.isEmpty()) {
+                this.subscribeThis(this.commandService.processInputStream(command.split(" ")), ui);
             }
         });
+    }
+
+    public void subscribeThis(Flux<String> flux, final UI ui) {
+        flux.doOnError((Throwable error) ->
+                    ui.access(() -> {
+                        log.info("Error: {}", error);
+                        this.textArea.setValue(textArea.getValue().concat(error.getMessage()));
+                    })
+                )
+                .subscribe((String line) ->
+                    ui.access(() -> {
+                        log.info("Salida: {}", line);
+                        this.textArea.setValue(textArea.getValue().concat(line));
+                    })
+                );
     }
 
     @Override
