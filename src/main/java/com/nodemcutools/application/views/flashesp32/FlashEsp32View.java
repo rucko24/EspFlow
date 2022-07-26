@@ -188,7 +188,12 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
             this.textAreaConsoleOutput.clear();
             if (Objects.nonNull(event.getValue())) {
                 final String port = event.getValue().trim();
-                this.commands = new String[]{"esptool.py", "-p", port, "flash_id"};
+                final int baudRate = baudRatesRadioButtonGroup.getValue().getBaudRate();
+                this.commands = new String[]{
+                        "esptool.py",
+                        "--port", port,
+                        "--baud",
+                        String.valueOf(baudRate), "flash_id"};
                 this.subscribeThis(
                         this.commandService.processInputStream(commands), ui);
             }
