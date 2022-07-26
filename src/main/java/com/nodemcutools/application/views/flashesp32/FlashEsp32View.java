@@ -3,6 +3,7 @@ package com.nodemcutools.application.views.flashesp32;
 import com.nodemcutools.application.data.enums.BaudRates;
 import com.nodemcutools.application.data.enums.FlashMode;
 import com.nodemcutools.application.data.service.CommandService;
+import com.nodemcutools.application.data.util.CommandsOnFirstLine;
 import com.nodemcutools.application.data.util.ResponsiveHeaderDiv;
 import com.nodemcutools.application.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
@@ -14,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.RolesAllowed;
+import java.util.Objects;
 
 import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
 import static com.nodemcutools.application.data.util.UiToolConstants.DISPLAY;
@@ -53,7 +56,9 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
     private final RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<String> eraseRadioButtons = new RadioButtonGroup<>();
-    private final TextArea textArea = new TextArea();
+    private final TextArea textAreaConsoleOutput = new TextArea();
+
+    private String[] commands;
 
     @PostConstruct
     public void constructEsp21View() {
@@ -144,12 +149,15 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divH3 = new Div(h3);
 
-        textArea.setClearButtonVisible(Boolean.TRUE);
-        textArea.setSizeFull();
-        textArea.getStyle().set("overflow-y", AUTO);
+        textAreaConsoleOutput.setClearButtonVisible(Boolean.TRUE);
+        textAreaConsoleOutput.setSizeFull();
+        this.textAreaConsoleOutput.addThemeVariants(TextAreaVariant.LUMO_HELPER_ABOVE_FIELD);
+        this.textAreaConsoleOutput.addThemeVariants(TextAreaVariant.MATERIAL_ALWAYS_FLOAT_LABEL);
+        this.textAreaConsoleOutput.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+        textAreaConsoleOutput.getStyle().set("overflow-y", AUTO);
 //        textArea.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
-        final Div divTextArea = new Div(textArea);
+        final Div divTextArea = new Div(textAreaConsoleOutput);
         divTextArea.setSizeFull();
         divTextArea.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         divTextArea.getStyle().set("margin-right", MARGIN_10_PX);
@@ -177,9 +185,13 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         });
         //esptool.py -p /dev/ttyUSB0 flash_id
         this.divHeaderPorts.getComboBoxSerialPort().addValueChangeListener((event) -> {
-            final String port = event.getValue().trim();
-            this.subscribeThis(
-                    this.commandService.processInputStream("esptool.py", "-p", port, "flash_id"), ui);
+            this.textAreaConsoleOutput.clear();
+            if (Objects.nonNull(event.getValue())) {
+                final String port = event.getValue().trim();
+                this.commands = new String[]{"esptool.py", "-p", port, "flash_id"};
+                this.subscribeThis(
+                        this.commandService.processInputStream(commands), ui);
+            }
         });
     }
 
@@ -187,15 +199,19 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         flux.doOnError((Throwable error) ->
                         ui.access(() -> {
                             log.info("Error: {}", error);
-                            this.textArea.setValue(textArea.getValue().concat(error.getMessage()));
+                            this.textAreaConsoleOutput.setValue(textAreaConsoleOutput.getValue().concat(error.getMessage()));
                         })
                 )
                 .subscribe((String line) ->
                         ui.access(() -> {
                             log.info("Salida: {}", line);
-                            this.textArea.setValue(textArea.getValue().concat(line));
+                            this.textAreaConsoleOutput.setValue(textAreaConsoleOutput.getValue().concat(line));
                         })
                 );
+        final String s = this.textAreaConsoleOutput.getValue();
+        final String r = CommandsOnFirstLine.onFirstLine(s, this.commands);
+        textAreaConsoleOutput.clear();
+        textAreaConsoleOutput.setValue(r);
     }
 
     @Override

@@ -102,6 +102,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createDivComboBox() {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setPlaceholder("com port");
+        comboBoxSerialPort.setPreventInvalidInput(Boolean.TRUE);
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
 
@@ -128,6 +129,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
             final Set<String> ports = this.comPortService.getPortsList();
             if (!ports.isEmpty()) {
                 comboBoxSerialPort.setItems(ports); //set port items to combo
+                String value = ports.stream().findFirst().orElseGet(() -> "-");
+                comboBoxSerialPort.setValue(value);
                 NotificationBuilder.builder()
                         .withText("Port found!")
                         .withPosition(Position.MIDDLE)

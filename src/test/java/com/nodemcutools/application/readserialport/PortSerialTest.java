@@ -60,4 +60,14 @@ class PortSerialTest {
                 .forEach(log::info);
     }
 
+    @Test
+    @DisplayName("Put command to first line")
+    void insertCommandToFirstPositionInProcessStream() {
+        this.commandService.processInputStream("ifconfig")
+                .subscribe((String line) -> {
+                   final String rLine = new StringBuilder(line).insert(0 ,"nueva linea \n").toString();
+                   log.info("Result {}", rLine);
+                });
+    }
+
 }
