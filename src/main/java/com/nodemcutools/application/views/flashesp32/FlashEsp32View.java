@@ -24,6 +24,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ArrayUtils;
 import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
@@ -85,7 +86,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
 
     public Div rowBaudRates() {
         baudRatesRadioButtonGroup.setItems(BaudRates.values());
-        baudRatesRadioButtonGroup.setValue(BaudRates.BAUD_RATE_9600);
+        baudRatesRadioButtonGroup.setValue(BaudRates.BAUD_RATE_115200);
 
         final H3 h3 = new H3("Baud rate");
         h3.getStyle().set(MARGIN_TOP, AUTO);
@@ -187,15 +188,16 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         this.divHeaderPorts.getComboBoxSerialPort().addValueChangeListener((event) -> {
             this.textAreaConsoleOutput.clear();
             if (Objects.nonNull(event.getValue())) {
-                final String port = event.getValue().trim();
+                final String port = event.getValue();
                 final int baudRate = baudRatesRadioButtonGroup.getValue().getBaudRate();
                 this.commands = new String[]{
                         "esptool.py",
                         "--port", port,
                         "--baud",
                         String.valueOf(baudRate), "flash_id"};
+                final String[] currentsCommands = ArrayUtils.addAll(this.commandService.bash(), this.commands);
                 this.subscribeThis(
-                        this.commandService.processInputStream(commands), ui);
+                        this.commandService.processInputStream(currentsCommands), ui);
             }
         });
     }
@@ -209,7 +211,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
                 )
                 .subscribe((String line) ->
                         ui.access(() -> {
-                            log.info("Salida: {}", line);
+                            log.info("Salida: subscribeThis {}", line);
                             this.textAreaConsoleOutput.setValue(textAreaConsoleOutput.getValue().concat(line));
                         })
                 );
@@ -224,6 +226,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         super.onDetach(detachEvent);
     }
 
+    @SneakyThrows
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);

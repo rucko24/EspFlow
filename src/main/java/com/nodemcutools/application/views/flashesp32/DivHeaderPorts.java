@@ -2,6 +2,7 @@ package com.nodemcutools.application.views.flashesp32;
 
 import com.nodemcutools.application.data.service.ComPortService;
 import com.nodemcutools.application.data.service.CommandService;
+import com.nodemcutools.application.data.util.CommandNotFoundException;
 import com.nodemcutools.application.data.util.NotificationBuilder;
 import com.nodemcutools.application.data.util.ResponsiveHeaderDiv;
 import com.vaadin.flow.component.AttachEvent;
@@ -15,7 +16,6 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.TextField;
@@ -24,15 +24,19 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
 import static com.nodemcutools.application.data.util.UiToolConstants.BOX_SHADOW_PROPERTY;
 import static com.nodemcutools.application.data.util.UiToolConstants.BOX_SHADOW_VALUE;
+import static com.nodemcutools.application.data.util.UiToolConstants.COMMAND_NOT_FOUND;
 import static com.nodemcutools.application.data.util.UiToolConstants.DISPLAY;
+import static com.nodemcutools.application.data.util.UiToolConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN;
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_10_PX;
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_TOP;
@@ -51,6 +55,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final Button killProcess = new Button(VaadinIcon.STOP.create());
     private final ComPortService comPortService;
     private final CommandService commandService;
+    private final H2 h2EsptoolVersion = new H2();
 
     @PostConstruct
     public void constructDiv() {
@@ -83,8 +88,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         hr.getStyle().set("background-size", "100% 3px, 100% 1px");
         hr.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
-        final H2 h2EspToolVersion = getEspToolVersion();
-        final Div divH2espToolVersion = new Div(h2EspToolVersion, hr);
+        final Div divH2espToolVersion = new Div(h2EsptoolVersion, hr);
         divH2espToolVersion.getStyle().set(MARGIN_TOP, AUTO);
 
         final Div divEndForH2EspToolVersion = new Div(divH2espToolVersion);
@@ -112,25 +116,22 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         return divH3;
     }
 
-    public H2 getEspToolVersion() {
-        final H2 h2 = new H2();
-        h2.addClassName("pulse");
+    public void getEspToolVersion(final UI ui) {
+        h2EsptoolVersion.addClassName("pulse");
+
         this.commandService.esptoolVersion()
-                .subscribe((String esptoolVersion) -> {
-                    if (getUI().isPresent()) {
-                        getUI().get().access(() -> h2.setText(esptoolVersion));
-                    }
-                });
-        return h2;
+                .doOnError(error -> ui.access(() -> {
+                    log.error("doOnError: {}", error.getCause());
+                    h2EsptoolVersion.setText(ESPTOOL_PY_NOT_FOUND);
+                }))
+                .subscribe(espToolVersion -> ui.access(() -> h2EsptoolVersion.setText(espToolVersion)));
     }
 
     private void initListeners(final UI ui) {
         this.scanPort.addClickListener(e -> {
             final Set<String> ports = this.comPortService.getPortsList();
-            if (!ports.isEmpty()) {
+            if (Objects.nonNull(ports)) {
                 comboBoxSerialPort.setItems(ports); //set port items to combo
-                String value = ports.stream().findFirst().orElseGet(() -> "-");
-                comboBoxSerialPort.setValue(value);
                 NotificationBuilder.builder()
                         .withText("Port found!")
                         .withPosition(Position.MIDDLE)
@@ -139,6 +140,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
                         .make();
             } else {
+                comboBoxSerialPort.setItems(List.of());
                 NotificationBuilder.builder()
                         .withText("Port not found!")
                         .withPosition(Position.MIDDLE)
@@ -147,15 +149,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         .withThemeVariant(NotificationVariant.LUMO_ERROR)
                         .make();
             }
-        });
-
-        this.killProcess.addClickListener(e -> {
-            ui.access(() -> Notification.show("Pid ".concat(this.commandService.getListProcess()
-                    .stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(" ")))));
-
-            this.commandService.killProcess(Long.valueOf(this.inputCommand.getValue()));
         });
 
     }
@@ -171,6 +164,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             this.initListeners(ui);
+            this.getEspToolVersion(ui);
         }
     }
+
 }

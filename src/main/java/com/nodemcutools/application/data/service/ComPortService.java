@@ -1,13 +1,16 @@
 package com.nodemcutools.application.data.service;
 
-import jssc.SerialPortList;
+import com.fazecast.jSerialComm.SerialPort;
+import com.nodemcutools.application.data.util.OSInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author rubn
@@ -17,24 +20,32 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @RequiredArgsConstructor
 public class ComPortService {
 
-    private final Set<String> portList = new CopyOnWriteArraySet<>();
-
     public Set<String> getPortsList() {
         try {
-            //Scan ports
-            Arrays.stream(SerialPortList.getPortNames())
-                    .forEach(portList::add);
-            if (!portList.isEmpty()) {
-                log.info("Port found! {}", portList);
-            } else {
-                log.info("Port not found! {}", portList);
-            }
-        } catch (UnsatisfiedLinkError e) {
-            log.error("Error UnsatisfiedLinkError: {}", e);
-        } catch (NoClassDefFoundError ee) {
-            log.error("Error NoClassDefFoundError: {}", ee);
+            return Optional.ofNullable(Arrays.stream(SerialPort.getCommPorts()))
+                    .map((Stream<SerialPort> portsStream) -> {
+                        final Set<String> set = portsStream
+                                .map(SerialPort::getSystemPortPath)
+                                .map(this::replaceCharacters)
+                                .collect(Collectors.toSet());
+                        if (set.isEmpty()) {
+                            return null;
+                        }
+                        return set;
+                    }).orElse(null);
+        } catch (Exception ex) {
+            log.error("Error with serial port! {}", ex);
         }
-        return portList;
+        return null;
     }
+
+    private String replaceCharacters(final String port) {
+        if (OSInfo.isWindows()) {
+            return port.replaceAll("\\.", "")
+                    .replaceAll("\\\\+", "");
+        }
+        return port;
+    }
+
 
 }
