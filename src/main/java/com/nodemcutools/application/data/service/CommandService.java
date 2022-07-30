@@ -56,11 +56,7 @@ public class CommandService {
     public Flux<String> esptoolVersion() {
         String[] commands = ArrayUtils.addAll(this.bash(), ESPTOOL_PY_VERSION);
         return this.processInputStream(commands)
-                .map(this::processLineEsptoolVersion)
-                .onErrorResume(throwable -> {
-                    log.error("onErrorResume: {}", throwable);
-                    return Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND));
-                });
+                .map(this::processLineEsptoolVersion);
     }
 
     /**
@@ -72,14 +68,11 @@ public class CommandService {
     public Flux<String> processInputStream(final String... commands) {
         return Flux.defer(() -> this.readIntputStream(commands))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(this::mappingDataBuffer);
-    }
-
-    public Process execute(String... commands) throws IOException {
-        return new ProcessBuilder()
-                .command(commands)
-                .redirectErrorStream(Boolean.TRUE)
-                .start();
+                .map(this::mappingDataBuffer)
+                .onErrorResume(throwable -> {
+                    log.error("onErrorResume: {}", throwable);
+                    return Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND));
+                });
     }
 
     private Flux<DataBuffer> readIntputStream(final String... commands) {
@@ -92,6 +85,13 @@ public class CommandService {
             log.error("Error {}", ex);
             return Flux.error(ex);
         }
+    }
+
+    public Process execute(String... commands) throws IOException {
+        return new ProcessBuilder()
+                .command(commands)
+                .redirectErrorStream(Boolean.TRUE)
+                .start();
     }
 
     private String mappingDataBuffer(final DataBuffer dataBuffer) {

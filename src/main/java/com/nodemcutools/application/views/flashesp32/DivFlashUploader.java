@@ -55,6 +55,7 @@ public class DivFlashUploader extends Div {
         super.setWidthFull();
         super.getStyle().set(DISPLAY, "flex");
         super.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+        super.addClassName("firmwareh3-vaadin-upload-div");
     }
 
     private void uploadInitialConfig() {
@@ -64,9 +65,11 @@ public class DivFlashUploader extends Div {
 
     private void addListeners() {
         AtomicReference<String> fileName = new AtomicReference<>();
+
         upload.addSucceededListener(event -> {
             upload.getElement()
                     .executeJs("this.shadowRoot.querySelector('vaadin-upload-file').className = 'meta'");
+
             // Get information about the uploaded file
             try (var input = new BufferedInputStream(buffer.getInputStream())) {
 
@@ -106,12 +109,15 @@ public class DivFlashUploader extends Div {
         upload.getStyle().set("border", "none");
         upload.getStyle().set("padding", "0");
         upload.getStyle().set("margin-left", "10px");
+        upload.addClassName("vaadin-upload");
     }
 
     private Div h3Firmware() {
         final H3 h3 = new H3("Firmware");
         h3.getStyle().set(MARGIN_TOP, AUTO);
-        return new Div(h3);
+        final Div div = new Div(h3);
+        div.addClassName("h2-firmware-div");
+        return div;
     }
 
     private void i18N() {

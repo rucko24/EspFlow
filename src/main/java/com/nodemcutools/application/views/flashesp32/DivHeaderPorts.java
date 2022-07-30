@@ -96,10 +96,12 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         divEndForH2EspToolVersion.getStyle().set(DISPLAY, "flex");
         divEndForH2EspToolVersion.getStyle().set("justify-content", "center");
 
+        divHeader.addClassName("header-flex-wrap");
         super.add(divHeader, divEndForH2EspToolVersion);
         super.setWidthFull();
         super.getStyle().set(DISPLAY, "flex");
         super.getStyle().set("justify-content", "space-around");
+        super.addClassName("vertical-flex-wrap");
 
     }
 
@@ -113,6 +115,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createH3SerialPort() {
         final Div divH3 = new Div(new H3("Serial port"));
         divH3.getStyle().set("white-space", "pre");
+        divH3.addClassName("serial-port-h3-div");
         return divH3;
     }
 
