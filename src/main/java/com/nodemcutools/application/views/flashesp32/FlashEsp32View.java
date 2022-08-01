@@ -11,17 +11,13 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -40,9 +36,12 @@ import java.util.Objects;
 import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
 import static com.nodemcutools.application.data.util.UiToolConstants.DISPLAY;
 import static com.nodemcutools.application.data.util.UiToolConstants.DMESG_GREP_TTY;
+import static com.nodemcutools.application.data.util.UiToolConstants.HIDDEN;
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_10_PX;
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_LEFT;
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_TOP;
+import static com.nodemcutools.application.data.util.UiToolConstants.OVERFLOW_X;
+import static com.nodemcutools.application.data.util.UiToolConstants.OVERFLOW_Y;
 
 /**
  * @author rubn
@@ -85,18 +84,18 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         final SplitLayout splitLayout = new SplitLayout();
         splitLayout.setOrientation(Orientation.VERTICAL);
         splitLayout.setSizeFull();
-        splitLayout.getStyle().set("overflow-y", "hidden");
+        splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
         splitLayout.addToPrimary(verticalLayout);
 
         verticalLayout.addClassName("vertical-parent");
 
         splitLayout.addToSecondary(divRowConsole);
         splitLayout.setSplitterPosition(60);
-        splitLayout.getPrimaryComponent().getElement().getStyle().set("overflow-x", "hidden");
-        splitLayout.getSecondaryComponent().getElement().getStyle().set("overflow-x", "hidden");
+        splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
+        splitLayout.getSecondaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getSecondaryComponent().getElement().getStyle().set("margin-bottom", "10px");
         splitLayout.getSecondaryComponent().getElement().getStyle().set("margin-right", "20px");
-        splitLayout.getStyle().set("overflow-x", "hidden");
+        splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
 
         super.add(splitLayout);
     }
@@ -178,7 +177,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         this.textAreaConsoleOutput.addThemeVariants(TextAreaVariant.LUMO_SMALL);
 
         textAreaConsoleOutput.getStyle().set("overflow-y", AUTO);
-        textAreaConsoleOutput.getElement().setAttribute("title","output");
+        textAreaConsoleOutput.getElement().setAttribute("title", "output");
 //        textArea.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
         textAreaConsoleOutput.addClassName("child-text-area-console");
 
@@ -192,7 +191,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         div.setWidthFull();
         div.getStyle().set(DISPLAY, "flex");
         div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-        div.getStyle().set("overflow-y", "hidden");
+        div.getStyle().set(OVERFLOW_Y, HIDDEN);
         div.addClassName("h3-text-area-div");
         return div;
     }
@@ -261,7 +260,6 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
             final UI ui = attachEvent.getUI();
             this.consoleOutput(ui);
         }
-
     }
 
 }

@@ -245,3 +245,14 @@ html {
     }
 
 }
+
+@media (max-width: 400px) {
+
+    .row-about {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-items: center !important;
+        justify-content: center;
+    }
+}

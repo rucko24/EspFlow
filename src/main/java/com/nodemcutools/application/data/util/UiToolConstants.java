@@ -25,8 +25,8 @@ public class UiToolConstants {
     public static final String NOT_FOUND = "not found!";
     public static final String COMMAND_NOT_FOUND = "command not found!";
     public static final String CHARSET_CP850 = "CP850";
-    public static final String ESPTOOL_NOT_INSTALLED_ON_LINUX = "/bin/sh: 1: esptool.py: not found";
-    public static final String ESPTOOL_NOT_INSTALLED_ON_FREE_BSD = "/bin/sh: esptool.py: Command not found.";
-    public static final String ESPTOOL_NOT_INSTALLED_ON_WINDOWS = "\"esptool.py\" no se reconoce como un comando interno o externo";
+    public static final String OVERFLOW_X = "overflow-x";
+    public static final String OVERFLOW_Y = "overflow-y";
+    public static final String HIDDEN = "hidden";
 
 }
