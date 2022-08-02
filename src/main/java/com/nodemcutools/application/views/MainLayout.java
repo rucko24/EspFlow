@@ -6,6 +6,7 @@ import com.nodemcutools.application.data.entity.User;
 import com.nodemcutools.application.security.AuthenticatedUser;
 import com.nodemcutools.application.views.about.AboutView;
 import com.nodemcutools.application.views.flashesp32.FlashEsp32View;
+import com.nodemcutools.application.views.readwriteflash.ReadWriteFlashView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -73,6 +74,10 @@ public class MainLayout extends AppLayout {
             nav.addItem(new AppNavItem("🔥 Flash Esp32+", FlashEsp32View.class));
 
         }
+        if(accessChecker.hasAccess(ReadWriteFlashView.class)) {
+            nav.addItem(new AppNavItem("⬇ ⬆Read/Write flash", ReadWriteFlashView.class));
+        }
+
         if (accessChecker.hasAccess(AboutView.class)) {
             nav.addItem(new AppNavItem("About", AboutView.class, "la la-file"));
 
