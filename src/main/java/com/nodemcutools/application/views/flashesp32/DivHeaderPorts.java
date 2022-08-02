@@ -2,7 +2,6 @@ package com.nodemcutools.application.views.flashesp32;
 
 import com.nodemcutools.application.data.service.ComPortService;
 import com.nodemcutools.application.data.service.CommandService;
-import com.nodemcutools.application.data.util.CommandNotFoundException;
 import com.nodemcutools.application.data.util.NotificationBuilder;
 import com.nodemcutools.application.data.util.ResponsiveHeaderDiv;
 import com.vaadin.flow.component.AttachEvent;
@@ -24,7 +23,6 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -34,7 +32,6 @@ import java.util.Set;
 import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
 import static com.nodemcutools.application.data.util.UiToolConstants.BOX_SHADOW_PROPERTY;
 import static com.nodemcutools.application.data.util.UiToolConstants.BOX_SHADOW_VALUE;
-import static com.nodemcutools.application.data.util.UiToolConstants.COMMAND_NOT_FOUND;
 import static com.nodemcutools.application.data.util.UiToolConstants.DISPLAY;
 import static com.nodemcutools.application.data.util.UiToolConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN;

@@ -1,6 +1,6 @@
 package com.nodemcutools.application.views.readwriteflash;
 
-import com.nodemcutools.application.components.console.Console;
+import com.nodemcutools.application.components.console.ConsoleCommandOutPutArea;
 import com.nodemcutools.application.data.service.ComPortService;
 import com.nodemcutools.application.data.service.CommandService;
 import com.nodemcutools.application.data.util.ResponsiveHeaderDiv;
@@ -16,6 +16,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -45,10 +46,15 @@ public class ReadWriteFlashView extends Div implements ResponsiveHeaderDiv {
 
     private final CommandService commandService;
     private final ComPortService comPortService;
+
     private final VerticalLayout content = new VerticalLayout();
     private final Tab readTab = new Tab(VaadinIcon.ARROW_CIRCLE_DOWN.create(), new Span("Read flash"));
     private final Tab writeTab = new Tab(VaadinIcon.ARROW_CIRCLE_UP.create(), new Span("Write flash"));
-    private final Console console;
+    /**
+     * Console output area
+     */
+    private final TextArea textAreaConsoleOutput = new TextArea();
+    private final ConsoleCommandOutPutArea consoleCommandOutPutArea = new ConsoleCommandOutPutArea(textAreaConsoleOutput);
     private final SplitLayout splitLayout = new SplitLayout(Orientation.VERTICAL);
 
     @PostConstruct
@@ -71,7 +77,7 @@ public class ReadWriteFlashView extends Div implements ResponsiveHeaderDiv {
         this.splitLayout.addToPrimary(tabs, content);
         this.splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
 
-        this.splitLayout.addToSecondary(console.getConsole());
+        this.splitLayout.addToSecondary(consoleCommandOutPutArea);
 
         this.splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);

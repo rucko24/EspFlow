@@ -1,5 +1,6 @@
 package com.nodemcutools.application.views.flashesp32;
 
+import com.nodemcutools.application.components.console.ConsoleCommandOutPutArea;
 import com.nodemcutools.application.data.enums.BaudRates;
 import com.nodemcutools.application.data.enums.FlashMode;
 import com.nodemcutools.application.data.service.CommandService;
@@ -17,7 +18,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextAreaVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -62,7 +62,11 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
     private final RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<String> eraseRadioButtons = new RadioButtonGroup<>();
+    /**
+     * Console output area
+     */
     private final TextArea textAreaConsoleOutput = new TextArea();
+    private final ConsoleCommandOutPutArea consoleCommandOutPutArea = new ConsoleCommandOutPutArea(textAreaConsoleOutput);
 
     private String[] commands;
 
@@ -93,7 +97,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         splitLayout.setSplitterPosition(60);
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getSecondaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
-        splitLayout.getSecondaryComponent().getElement().getStyle().set("margin-bottom", "10px");
+//        splitLayout.getSecondaryComponent().getElement().getStyle().set("margin-bottom", "10px");
         splitLayout.getSecondaryComponent().getElement().getStyle().set("margin-right", "20px");
         splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
 
@@ -168,32 +172,32 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
      * @return HorizontalLayout
      */
     public Div rowConsole() {
-        final H3 h3 = new H3("Console");
-        h3.getStyle().set(MARGIN_TOP, AUTO);
-        final Div divH3 = new Div(h3);
-
-        textAreaConsoleOutput.setSizeFull();
-        textAreaConsoleOutput.setReadOnly(Boolean.TRUE);
-        this.textAreaConsoleOutput.addThemeVariants(TextAreaVariant.LUMO_SMALL);
-
-        textAreaConsoleOutput.getStyle().set("overflow-y", AUTO);
-        textAreaConsoleOutput.getElement().setAttribute("title", "output");
+//        final H3 h3 = new H3("Console");
+//        h3.getStyle().set(MARGIN_TOP, AUTO);
+//        final Div divH3 = new Div(h3);
+//
+//        textAreaConsoleOutput.setSizeFull();
+//        textAreaConsoleOutput.setReadOnly(Boolean.TRUE);
+//        this.textAreaConsoleOutput.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+//
+//        textAreaConsoleOutput.getStyle().set("overflow-y", AUTO);
+//        textAreaConsoleOutput.getElement().setAttribute("title", "output");
 //        textArea.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
-        textAreaConsoleOutput.addClassName("child-text-area-console");
-
-        final Div divTextArea = new Div(textAreaConsoleOutput);
-        divTextArea.setSizeFull();
-        divTextArea.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-        divTextArea.getStyle().set("margin-right", "20px");
-        divTextArea.addClassName("text-area-console-div");
-
-        final Div div = new Div(divH3, divTextArea);
-        div.setWidthFull();
-        div.getStyle().set(DISPLAY, "flex");
-        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-        div.getStyle().set(OVERFLOW_Y, HIDDEN);
-        div.addClassName("h3-text-area-div");
-        return div;
+//        textAreaConsoleOutput.addClassName("child-text-area-console");
+//
+//        final Div divTextArea = new Div(textAreaConsoleOutput);
+//        divTextArea.setSizeFull();
+//        divTextArea.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+//        divTextArea.getStyle().set("margin-right", "20px");
+//        divTextArea.addClassName("text-area-console-div");
+//
+//        final Div div = new Div(divH3, divTextArea);
+//        div.setWidthFull();
+//        div.getStyle().set(DISPLAY, "flex");
+//        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+//        div.getStyle().set(OVERFLOW_Y, HIDDEN);
+//        div.addClassName("h3-text-area-div");
+        return this.consoleCommandOutPutArea;
     }
 
     @SneakyThrows

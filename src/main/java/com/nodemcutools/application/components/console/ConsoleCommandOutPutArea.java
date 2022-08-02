@@ -4,9 +4,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
 import static com.nodemcutools.application.data.util.UiToolConstants.DISPLAY;
@@ -19,21 +18,25 @@ import static com.nodemcutools.application.data.util.UiToolConstants.OVERFLOW_Y;
 /**
  * @author rubn
  */
+@Log4j2
 @Getter
-@SpringComponent
-@RequiredArgsConstructor
-public class Console extends Div {
+public class ConsoleCommandOutPutArea extends Div {
 
-    private final TextArea textAreaConsoleOutput = new TextArea();
+    private final TextArea textAreaConsoleOutput;
 
-    public Div getConsole() {
+    public ConsoleCommandOutPutArea(TextArea textAreaConsoleOutput) {
+        this.textAreaConsoleOutput = textAreaConsoleOutput;
+        this.getConsole();
+    }
+
+    private void getConsole() {
         final H3 h3 = new H3("Console");
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divH3 = new Div(h3);
 
         textAreaConsoleOutput.setSizeFull();
         textAreaConsoleOutput.setReadOnly(Boolean.TRUE);
-        this.textAreaConsoleOutput.addThemeVariants(TextAreaVariant.LUMO_SMALL);
+        textAreaConsoleOutput.addThemeVariants(TextAreaVariant.LUMO_SMALL);
 
         textAreaConsoleOutput.getStyle().set("overflow-y", AUTO);
         textAreaConsoleOutput.getElement().setAttribute("title", "output");
@@ -53,7 +56,6 @@ public class Console extends Div {
         super.getStyle().set(OVERFLOW_Y, HIDDEN);
         super.addClassName("h3-text-area-div");
 
-        return this;
     }
 
 }

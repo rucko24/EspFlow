@@ -13,7 +13,6 @@ import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.MediaType;
@@ -31,7 +30,6 @@ import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_LEFT
 import static com.nodemcutools.application.data.util.UiToolConstants.MARGIN_TOP;
 
 @Log4j2
-@Getter
 @UIScope
 @SpringComponent
 @RequiredArgsConstructor
