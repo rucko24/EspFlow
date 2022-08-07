@@ -65,8 +65,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
     /**
      * Console output area
      */
-    private final TextArea textAreaConsoleOutput = new TextArea();
-    private final ConsoleCommandOutPutArea consoleCommandOutPutArea = new ConsoleCommandOutPutArea(textAreaConsoleOutput);
+    private TextArea textAreaConsoleOutput;
 
     private String[] commands;
 
@@ -104,11 +103,11 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         super.add(splitLayout);
     }
 
-    public Div rowPorts() {
+    private Div rowPorts() {
         return this.divHeaderPorts;
     }
 
-    public Div rowBaudRates() {
+    private Div rowBaudRates() {
         baudRatesRadioButtonGroup.setItems(BaudRates.values());
         baudRatesRadioButtonGroup.setValue(BaudRates.BAUD_RATE_115200);
 
@@ -127,7 +126,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         return div;
     }
 
-    public Div rowFlashMode() {
+    private Div rowFlashMode() {
         final H3 h3 = new H3("Flash mode");
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divh3FlashMode = new Div(h3);
@@ -145,7 +144,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         return div;
     }
 
-    public Div rowEraseFlash() {
+    private Div rowEraseFlash() {
         final H3 h3 = new H3("Erase flash");
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divh3EraseFlash = new Div(h3);
@@ -171,33 +170,10 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
      *
      * @return HorizontalLayout
      */
-    public Div rowConsole() {
-//        final H3 h3 = new H3("Console");
-//        h3.getStyle().set(MARGIN_TOP, AUTO);
-//        final Div divH3 = new Div(h3);
-//
-//        textAreaConsoleOutput.setSizeFull();
-//        textAreaConsoleOutput.setReadOnly(Boolean.TRUE);
-//        this.textAreaConsoleOutput.addThemeVariants(TextAreaVariant.LUMO_SMALL);
-//
-//        textAreaConsoleOutput.getStyle().set("overflow-y", AUTO);
-//        textAreaConsoleOutput.getElement().setAttribute("title", "output");
-//        textArea.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
-//        textAreaConsoleOutput.addClassName("child-text-area-console");
-//
-//        final Div divTextArea = new Div(textAreaConsoleOutput);
-//        divTextArea.setSizeFull();
-//        divTextArea.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-//        divTextArea.getStyle().set("margin-right", "20px");
-//        divTextArea.addClassName("text-area-console-div");
-//
-//        final Div div = new Div(divH3, divTextArea);
-//        div.setWidthFull();
-//        div.getStyle().set(DISPLAY, "flex");
-//        div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-//        div.getStyle().set(OVERFLOW_Y, HIDDEN);
-//        div.addClassName("h3-text-area-div");
-        return this.consoleCommandOutPutArea;
+    private Div rowConsole() {
+        final ConsoleCommandOutPutArea consoleCommandOutPutArea = new ConsoleCommandOutPutArea();
+        this.textAreaConsoleOutput = consoleCommandOutPutArea.getTextArea();
+        return consoleCommandOutPutArea;
     }
 
     @SneakyThrows

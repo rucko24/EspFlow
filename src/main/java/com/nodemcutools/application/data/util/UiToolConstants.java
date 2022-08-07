@@ -29,4 +29,7 @@ public class UiToolConstants {
     public static final String OVERFLOW_Y = "overflow-y";
     public static final String HIDDEN = "hidden";
 
+    public static final String MAC = "MAC";
+    public static final String FLASH_SIZE = "Detected flash size";
+
 }

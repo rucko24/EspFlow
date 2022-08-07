@@ -146,6 +146,7 @@ html {
 
     .child-text-area-console {
        margin-bottom: 10px;
+       height: 98%;
        //maring-right: 20px;
     }
 
@@ -236,6 +237,7 @@ html {
 
     .child-text-area-console {
        margin-bottom: 10px;
+       height: 98%;
        overflow-x: hidden;
     }
 
@@ -254,5 +256,9 @@ html {
         gap: 5px;
         align-items: center !important;
         justify-content: center;
+    }
+
+    .row-span-flash-size-footer {
+        font-size: 70% !important;
     }
 }
