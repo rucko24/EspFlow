@@ -3,13 +3,13 @@ package com.nodemcutools.application.data.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nodemcutools.application.data.enums.Role;
 import java.util.Set;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Lob;
-import javax.persistence.Table;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "application_user")

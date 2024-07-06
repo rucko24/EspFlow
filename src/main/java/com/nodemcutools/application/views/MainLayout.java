@@ -1,7 +1,5 @@
 package com.nodemcutools.application.views;
 
-import com.nodemcutools.application.components.appnav.AppNav;
-import com.nodemcutools.application.components.appnav.AppNavItem;
 import com.nodemcutools.application.data.entity.User;
 import com.nodemcutools.application.security.AuthenticatedUser;
 import com.nodemcutools.application.views.about.AboutView;
@@ -19,8 +17,12 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+
 import java.util.Optional;
 
 /**
@@ -66,20 +68,20 @@ public class MainLayout extends AppLayout {
         return section;
     }
 
-    private AppNav createNavigation() {
-        AppNav nav = new AppNav();
-        nav.addClassNames("app-nav");
+    private SideNav createNavigation() {
+        SideNav nav = new SideNav();
+        // nav.addClassNames("app-nav");
 
         if (accessChecker.hasAccess(FlashEsp32View.class)) {
-            nav.addItem(new AppNavItem("🔥 Flash Esp32+", FlashEsp32View.class));
+            nav.addItem(new SideNavItem("🔥 Flash Esp32+", FlashEsp32View.class, LineAwesomeIcon.HOME_SOLID.create()));
 
         }
-        if(accessChecker.hasAccess(ReadWriteFlashView.class)) {
-            nav.addItem(new AppNavItem("⬇ ⬆Read/Write flash", ReadWriteFlashView.class));
+        if (accessChecker.hasAccess(ReadWriteFlashView.class)) {
+            nav.addItem(new SideNavItem("⬇ ⬆Read/Write flash", ReadWriteFlashView.class, LineAwesomeIcon.README.create()));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {
-            nav.addItem(new AppNavItem("About", AboutView.class, "la la-file"));
+            nav.addItem(new SideNavItem("About", AboutView.class, LineAwesomeIcon.FILE.create()));
 
         }
 
@@ -95,13 +97,12 @@ public class MainLayout extends AppLayout {
             User user = maybeUser.get();
 
             Avatar avatar = new Avatar(user.getName(), user.getProfilePictureUrl());
-            avatar.addClassNames("me-xs");
+            avatar.setThemeName("xsmall");
+            avatar.getElement().setAttribute("tabindex", "-1");
 
             ContextMenu userMenu = new ContextMenu(avatar);
             userMenu.setOpenOnClick(true);
-            userMenu.addItem("Logout", e -> {
-                authenticatedUser.logout();
-            });
+            userMenu.addItem("Logout", e -> authenticatedUser.logout());
 
             Span name = new Span(user.getName());
             name.addClassNames("font-medium", "text-s", "text-secondary");

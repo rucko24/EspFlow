@@ -4,6 +4,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Bottom;
 import lombok.extern.log4j.Log4j2;
 
 import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;
@@ -46,16 +48,17 @@ public class ConsoleCommandOutPutArea extends Div {
         textAreaConsoleOutput.addClassName("child-text-area-console");
 
         final Div divTextArea = new Div(textAreaConsoleOutput);
+        divTextArea.setId("divTextArea");
         divTextArea.setSizeFull();
         divTextArea.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         divTextArea.getStyle().set("margin-right", "20px");
-//        divTextArea.getStyle().set("margin-bottom", "10px");
         divTextArea.addClassName("text-area-console-div");
 
         super.add(divTextArea);
         super.setWidthFull();
         super.getStyle().set(DISPLAY, "flex");
         super.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+        super.addClassName(Bottom.SMALL);
         super.getStyle().set(OVERFLOW_Y, HIDDEN);
         super.addClassName("h3-text-area-div");
 

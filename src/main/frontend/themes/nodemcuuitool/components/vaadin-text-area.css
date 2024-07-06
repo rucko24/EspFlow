@@ -1,0 +1,437 @@
+:host {
+  animation: 1ms vaadin-text-area-appear;
+}
+
+.vaadin-text-area-container {
+  flex: auto;
+  border-radius: 5px;
+  padding-top: calc((var(--lumo-text-field-size) - 1em * var(--lumo-line-height-s)) / 2);
+      padding-bottom: calc((var(--lumo-text-field-size) - 1em * var(--lumo-line-height-s)) / 2);
+      transition: background-color 0.1s;
+      line-height: var(--lumo-line-height-s);
+}
+
+[part='label'], [part='helper-text'], [part='error-message'] {
+  flex: none;
+}
+
+[part='input-field'] {
+  flex: auto;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:host(.input-field) [part~=input-field] {
+    color: blue !important;
+}
+
+::slotted(textarea) {
+  -webkit-appearance: none;
+          -moz-appearance: none;
+          flex: auto;
+          overflow: hidden;
+          width: 100%;
+          height: 100%;
+          outline: none;
+          resize: none;
+          margin: 0;
+          padding: 0 0.25em;
+          border: 0;
+          border-radius: 0;
+          min-width: 0;
+          font: inherit;
+          font-size: 1em;
+          line-height: normal;
+          color: var(--lumo-body-text-color) !important;
+          background-color: transparent;
+
+          box-shadow: none;
+}
+
+[part='input-field'] ::slotted(textarea) {
+  align-self: stretch;
+          white-space: pre-wrap;
+}
+
+[part='input-field'] ::slotted(:not(textarea)) {
+  align-self: flex-start;
+}
+
+:host([disabled]) ::slotted(textarea) {
+  user-select: none;
+}
+
+@keyframes vaadin-text-area-appear {
+to {
+  opacity: 1;
+}
+
+}
+
+:host {
+  display: inline-flex;
+    outline: none;
+}
+
+:host::before {
+  content: '\2003';
+    width: 0;
+    display: inline-block;
+}
+
+:host([hidden]) {
+  display: none !important;
+}
+
+:host(:not([has-label])) [part='label'] {
+  display: none;
+}
+
+[class$='container'] {
+  display: flex;
+    flex-direction: column;
+    min-width: 100%;
+    max-width: 100%;
+    width: var(--vaadin-field-default-width, 12em);
+}
+
+[part='clear-button'] {
+  display: none;
+    cursor: default;
+}
+
+[part='clear-button']::before {
+  content: '✕';
+}
+
+:host([clear-button-visible][has-value]:not([disabled]):not([readonly])) [part='clear-button'] {
+  //display: block;
+}
+
+[part='label'] {
+  align-self: flex-start;
+    color: var(--lumo-body-text-color);
+    font-weight: 500;
+    font-size: var(--lumo-font-size-s);
+    margin-left: calc(var(--lumo-border-radius-m) / 4);
+    transition: color 0.2s;
+    line-height: 1;
+    padding-right: 1em;
+    padding-bottom: 0.5em;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    position: relative;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+:host([has-label])::before {
+  margin-top: calc(var(--lumo-font-size-s) * 1.5);
+}
+
+:host([has-label][theme~='small'])::before {
+  margin-top: calc(var(--lumo-font-size-xs) * 1.5);
+}
+
+:host([has-label]) {
+  padding-top: var(--lumo-space-m);
+}
+
+:host([required]) [part='required-indicator']::after {
+  content: var(--lumo-required-field-indicator, '•');
+    transition: opacity 0.2s;
+    color: var(--lumo-required-field-indicator-color, var(--lumo-primary-text-color));
+    position: absolute;
+    right: 0;
+    width: 1em;
+    text-align: center;
+}
+
+:host([invalid]) [part='required-indicator']::after {
+  color: var(--lumo-required-field-indicator-color, var(--lumo-error-text-color));
+}
+
+[part='error-message'] {
+  margin-left: calc(var(--lumo-border-radius-m) / 4);
+    font-size: var(--lumo-font-size-xs);
+    line-height: var(--lumo-line-height-xs);
+    color: var(--lumo-error-text-color);
+    will-change: max-height;
+    transition: 0.4s max-height;
+    max-height: 5em;
+}
+
+:host([has-error-message]) [part='error-message']::before, :host([has-error-message]) [part='error-message']::after {
+    content: '';
+    display: block;
+    height: 0.4em;
+}
+
+:host(:not([invalid])) [part='error-message'] {
+  max-height: 0;
+  overflow: hidden;
+}
+
+:host([dir='rtl']) [part='label'] {
+  margin-left: 0;
+  margin-right: calc(var(--lumo-border-radius-m) / 4);
+}
+
+:host([dir='rtl']) [part='label'] {
+  padding-left: 1em;
+  padding-right: 0;
+}
+
+:host([dir='rtl']) [part='required-indicator']::after {
+  right: auto;
+  left: 0;
+}
+
+:host([dir='rtl']) [part='error-message'] {
+  margin-left: 0;
+  margin-right: calc(var(--lumo-border-radius-m) / 4);
+}
+
+[part$='button'] {
+  flex: none;
+    width: 1em;
+    height: 1em;
+    line-height: 1;
+    font-size: var(--lumo-icon-size-m);
+    text-align: center;
+    color: var(--lumo-contrast-60pct);
+    transition: 0.2s color;
+    cursor: var(--lumo-clickable-cursor);
+}
+
+[part$='button']:hover {
+  color: red !important;
+}
+
+:host([disabled]) [part$='button'], :host([readonly]) [part$='button'] {
+  //color: var(--lumo-contrast-20pct);
+  //cursor: default;
+}
+
+[part$='button']::before {
+  font-family: 'lumo-icons';
+    display: block;
+}
+
+:host([has-helper]) [part='helper-text']::before {
+  content: '';
+    display: block;
+    height: 0.4em;
+}
+
+[part='helper-text'] {
+  display: block;
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-xs);
+    line-height: var(--lumo-line-height-xs);
+    margin-left: calc(var(--lumo-border-radius-m) / 4);
+    transition: color 0.2s;
+}
+
+:host(:hover:not([readonly])) [part='helper-text'] {
+  color: red !important;
+}
+
+:host([disabled]) [part='helper-text'] {
+  color: var(--lumo-disabled-text-color);
+    -webkit-text-fill-color: var(--lumo-disabled-text-color);
+}
+
+:host([has-helper][theme~='helper-above-field']) [part='helper-text']::before {
+  display: none;
+}
+
+:host([has-helper][theme~='helper-above-field']) [part='helper-text']::after {
+  content: '';
+    display: block;
+    height: 0.4em;
+}
+
+:host([has-helper][theme~='helper-above-field']) [part='label'] {
+  order: 0;
+    padding-bottom: 0.4em;
+}
+
+:host([has-helper][theme~='helper-above-field']) [part='helper-text'] {
+  order: 1;
+}
+
+:host([has-helper][theme~='helper-above-field']) [part='label'] + * {
+  order: 2;
+}
+
+:host([has-helper][theme~='helper-above-field']) [part='error-message'] {
+  order: 3;
+}
+
+:host {
+  --lumo-text-field-size: var(--lumo-size-m);
+    color: var(--lumo-body-text-color);
+    font-size: var(--lumo-font-size-m);
+    font-family: var(--lumo-font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    padding: var(--lumo-space-xs) 0;
+}
+
+:host::before {
+  height: var(--lumo-text-field-size);
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+}
+
+:host([focused]:not([readonly])) [part='label'] {
+  //color: var(--lumo-primary-text-color);
+}
+
+:host([focused]) [part='input-field'] ::slotted(:is(input, textarea)) {
+  -webkit-mask-image: none;
+    mask-image: none;
+}
+
+::slotted(:is(input, textarea):placeholder-shown) {
+  color: var(--lumo-secondary-text-color);
+}
+
+:host(:hover:not([readonly]):not([focused])) [part='label'] {
+  color: red !important;
+}
+
+:host(:hover:not([readonly]):not([focused])) [part='input-field']::after {
+  opacity: 0.1 !important;
+}
+
+@media (pointer: coarse) {
+:host(:hover:not([readonly]):not([focused])) [part='label'] {
+  color: red !important;
+}
+
+:host(:hover:not([readonly]):not([focused])) [part='input-field']::after {
+  opacity: 0 !important;
+}
+
+:host(:active:not([readonly]):not([focused])) [part='input-field']::after {
+  opacity: 0.2 !important;
+}
+
+}
+
+:host([focused]:not([focus-ring]):not([readonly])) [part='input-field']::after {
+  //transform: scaleX(0);
+  //transition-duration: 0.15s, 1s;
+}
+
+:host([focus-ring]) [part='input-field'] {
+  box-shadow: 0 0 0 2px var(--lumo-primary-color-50pct);
+}
+
+:host(:is([readonly], [disabled])) ::slotted(:is(input, textarea):placeholder-shown) {
+  //opacity: 0;
+}
+
+:host([disabled]) {
+  //pointer-events: none;
+}
+
+:host([disabled]) [part='label'], :host([disabled]) [part='input-field'] ::slotted(*) {
+  color: var(--lumo-disabled-text-color);
+    -webkit-text-fill-color: var(--lumo-disabled-text-color);
+}
+
+:host([invalid][focus-ring]) [part='input-field'] {
+  box-shadow: 0 0 0 2px var(--lumo-error-color-50pct);
+}
+
+:host([input-prevented]) [part='input-field'] {
+  animation: shake 0.15s infinite;
+}
+
+@keyframes shake {
+25% {
+  transform: translateX(4px);
+}
+
+75% {
+  transform: translateX(-4px);
+}
+
+}
+
+:host([theme~='small']) {
+  font-size: var(--lumo-font-size-s);
+    --lumo-text-field-size: var(--lumo-size-s);
+}
+
+:host([theme~='small']) [part='label'] {
+  font-size: var(--lumo-font-size-xs);
+}
+
+:host([theme~='small']) [part='error-message'] {
+  font-size: var(--lumo-font-size-xxs);
+}
+
+[part='input-field'] ::slotted(:not(iron-icon):not(vaadin-icon):not(input):not(textarea)) {
+  color: var(--lumo-secondary-text-color);
+    font-weight: 400;
+}
+
+[part='clear-button']::before {
+  content: var(--lumo-icons-cross);
+}
+
+[part='input-field'], [part='input-field'] ::slotted(textarea) {
+  height: auto;
+    box-sizing: border-box;
+}
+
+[part='input-field'] {
+  padding-top: calc((var(--lumo-text-field-size) - 1em * var(--lumo-line-height-s)) / 2);
+    padding-bottom: calc((var(--lumo-text-field-size) - 1em * var(--lumo-line-height-s)) / 2);
+    transition: background-color 0.1s;
+    line-height: var(--lumo-line-height-s);
+}
+
+:host(:not([readonly])) [part='input-field']::after {
+  //display: none;
+}
+
+:host([readonly]) [part='input-field'] {
+  //border: 1px dashed var(--lumo-contrast-30pct);
+  border: 2px solid lightgray;
+}
+
+:host([readonly]) [part='input-field']::after {
+  //border: none;
+}
+
+:host(:hover:not([readonly]):not([focused]):not([invalid])) [part='input-field'] {
+  background-color: red !important;
+}
+
+@media (pointer: coarse) {
+:host(:hover:not([readonly]):not([focused]):not([invalid])) [part='input-field'] {
+  background-color: red !important;
+}
+
+:host(:active:not([readonly]):not([focused])) [part='input-field'] {
+  //background-color: var(--lumo-contrast-20pct);
+}
+
+}
+
+[part='input-field'] ::slotted(textarea) {
+  line-height: inherit;
+    --_lumo-text-field-overflow-mask-image: none;
+}
+
+[part='input-field'] ::slotted(iron-icon), [part='input-field'] ::slotted(vaadin-icon) {
+  margin-top: calc((var(--lumo-icon-size-m) - 1em * var(--lumo-line-height-s)) / -2);
+}

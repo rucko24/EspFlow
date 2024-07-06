@@ -12,18 +12,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.MimeTypeUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 
 import static com.nodemcutools.application.data.util.UiToolConstants.CHARSET_CP850;
@@ -64,7 +70,8 @@ class ExecuteCommandsTest {
                 .doOnTerminate(count::countDown)
                 .onErrorResume(throwable -> Mono.empty())
                 .switchIfEmpty(Mono.just(NOT_FOUND))
-                .subscribe(log::info);
+                .log()
+                .subscribe();
         count.await();
     }
 
@@ -112,6 +119,30 @@ class ExecuteCommandsTest {
                 .doOnError(line -> log.info("doOnError: {}", line))
                 .subscribe(line -> log.info("Subscribe: {}", line));
         count.await();
+    }
+
+    @Test
+    @DisplayName("Leyendo line a linea un inputStream decodificado para poder leer bien, sin mapping extraños")
+    void testRead() {
+
+        final var countDownLatch = new CountDownLatch(1);
+        DataBufferUtils.readInputStream(() ->  this.commandService.execute(getIpAddressInfo())
+                .getInputStream(),  DefaultDataBufferFactory.sharedInstance, FileCopyUtils.BUFFER_SIZE)
+                .transformDeferred(this::stringDecoder)
+                .delayElements(Duration.ofSeconds(1))
+                .log()
+                .doOnTerminate(countDownLatch::countDown)
+                .subscribe();
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Flux<String> stringDecoder(Flux<DataBuffer> dataBuffer) {
+        return StringDecoder.allMimeTypes().decode(dataBuffer,null,  null,  null);
     }
 
 }

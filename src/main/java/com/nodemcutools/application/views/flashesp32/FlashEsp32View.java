@@ -29,8 +29,8 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import reactor.core.publisher.Flux;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.security.RolesAllowed;
 import java.util.Objects;
 
 import static com.nodemcutools.application.data.util.UiToolConstants.AUTO;

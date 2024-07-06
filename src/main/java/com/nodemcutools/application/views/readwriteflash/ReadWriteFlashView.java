@@ -31,8 +31,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.security.RolesAllowed;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.security.RolesAllowed;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 

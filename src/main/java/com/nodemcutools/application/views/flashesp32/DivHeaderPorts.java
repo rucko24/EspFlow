@@ -24,7 +24,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -105,7 +105,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createDivComboBox() {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setPlaceholder("com port");
-        comboBoxSerialPort.setPreventInvalidInput(Boolean.TRUE);
+        //comboBoxSerialPort.setPreventInvalidInput(Boolean.TRUE);
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
 

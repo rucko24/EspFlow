@@ -1,0 +1,262 @@
+@import url('./main-layout.css');
+@import url('components/vaadin-upload-file.css');
+
+html {
+    --lumo-size-xl: 3rem;
+    --lumo-size-l: 2.5rem;
+    --lumo-size-m: 2rem;
+    --lumo-size-s: 1.75rem;
+    --lumo-size-xs: 1.5rem;
+    --lumo-space-xl: 1.875rem;
+    --lumo-space-l: 1.25rem;
+    --lumo-space-m: 0.625rem;
+    --lumo-space-s: 0.3125rem;
+    --lumo-space-xs: 0.1875rem;
+    --lumo-body-text-color: hsla(214, 0%, 0%, 0.94);
+    --lumo-font-family: Cairo;
+}
+
+[theme~="dark"] {
+    --lumo-body-text-color: hsla(214, 0%, 98%, 0.9);
+    --lumo-shade-5pct: rgba(33, 33, 33, 0.05);
+    --lumo-shade-10pct: rgba(33, 33, 33, 0.1);
+    --lumo-shade-20pct: rgba(33, 33, 33, 0.2);
+    --lumo-shade-30pct: rgba(33, 33, 33, 0.3);
+    --lumo-shade-40pct: rgba(33, 33, 33, 0.4);
+    --lumo-shade-50pct: rgba(33, 33, 33, 0.5);
+    --lumo-shade-60pct: rgba(33, 33, 33, 0.6);
+    --lumo-shade-70pct: rgba(33, 33, 33, 0.7);
+    --lumo-shade-80pct: rgba(33, 33, 33, 0.8);
+    --lumo-shade-90pct: rgba(33, 33, 33, 0.9);
+    --lumo-primary-color-50pct: rgba(235, 89, 5, 0.5);
+    --lumo-primary-color-10pct: rgba(235, 89, 5, 0.1);
+    --lumo-error-color-50pct: rgba(231, 24, 24, 0.5);
+    --lumo-error-color-10pct: rgba(231, 24, 24, 0.1);
+    --lumo-success-color-50pct: rgba(62, 229, 170, 0.5);
+    --lumo-success-color-10pct: rgba(62, 229, 170, 0.1);
+    --lumo-shade: hsl(0, 0%, 13%);
+    --lumo-primary-color: hsl(22, 96%, 47%);
+    --lumo-primary-text-color: hsl(22, 100%, 42%);
+    --lumo-error-color: hsl(0, 81%, 50%);
+    --lumo-error-text-color: hsl(0, 86%, 45%);
+    --lumo-success-color: hsl(159, 76%, 57%);
+    --lumo-success-contrast-color: hsl(159, 29%, 10%);
+    --lumo-success-text-color: hsl(159, 61%, 40%);
+}
+
+.pulse {
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+    	transform: scale(0.95);
+    	box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+
+    70% {
+    	transform: scale(1);
+    	box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+    	box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+@media (max-width: 1155px) {
+     .vertical-parent {
+        margin-right: 10px;
+    }
+
+    .vertical-flex-wrap {
+        display: flex;
+        width: 100%;
+        justify-content: space-around;
+        flex-wrap: wrap-reverse;
+    }
+
+    .header-flex-wrap {
+        margin: 10px;
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .serial-port-h3-div {
+        display: flex;
+        width: 100%;
+        margin-left: 10px;
+        justify-content: center;
+    }
+
+    .baud-rate-flex-wrap {
+      //display: flex;
+      //margin-left: 10px;
+      //width: 100%;
+      //justify-content: center;
+      //flex-wrap: wrap;
+    }
+
+    .baud-rate-h3-div {
+        //display: flex;
+        //width: 100%;
+        //align-items: center;
+        //justify-content: center;
+    }
+
+    .baud-rate-radio-button {
+        //margin-left: 0px !important;
+    }
+
+    .firmwareh3-vaadin-upload-div {
+        margin-left: 10px;
+        display: flex;
+        //width: 100%;
+        //justify-content: center;
+        //flex-wrap: wrap;
+    }
+
+    .h2-firmware-div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        //width: 100%;
+    }
+
+    .vaadin-upload {
+       border: none;
+       padding: 0px;
+       display: flex;
+       margin-left: 0px !important;
+    }
+
+    .h3-text-area-div {
+        display: flex;
+        margin-left: 10px;
+        flex-direction: column;
+        overflow-y: visible !important;
+    }
+
+    .child-text-area-console {
+       margin-bottom: 10px;
+       height: 98%;
+       //maring-right: 20px;
+    }
+
+    .text-area-console-div {
+        margin-left: 0px !important;
+        overflow-y: hidden;
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .vertical-parent {
+        margin-right: 10px;
+    }
+
+    .vertical-flex-wrap {
+        display: flex;
+        width: 100%;
+        justify-content: space-around;
+        flex-wrap: wrap-reverse;
+    }
+
+    .header-flex-wrap {
+        margin: 10px;
+        display: flex;
+        width: 100%;
+        min-width: 100%;
+        align-items: baseline;
+        flex-wrap: wrap;
+    }
+
+    .serial-port-h3-div {
+        display: flex;
+        width: 100%;
+        margin-left: 10px;
+        justify-content: center;
+    }
+
+    .baud-rate-h3-div {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .baud-rate-radio-button {
+        margin-left: 0px !important;
+    }
+
+    .baud-rate-flex-wrap {
+        display: flex;
+        margin-left: 10px;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .firmwareh3-vaadin-upload-div {
+        margin-left: 10px;
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .h2-firmware-div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        //width: 100%;
+    }
+
+    .vaadin-upload {
+       border: none;
+       padding: 0px;
+       display: flex;
+       margin-left: 0px !important;
+    }
+
+    .h3-text-area-div {
+        display: flex;
+        width: 96% !important;
+        margin-left: 10px;
+        flex-direction: column;
+        overflow-y: visible !important;
+    }
+
+    .child-text-area-console {
+       margin-bottom: 10px;
+       height: 98%;
+       overflow-x: hidden;
+    }
+
+    .text-area-console-div {
+        margin-left: 0px !important;
+        overflow-y: hidden;
+    }
+
+}
+
+@media (max-width: 400px) {
+
+    .row-about {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-items: center !important;
+        justify-content: center;
+    }
+
+    .row-span-flash-size-footer {
+        font-size: 70% !important;
+    }
+}
