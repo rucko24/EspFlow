@@ -1,5 +1,7 @@
 @import url('./main-layout.css');
 @import url('components/vaadin-upload-file.css');
+@import url('./views/readflash/esp-device-info.css');
+@import url('./views/readflash/carousel-demo-style.css');
 
 html {
     --lumo-size-xl: 3rem;

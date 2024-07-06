@@ -105,7 +105,7 @@ to {
 }
 
 :host([clear-button-visible][has-value]:not([disabled]):not([readonly])) [part='clear-button'] {
-  //display: block;
+  /*display: block;*/
 }
 
 [part='label'] {
@@ -210,8 +210,8 @@ to {
 }
 
 :host([disabled]) [part$='button'], :host([readonly]) [part$='button'] {
-  //color: var(--lumo-contrast-20pct);
-  //cursor: default;
+  /*color: var(--lumo-contrast-20pct);
+    cursor: default;*/
 }
 
 [part$='button']::before {
@@ -289,7 +289,7 @@ to {
 }
 
 :host([focused]:not([readonly])) [part='label'] {
-  //color: var(--lumo-primary-text-color);
+  /*color: var(--lumo-primary-text-color);*/
 }
 
 :host([focused]) [part='input-field'] ::slotted(:is(input, textarea)) {
@@ -325,8 +325,8 @@ to {
 }
 
 :host([focused]:not([focus-ring]):not([readonly])) [part='input-field']::after {
-  //transform: scaleX(0);
-  //transition-duration: 0.15s, 1s;
+  /*transform: scaleX(0);
+  transition-duration: 0.15s, 1s;*/
 }
 
 :host([focus-ring]) [part='input-field'] {
@@ -334,11 +334,11 @@ to {
 }
 
 :host(:is([readonly], [disabled])) ::slotted(:is(input, textarea):placeholder-shown) {
-  //opacity: 0;
+  /*opacity: 0;*/
 }
 
 :host([disabled]) {
-  //pointer-events: none;
+  /*pointer-events: none;*/
 }
 
 :host([disabled]) [part='label'], :host([disabled]) [part='input-field'] ::slotted(*) {
@@ -400,16 +400,16 @@ to {
 }
 
 :host(:not([readonly])) [part='input-field']::after {
-  //display: none;
+  /*display: none;*/
 }
 
 :host([readonly]) [part='input-field'] {
-  //border: 1px dashed var(--lumo-contrast-30pct);
+  /*border: 1px dashed var(--lumo-contrast-30pct);*/
   border: 2px solid lightgray;
 }
 
 :host([readonly]) [part='input-field']::after {
-  //border: none;
+  /*border: none;*/
 }
 
 :host(:hover:not([readonly]):not([focused]):not([invalid])) [part='input-field'] {
@@ -422,7 +422,7 @@ to {
 }
 
 :host(:active:not([readonly]):not([focused])) [part='input-field'] {
-  //background-color: var(--lumo-contrast-20pct);
+  /*background-color: var(--lumo-contrast-20pct);*/
 }
 
 }

@@ -8,14 +8,17 @@ import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 
 const loadOnDemand = (key) => {
   const pending = [];
-  if (key === 'f18e1ddfe3f371f577b7e6d3f6053e472012c4de20fa1969f4df97b5a49a0cb5') {
-    pending.push(import('./chunks/chunk-ac0e6714ed86dbcbc1646945f304d698c19eb6c553ed642fa5fe88d46fbc257b.js'));
+  if (key === '0ef434eda28567f8892d9fbcf571b63ed3a043a8306c5aa023c487026f9fc8cc') {
+    pending.push(import('./chunks/chunk-6cd0ea702bab74126e1671548385485d0e63362292ad1cd2883a24ed3536a541.js'));
   }
-  if (key === 'dff6cb925a1200976d4a73b782756a23fb37a43d8682623b291e63a99b1b2f32') {
-    pending.push(import('./chunks/chunk-e2454946031db7651ac5a1da7ace70945b397c399b0fef722fec2fd2c21e2130.js'));
+  if (key === 'ae59ccbf61f925fc523468d821916353b4137249761af72dc206e52abbec2626') {
+    pending.push(import('./chunks/chunk-341adefcc4eb5d9926ba517640166eb3b698c299302921edeb9d531bbad4d38d.js'));
   }
-  if (key === '971f88183d4ec698b1447b7a9d104bbf1eaca2b2983ba8ab2b65462d9a63aea7') {
-    pending.push(import('./chunks/chunk-0c94acd8290e6991befd6b90f5ea3773cf6c789326d32bbe43f73bb91cd517a3.js'));
+  if (key === '9f50b7caedb2c852bf9ecd33338f7cd3cf85a7a3a4cfbc4d73763a1989945b0d') {
+    pending.push(import('./chunks/chunk-e8852bd7dfb3f878e918ff6d024bda73d9fe986c8fa73e9848b6929089f1c774.js'));
+  }
+  if (key === 'fd07cb347eb35ba31cdbe5288c495dbe40d7e7a6af18fe4b202d6bfc83204ee2') {
+    pending.push(import('./chunks/chunk-341adefcc4eb5d9926ba517640166eb3b698c299302921edeb9d531bbad4d38d.js'));
   }
   return Promise.all(pending);
 }
