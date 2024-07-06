@@ -1,0 +1,15 @@
+import '@vaadin/side-nav/src/vaadin-side-nav.js';
+import '@vaadin/polymer-legacy-adapter/style-modules.js';
+import '@vaadin/app-layout/src/vaadin-app-layout.js';
+import '@vaadin/tooltip/src/vaadin-tooltip.js';
+import '@vaadin/button/src/vaadin-button.js';
+import 'Frontend/generated/jar-resources/buttonFunctions.js';
+import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
+import '@vaadin/icon/src/vaadin-icon.js';
+import '@vaadin/side-nav/src/vaadin-side-nav-item.js';
+import '@vaadin/context-menu/src/vaadin-context-menu.js';
+import 'Frontend/generated/jar-resources/flow-component-renderer.js';
+import 'Frontend/generated/jar-resources/contextMenuConnector.js';
+import 'Frontend/generated/jar-resources/contextMenuTargetConnector.js';
+import '@vaadin/app-layout/src/vaadin-drawer-toggle.js';
+import '@vaadin/avatar/src/vaadin-avatar.js';
