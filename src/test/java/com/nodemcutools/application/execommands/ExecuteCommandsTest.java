@@ -7,7 +7,9 @@ import com.nodemcutools.application.data.util.CommandNotFoundException;
 import com.nodemcutools.application.data.util.OSInfo;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,7 @@ import org.springframework.util.MimeTypeUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.test.StepVerifier;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +36,7 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 
 import static com.nodemcutools.application.data.util.UiToolConstants.CHARSET_CP850;
+import static com.nodemcutools.application.data.util.UiToolConstants.ESPTOOL_PY_VERSION;
 import static com.nodemcutools.application.data.util.UiToolConstants.NOT_FOUND;
 
 /**
@@ -61,18 +65,17 @@ class ExecuteCommandsTest {
 
     @Test
     @SneakyThrows
-    @DisplayName("Execute ipconfig with specific charset CP850 for windows")
-    void executeWithCharset() {
-        final CountDownLatch count = new CountDownLatch(1);
-        Flux.defer(() -> this.readIntputStream(getIpAddressInfo()))
-                .subscribeOn(Schedulers.boundedElastic())
-                .map(this::mappinDataBuffer)
-                .doOnTerminate(count::countDown)
-                .onErrorResume(throwable -> Mono.empty())
-                .switchIfEmpty(Mono.just(NOT_FOUND))
-                .log()
-                .subscribe();
-        count.await();
+    @DisplayName("esptool version")
+    void esptoolVersion() {
+
+        String[] commands = ArrayUtils.addAll(new String[]{"/bin/sh","-c"}, ESPTOOL_PY_VERSION);
+
+        StepVerifier.create(this.commandService.processInputStream(commands)
+                .take(1))
+                .expectNextMatches(line -> line.contains("esptool.py v"))
+                .verifyComplete();
+
+
     }
 
     private Flux<DataBuffer> readIntputStream(final String commands) {
@@ -87,19 +90,6 @@ class ExecuteCommandsTest {
         }
     }
 
-    private String mappinDataBuffer(final DataBuffer dataBuffer) {
-        final byte[] bytes = new byte[dataBuffer.readableByteCount()];
-        dataBuffer.read(bytes);
-        DataBufferUtils.release(dataBuffer);
-        if (OSInfo.osName(OSInfo.WINDOWS)) {
-            try {
-                return new String(bytes, CHARSET_CP850);
-            } catch (UnsupportedEncodingException e) {
-                return StringUtils.EMPTY;
-            }
-        }
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
 
     public String getIpAddressInfo() {
         return OSInfo.osName(OSInfo.WINDOWS) ? IPCONFIG : IFCONFIG;
@@ -111,9 +101,9 @@ class ExecuteCommandsTest {
     @SneakyThrows
     void handleError() {
         final CountDownLatch count = new CountDownLatch(1);
-        Flux.defer(() -> this.readIntputStream("esptool.py"))
+        Flux.defer(() -> this.readIntputStream("esptool.py v"))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(this::mappinDataBuffer)
+                .transformDeferred(this::stringDecoder)
                 .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(NOT_FOUND)))
                 .doOnTerminate(count::countDown)
                 .doOnError(line -> log.info("doOnError: {}", line))

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -16,12 +17,9 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.nodemcutools.application.data.util.UiToolConstants.CHARSET_CP850;
 import static com.nodemcutools.application.data.util.UiToolConstants.CMD_C;
 import static com.nodemcutools.application.data.util.UiToolConstants.COMMAND_NOT_FOUND;
 import static com.nodemcutools.application.data.util.UiToolConstants.DMESG_TTY;
@@ -56,6 +54,7 @@ public class CommandService {
     public Flux<String> esptoolVersion() {
         String[] commands = ArrayUtils.addAll(this.bash(), ESPTOOL_PY_VERSION);
         return this.processInputStream(commands)
+                .take(1)
                 .map(this::processLineEsptoolVersion);
     }
 
@@ -68,7 +67,7 @@ public class CommandService {
     public Flux<String> processInputStream(final String... commands) {
         return Flux.defer(() -> this.readIntputStream(commands))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(this::mappingDataBuffer)
+                .transformDeferred(this::decodedDataBuffer)
                 .onErrorResume(throwable -> {
                     log.error("onErrorResume: {}", throwable);
                     return Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND));
@@ -77,10 +76,7 @@ public class CommandService {
 
     private Flux<DataBuffer> readIntputStream(final String... commands) {
         try {
-            return DataBufferUtils.readInputStream(() ->
-                            this.execute(commands)
-                                    .getInputStream(),
-                    new DefaultDataBufferFactory(), FileCopyUtils.BUFFER_SIZE);
+            return DataBufferUtils.readInputStream(() -> this.execute(commands).getInputStream(), new DefaultDataBufferFactory(), FileCopyUtils.BUFFER_SIZE);
         } catch (Exception ex) {
             log.error("Error {}", ex);
             return Flux.error(ex);
@@ -94,18 +90,8 @@ public class CommandService {
                 .start();
     }
 
-    private String mappingDataBuffer(final DataBuffer dataBuffer) {
-        final byte[] bytes = new byte[dataBuffer.readableByteCount()];
-        dataBuffer.read(bytes);
-        DataBufferUtils.release(dataBuffer);
-        if (OSInfo.isWindows()) {
-            try {
-                return new String(bytes, CHARSET_CP850);
-            } catch (UnsupportedEncodingException e) {
-                return StringUtils.EMPTY;
-            }
-        }
-        return new String(bytes, StandardCharsets.UTF_8);
+    private Flux<String> decodedDataBuffer(final Flux<DataBuffer> dataBuffer) {
+        return StringDecoder.allMimeTypes().decode(dataBuffer, null, null, null);
     }
 
     private String processLineEsptoolVersion(final String rawLine) {
@@ -115,6 +101,7 @@ public class CommandService {
         return rawLine.split(System.lineSeparator())[0];
     }
 
+    //FIXME must be use de StringDecoder
     public Flux<String> executeDmesgForTtyPort() {
         return processInputStream(DMESG_TTY)
                 .map((String line) -> line.split(System.lineSeparator()))
