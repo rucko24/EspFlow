@@ -2,6 +2,7 @@ package com.nodemcuui.tool.views.readflash;
 
 import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -30,31 +31,58 @@ public class EspDevicesCarousel extends Div {
                         "Slide 4",
                         "https://www.flowingcode.com/wp-content/uploads/2021/03/happy_birthday_2.jpg"));
 
+        slide1.setId("slide 1");
+        s2.setId("slide 2");
+        s3.setId("slide 3");
+        s4.setId("slide 4");
+
         Carousel carousel = new Carousel(slide1, s2, s3, s4);
         carousel.setSizeFull();
         carousel.setThemeName("custom-theme");
         carousel.addChangeListener(e -> Notification.show("Slide Changed!", 1000, Position.BOTTOM_START));
 
         super.add(carousel);
-        super.setWidth("55%");
-        super.setHeight("85%");
+        super.setWidth("450px");
+        super.setHeight("100%");
 
     }
 
 
-    public static Div createSlideContent(String string, String image ) {
-        final MatCard parent = new MatCard(image);
+//    public static Div createSlideContent2(String string, String image ) {
+//        final MatCard parent = new MatCard(image);
+//
+//        Span spanName = new Span("Name: esp8266");
+//        Hr hr1 = new Hr();
+//        Span spanChipId = new Span("EspDeviceInfo: ESP8266EX ");
+//        Hr hr2 = new Hr();
+//        Span hex = new Span("Hex: 0x400000");
+//        Hr hr3 = new Hr();
+//
+//        parent.createDivRightContent().add(spanName, hr1, spanChipId, hr2, hex, hr3);
+//
+//        return parent;
+//    }
 
-        Span spanName = new Span("Name: esp8266");
-        Hr hr1 = new Hr();
-        Span spanChipId = new Span("EspDeviceInfo: ESP8266EX ");
-        Hr hr2 = new Hr();
-        Span hex = new Span("Hex: 0x400000");
-        Hr hr3 = new Hr();
+    public static Component createSlideContent(String string, String image) {
 
-        parent.createDivRightContent().add(spanName, hr1, spanChipId, hr2, hex, hr3);
+        Div overview = new Div();
+        overview.addClassName("div-slide-overview");
 
-        return parent;
+        Div divLeft = new Div();
+        divLeft.addClassName("div-left");
+        divLeft.getStyle().set("background-image", "url('" + image + "')");
+        overview.add(divLeft);
+
+        Div divOverlay = new Div();
+        divOverlay.addClassName("div-overlay");
+        overview.add(divOverlay);
+
+        Div divLeftContent = new Div();
+        divLeftContent.addClassName("div-left-content");
+
+
+
+        return overview;
     }
 
     private EspDeviceInfo getEspDeviceInfo() {

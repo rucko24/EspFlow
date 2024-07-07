@@ -89,11 +89,11 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         if (accessChecker.hasAccess(FlashEsp32View.class)) {
-            nav.addItem(new SideNavItem("🔥 Flash Esp32+", FlashEsp32View.class, LineAwesomeIcon.HOME_SOLID.create()));
+            nav.addItem(new SideNavItem("⚡ Flash Esp32+", FlashEsp32View.class, LineAwesomeIcon.HOME_SOLID.create()));
 
         }
         if (accessChecker.hasAccess(ReadFlashView.class)) {
-            nav.addItem(new SideNavItem("⬇ ⬆Read/Write flash", ReadFlashView.class, LineAwesomeIcon.README.create()));
+            nav.addItem(new SideNavItem("Read firmware", ReadFlashView.class, LineAwesomeIcon.ARROW_CIRCLE_DOWN_SOLID.create()));
         }
 
         if(accessChecker.hasAccess(TestMatCardView.class)) {

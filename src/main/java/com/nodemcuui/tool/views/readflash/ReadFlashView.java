@@ -3,6 +3,7 @@ package com.nodemcuui.tool.views.readflash;
 import com.nodemcuui.tool.data.service.ComPortService;
 import com.nodemcuui.tool.data.service.CommandService;
 import com.nodemcuui.tool.data.service.EsptoolService;
+import com.nodemcuui.tool.data.util.CommandNotFoundException;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
 import com.nodemcuui.tool.data.util.console.ConsoleCommandOutPutArea;
 import com.nodemcuui.tool.views.MainLayout;
@@ -30,6 +31,7 @@ import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -37,6 +39,7 @@ import java.util.stream.Stream;
 import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
 import static com.nodemcuui.tool.data.util.UiToolConstants.MAC;
+import static com.nodemcuui.tool.data.util.UiToolConstants.NOT_FOUND;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_X;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
 
@@ -99,7 +102,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         verticalLayoutToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
         verticalLayoutToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
         splitLayout.addToSecondary(verticalLayoutToSecondary);
-        splitLayout.setSplitterPosition(75);
+        splitLayout.setSplitterPosition(60);
 
         splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
@@ -128,7 +131,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private void readFlashId(final UI ui) {
         this.esptoolService.readFlashId()
                 .subscribe((ConcurrentHashMap<String, String> espInfo) -> {
-                    ui.access(() -> {
+                    getUI().ifPresent(ui2 -> ui2.access(() -> {
                         final String flashSize = espInfo.get(FLASH_SIZE);
                         if (flashSize != null) {
                             this.flashSize.setText("Flash size: " + flashSize);
@@ -146,8 +149,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                         if(mac != null) {
                             Notification.show("MAC: " + mac);
                         }
-
-                    });
+                    }));
                 });
 
         Stream.of(flashSize, this.decimalSize, this.hexSize)
