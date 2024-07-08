@@ -29,6 +29,8 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.AUTO;
 import static com.nodemcuui.tool.data.util.UiToolConstants.BOX_SHADOW_PROPERTY;
@@ -55,6 +57,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final CommandService commandService;
     private final EsptoolService esptoolService;
     private final H2 h2EsptoolVersion = new H2();
+    private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
 
     @PostConstruct
     public void constructDiv() {
@@ -126,11 +129,21 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     log.error("doOnError: {}", error.getCause());
                     h2EsptoolVersion.setText(ESPTOOL_PY_NOT_FOUND);
                 }))
-                .subscribe(espToolVersion -> ui.access(() -> h2EsptoolVersion.setText(espToolVersion)));
+                .subscribe(espToolVersion -> ui.access(() -> {
+                    if(espToolVersion.contains("esptool.py v")) {
+                        esptoolVersionCounter.set(true);
+                    }
+                    h2EsptoolVersion.setText(espToolVersion);
+                }));
     }
 
     private void initListeners(final UI ui) {
-        this.scanPort.addClickListener(e -> {
+        this.scanPort.addClickListener(e -> showPortIsEsptoolVersionExists());
+
+    }
+
+    private void showPortIsEsptoolVersionExists() {
+        if(esptoolVersionCounter.get()) {
             final Set<String> ports = this.comPortService.getPortsList();
             if (Objects.nonNull(ports)) {
                 comboBoxSerialPort.setItems(ports); //set port items to combo
@@ -151,8 +164,15 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         .withThemeVariant(NotificationVariant.LUMO_ERROR)
                         .make();
             }
-        });
-
+        } else {
+            NotificationBuilder.builder()
+                    .withText("Verify if esptool.py is installed !!!")
+                    .withPosition(Position.MIDDLE)
+                    .withDuration(3000)
+                    .withIcon(VaadinIcon.WARNING)
+                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                    .make();
+        }
     }
 
     @Override
