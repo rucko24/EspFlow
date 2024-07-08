@@ -1,62 +1,10 @@
-/* esp div device information with background */
-
-
-.div-row-wrap {
-    width: 548px;
-    flex-flow: wrap;
-    box-sizing: border-box;
-    display: flex;
-    margin: 0 auto;
-
-}
-
-.div-device-info {
-
-    flex: 1 1 540px;
-    box-sizing: border-box;
-    max-width: 540px;
-    min-width: 540px;
-    margin: 0 4px;
-}
-
-
-/* No es el parent ahora */
-.div-double-height {
-     /*width: 600px;*/
-     height: 400px;
-     width: 540px !important;
-     margin: 8px;
-     position: relative;
-     left: calc(50% - 270px);
-}
-
-/*2 dentro del parent */
-.card-container-front {
-   width: 100%;
+.card-container {
+   width: auto;
    height: 100%;
   -webkit-transform-style: preserve-3d;
-  /*border: 2px solid lightgray;*/
-  /*border-radius: 6px;*/
 }
 
-/*3 dentro del .card-container-front  */
-.mat-card {
-   overflow: hidden;
-    flex-direction: row;
-    box-sizing: border-box;
-    display: flex;
-    place-content: stretch space-between;
-    align-items: stretch;
-    max-height: 100%;
-}
-
-/*4 dentro del mat-card */
-.mat-card-content {
-  width: 100%;
-}
-
-/* 5 dentro del mat-card-content */
-.mat-toolbar-row {
+.toolbar-row {
    position: absolute;
     height: 48px;
     width: 100%;
@@ -69,32 +17,17 @@
     line-height: 180%;
 }
 
-/* dentro del mat-toolbar-row */
 .span-esp-device-title {
     color: #efefef;
 }
 
-/* 6 dentro del mat-toolbar-row */
 .div-controls {
     position: absolute;
-    top: 0;
+    top: 10px;
     right: 30px;
     color: #cccccc;
 }
 
-/* 7 dentro del mat-card-content */
-.div-carousel {
-    flex-direction: row;
-    box-sizing: border-box;
-    display: flex;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 6px;
-    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
-}
-
-/* 8 dentro del carousel*/
 .div-slide-overview {
     flex-direction: row;
     box-sizing: border-box;
@@ -103,9 +36,9 @@
     align-items: stretch;
     flex: 1 1 100%;
     max-width: 100%;
+    height: 100%;
 }
 
-/* 9 dentro del slide overview */
 .div-left {
 
     background-color: #303437;
@@ -116,16 +49,16 @@
     color: #efefef;
     position: relative;
     padding: 0;
+    border-radius: 6px 0 0 6px;
 
     flex: 1 1 100%;
     box-sizing: border-box;
     flex-direction: row;
     display: flex;
     max-width: 40%;
-    border-radius: 6px 0 0 6px;
+
 }
 
-/* 10 dentro del div-left */
 .div-overlay {
      flex-direction: column;
      box-sizing: border-box;
@@ -142,7 +75,6 @@
      text-shadow: 0 0 48px #000;
 }
 
-/* 11 div dentro del div-overlay*/
 .div-left-content {
     flex: 1 1 100%;
     box-sizing: border-box;
@@ -150,15 +82,14 @@
 }
 
 .div-left-content-inside-title1 {
-    font-size: 250%;
+    font-size: 200%;
 }
 
 .div-left-content-inside-title2 {
     margin: 16px 0 8px;
 }
 
-/* 12 dentro del slide-overview */
-.div-right {
+.div-right-parent {
     flex-direction: column;
     box-sizing: border-box;
     display: flex;
@@ -174,14 +105,14 @@
 
 }
 
-/* dentro del div-right*/
-.div-for-parent-div-right {
+.div-right-content {
     flex: 1 1 100%;
     box-sizing: border-box;
     max-height: 100%;
+    width: 100%;
 }
 
-.div-subheader-right {
+.div-right-subheader {
     margin-top: 48px;
     text-transform: capitalize;
     font-weight: 700;
@@ -191,9 +122,9 @@
     color: black;
 }
 
-/*13 dentro del div-for-parent-div-right */
-.div-right-content {
-    padding-top: 8px;
+
+.div-right-content-text {
+    padding: 8px 8px 0 16px;
     display: block;
     -webkit-tap-highlight-color: transparent;
 }

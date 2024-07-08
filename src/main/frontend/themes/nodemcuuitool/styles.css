@@ -1,7 +1,8 @@
 @import url('./main-layout.css');
 @import url('components/vaadin-upload-file.css');
-/*@import url('./views/readflash/esp-device-info.css');*/
-@import url('./views/readflash/carousel-demo-style.css');
+@import url('./views/readflash/esp-device-info.css');
+@import url('./views/readflash/carousel-demo-styles.css');
+@import url('./fonts/stylesheet.css');
 
 html {
     --lumo-size-xl: 3rem;
@@ -15,7 +16,7 @@ html {
     --lumo-space-s: 0.3125rem;
     --lumo-space-xs: 0.1875rem;
     --lumo-body-text-color: hsla(214, 0%, 0%, 0.94);
-    --lumo-font-family: Cairo;
+    --lumo-font-family: 'Arimo', sans-serif;
 }
 
 [theme~="dark"] {

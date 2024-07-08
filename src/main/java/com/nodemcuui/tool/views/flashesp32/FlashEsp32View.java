@@ -187,7 +187,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
                 return;
             }
             if (!command.isEmpty()) {
-                this.subscribeThis(this.commandService.processInputStream(command.split(" ")), ui);
+                this.subscribeThis(this.commandService.processCommands(command.split(" ")), ui);
             }
         });
         //esptool.py -p /dev/ttyUSB0 flash_id
@@ -203,7 +203,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
                         String.valueOf(baudRate), "flash_id"};
                 final String[] currentsCommands = ArrayUtils.addAll(this.commands);
                 this.subscribeThis(
-                        this.commandService.processInputStream(currentsCommands), ui);
+                        this.commandService.processCommands(currentsCommands), ui);
             }
         });
 

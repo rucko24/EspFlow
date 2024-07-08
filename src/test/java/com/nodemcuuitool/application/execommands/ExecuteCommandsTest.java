@@ -46,7 +46,7 @@ class ExecuteCommandsTest {
     @Test
     @DisplayName("Put command to first line")
     void insertCommandToFirstPositionInProcessStream() {
-        this.commandService.processInputStream("ifconfig")
+        this.commandService.processCommands("ifconfig")
                 .subscribe((String line) -> {
                     final String rLine = new StringBuilder(line).insert(0, "nueva linea \n").toString();
                     log.info("Result {}", rLine);
@@ -60,7 +60,7 @@ class ExecuteCommandsTest {
 
         String[] commands = ArrayUtils.addAll(new String[]{"/bin/sh", "-c"}, ESPTOOL_PY_VERSION);
 
-        StepVerifier.create(this.commandService.processInputStream(commands)
+        StepVerifier.create(this.commandService.processCommands(commands)
                         .take(1))
                 .expectNextMatches(line -> line.contains("esptool.py v"))
                 .verifyComplete();
@@ -82,7 +82,7 @@ class ExecuteCommandsTest {
 
 
     public String getIpAddressInfo() {
-        return GetOsName.getOsInfo() == GetOsName.WINDOWS ? IPCONFIG : IFCONFIG;
+        return GetOsName.getOsName() == GetOsName.WINDOWS ? IPCONFIG : IFCONFIG;
     }
 
 

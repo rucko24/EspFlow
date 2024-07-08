@@ -1,9 +1,10 @@
 package com.nodemcuui.tool.views.readflash;
 
+import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.nodemcuui.tool.data.service.ComPortService;
 import com.nodemcuui.tool.data.service.CommandService;
 import com.nodemcuui.tool.data.service.EsptoolService;
-import com.nodemcuui.tool.data.util.CommandNotFoundException;
+import com.nodemcuui.tool.data.util.NotificationBuilder;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
 import com.nodemcuui.tool.data.util.console.ConsoleCommandOutPutArea;
 import com.nodemcuui.tool.views.MainLayout;
@@ -12,11 +13,15 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.router.PageTitle;
@@ -31,17 +36,13 @@ import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import reactor.core.publisher.Mono;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
-import static com.nodemcuui.tool.data.util.UiToolConstants.MAC;
-import static com.nodemcuui.tool.data.util.UiToolConstants.NOT_FOUND;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_X;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
+import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
  * @author rubn
@@ -58,9 +59,10 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final CommandService commandService;
     private final ComPortService comPortService;
     private final EsptoolService esptoolService;
+    private final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel();
 
     private final VerticalLayout content = new VerticalLayout();
-    private final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel();
+    private final ProgressBar progressBar = new ProgressBar();
 
     /**
      * Console output area
@@ -82,9 +84,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     private SplitLayout getSplitLayout() {
+        this.progressBar.setVisible(false);
+        this.progressBar.setIndeterminate(true);
         this.content.setSpacing(false);
-        this.content.add(espDevicesCarousel);
         this.content.addClassNames(AlignItems.CENTER, JustifyContent.CENTER);
+        this.content.add(progressBar);
 
         final var splitLayout = new SplitLayout(Orientation.VERTICAL);
 
@@ -128,28 +132,66 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     @SneakyThrows
-    private void readFlashId(final UI ui) {
-        this.esptoolService.readFlashId()
-                .subscribe((ConcurrentHashMap<String, String> espInfo) -> {
-                    getUI().ifPresent(ui2 -> ui2.access(() -> {
-                        final String flashSize = espInfo.get(FLASH_SIZE);
+    private void showDetectedDevices(final UI ui) {
+
+        this.esptoolService.readAllDevices()
+                .doOnError(error -> {
+                    ui.access(() -> {
+                        log.info("Error: {}", error);
+                        NotificationBuilder.builder()
+                                .withText("Error al leer el microcontrolador " + error)
+                                .withPosition(Position.MIDDLE)
+                                .withDuration(3000)
+                                .withIcon(VaadinIcon.WARNING)
+                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                                .make();
+                    });
+                })
+                .doOnComplete(() -> {
+                    ui.access(() -> {
+                        this.progressBar.setVisible(false);
+                        espDevicesCarousel.createSlides();
+                        this.content.add(espDevicesCarousel);
+                    });
+                })
+                .subscribe(espDeviceInfo -> {
+                    ui.access(() -> {
+                        this.progressBar.setVisible(true);
+                        final String flashSize = espDeviceInfo.detectedFlashSize();
                         if (flashSize != null) {
                             this.flashSize.setText("Flash size: " + flashSize);
-
-                            final String toDec = flashSize.split("MB")[0].trim();
-                            final String decSize = String.valueOf(Integer.parseInt(toDec) * 1048576);
-                            this.decimalSize.setText("Decimal: " + decSize);
-
-                            final String hexSize = Integer.toHexString(Integer.parseInt(decSize));
-                            this.hexSize.setText("Hex: 0x" + hexSize);
-
+                            this.decimalSize.setText("Decimal: " + espDeviceInfo.decimal());
+                            this.hexSize.setText("Hex: 0x" + espDeviceInfo.hex());
                         }
-                        final String mac = espInfo.get(MAC);
+                        final String chipType = espDeviceInfo.chipType();
+                        if (chipType != null) {
+                            if (chipType.endsWith("8266") && flashSize.equals("1MB")) {
+                                Slide esp01sSlide = new Slide(createSlideContent("https://www.electronicwings.com/storage/PlatformSection/TopicContent/308/description/esp8266%20module.jpg", espDeviceInfo));
 
-                        if(mac != null) {
-                            Notification.show("MAC: " + mac);
+                                espDevicesCarousel.addSlide(esp01sSlide);
+                            }
+
+                            if(espDeviceInfo.chipIs().equals("ESP8285H16") && flashSize.equals("2MB")) {
+
+                                Slide esp8285H16Slide = new Slide(createSlideContent("https://rubn0x52.com/assets/images/esp8285h08.jpg", espDeviceInfo));
+
+                                espDevicesCarousel.addSlide(esp8285H16Slide);
+                            }
+
+                            if(chipType.endsWith("8266") && flashSize.equals("4MB")) {
+                                Slide esp8266Slide = new Slide(createSlideContent("https://rubn0x52.com/assets/images/nodemcu-v3-wifi-esp8266-ch340.png", espDeviceInfo));
+                                espDevicesCarousel.addSlide(esp8266Slide);
+                            }
+
+                            if (chipType.endsWith("-S3")) {
+
+                                Slide esp32s3Slide = new Slide(createSlideContent("https://www.mouser.es/images/espressifsystems/hd/ESP32-S3-DEVKITC-1-N8_SPL.jpg", espDeviceInfo));
+
+                                espDevicesCarousel.addSlide(esp32s3Slide);
+                            }
                         }
-                    }));
+                    });
+
                 });
 
         Stream.of(flashSize, this.decimalSize, this.hexSize)
@@ -161,9 +203,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     *
      * PORT /dev/ttyUSB1, COM
-     *
+     * <p>
      * esptool.py --port /dev/ttyUSB1 read_flash 0 ALL esp8266-backupflash.bin
      *
      * @param ui
@@ -175,14 +216,14 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-
+        super.onDetach(detachEvent);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
-            this.readFlashId(ui);
+            this.showDetectedDevices(ui);
 
         }
     }

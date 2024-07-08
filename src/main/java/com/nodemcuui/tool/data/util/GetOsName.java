@@ -19,13 +19,13 @@ public enum GetOsName {
     MAC("mac os"),
     OTHER("other");
 
-    final String osName;
+    final String name;
 
-    public static GetOsName getOsInfo() {
+    public static GetOsName getOsName() {
         final String currentOs = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
         return EnumSet.allOf(GetOsName.class)
                 .stream()
-                .filter(osEnum -> currentOs.contains(osEnum.getOsName()))
+                .filter(osEnum -> currentOs.contains(osEnum.getName()))
                 .findFirst()
                 .orElse(OTHER);
     }

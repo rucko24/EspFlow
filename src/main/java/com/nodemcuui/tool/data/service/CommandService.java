@@ -37,17 +37,14 @@ public class CommandService {
      * @param commands the array strings with commands
      * @return Flux<String>
      */
-    public Flux<String> processInputStream(final String... commands) {
-        return Flux.defer(() -> this.readIntputStream(commands))
+    public Flux<String> processCommands(final String... commands) {
+        return Flux.defer(() -> this.processCommandsInternal(commands))
                 .subscribeOn(Schedulers.boundedElastic())
                 .transformDeferred(this::decodedDataBuffer)
-                .onErrorResume(throwable -> {
-                    log.error("onErrorResume: {}", throwable);
-                    return Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND));
-                });
+                .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND)));
     }
 
-    private Flux<DataBuffer> readIntputStream(final String... commands) {
+    private Flux<DataBuffer> processCommandsInternal(final String... commands) {
         try {
             return DataBufferUtils.readInputStream(() -> this.execute(commands).getInputStream(), new DefaultDataBufferFactory(), FileCopyUtils.BUFFER_SIZE);
         } catch (Exception ex) {
@@ -69,7 +66,7 @@ public class CommandService {
 
     @SuppressWarnings("unused")
     public Flux<String> executeDmesgForTtyPort() {
-        return processInputStream(DMESG_TTY)
+        return processCommands(DMESG_TTY)
                 .map((String line) -> line.split(System.lineSeparator()))
                 .map((String[] tmp) -> Stream.of(tmp)
                         .map((String line) -> {

@@ -1,6 +1,8 @@
 package com.nodemcuui.tool.data.service;
 
+import com.nodemcuui.tool.data.entity.EspDeviceInfo;
 import com.nodemcuui.tool.data.enums.BaudRates;
+import com.nodemcuui.tool.data.mappers.EspDeviceInfoMapper;
 import com.nodemcuui.tool.data.util.GetOsName;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,14 +11,16 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.BIN_SH_C;
+import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
+import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_TYPE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CMD_C;
 import static com.nodemcuui.tool.data.util.UiToolConstants.COMMAND_NOT_FOUND;
+import static com.nodemcuui.tool.data.util.UiToolConstants.CRYSTAL_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.nodemcuui.tool.data.util.UiToolConstants.ESPTOOL_PY_VERSION;
 import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
@@ -34,14 +38,9 @@ public class EsptoolService {
 
     private final CommandService commandService;
     private final ComPortService comPortService;
-    private String mac;
-    private String flashSize;
-    private String decflashSize;
-    private String hexflashSize;
-    private static final String NONE = "-";
 
-    public String[] bash() {
-        GetOsName oS = GetOsName.getOsInfo();
+    public static String[] bash() {
+        GetOsName oS = GetOsName.getOsName();
         if (oS == GetOsName.WINDOWS) {
             return CMD_C;
         } else if (oS == GetOsName.LINUX) {
@@ -51,108 +50,91 @@ public class EsptoolService {
         } else if (oS == GetOsName.MAC) {
             return SH_C;
         }
-        return new String[]{GetOsName.OTHER.getOsName()};
+        return new String[]{GetOsName.OTHER.getName()};
     }
 
     /**
-     * esptool.py --port /dev/ttyUSB0 --baud 115200 flash_id
+     * The predicate to filter only the necessary lines, if you want to process one more line, this condition should be added here
      */
-    public Flux<ConcurrentHashMap<String, String>> readFlashId() {
-        //read default port with esp8266
-        return commandService.processInputStream("esptool.py", "--baud",
-                        String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id")
-                .filter(line -> line.startsWith(MAC) || line.startsWith(FLASH_SIZE))
-                .map((String line) -> Arrays.stream(line.split(System.lineSeparator()))
-                        .map(this::mapper)
-                        .collect(Collectors.toMap(this::keyMapper, this::valueMapper, String::join, ConcurrentHashMap::new)))
-                .doOnNext(map -> map.entrySet().removeIf(item -> item.getValue().equals("")))
+    private final Predicate<String> predicate = line -> line.startsWith(MAC) ||
+            line.startsWith(FLASH_SIZE) || line.startsWith(CRYSTAL_IS) ||
+            line.startsWith(CHIP_TYPE) || line.startsWith(CHIP_IS);
+
+    /**
+     *
+     * This returns all existing esp32-based microcontrollers in the current system.
+     *
+     * @return  Flux<EspDeviceInfo>
+     */
+    public Flux<EspDeviceInfo> readAllDevices() {
+        return Flux.fromIterable(comPortService.getPortsList())
+                .flatMap(this::readFlashIdFromPort)
+                .doOnNext(onNext -> log.info("Device {}", onNext));
+    }
+
+    /**
+     *
+     * <p> It processes to use as parameters the <strong>--baud<strong>, the <strong>--port<strong> and the <strong>flash_id<strong>. </p>
+     *
+     * With the above, this method creates a map that is then mapped to the entity EspDeviceInfo,
+     * as many items are issued we need for convenience to have them in a single item or Mono.
+     *
+     * @param port the microcontroller port to be scanned
+     * @return Mono<EspDeviceInfo>
+     */
+    public Mono<EspDeviceInfo> readFlashIdFromPort(String port) {
+        final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", port, "--baud",
+                String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id");
+
+        return commandService.processCommands(commands)
+                .filter(predicate)
+                .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
+                .map(EspDeviceInfoMapper::mapToEspDeviceInfo)
+                .doOnNext(onNext -> log.info("OnNext {}", onNext));
+    }
+
+    /**
+     *
+     * <p>This simply executes the command to get data from the default micro, with the <strong>flash_id<strong> parameter.</p>
+     *
+     * <li>
+     *     The command is: <strong>"esptool.py  flash_id"</strong>
+     * </li>
+     *
+     *
+     * @return Mono<EspDeviceInfo>
+     *
+     */
+    public Mono<EspDeviceInfo> readFlashIdFromDefault() {
+        final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--baud",
+                String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id");
+
+        return commandService.processCommands(commands)
+                .filter(predicate)
+                .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
+                 .map(EspDeviceInfoMapper::mapToEspDeviceInfo)
+                .doOnNext(onNext -> log.info("OnNext {}", onNext))
                 .doOnError(error -> log.error("Error: {}", error));
     }
 
-    private String mapper(final String line) {
-        final String tmp = line.split(System.lineSeparator())[0];
-        if (tmp.contains(MAC)) {
-            return tmp;
-        } else if (tmp.contains(FLASH_SIZE)) {
-            return tmp;
-        }
-        return StringUtils.EMPTY;
-    }
-
-    private String keyMapper(final String key) {
-        if (key.contains(FLASH_SIZE)) {
-            return key.split(":")[0].trim();
-        } else if (key.contains(MAC)) {
-            return key.split(":")[0].trim();
-        }
-        return StringUtils.EMPTY;
-    }
-
-    private String valueMapper(final String value) {
-        if (value.contains(FLASH_SIZE)) {
-            return value.split(":")[1].trim();
-        } else if (value.contains(MAC)) {
-            return value.split(" ")[1].trim();
-        }
-        return StringUtils.EMPTY;
-    }
-
-    public String getFlashSize() {
-        if (this.flashSize == null) {
-            return NONE;
-        }
-        return this.flashSize;
-    }
-
-    public String getDecflashSize() {
-        if (this.decflashSize == null) {
-            return NONE;
-        }
-        return this.decflashSize;
-    }
-
-    public String getHexFlashSize() {
-        if (this.hexflashSize == null) {
-            return NONE;
-        }
-        return this.hexflashSize;
-    }
-
-    private String parseData(final String line) {
-        if (line.contains(COMMAND_NOT_FOUND)) {
-            return COMMAND_NOT_FOUND;
-        }
-        return this.parse(line);
-    }
-
-    private String parse(String line) {
-        //extract flash size
-        if (line.contains("flash size")) {
-            this.flashSize = line.split(":")[1];
-            this.decflashSize = String.valueOf(Integer.parseInt(flashSize) * 1048576);
-            this.hexflashSize = Integer.toHexString(Integer.parseInt(decflashSize));
-        }
-        if (line.startsWith("MAC:")) {
-            //extrac mac
-            this.mac = line.split(" ")[1];
-        }
-        return line;
-    }
-
-    public String getMacAddress() {
-        if (this.mac == null) {
-            return NONE;
-        }
-        return this.mac;
-    }
-
+    /**
+     * Check if esptool is installed by executing the command esptool.py version for the current system.
+     *
+     * @return Flux<String>
+     */
     public Flux<String> showEsptoolVersion() {
         String[] commands = ArrayUtils.addAll(this.bash(), ESPTOOL_PY_VERSION);
-        return this.commandService.processInputStream(commands)
+        return this.commandService.processCommands(commands)
                 .take(1)
                 .map(this::processLineEsptoolVersion);
     }
 
+    /**
+     * This processes the line that has the esptool.py v and thus validates that the <strong>esptool.py</strong> is correctly installed.
+     *
+     * @param rawLine
+     * @return String
+     */
     private String processLineEsptoolVersion(final String rawLine) {
         if (!(rawLine.contains("esptool.py v"))) {
             return ESPTOOL_PY_NOT_FOUND;

@@ -53,10 +53,10 @@ class CommandServiceTest {
     @SneakyThrows
     void handleErrorWithWrongCommand() {
 
-        Mockito.when(this.commandService.processInputStream("esptoo.pys", "version"))
+        Mockito.when(this.commandService.processCommands("esptoo.pys", "version"))
                 .thenReturn(Flux.just(NOT_FOUND));
 
-        Flux<String> processInput = this.commandService.processInputStream("esptoo.pys", "version")
+        Flux<String> processInput = this.commandService.processCommands("esptoo.pys", "version")
                 .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(NOT_FOUND)));
 
         StepVerifier.create(processInput)

@@ -12,27 +12,27 @@ class GetOsNameTest {
     @Test
     @DisplayName("Check OS")
     void test() {
-        GetOsName os = GetOsName.getOsInfo();
+        GetOsName os = GetOsName.getOsName();
 
         if (os == GetOsName.WINDOWS) {
 
-            assertThat(os.getOsName()).contains(GetOsName.WINDOWS.getOsName());
+            assertThat(os.getName()).contains(GetOsName.WINDOWS.getName());
 
         } else if (os == GetOsName.LINUX) {
 
-            assertThat(os.getOsName()).contains(GetOsName.LINUX.getOsName());
+            assertThat(os.getName()).contains(GetOsName.LINUX.getName());
 
         } else if (os == GetOsName.MAC) {
 
-            assertThat(os.getOsName()).contains(GetOsName.MAC.getOsName());
+            assertThat(os.getName()).contains(GetOsName.MAC.getName());
 
         } else if (os == GetOsName.FREEBSD) {
 
-            assertThat(os.getOsName()).contains(GetOsName.FREEBSD.getOsName());
+            assertThat(os.getName()).contains(GetOsName.FREEBSD.getName());
 
         } else {
 
-            assertThat(os.getOsName()).contains(GetOsName.OTHER.getOsName());
+            assertThat(os.getName()).contains(GetOsName.OTHER.getName());
         }
     }
 

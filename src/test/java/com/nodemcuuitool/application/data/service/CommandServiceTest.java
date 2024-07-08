@@ -15,7 +15,7 @@ class CommandServiceTest {
     }
 
     @Test
-    void processInputStream() {
+    void processCommands() {
 
     }
 

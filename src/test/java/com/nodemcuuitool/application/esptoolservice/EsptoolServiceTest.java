@@ -1,124 +1,83 @@
 package com.nodemcuuitool.application.esptoolservice;
 
+import com.nodemcuui.tool.data.entity.EspDeviceInfo;
 import com.nodemcuui.tool.data.service.ComPortService;
 import com.nodemcuui.tool.data.service.CommandService;
 import com.nodemcuui.tool.data.service.EsptoolService;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
-import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
-import static com.nodemcuui.tool.data.util.UiToolConstants.MAC;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static com.nodemcuui.tool.data.util.UiToolConstants.ESPTOOL_PY_VERSION;
+import static org.mockito.Mockito.when;
 
 /**
  * @author rubn
  */
 @Log4j2
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CommandService.class, EsptoolService.class, ComPortService.class})
+@ExtendWith(MockitoExtension.class)
 class EsptoolServiceTest {
 
-    @Autowired
+    @InjectMocks
+    private EsptoolService esptoolService;
+
+    @Mock
     private CommandService commandService;
 
-    @MockBean
-    private EsptoolService esptoolService;
+    @Mock
+    private ComPortService comPortService;
 
     @Test
     @SneakyThrows
-    @DisplayName("esptool.py --port /dev/ttyUSB0 --baud 115200 flash_id")
-    void readFlashId() {
-        final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
-        map.put(FLASH_SIZE, "4MB");
-        map.put(MAC, "f4:cf:a2:0f:45:cd");
+    @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id")
+    void readFlashIdFromPortWithCustomPort() {
 
-        Mockito.when(esptoolService.readFlashId()).thenReturn(Flux.just(map));
+        Flux<String> actual = Flux.just(
+                "Detecting chip type... ESP32-S3",
+                "Chip is ESP32-S3 (QFN56) (revision v0.0)",
+                "Detected flash size: 8MB");
 
-        StepVerifier.create(this.esptoolService.readFlashId())
-                .assertNext(assertMap -> {
-                    final String flashSize = assertMap.get(FLASH_SIZE);
-                    final String mac = assertMap.get(MAC);
+        var expected = EspDeviceInfo.builder()
+                .detectedFlashSize("8MB")
+                .decimal("8388608")
+                .hex("800000")
+                .chipType("ESP32-S3")
+                .chipIs("ESP32-S3 (QFN56) (revision v0.0)")
+                .build();
 
-                    final String flash = flashSize.split("MB")[0].trim();
-                    final String dec = String.valueOf(Integer.parseInt(flash) * 1048576);
-                    final String hex = Integer.toHexString(Integer.parseInt(dec));
+        String[] commands = ArrayUtils.addAll(EsptoolService.bash(), "esptool.py", "--port", "/dev/ttyACM0", "--baud", "115200", "flash_id");
 
-                    assertThat(dec).isEqualTo("4194304");
-                    assertThat(hex).isEqualTo("400000");
-                    assertThat(mac).isEqualTo("f4:cf:a2:0f:45:cd");
-                })
+        when(commandService.processCommands(commands))
+                .thenReturn(actual);
+
+        StepVerifier.create(esptoolService.readFlashIdFromPort("/dev/ttyACM0"))
+                .expectNext(expected)
                 .verifyComplete();
 
     }
 
-    @Test
-    @DisplayName("Flash size, mb, dec, hex")
-    void flashSize() {
-        String hex = Integer.toHexString(4194304);
-        System.out.println("hex: " + "0x".concat(hex));
-        System.out.println("MB to decimal/bytes: " + (4 * 1048576));
-    }
-
 
     @Test
-    @DisplayName("Parse flash_id output from esp32")
+    @DisplayName("show esptool version")
     @SneakyThrows
-    void stringArrayToCollectMap() {
+    void showEsptoolVersion() {
 
-        String s = "Detected flash size: 4MB\nb:12\nMAC: f4:cf:a2:0f:45:cd\n";
-        Map<String, String> map = Arrays.stream(s.split(System.lineSeparator()))
-                .map(this::mapper)
-                .collect(Collectors.toMap(this::keyMapper, this::valueMapper, String::join, LinkedHashMap::new));
-        map.entrySet().removeIf(e -> e.getKey().equals(""));
+        String[] commands = ArrayUtils.addAll(EsptoolService.bash(), ESPTOOL_PY_VERSION);
 
-        assertThat(map.get(FLASH_SIZE)).isEqualTo("4MB");
-        assertThat(map.get(MAC)).isEqualTo("f4:cf:a2:0f:45:cd");
-    }
+        when(commandService.processCommands(commands)).thenReturn(Flux.just("esptool.py v4.7.0"));
 
-    private String mapper(final String line) {
-        final String tmp = line.split(System.lineSeparator())[0];
-        if (tmp.contains(MAC)) {
-            return tmp;
-        } else if (tmp.contains(FLASH_SIZE)) {
-            return tmp;
-        }
-        return StringUtils.EMPTY;
-    }
+        StepVerifier.create(esptoolService.showEsptoolVersion())
+                .expectNext("esptool.py v4.7.0")
+                .verifyComplete();
 
-    private String keyMapper(final String key) {
-        if (key.contains(FLASH_SIZE)) {
-            return key.split(":")[0].trim();
-        } else if (key.contains(MAC)) {
-            return key.split(" ")[0].trim().replace(":", "");
-        }
-        return StringUtils.EMPTY;
-    }
-
-    private String valueMapper(final String value) {
-        if (value.contains(FLASH_SIZE)) {
-            final String s = value.split(":")[1].trim();
-            return s;
-        } else if (value.contains(MAC)) {
-            return value.split(" ")[1].trim();
-        }
-        return StringUtils.EMPTY;
     }
 
 }

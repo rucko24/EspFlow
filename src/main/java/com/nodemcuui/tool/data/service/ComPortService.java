@@ -20,11 +20,16 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ComPortService {
 
+    private SerialPort serialPort;
+
     public Set<String> getPortsList() {
         try {
-            return Optional.ofNullable(Arrays.stream(SerialPort.getCommPorts()))
+            SerialPort[] serialPorts = serialPort.getCommPorts();
+
+            return Optional.ofNullable(Arrays.stream(serialPorts))
                     .map((Stream<SerialPort> portsStream) -> {
                         final Set<String> set = portsStream
+                                .filter(this::isSerialPortFT232R)
                                 .map(SerialPort::getSystemPortPath)
                                 .map(this::replaceCharacters)
                                 .collect(Collectors.toSet());
@@ -39,8 +44,19 @@ public class ComPortService {
         return null;
     }
 
+    /**
+     *
+     * Filter if the port is Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R
+     *
+     * @param filterSerialPortFT232R
+     * @return Boolean
+     */
+    private Boolean isSerialPortFT232R(SerialPort filterSerialPortFT232R) {
+        return !(filterSerialPortFT232R.getDescriptivePortName().startsWith("FT232R"));
+    }
+
     private String replaceCharacters(final String port) {
-        if (GetOsName.getOsInfo() == GetOsName.WINDOWS) {
+        if (GetOsName.getOsName() == GetOsName.WINDOWS) {
             return port.replaceAll("\\.", "")
                     .replaceAll("\\\\+", "");
         }

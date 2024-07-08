@@ -65,6 +65,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final var divh3SerialPort = this.createH3SerialPort();
         final var divCombo = this.createDivComboBox();
 
+        scanPort.setTooltipText("Refresh ports!");
         inputCommand.setPlaceholder("input command");
         inputCommand.setClearButtonVisible(Boolean.TRUE);
         killProcess.addThemeVariants(ButtonVariant.LUMO_ERROR);

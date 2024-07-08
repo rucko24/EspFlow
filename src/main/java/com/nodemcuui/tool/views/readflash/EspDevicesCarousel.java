@@ -2,41 +2,34 @@ package com.nodemcuui.tool.views.readflash;
 
 import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
-import com.vaadin.flow.component.Component;
+import com.nodemcuui.tool.data.entity.EspDeviceInfo;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
-import lombok.Builder;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/**
+ * Use a StepBuilder
+ */
 @Uses(Carousel.class)
 public class EspDevicesCarousel extends Div {
 
-    public EspDevicesCarousel() {
-        Slide slide1 = new Slide(createSlideContent(
-                "Slide 1",
-                "https://www.electronicwings.com/storage/PlatformSection/TopicContent/308/description/esp8266%20module.jpg"));
-        Slide s2 =
-                new Slide(createSlideContent(
-                        "Slide 2",
-                        "https://2.bp.blogspot.com/-nvtIfgN8duc/XKUQh9VEyFI/AAAAAAAABT8/mE7P45E2uqwWlkKimAmes7fT2rdW9UDWwCEwYBhgL/s320/anniversary_1.jpg"));
-        Slide s3 =
-                new Slide(createSlideContent(
-                        "Slide 3",
-                        "https://www.flowingcode.com/wp-content/uploads/2020/04/photo4blog-300x300.jpg"));
-        Slide s4 =
-                new Slide(createSlideContent(
-                        "Slide 4",
-                        "https://www.flowingcode.com/wp-content/uploads/2021/03/happy_birthday_2.jpg"));
+    private final List<Slide> slideList = new CopyOnWriteArrayList<>();
 
-        slide1.setId("slide 1");
-        s2.setId("slide 2");
-        s3.setId("slide 3");
-        s4.setId("slide 4");
+    public void addSlide(Slide slide) {
+        this.slideList.add(slide);
+    }
 
-        Carousel carousel = new Carousel(slide1, s2, s3, s4);
+    /**
+     * Dependiendo de lo que se lea por consola se crea una slide en base a esa lectura
+     */
+    public void createSlides() {
+
+        Carousel carousel = new Carousel(slideList.toArray(Slide[]::new));
         carousel.setSizeFull();
         carousel.setThemeName("custom-theme");
         carousel.addChangeListener(e -> Notification.show("Slide Changed!", 1000, Position.BOTTOM_START));
@@ -44,67 +37,12 @@ public class EspDevicesCarousel extends Div {
         super.add(carousel);
         super.setWidth("450px");
         super.setHeight("100%");
-
+        getStyle().set("border-radius", "6px");
+        getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
     }
 
-
-//    public static Div createSlideContent2(String string, String image ) {
-//        final MatCard parent = new MatCard(image);
-//
-//        Span spanName = new Span("Name: esp8266");
-//        Hr hr1 = new Hr();
-//        Span spanChipId = new Span("EspDeviceInfo: ESP8266EX ");
-//        Hr hr2 = new Hr();
-//        Span hex = new Span("Hex: 0x400000");
-//        Hr hr3 = new Hr();
-//
-//        parent.createDivRightContent().add(spanName, hr1, spanChipId, hr2, hex, hr3);
-//
-//        return parent;
-//    }
-
-    public static Component createSlideContent(String string, String image) {
-
-        Div overview = new Div();
-        overview.addClassName("div-slide-overview");
-
-        Div divLeft = new Div();
-        divLeft.addClassName("div-left");
-        divLeft.getStyle().set("background-image", "url('" + image + "')");
-        overview.add(divLeft);
-
-        Div divOverlay = new Div();
-        divOverlay.addClassName("div-overlay");
-        overview.add(divOverlay);
-
-        Div divLeftContent = new Div();
-        divLeftContent.addClassName("div-left-content");
-
-
-
-        return overview;
+    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo) {
+        return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo);
     }
-
-    private EspDeviceInfo getEspDeviceInfo() {
-        return EspDeviceInfo.builder()
-                .name("esp8266")
-                .chipId("ESP8266EX")
-                .hex("0x400000")
-                .decimal("4194304")
-                .flashSize("4MB")
-                .build();
-    }
-
-    @Builder
-    record EspDeviceInfo(
-            String name,
-            String chipId,
-            String macAddress,
-            String decimal,
-            String hex,
-            String flashSize) {
-
-    }
-
 
 }
