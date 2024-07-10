@@ -200,6 +200,7 @@ public final class DeviceCardLayout extends Div {
 
         final Div divChipIsAndValue = new Div(chipIs, chipIsValue);
         divChipIsAndValue.addClassName("div-right-ellipsis-text");
+        divChipIsAndValue.getElement().setAttribute("title", espDeviceInfo.chipIs());
 
         divChipIsAndValue.setWidthFull();
         flashSizeValue.setText(":  " + espDeviceInfo.detectedFlashSize());

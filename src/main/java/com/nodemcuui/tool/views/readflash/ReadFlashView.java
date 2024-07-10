@@ -113,7 +113,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         verticalLayoutToSecondary.setFlexGrow(1, textAreaConsoleOutput);
 
         verticalLayoutToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
-        verticalLayoutToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
+        //verticalLayoutToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
         splitLayout.addToSecondary(verticalLayoutToSecondary);
         splitLayout.setSplitterPosition(60);
 
@@ -196,8 +196,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                         if (chipType != null) {
                             if (chipType.endsWith("8266") && flashSize.equals("1MB")) {
 
+                                //chipIs-currentTimeMillis-backupflash
                                 long currentTimeMillis = System.currentTimeMillis();
-                                String fileName = espDeviceInfo.chipIs().concat(String.valueOf(currentTimeMillis)).concat("-backupflash");
+                                String fileName = espDeviceInfo.chipIs().concat("-")
+                                        .concat(String.valueOf(currentTimeMillis))
+                                        .concat("-backupflash");
 
                                 var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
 
@@ -210,8 +213,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
                             if (espDeviceInfo.chipIs().equals("ESP8285H16") && flashSize.equals("2MB")) {
 
+                                //chipIs-currentTimeMillis-backupflash
                                 long currentTimeMillis = System.currentTimeMillis();
-                                String fileName = espDeviceInfo.chipIs().concat(String.valueOf(currentTimeMillis)).concat("-backupflash");
+                                String fileName = espDeviceInfo.chipIs().concat("-")
+                                        .concat(String.valueOf(currentTimeMillis))
+                                        .concat("-backupflash");
 
                                 var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
 
@@ -226,8 +232,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
                             if (chipType.endsWith("8266") && flashSize.equals("4MB")) {
 
+                                //chipIs-currentTimeMillis-backupflash
                                 long currentTimeMillis = System.currentTimeMillis();
-                                String fileName = espDeviceInfo.chipIs().concat(String.valueOf(currentTimeMillis)).concat("-backupflash");
+                                String fileName = espDeviceInfo.chipIs().concat("-")
+                                        .concat(String.valueOf(currentTimeMillis))
+                                        .concat("-backupflash");
 
                                 var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
 
@@ -241,8 +250,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                             }
 
                             if (chipType.endsWith("-S3")) {
+
+                                //chipIs-currentTimeMillis-backupflash
                                 long currentTimeMillis = System.currentTimeMillis();
-                                String fileName = espDeviceInfo.chipIs().concat(String.valueOf(currentTimeMillis)).concat("-backupflash");
+                                String fileName = espDeviceInfo.chipIs().concat("-")
+                                        .concat(String.valueOf(currentTimeMillis))
+                                        .concat("-backupflash");
 
                                 var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
 
