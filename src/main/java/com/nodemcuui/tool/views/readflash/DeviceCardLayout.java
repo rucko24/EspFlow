@@ -1,16 +1,24 @@
 package com.nodemcuui.tool.views.readflash;
 
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.vaadin.flow.component.Html;
+import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.theme.lumo.Lumo;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
+import com.vaadin.flow.theme.lumo.LumoUtility.TextOverflow;
+import com.vaadin.flow.theme.lumo.LumoUtility.Whitespace;
+import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 import lombok.Getter;
 
 import java.util.stream.Stream;
 
+import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_TYPE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CRYSTAL_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
@@ -36,7 +44,7 @@ public final class DeviceCardLayout extends Div {
     private final Span spanDeviceName = new Span();
     private final Span spanState = new Span("STATE UP");
 
-    private final Span chipType = new Span(new Html(CHIP_TYPE));
+    private final Span chipType = new Span(CHIP_TYPE);
     private Span chipTypeValue = new Span();
     private final Hr hr1 = new Hr();
 
@@ -48,7 +56,14 @@ public final class DeviceCardLayout extends Div {
     private final Span crystalValue = new Span();
     private final Hr hr3 = new Hr();
 
-    private final Button downloadFlashButton = new Button("Download flash", VaadinIcon.DOWNLOAD.create());
+    private final Span chipIs = new Span(CHIP_IS);
+    private final Span chipIsValue = new Span();
+    private final Hr hr4 = new Hr();
+
+    /**
+     * The download flash button
+     */
+    private DownloadFlashButton downloadFlashButton;
 
     private String image;
     private EspDeviceInfo espDeviceInfo;
@@ -85,6 +100,18 @@ public final class DeviceCardLayout extends Div {
         super.add(toolbar, slideOverView);
     }
 
+    public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo, final DownloadFlashButton downloadFlashButton) {
+        super.addClassName("card-container");
+        this.image = image;
+        this.espDeviceInfo = espDeviceInfo;
+        this.downloadFlashButton = downloadFlashButton;
+
+        final Div toolbar = this.createDivToolbarRow();
+        final Div slideOverView = this.createDivSlideOverview();
+
+        super.add(toolbar, slideOverView);
+    }
+
     public Div createDivToolbarRow() {
         divToolbarRow.addClassName("toolbar-row");
         divToolbarRow.add(createSpanEspDeviceTitle(), createDivControls());
@@ -101,8 +128,6 @@ public final class DeviceCardLayout extends Div {
         Div divControls = new Div();
         divControls.addClassName("div-controls");
 
-        downloadFlashButton.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
-        downloadFlashButton.setTooltipText("Download flash");
         divControls.add(downloadFlashButton);
 
         return divControls;
@@ -169,11 +194,19 @@ public final class DeviceCardLayout extends Div {
 
     public Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
-        Stream.of(chipType, flashSize, crystal).forEach(span -> span.getStyle().set("font-weight","bold"));
+        Stream.of(chipType, flashSize, crystal, chipIs).forEach(span -> span.getStyle().set("font-weight","bold"));
         chipTypeValue.setText(":  " + espDeviceInfo.chipType());
+        chipIsValue.setText(":  " + espDeviceInfo.chipIs());
+
+        final Div divChipIsAndValue = new Div(chipIs, chipIsValue);
+        divChipIsAndValue.addClassName("div-right-ellipsis-text");
+
+        divChipIsAndValue.setWidthFull();
         flashSizeValue.setText(":  " + espDeviceInfo.detectedFlashSize());
         crystalValue.setText(":  " + espDeviceInfo.crystalIs());
-        divRightContentText.add(chipType, chipTypeValue, hr1, flashSize, flashSizeValue, hr2, crystal, crystalValue, hr3);
+        divRightContentText.add(chipType, chipTypeValue, hr1, divChipIsAndValue, hr2,
+                flashSize, flashSizeValue, hr3,
+                crystal, crystalValue, hr4);
         return divRightContentText;
     }
 

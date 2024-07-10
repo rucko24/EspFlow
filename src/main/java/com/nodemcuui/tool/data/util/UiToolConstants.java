@@ -29,7 +29,7 @@ public class UiToolConstants {
     public static final String OVERFLOW_Y = "overflow-y";
     public static final String HIDDEN = "hidden";
 
-
+    public static final String SERIAL_PORT = "Serial port";
     public static final String MAC = "MAC";
     public static final String CHIP_TYPE = "Detecting chip type";
     public static final String CHIP_IS = "Chip is";

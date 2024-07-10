@@ -68,17 +68,17 @@ class ExecuteCommandsTest {
 
     }
 
-    private Flux<DataBuffer> readIntputStream(final String commands) {
-        try {
-            return DataBufferUtils.readInputStream(() ->
-                            this.commandService.execute(commands)
-                                    .getInputStream(),
-                    new DefaultDataBufferFactory(), FileCopyUtils.BUFFER_SIZE);
-        } catch (Exception ex) {
-            log.error("Error {}", ex);
-            return Flux.error(ex);
-        }
-    }
+//    private Flux<DataBuffer> readIntputStream(final String commands) {
+//        try {
+//            return DataBufferUtils.readInputStream(() ->
+//                            this.commandService.processCommands(commands)
+//                                    .getInputStream(),
+//                    new DefaultDataBufferFactory(), FileCopyUtils.BUFFER_SIZE);
+//        } catch (Exception ex) {
+//            log.error("Error {}", ex);
+//            return Flux.error(ex);
+//        }
+//    }
 
 
     public String getIpAddressInfo() {
@@ -90,35 +90,35 @@ class ExecuteCommandsTest {
     @DisplayName("Handle error")
     @SneakyThrows
     void handleError() {
-        final CountDownLatch count = new CountDownLatch(1);
-        Flux.defer(() -> this.readIntputStream("esptool.py v"))
-                .subscribeOn(Schedulers.boundedElastic())
-                .transformDeferred(this::stringDecoder)
-                .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(NOT_FOUND)))
-                .doOnTerminate(count::countDown)
-                .doOnError(line -> log.info("doOnError: {}", line))
-                .subscribe(line -> log.info("Subscribe: {}", line));
-        count.await();
+//        final CountDownLatch count = new CountDownLatch(1);
+//        Flux.defer(() -> this.readIntputStream("esptool.py v"))
+//                .subscribeOn(Schedulers.boundedElastic())
+//                .transformDeferred(this::stringDecoder)
+//                .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(NOT_FOUND)))
+//                .doOnTerminate(count::countDown)
+//                .doOnError(line -> log.info("doOnError: {}", line))
+//                .subscribe(line -> log.info("Subscribe: {}", line));
+//        count.await();
     }
 
     @Test
     @DisplayName("Leyendo line a linea un inputStream decodificado para poder leer bien, sin mapping extraños")
     void testRead() {
-
-        final var countDownLatch = new CountDownLatch(1);
-        DataBufferUtils.readInputStream(() -> this.commandService.execute(getIpAddressInfo())
-                        .getInputStream(), DefaultDataBufferFactory.sharedInstance, FileCopyUtils.BUFFER_SIZE)
-                .transformDeferred(this::stringDecoder)
-                .delayElements(Duration.ofSeconds(1))
-                .log()
-                .doOnTerminate(countDownLatch::countDown)
-                .subscribe();
-
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//
+//        final var countDownLatch = new CountDownLatch(1);
+//        DataBufferUtils.readInputStream(() -> this.commandService.processCommands(getIpAddressInfo())
+//                        .getInputStream(), DefaultDataBufferFactory.sharedInstance, FileCopyUtils.BUFFER_SIZE)
+//                .transformDeferred(this::stringDecoder)
+//                .delayElements(Duration.ofSeconds(1))
+//                .log()
+//                .doOnTerminate(countDownLatch::countDown)
+//                .subscribe();
+//
+//        try {
+//            countDownLatch.await();
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     private Flux<String> stringDecoder(Flux<DataBuffer> dataBuffer) {

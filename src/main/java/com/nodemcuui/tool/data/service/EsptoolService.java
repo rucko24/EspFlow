@@ -8,23 +8,23 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.function.Predicate;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.BIN_SH_C;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_TYPE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CMD_C;
-import static com.nodemcuui.tool.data.util.UiToolConstants.COMMAND_NOT_FOUND;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CRYSTAL_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.nodemcuui.tool.data.util.UiToolConstants.ESPTOOL_PY_VERSION;
 import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.MAC;
+import static com.nodemcuui.tool.data.util.UiToolConstants.SERIAL_PORT;
 import static com.nodemcuui.tool.data.util.UiToolConstants.SH_C;
 
 /**
@@ -56,7 +56,9 @@ public class EsptoolService {
     /**
      * The predicate to filter only the necessary lines, if you want to process one more line, this condition should be added here
      */
-    private final Predicate<String> predicate = line -> line.startsWith(MAC) ||
+    private final Predicate<String> predicate = line ->
+            line.startsWith(SERIAL_PORT) ||
+            line.startsWith(MAC) ||
             line.startsWith(FLASH_SIZE) || line.startsWith(CRYSTAL_IS) ||
             line.startsWith(CHIP_TYPE) || line.startsWith(CHIP_IS);
 
@@ -140,6 +142,17 @@ public class EsptoolService {
             return ESPTOOL_PY_NOT_FOUND;
         }
         return rawLine.split(System.lineSeparator())[0];
+    }
+
+    /**
+     * esptool.py --port /dev/ttyUSB1 read_flash 0 ALL esp8266-backupflash.bin
+     *
+     * @param commands
+     * @return Flux<String>
+     */
+    public Flux<String> downloadFlash(String ...commands) {
+        return commandService.processCommands(commands)
+                .doOnNext(onNext -> log.info("OnNext {}", onNext));
     }
 
 }

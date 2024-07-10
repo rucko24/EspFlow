@@ -12,6 +12,7 @@ import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_TYPE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CRYSTAL_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.MAC;
+import static com.nodemcuui.tool.data.util.UiToolConstants.SERIAL_PORT;
 
 /**
  * The EspDeviceInfoMapper
@@ -20,6 +21,9 @@ import static com.nodemcuui.tool.data.util.UiToolConstants.MAC;
 public final class EspDeviceInfoMapper {
 
     public static String key(final String key) {
+        if(key.contains(SERIAL_PORT)) {
+            return SERIAL_PORT;
+        }
         if(key.contains(FLASH_SIZE)) {
             return FLASH_SIZE;
         }
@@ -39,6 +43,9 @@ public final class EspDeviceInfoMapper {
     }
 
     public static String value(final String value) {
+        if(value.contains(SERIAL_PORT)) {
+            return parseSerialPort(value);
+        }
         if(value.contains(FLASH_SIZE)) {
             return parseFlashSizeValue(value);
         }
@@ -58,6 +65,7 @@ public final class EspDeviceInfoMapper {
     }
 
     public static EspDeviceInfo mapToEspDeviceInfo(Map<String, String> map) {
+        var serialPort = map.get(SERIAL_PORT);
         var flashSize = map.get(FLASH_SIZE);
         var mac = map.get(MAC);
         var crystalIs = map.get(CRYSTAL_IS);
@@ -67,6 +75,7 @@ public final class EspDeviceInfoMapper {
         var hex = parseHexDecimal(decimal);
 
         return EspDeviceInfo.builder()
+                .port(serialPort)
                 .detectedFlashSize(flashSize)
                 .macAddress(mac)
                 .crystalIs(crystalIs)
@@ -75,6 +84,10 @@ public final class EspDeviceInfoMapper {
                 .decimal(decimal)
                 .hex(hex)
                 .build();
+    }
+
+    private static String parseSerialPort(String line) {
+        return line.split(" ")[2].trim();
     }
 
     private static String parseFlashSizeValue(String line) {

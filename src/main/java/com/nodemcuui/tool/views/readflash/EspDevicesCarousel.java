@@ -3,9 +3,10 @@ package com.nodemcuui.tool.views.readflash;
 import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
+import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 
@@ -42,8 +43,8 @@ public class EspDevicesCarousel extends Div {
         getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
     }
 
-    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo) {
-        return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo);
+    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final DownloadFlashButton downFlashButton) {
+        return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo, downFlashButton);
     }
 
 }

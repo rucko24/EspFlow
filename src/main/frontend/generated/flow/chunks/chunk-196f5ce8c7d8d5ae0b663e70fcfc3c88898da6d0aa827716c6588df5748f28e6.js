@@ -25,9 +25,16 @@ import 'Frontend/generated/jar-resources/contextMenuTargetConnector.js';
 import '@vaadin/multi-select-combo-box/theme/lumo/vaadin-multi-select-combo-box.js';
 import '@vaadin/text-field/theme/lumo/vaadin-text-field.js';
 import '@vaadin/icons/vaadin-iconset.js';
+import 'Frontend/generated/jar-resources/file-download-wrapper.js';
 import '@vaadin/text-area/theme/lumo/vaadin-text-area.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-drawer-toggle.js';
 import '@vaadin/avatar/theme/lumo/vaadin-avatar.js';
 import '@vaadin/scroller/theme/lumo/vaadin-scroller.js';
 import 'Frontend/generated/jar-resources/lit-renderer.ts';
 import '@vaadin/notification/theme/lumo/vaadin-notification.js';
+import { injectGlobalCss } from 'Frontend/generated/jar-resources/theme-util.js';
+
+import { css, unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin';
+import $cssFromFile_0 from 'Frontend/generated/jar-resources/animate.css?inline';
+
+injectGlobalCss($cssFromFile_0.toString(), 'CSSImport end', document);

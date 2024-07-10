@@ -128,3 +128,11 @@
     display: block;
     -webkit-tap-highlight-color: transparent;
 }
+
+.div-right-ellipsis-text {
+    width: 100%;
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

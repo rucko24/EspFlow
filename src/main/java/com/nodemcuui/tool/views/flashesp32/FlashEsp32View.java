@@ -183,7 +183,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         this.divHeaderPorts.getValidateInput().addClickListener(e -> {
             final String command = this.divHeaderPorts.getInputCommand().getValue().trim();
             if (command.equals(DMESG_GREP_TTY)) {
-                this.subscribeThis(this.commandService.executeDmesgForTtyPort(), ui);
+                //this.subscribeThis(this.commandService.executeDmesgForTtyPort(), ui);
                 return;
             }
             if (!command.isEmpty()) {

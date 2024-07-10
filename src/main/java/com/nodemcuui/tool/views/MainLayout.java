@@ -72,7 +72,8 @@ public class MainLayout extends AppLayout {
             User user = maybeUser.get();
 
             var avatar = new Avatar(user.getName(), "images/ESP8285H08.jpeg");
-            avatar.setThemeName("xlarge");
+            avatar.setWidth("56px");
+            avatar.setHeight("56px");
 
             var row = new HorizontalLayout(avatar);
             row.setWidthFull();

@@ -38,7 +38,7 @@ class EsptoolServiceTest {
     @Test
     @SneakyThrows
     @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id")
-    void readFlashIdFromPortWithCustomPort() {
+    void readFlashIdWithCustomPort() {
 
         Flux<String> actual = Flux.just(
                 "Detecting chip type... ESP32-S3",
@@ -53,7 +53,7 @@ class EsptoolServiceTest {
                 .chipIs("ESP32-S3 (QFN56) (revision v0.0)")
                 .build();
 
-        String[] commands = ArrayUtils.addAll(EsptoolService.bash(), "esptool.py", "--port", "/dev/ttyACM0", "--baud", "115200", "flash_id");
+        String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", "/dev/ttyACM0", "--baud", "115200", "flash_id");
 
         when(commandService.processCommands(commands))
                 .thenReturn(actual);
