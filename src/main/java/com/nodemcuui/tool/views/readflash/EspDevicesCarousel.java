@@ -38,7 +38,8 @@ public class EspDevicesCarousel extends Div {
         super.setWidth("450px");
         super.setHeight("100%");
         getStyle().set("border-radius", "6px");
-        getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        //getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
     }
 
     public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo) {

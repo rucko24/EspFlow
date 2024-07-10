@@ -1,12 +1,15 @@
 package com.nodemcuui.tool.views.readflash;
 
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import lombok.Getter;
+
+import java.util.stream.Stream;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_TYPE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CRYSTAL_IS;
@@ -33,7 +36,7 @@ public final class DeviceCardLayout extends Div {
     private final Span spanDeviceName = new Span();
     private final Span spanState = new Span("STATE UP");
 
-    private final Span chipType = new Span(CHIP_TYPE);
+    private final Span chipType = new Span(new Html(CHIP_TYPE));
     private Span chipTypeValue = new Span();
     private final Hr hr1 = new Hr();
 
@@ -48,8 +51,6 @@ public final class DeviceCardLayout extends Div {
     private final Button downloadFlashButton = new Button("Download flash", VaadinIcon.DOWNLOAD.create());
 
     private String image;
-    private String crystalIs;
-    private String sChipTypeValue;
     private EspDeviceInfo espDeviceInfo;
 
     public DeviceCardLayout(final String image) {
@@ -168,10 +169,10 @@ public final class DeviceCardLayout extends Div {
 
     public Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
-        //Stream.of(chipType, flashSize, crystal).forEach(span -> span.getElement().setAttribute("theme","badge"));
-        chipTypeValue.setText(espDeviceInfo.chipType());
-        flashSizeValue.setText(espDeviceInfo.detectedFlashSize());
-        crystalValue.setText(espDeviceInfo.crystalIs());
+        Stream.of(chipType, flashSize, crystal).forEach(span -> span.getStyle().set("font-weight","bold"));
+        chipTypeValue.setText(":  " + espDeviceInfo.chipType());
+        flashSizeValue.setText(":  " + espDeviceInfo.detectedFlashSize());
+        crystalValue.setText(":  " + espDeviceInfo.crystalIs());
         divRightContentText.add(chipType, chipTypeValue, hr1, flashSize, flashSizeValue, hr2, crystal, crystalValue, hr3);
         return divRightContentText;
     }
