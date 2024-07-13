@@ -5,7 +5,7 @@ import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
+import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
@@ -50,7 +50,7 @@ public class EspDevicesCarousel extends Div {
         Animated.animate(carousel, Animation.FADE_IN);
     }
 
-    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton, DownloadFlashButton anchor) {
+    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton, FlashButtonWrapper anchor) {
         return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo, downFlashButton, anchor);
     }
 

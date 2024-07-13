@@ -1,7 +1,7 @@
 package com.nodemcuui.tool.views.readflash;
 
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
+import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -58,7 +58,7 @@ public final class DeviceCardLayout extends Div {
      * The download flash button
      */
     private Button downloadFlashButton;
-    private DownloadFlashButton anchorButton;
+    private FlashButtonWrapper flashButtonWrapper;
     private DynamicFileDownloader dynamicFileDownloader;
 
     private String image;
@@ -66,12 +66,12 @@ public final class DeviceCardLayout extends Div {
 
     public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo,
                             final Button downloadFlashButton,
-                            final DownloadFlashButton anchor) {
+                            final FlashButtonWrapper flashButtonWrapper) {
         super.addClassName("card-container");
         this.image = image;
         this.espDeviceInfo = espDeviceInfo;
         this.downloadFlashButton = downloadFlashButton;
-        this.anchorButton = anchorButton;
+        this.flashButtonWrapper = flashButtonWrapper;
 
         final Div toolbar = this.createDivToolbarRow();
         final Div slideOverView = this.createDivSlideOverview();
@@ -112,6 +112,9 @@ public final class DeviceCardLayout extends Div {
         }
         if(dynamicFileDownloader != null) {
             divControls.add(dynamicFileDownloader);
+        }
+        if(flashButtonWrapper != null) {
+            divControls.add(flashButtonWrapper);
         }
 
         return divControls;

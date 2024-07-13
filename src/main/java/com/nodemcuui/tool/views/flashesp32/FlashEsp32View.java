@@ -7,7 +7,7 @@ import com.nodemcuui.tool.data.service.EsptoolService;
 import com.nodemcuui.tool.data.util.CommandsOnFirstLine;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
 import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
-import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
+import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.nodemcuui.tool.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -185,11 +185,11 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
      */
     private void uploadTest(final UI ui) {
 
-        DownloadFlashButton linksArea = new DownloadFlashButton(consoleOutPut, ui);
+        FlashButtonWrapper linksArea = new FlashButtonWrapper(consoleOutPut, ui);
         linksArea.setText("Download");
         this.contentForPrimary.add(new Div(linksArea));
 
-        linksArea.enableAnchorForDownloadTheFirmware( "esp-backup.bin");
+        //linksArea.enableAnchorForDownloadTheFirmware( "esp-backup.bin");
 
     }
 

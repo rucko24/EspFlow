@@ -1,7 +1,7 @@
 package com.nodemcuui.tool.views.readflash;
 
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
+import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.button.Button;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.vaadin.firitin.components.DynamicFileDownloader;
 public class DeviceFactoryCardLayout {
 
     public static DeviceCardLayout createDeviceCard(final String image, final EspDeviceInfo espDeviceInfo,
-                                                    final Button downloadFlash, final DownloadFlashButton anchor) {
+                                                    final Button downloadFlash, final FlashButtonWrapper anchor) {
         return new DeviceCardLayout(image, espDeviceInfo, downloadFlash, anchor);
     }
 

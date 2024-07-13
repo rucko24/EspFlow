@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.function.Function;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.BIN_SH_C;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
@@ -157,10 +157,24 @@ public class EsptoolService {
      * @return
      */
     private String splitPercentaje(String input) {
-        if(input.contains("\\((\\d{1,2}|100) %\\)"))  {
+        if (input.contains("\\((\\d{1,2}|100) %\\)")) {
             return input.split("\\((\\d{1,2}|100) %\\)")[0];
         }
         return input;
+    }
+
+    /**
+     * Create the folder named esp-backup-flash-dir in the temporary directory of the operating system
+     */
+    public void createEspBackUpFlashDirIfNotExists() {
+        final Path espBackupFlashDir = Path.of(System.getProperty("java.io.tmpdir").concat("/esp-backup-flash-dir"));
+        if (!Files.exists(espBackupFlashDir)) {
+            try {
+                Files.createDirectory(espBackupFlashDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 }
