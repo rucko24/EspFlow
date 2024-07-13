@@ -50,7 +50,7 @@ public final class EspDeviceInfoMapper {
             return parseFlashSizeValue(value);
         }
         if(value.contains(MAC)) {
-            return parseValueMac(value);
+            return parseMacValue(value);
         }
         if(value.contains(CRYSTAL_IS)) {
             return parseCrystalIsValue(value);
@@ -87,19 +87,23 @@ public final class EspDeviceInfoMapper {
     }
 
     private static String parseSerialPort(String line) {
+        Objects.requireNonNull(line,"Parse Serial Port value must not be null");
         return line.split(" ")[2].trim();
     }
 
     private static String parseFlashSizeValue(String line) {
+        Objects.requireNonNull(line,"Parse flashSize value must not be null");
         return line.split(":")[1].trim();
     }
 
-    private static String parseValueMac(String line) {
+    private static String parseMacValue(String line) {
+        Objects.requireNonNull(line,"Parse mac value must not be null");
         return line.split(" ")[1].trim();
     }
 
 
     private static String parseChipTypeValue(String line) {
+        Objects.requireNonNull(line,"Parse chipType value, must not be null");
         if (!(line.contains("Unsupported detection protocol"))) {
             return line.split("type...")[1].trim();
         }

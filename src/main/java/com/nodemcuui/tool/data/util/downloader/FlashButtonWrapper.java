@@ -30,28 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Log4j2
 public class FlashButtonWrapper extends FileDownloadWrapper {
 
-    private ProcessCommandsInternals processCommandsInternals = new ProcessCommandsInternals();
     private final Button download = new Button(VaadinIcon.DOWNLOAD.create());
-    private String fileName;
-
-    private ConsoleOutPut consoleOutPut;
-    private UI ui;
-
-    public FlashButtonWrapper(ConsoleOutPut consoleOutPut, UI ui) {
-        super();
-        setSizeFull();
-        this.consoleOutPut = consoleOutPut;
-        this.ui = ui;
-    }
-
 
     public FlashButtonWrapper() {
         super();
         setSizeFull();
-    }
-
-    public Button getDownloadButton() {
-        return download;
     }
 
     /**

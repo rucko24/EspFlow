@@ -1,19 +1,13 @@
 package com.nodemcuui.tool.views.readflash;
 
-import com.flowingcode.vaadin.addons.carousel.Slide;
-import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.nodemcuui.tool.data.enums.BaudRates;
 import com.nodemcuui.tool.data.service.EsptoolService;
-import com.nodemcuui.tool.data.util.CommandsOnFirstLine;
 import com.nodemcuui.tool.data.util.NotificationBuilder;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
 import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
-import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.nodemcuui.tool.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -41,14 +35,11 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Mono;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_X;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
-import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
  * @author rubn
@@ -75,9 +66,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
     private final Span spanTotalDevices = new Span("Total devices: ");
     private final Span spanTotalDevicesValue = new Span();
-
-    private String[] commands;
-    private final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
     @PostConstruct
     public void init() {
@@ -128,12 +116,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         div.getElement().setAttribute("theme", "badge");
 //        final Div div2 = new Div(this.decimalSize);
 //        final Div div3 = new Div(this.hexSize);
-
         footer.setWidthFull();
         footer.setAlignItems(Alignment.CENTER);
         footer.setJustifyContentMode(JustifyContentMode.AROUND);
         footer.add(div);
-
+        Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue)
+                .forEach(span -> {
+                    span.getStyle().set("font-size", "var(--lumo-font-size-xs)");
+                    span.addClassName("row-span-flash-size-footer");
+                });
         return footer;
     }
 
@@ -165,7 +156,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                         this.progressBar.setVisible(false);
                         log.info("Error: {}", error);
                         NotificationBuilder.builder()
-                                .withText("Error al leer el microcontrolador " + error)
+                                .withText("Error reading the microcontroller " + error)
                                 .withPosition(Position.MIDDLE)
                                 .withDuration(3000)
                                 .withIcon(VaadinIcon.WARNING)
@@ -173,7 +164,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                                 .make();
                     });
                 })
-                .onErrorResume(throwable -> Mono.error(new RuntimeException("Error UI")))
+                .onErrorResume(throwable -> Mono.error(new RuntimeException("Error readAllDevices ")))
                 .doOnComplete(() -> {
                     ui.access(() -> {
                         this.progressBar.setVisible(false);
@@ -183,183 +174,18 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 })
                 .subscribe(espDeviceInfo -> {
                     ui.access(() -> {
-                        //Validar con un Stream aqui cada campo distinto de null del espDeviceInfo
-
-                        final String flashSize = espDeviceInfo.detectedFlashSize();
-                        final String chipType = espDeviceInfo.chipType();
-                        if (chipType != null) {
-                            if (chipType.endsWith("8266") && flashSize.equals("1MB")) {
-
-                                var downloadTest = downloadFlashWithNormalButton(ui, espDeviceInfo);
-
-                                Slide esp01sSlide = new Slide(createSlideContent(
-                                        "https://www.electronicwings.com/storage/PlatformSection/TopicContent/308/description/esp8266%20module.jpg",
-                                        espDeviceInfo, downloadTest, flashButtonWrapper));
-
-                                espDevicesCarousel.addSlide(esp01sSlide);
-                            }
-
-                            if (espDeviceInfo.chipIs().equals("ESP8285H16") && flashSize.equals("2MB")) {
-
-                                //chipIs-currentTimeMillis-backupflash
-//                                long currentTimeMillis = System.currentTimeMillis();
-//                                String fileName = espDeviceInfo.chipIs().concat("-")
-//                                        .concat(String.valueOf(currentTimeMillis))
-//                                        .concat("-backupflash.bin");
-//
-//                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
-//
-//                                Slide esp8285H16Slide = new Slide(createSlideContent(
-//                                        "https://rubn0x52.com/assets/images/esp8285h08.jpg", espDeviceInfo, null));
-//
-//                                espDevicesCarousel.addSlide(esp8285H16Slide);
-
-                            }
-
-                            if (chipType.endsWith("8266") && flashSize.equals("4MB")) {
-
-//                                //chipIs-currentTimeMillis-backupflash
-//                                long currentTimeMillis = System.currentTimeMillis();
-//                                String fileName = espDeviceInfo.chipIs().concat("-")
-//                                        .concat(String.valueOf(currentTimeMillis))
-//                                        .concat("-backupflash.bin");
-//
-//                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
-//
-//                                Slide esp8266Slide = new Slide(createSlideContent(
-//                                        "https://rubn0x52.com/assets/images/nodemcu-v3-wifi-esp8266-ch340.png",
-//                                        espDeviceInfo,
-//                                        downFlashButton.getDownloadFlashButton()));
-//
-//                                espDevicesCarousel.addSlide(esp8266Slide);
-
-                            }
-
-                            if (chipType.endsWith("-S3")) {
-
-                                var downFlashButton = this.downloadFlashWithNormalButton(ui, espDeviceInfo);
-
-                                Slide esp32s3Slide = new Slide(createSlideContent(
-                                        "https://www.mouser.es/images/espressifsystems/hd/ESP32-S3-DEVKITC-1-N8_SPL.jpg",
-                                        espDeviceInfo,
-                                        downFlashButton, this.flashButtonWrapper));
-
-                                espDevicesCarousel.addSlide(esp32s3Slide);
-                            }
-                        }
-                    });
-
-                });
-
-        Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue)
-                .forEach(span -> {
-                    span.getStyle().set("font-size", "var(--lumo-font-size-xs)");
-                    span.addClassName("row-span-flash-size-footer");
-                });
-
-    }
-
-
-    /**
-     * @param ui
-     * @param espDeviceInfo
-     * @return DownloadFlashButton
-     */
-    private Button downloadFlashWithNormalButton(final UI ui, EspDeviceInfo espDeviceInfo) {
-        final Button downloadFlashButton = new Button("Read flash");
-        downloadFlashButton.setTooltipText("Read flash");
-        downloadFlashButton.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
-        downloadFlashButton.addClickListener(event -> {
-            ui.access(() -> {
-                this.esptoolService.createEspBackUpFlashDirIfNotExists();
-
-                final String currentTimeMillis = String.valueOf(System.currentTimeMillis());
-                final String fileNameResult = espDeviceInfo.chipIs().concat("-")
-                        .concat(currentTimeMillis).concat("-backup.bin");
-
-                final String writFileToTempDir = System.getProperty("java.io.tmpdir")
-                        .concat("/esp-backup-flash-dir/")
-                        .concat(fileNameResult);
-
-                this.readFlash(ui, writFileToTempDir, espDeviceInfo);
-
-            });
-        });
-        return downloadFlashButton;
-    }
-
-    /**
-     * <p> esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/espbackup/ESP8266EX-1720865320370-backup.bin <p/>
-     *
-     * @param ui
-     * @param writFileToTempDir
-     * @param espDeviceInfo
-     */
-    private void readFlash(final UI ui, final String writFileToTempDir, final EspDeviceInfo espDeviceInfo) {
-
-        this.commands = new String[]{
-                "esptool.py",
-                "--port", espDeviceInfo.port(),
-                "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
-                "read_flash",
-                "0",
-                "0x1000",
-                writFileToTempDir
-        };
-
-//        this.commands = new String[]{
-//                "esptool.py",
-//                "--port", espDeviceInfo.port(),
-//                "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
-//                "flash_id"
-//        };
-
-        CommandsOnFirstLine.putCommansdOnFirstLine(this.commands, this.consoleOutPut);
-
-        this.esptoolService.downloadFlash(commands)
-                .doOnComplete(() -> {
-                    ui.access(() -> {
-                        this.consoleOutPut.writePrompt();
-                        if(Files.exists(Path.of(writFileToTempDir))) {
-                            log.info("Backup completado! {}", "");
-                            NotificationBuilder.builder()
-                                    .withText("Backup completado!")
-                                    .withPosition(Position.MIDDLE)
-                                    .withDuration(3000)
-                                    .withIcon(VaadinIcon.INFO)
-                                    .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
-                                    .make();
-                            this.flashButtonWrapper.enableAnchorForDownloadTheFirmware(writFileToTempDir);
-                        } else {
-                            NotificationBuilder.builder()
-                                    .withText("Stream reactivo completado pero la flash no exsite en el tmp! " + writFileToTempDir)
-                                    .withPosition(Position.MIDDLE)
-                                    .withDuration(3000)
-                                    .withIcon(VaadinIcon.INFO)
-                                    .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
-                                    .make();
-                        }
-                    });
-                })
-                .doOnError(onError -> {
-                    ui.access(() -> {
-                        log.info("Error: {}", onError);
-                        NotificationBuilder.builder()
-                                .withText("Error al crear backup de esta flash " + onError)
-                                .withPosition(Position.MIDDLE)
-                                .withDuration(3000)
-                                .withIcon(VaadinIcon.WARNING)
-                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                        ShowDevices.builder()
+                                .withEspDevicesCarousel(espDevicesCarousel)
+                                .withEsptoolService(esptoolService)
+                                .withEspDeviceInfo(espDeviceInfo)
+                                .withConsoleOutStage(consoleOutPut)
+                                .withUi(ui)
+                                .createSlides()
                                 .make();
                     });
-                })
-                .subscribe(inputLine -> {
-                    ui.access(() -> {
-                        this.consoleOutPut.readFlash(inputLine);
-                    });
                 });
-
     }
+
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
