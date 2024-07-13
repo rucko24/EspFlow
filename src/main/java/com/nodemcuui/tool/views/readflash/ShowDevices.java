@@ -23,16 +23,20 @@ import java.nio.file.Path;
 import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
- * ShowDevices
+ * <p><strong>ShowDevices</strong>  this class serves as an aid to display in the Read Firmware view the microcontrollers available in the OS.</p>
  *
- *  ShowDevices.builder()
- *          .withEspDevicesCarousel(espDevicesCarousel)
- *          .withEsptoolService(esptoolService)
- *          .withEspDeviceInfo(espDeviceInfo)
- *          .withConsoleOutStage(consoleOutPut)
- *          .withUi(ui)
- *          .createSlides()
- *          .make();
+ * <p>With this StepBuilder we can set it up avoiding the nulls, and with obligatory steps </p>
+ *
+ * <pre>
+ *     ShowDevices.builder()
+ *         .withEspDevicesCarousel(espDevicesCarousel)
+ *         .withEsptoolService(esptoolService)
+ *         .withEspDeviceInfo(espDeviceInfo)
+ *         .withConsoleOutStage(consoleOutPut)
+ *         .withUi(ui)
+ *         .createSlides()
+ *         .make();
+ * </pre>
  *
  */
 @Log4j2
@@ -162,6 +166,12 @@ public class ShowDevices {
             }
         }
 
+        /**
+         *
+         * Show the esp01s slide
+         *
+         * @param flashSize
+         */
         private void showEsp01s(String flashSize) {
 
             if (espDeviceInfo.chipType().endsWith("8266") && flashSize.equals("1MB")) {

@@ -2,9 +2,6 @@ package com.nodemcuui.tool.data.util.downloader;
 
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
-import com.nodemcuui.tool.data.util.ProcessCommandsInternals;
-import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.server.StreamResource;
@@ -21,11 +18,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * https://stackoverflow.com/questions/61513997/how-to-download-a-pdf-from-vaadin-flow-app
- * <p>
- * Escribir la flash en el disco primero luego generar un anchor o un FileDownloadWrapper ? o un anchor normal ?
- * Recuperar de la ruta del Vaadin Servlet para luego guardarlo en otro lugar
- * luego borrarlo del Vaadin Servlet
+ * <p>This class allows to generate an anchor to download the microcontroller firmware from a location in the temporary directory of the OS.  </p>
+ *
+ * <p>Once it is instantiated, the method <strong>enableAnchorForDownloadTheFirmware</strong> must be invoked and pass as parameter the name of the file that was generated in the temp directory, so that the browser knows where it is located. </p>
+ *
+ * @author rubn
  */
 @Log4j2
 public class FlashButtonWrapper extends FileDownloadWrapper {
@@ -34,11 +31,13 @@ public class FlashButtonWrapper extends FileDownloadWrapper {
 
     public FlashButtonWrapper() {
         super();
-        setSizeFull();
     }
 
     /**
-     * @param writFileToTempDir
+     * This method enables the anchor, and each time it is invoked a name is set by the Content-Disposition
+     * allowing to determine the name of the file in the browser and to download it.
+     *
+     * @param writFileToTempDir the name of the file located in the temporary OS directory
      */
     public void enableAnchorForDownloadTheFirmware(final String writFileToTempDir) {
         download.setTooltipText("Download flash backup");
@@ -57,12 +56,10 @@ public class FlashButtonWrapper extends FileDownloadWrapper {
         Animated.animate(download, Animation.FADE_IN);
     }
 
-
     /**
-     * <p>
-     * Posiblemente mejor guardar en el direcotiro temporal y listo
-     * Bytearray con buffer para no cargar todo en memoria
+     *  Convert the firmware to byte array
      *
+     * @param writFileToTempFile
      * @return ByteArrayInputStream
      */
     private ByteArrayInputStream firmwareToByteArray(final String writFileToTempFile) {
