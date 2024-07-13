@@ -3,6 +3,7 @@ package com.nodemcuui.tool.data.mappers;
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Objects;
@@ -64,9 +65,14 @@ public final class EspDeviceInfoMapper {
         return "Unknown";
     }
 
-    public static EspDeviceInfo mapToEspDeviceInfo(Map<String, String> map) {
+    public static Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map) {
         var serialPort = map.get(SERIAL_PORT);
         var flashSize = map.get(FLASH_SIZE);
+
+        if(Objects.isNull(flashSize)) { //In order to trigger the fallback
+            return Mono.empty();
+        }
+
         var mac = map.get(MAC);
         var crystalIs = map.get(CRYSTAL_IS);
         var chipType = map.get(CHIP_TYPE);
@@ -74,7 +80,7 @@ public final class EspDeviceInfoMapper {
         var decimal = parseDecimal(flashSize);
         var hex = parseHexDecimal(decimal);
 
-        return EspDeviceInfo.builder()
+        return Mono.just(EspDeviceInfo.builder()
                 .port(serialPort)
                 .detectedFlashSize(flashSize)
                 .macAddress(mac)
@@ -83,7 +89,20 @@ public final class EspDeviceInfoMapper {
                 .chipIs(chipIs)
                 .decimal(decimal)
                 .hex(hex)
-                .build();
+                .build());
+    }
+
+    public static Mono<EspDeviceInfo> fallback(String port) {
+        return Mono.just(EspDeviceInfo.builder()
+                .port(port)
+                .detectedFlashSize("none")
+                .macAddress("none")
+                .crystalIs("none")
+                .chipType("none")
+                .chipIs("none")
+                .decimal("none")
+                .hex("none")
+                .build());
     }
 
     private static String parseSerialPort(String line) {

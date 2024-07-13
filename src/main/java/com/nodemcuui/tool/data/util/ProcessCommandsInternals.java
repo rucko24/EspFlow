@@ -1,5 +1,6 @@
 package com.nodemcuui.tool.data.util;
 
+import com.nodemcuui.tool.data.exceptions.CommandNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.codec.StringDecoder;

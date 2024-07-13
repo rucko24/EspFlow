@@ -12,6 +12,7 @@ import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import lombok.Getter;
@@ -132,6 +133,11 @@ public class ShowDevices {
         @Override
         public Build createSlides() {
             final String detectedFlashSize = espDeviceInfo.detectedFlashSize();
+            if(detectedFlashSize.equals("none")) {
+                ui.access(() -> {
+                    Notification.show("Error with microcontroller on port" + espDeviceInfo.port());
+                });
+            }
             showEsp01s(detectedFlashSize);
             showEso82664MB(espDeviceInfo);
             showEsp8285(detectedFlashSize);

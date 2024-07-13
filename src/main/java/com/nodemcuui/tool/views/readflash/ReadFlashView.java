@@ -164,7 +164,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                                 .make();
                     });
                 })
-                .onErrorResume(throwable -> Mono.error(new RuntimeException("Error readAllDevices ")))
                 .doOnComplete(() -> {
                     ui.access(() -> {
                         this.progressBar.setVisible(false);

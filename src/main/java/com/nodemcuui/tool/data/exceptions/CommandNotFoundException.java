@@ -1,4 +1,4 @@
-package com.nodemcuui.tool.data.util;
+package com.nodemcuui.tool.data.exceptions;
 
 /**
  * Esptool not found

@@ -2,6 +2,7 @@ package com.nodemcuui.tool.data.service;
 
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
 import com.nodemcuui.tool.data.enums.BaudRates;
+import com.nodemcuui.tool.data.exceptions.CanNotBeReadDeviceException;
 import com.nodemcuui.tool.data.mappers.EspDeviceInfoMapper;
 import com.nodemcuui.tool.data.util.GetOsName;
 import lombok.Getter;
@@ -91,9 +92,11 @@ public class EsptoolService {
         return commandService.processCommands(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
-                .map(EspDeviceInfoMapper::mapToEspDeviceInfo)
-                .doOnNext(onNext -> log.info("OnNext {}", onNext));
+                .flatMap(EspDeviceInfoMapper::mapToEspDeviceInfo)
+                .switchIfEmpty(Mono.defer(() -> EspDeviceInfoMapper.fallback(port)));
     }
+
+
 
     /**
      * <p>This simply executes the command to get data from the default micro, with the <strong>flash_id<strong> parameter.</p>
@@ -111,7 +114,8 @@ public class EsptoolService {
         return commandService.processCommands(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
-                .map(EspDeviceInfoMapper::mapToEspDeviceInfo)
+                .flatMap(EspDeviceInfoMapper::mapToEspDeviceInfo)
+                .switchIfEmpty(Mono.error(new CanNotBeReadDeviceException("No existe el micro controlador")))
                 .doOnNext(onNext -> log.info("OnNext {}", onNext))
                 .doOnError(error -> log.error("Error: {}", error));
     }
