@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.AUTO;
 import static com.nodemcuui.tool.data.util.UiToolConstants.BOX_SHADOW_PROPERTY;
