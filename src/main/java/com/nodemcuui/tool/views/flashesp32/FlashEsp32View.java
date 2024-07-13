@@ -184,15 +184,12 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
      * @param ui
      */
     private void uploadTest(final UI ui) {
+
         DownloadFlashButton linksArea = new DownloadFlashButton(consoleOutPut, ui);
         linksArea.setText("Download");
         this.contentForPrimary.add(new Div(linksArea));
-        linksArea.enableAnchorForDownloadedTheFirmware("esp-backup.bin");
 
-        buttonTestFirmware.addClickListener(event -> {
-
-
-        });
+        linksArea.enableAnchorForDownloadTheFirmware( "esp-backup.bin");
 
     }
 

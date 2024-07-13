@@ -1,7 +1,5 @@
 package com.nodemcuui.tool.data.util.downloader;
 
-import com.infraleap.animatecss.Animated;
-import com.nodemcuui.tool.data.enums.BaudRates;
 import com.nodemcuui.tool.data.util.GetOsName;
 import com.nodemcuui.tool.data.util.ProcessCommandsInternals;
 import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
@@ -26,21 +24,23 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHARSET_CP850;
 
 /**
- * Clase de utilidad para que un boton pueda crear/descargar un pdf, además permite habilidar/deshabilitar el anchor
- * de descarga cuando sea necesario.
+ * https://stackoverflow.com/questions/61513997/how-to-download-a-pdf-from-vaadin-flow-app
  * <p>
- * DownloadFlashButton button = new DownloadFlashButton();
- * button.saveFirmware(fileName);
+ * Escribir la flash en el disco primero luego generar un anchor o un FileDownloadWrapper ? o un anchor normal ?
+ * Recuperar de la ruta del Vaadin Servlet para luego guardarlo en otro lugar
+ * luego borrarlo del Vaadin Servlet
  */
 @Log4j2
 public class DownloadFlashButton extends FileDownloadWrapper {
 
     private ProcessCommandsInternals processCommandsInternals = new ProcessCommandsInternals();
-    private final Button download = new Button("Download", VaadinIcon.DOWNLOAD.create());
+    private final Button download = new Button(VaadinIcon.DOWNLOAD.create());
     private String fileName;
 
     private ConsoleOutPut consoleOutPut;
@@ -59,6 +59,9 @@ public class DownloadFlashButton extends FileDownloadWrapper {
         setSizeFull();
     }
 
+    public Button getDownloadButton() {
+        return download;
+    }
 
     /**
      * Al invocar este metodo desde otro listener de un boton, solo se habilita el anchor
@@ -66,7 +69,7 @@ public class DownloadFlashButton extends FileDownloadWrapper {
      *
      * @param fileName el nombre final del fichero
      */
-    public void enableAnchorForDownloadedTheFirmware(String fileName) {
+    public void enableAnchorForDownloadTheFirmware(final String fileName) {
         this.fileName = fileName;
         final var streamResource = new StreamResource(fileName, this::firmwareToByteArray);
         streamResource.setCacheTime(0);
@@ -85,25 +88,13 @@ public class DownloadFlashButton extends FileDownloadWrapper {
      * @return ByteArrayInputStream
      */
     private ByteArrayInputStream firmwareToByteArray() {
-
-        final String[] commands = new String[]{
-                "esptool.py",
-                "--port", "/dev/ttyUSB2",
-                "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
-                "read_flash",
-                "0",
-                "0x3500",
-                fileName
-        };
-
-        try (final var bin = new BufferedInputStream(this.execute(commands).getInputStream());
+        final Path path = Path.of(fileName);
+        try (final var bin = new BufferedInputStream(Files.newInputStream(path));
              final var baos = new FastByteArrayOutputStream()) {
             //transfer
             //Pasar listener del ConsoleOutPut aqui?
             //https://github.com/newUserRepo/testbar/blob/issueBar/vaadin-upload/src/main/java/com/example/vaadinupload/ProcessingService.java#L49C17-L49C46
             bin.transferTo(baos);
-            this.writeToXterm(baos);
-
             return new ByteArrayInputStream(baos.toByteArray());
         } catch (IOException ex) {
             log.error(ex.getMessage());
@@ -111,12 +102,6 @@ public class DownloadFlashButton extends FileDownloadWrapper {
         return null;
     }
 
-    public Process execute(String... commands) throws IOException {
-        return new ProcessBuilder()
-                .command(commands)
-                .redirectErrorStream(Boolean.TRUE)
-                .start();
-    }
 
     private void writeToXterm(FastByteArrayOutputStream baos) {
         Flux.defer(() -> DataBufferUtils.readInputStream(baos::getInputStream, DefaultDataBufferFactory.sharedInstance, FileCopyUtils.BUFFER_SIZE))
