@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.BIN_SH_C;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
@@ -58,15 +60,14 @@ public class EsptoolService {
      */
     private final Predicate<String> predicate = line ->
             line.startsWith(SERIAL_PORT) ||
-            line.startsWith(MAC) ||
-            line.startsWith(FLASH_SIZE) || line.startsWith(CRYSTAL_IS) ||
-            line.startsWith(CHIP_TYPE) || line.startsWith(CHIP_IS);
+                    line.startsWith(MAC) ||
+                    line.startsWith(FLASH_SIZE) || line.startsWith(CRYSTAL_IS) ||
+                    line.startsWith(CHIP_TYPE) || line.startsWith(CHIP_IS);
 
     /**
-     *
      * This returns all existing esp32-based microcontrollers in the current system.
      *
-     * @return  Flux<EspDeviceInfo>
+     * @return Flux<EspDeviceInfo>
      */
     public Flux<EspDeviceInfo> readAllDevices() {
         return Flux.fromIterable(comPortService.getPortsList())
@@ -75,9 +76,8 @@ public class EsptoolService {
     }
 
     /**
-     *
      * <p> It processes to use as parameters the <strong>--baud<strong>, the <strong>--port<strong> and the <strong>flash_id<strong>. </p>
-     *
+     * <p>
      * With the above, this method creates a map that is then mapped to the entity EspDeviceInfo,
      * as many items are issued we need for convenience to have them in a single item or Mono.
      *
@@ -96,16 +96,13 @@ public class EsptoolService {
     }
 
     /**
-     *
      * <p>This simply executes the command to get data from the default micro, with the <strong>flash_id<strong> parameter.</p>
      *
      * <li>
-     *     The command is: <strong>"esptool.py  flash_id"</strong>
+     * The command is: <strong>"esptool.py  flash_id"</strong>
      * </li>
      *
-     *
      * @return Mono<EspDeviceInfo>
-     *
      */
     public Mono<EspDeviceInfo> readFlashIdFromDefault() {
         final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--baud",
@@ -114,7 +111,7 @@ public class EsptoolService {
         return commandService.processCommands(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
-                 .map(EspDeviceInfoMapper::mapToEspDeviceInfo)
+                .map(EspDeviceInfoMapper::mapToEspDeviceInfo)
                 .doOnNext(onNext -> log.info("OnNext {}", onNext))
                 .doOnError(error -> log.error("Error: {}", error));
     }
@@ -150,9 +147,20 @@ public class EsptoolService {
      * @param commands
      * @return Flux<String>
      */
-    public Flux<String> downloadFlash(String ...commands) {
-        return commandService.processCommands(commands)
-                .doOnNext(onNext -> log.info("OnNext {}", onNext));
+    public Flux<String> downloadFlash(String... commands) {
+        return commandService.processCommandsWithCustomCharset(commands)
+                .distinct(this::splitPercentaje);
+    }
+
+    /**
+     * @param input
+     * @return
+     */
+    private String splitPercentaje(String input) {
+        if(input.contains("\\((\\d{1,2}|100) %\\)"))  {
+            return input.split("\\((\\d{1,2}|100) %\\)")[0];
+        }
+        return input;
     }
 
 }

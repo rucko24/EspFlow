@@ -1,20 +1,13 @@
 package com.nodemcuui.tool.views.readflash;
 
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.theme.lumo.Lumo;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextOverflow;
-import com.vaadin.flow.theme.lumo.LumoUtility.Whitespace;
-import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 import lombok.Getter;
+import org.vaadin.firitin.components.DynamicFileDownloader;
 
 import java.util.stream.Stream;
 
@@ -63,48 +56,29 @@ public final class DeviceCardLayout extends Div {
     /**
      * The download flash button
      */
-    private DownloadFlashButton downloadFlashButton;
+    private Button downloadFlashButton;
+    private DynamicFileDownloader dynamicFileDownloader;
 
     private String image;
     private EspDeviceInfo espDeviceInfo;
 
-    public DeviceCardLayout(final String image) {
-        super.addClassName("card-container");
-        this.image = image;
-
-        final Div toolbar = this.createDivToolbarRow();
-        final Div slideOverView = this.createDivSlideOverview();
-
-        super.add(toolbar, slideOverView);
-    }
-
-    public DeviceCardLayout(final String image, final Span chipTypeValue) {
-        super.addClassName("card-container");
-        this.image = image;
-        this.chipTypeValue = chipTypeValue;
-
-        final Div toolbar = this.createDivToolbarRow();
-        final Div slideOverView = this.createDivSlideOverview();
-
-        super.add(toolbar, slideOverView);
-    }
-
-    public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo) {
-        super.addClassName("card-container");
-        this.image = image;
-        this.espDeviceInfo = espDeviceInfo;
-
-        final Div toolbar = this.createDivToolbarRow();
-        final Div slideOverView = this.createDivSlideOverview();
-
-        super.add(toolbar, slideOverView);
-    }
-
-    public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo, final DownloadFlashButton downloadFlashButton) {
+    public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo, final Button downloadFlashButton) {
         super.addClassName("card-container");
         this.image = image;
         this.espDeviceInfo = espDeviceInfo;
         this.downloadFlashButton = downloadFlashButton;
+
+        final Div toolbar = this.createDivToolbarRow();
+        final Div slideOverView = this.createDivSlideOverview();
+
+        super.add(toolbar, slideOverView);
+    }
+
+    public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo, final DynamicFileDownloader dynamicFileDownloader) {
+        super.addClassName("card-container");
+        this.image = image;
+        this.espDeviceInfo = espDeviceInfo;
+        this.dynamicFileDownloader = dynamicFileDownloader;
 
         final Div toolbar = this.createDivToolbarRow();
         final Div slideOverView = this.createDivSlideOverview();
@@ -128,7 +102,10 @@ public final class DeviceCardLayout extends Div {
         Div divControls = new Div();
         divControls.addClassName("div-controls");
 
-        divControls.add(downloadFlashButton);
+        if(downloadFlashButton != null) {
+            divControls.add(downloadFlashButton);
+        }
+        divControls.add(dynamicFileDownloader);
 
         return divControls;
     }
@@ -194,7 +171,7 @@ public final class DeviceCardLayout extends Div {
 
     public Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
-        Stream.of(chipType, flashSize, crystal, chipIs).forEach(span -> span.getStyle().set("font-weight","bold"));
+        Stream.of(chipType, flashSize, crystal, chipIs).forEach(span -> span.getStyle().set("font-weight", "bold"));
         chipTypeValue.setText(":  " + espDeviceInfo.chipType());
         chipIsValue.setText(":  " + espDeviceInfo.chipIs());
 

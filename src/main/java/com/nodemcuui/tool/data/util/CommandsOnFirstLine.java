@@ -1,20 +1,26 @@
 package com.nodemcuui.tool.data.util;
 
+import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 import java.util.Arrays;
 
 /**
  * @author rubn
  */
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandsOnFirstLine {
 
-    public static String onFirstLine(final String line, final String[] commands) {
+    public static void putCommansdOnFirstLine(final String[] commands, final ConsoleOutPut consoleOutPut) {
+
         final String firstLine = Arrays.toString(commands)
                 .replaceAll("\\[+", "")
-                .replaceAll("\\]+", "")
-                .replaceAll(",", "")
+                .replaceAll("]+", "")
+                .replace(",", "")
                 .concat("\n\n");
-        return new StringBuilder(line)
-                .insert(0, "Command: ".concat(firstLine))
-                .toString();
+
+        consoleOutPut.write(firstLine);
+
     }
 }

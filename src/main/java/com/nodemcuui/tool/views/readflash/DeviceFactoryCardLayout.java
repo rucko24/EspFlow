@@ -1,11 +1,10 @@
 package com.nodemcuui.tool.views.readflash;
 
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Span;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.vaadin.firitin.components.DynamicFileDownloader;
 
 /**
  * @author rubn
@@ -13,19 +12,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class DeviceFactoryCardLayout {
 
-    public static DeviceCardLayout createDeviceCard(final String image) {
-        return new DeviceCardLayout(image);
+    public static DeviceCardLayout createDeviceCard(final String image, final EspDeviceInfo espDeviceInfo, final Button downloadFlash) {
+        return new DeviceCardLayout(image, espDeviceInfo, downloadFlash);
     }
 
-    public static DeviceCardLayout createDeviceCard(final String image, final Span chipTypeValue) {
-        return new DeviceCardLayout(image, chipTypeValue);
-    }
-
-    public static DeviceCardLayout createDeviceCard(final String image, final EspDeviceInfo espDeviceInfo) {
-        return new DeviceCardLayout(image, espDeviceInfo);
-    }
-
-    public static DeviceCardLayout createDeviceCard(final String image, final EspDeviceInfo espDeviceInfo, final DownloadFlashButton downloadFlash) {
+    public static DeviceCardLayout createDeviceCard(final String image, final EspDeviceInfo espDeviceInfo, final DynamicFileDownloader downloadFlash) {
         return new DeviceCardLayout(image, espDeviceInfo, downloadFlash);
     }
 

@@ -46,4 +46,14 @@ public class CommandService {
         return processCommandsInternals.processCommands(commands);
     }
 
+    /**
+     *
+     * Used for firmware reading
+     *
+     * @param commands
+     * @return Flux<String>
+     */
+    public Flux<String> processCommandsWithCustomCharset(final String... commands) {
+        return processCommandsInternals.processCommandsWithCustomCharset(commands);
+    }
 }

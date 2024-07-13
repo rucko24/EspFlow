@@ -58,6 +58,7 @@ public class DivFlashUploader extends Div {
 
     private void uploadInitialConfig() {
         upload.setReceiver(buffer);
+        upload.setMaxFiles(1);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
     }
 
@@ -120,11 +121,16 @@ public class DivFlashUploader extends Div {
 
     private void i18N() {
         uploadI18N.getAddFiles().setOne("Select firmware...");
+
         uploadI18N.getDropFiles().setOne("Drop firmware here...");
         uploadI18N.getError()
                 .setIncorrectFileType(
                         "The provided file doesn't have the correct format. Please provide a .bin file.");
         upload.setI18n(uploadI18N);
+        upload.getUploadButton().getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        //upload.getUploadButton().getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
+        //upload.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
+
     }
 
     @Override

@@ -4,34 +4,38 @@ import com.nodemcuui.tool.data.enums.BaudRates;
 import com.nodemcuui.tool.data.enums.FlashMode;
 import com.nodemcuui.tool.data.service.CommandService;
 import com.nodemcuui.tool.data.service.EsptoolService;
-import com.nodemcuui.tool.data.util.console.ConsoleCommandOutPutArea;
-import com.nodemcuui.tool.views.MainLayout;
 import com.nodemcuui.tool.data.util.CommandsOnFirstLine;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
+import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
+import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
+import com.nodemcuui.tool.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.AUTO;
@@ -55,7 +59,7 @@ import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeaderDiv {
+public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
 
     private final DivFlashUploader divFlashUploader;
     private final DivHeaderPorts divHeaderPorts;
@@ -64,38 +68,44 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
     private final RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<String> eraseRadioButtons = new RadioButtonGroup<>();
+    private final VerticalLayout contentForPrimary = new VerticalLayout();
+    private Button buttonTestFirmware = new Button("Enable download link");
+
     /**
      * Console output area
      */
-    private TextArea textAreaConsoleOutput;
+    private ConsoleOutPut consoleOutPut = new ConsoleOutPut();
 
     private String[] commands;
 
     @PostConstruct
-    public void constructEsp21View() {
-        super.removeAll();
+    public void init() {
         super.setSizeFull();
+        super.getStyle().set("display", "flex");
+        super.getStyle().set("flex-direction", "row");
+
         final var divRowPort = this.rowPorts();
         final var divRowBaudRate = this.rowBaudRates();
         final var divRowFlashMode = this.rowFlashMode();
         final var divRowEraseFlash = this.rowEraseFlash();
         final var divRowUploaderFlash = this.rowUploadingFlash();
-        final var divRowConsole = this.rowConsole();
 
-        final VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowUploaderFlash,
-                divRowConsole);
+        contentForPrimary.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowUploaderFlash, buttonTestFirmware);
 
-        final SplitLayout splitLayout = new SplitLayout();
-        splitLayout.setOrientation(Orientation.VERTICAL);
+        final SplitLayout splitLayout = new SplitLayout(Orientation.VERTICAL);
+        splitLayout.setSplitterPosition(60);
         splitLayout.setSizeFull();
         splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
-        splitLayout.addToPrimary(verticalLayout);
+        splitLayout.addToPrimary(contentForPrimary);
+        splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
 
-        verticalLayout.addClassName("vertical-parent");
+        contentForPrimary.addClassName("vertical-parent");
 
-        splitLayout.addToSecondary(divRowConsole);
-        splitLayout.setSplitterPosition(60);
+        final var divRowToSecondary = new Div(consoleOutPut);
+        divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
+        divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
+
+        splitLayout.addToSecondary(divRowToSecondary);
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getSecondaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
 //        splitLayout.getSecondaryComponent().getElement().getStyle().set("margin-bottom", "10px");
@@ -168,17 +178,39 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
     }
 
     /**
-     * Show console output
+     * Dentro de un listener de un boton ?
+     * Click en un boton e instanciarlo y cuando se haga empezara la descarga
      *
-     * @return HorizontalLayout
+     * @param ui
      */
-    private Div rowConsole() {
-        final ConsoleCommandOutPutArea consoleCommandOutPutArea = new ConsoleCommandOutPutArea();
-        this.textAreaConsoleOutput = consoleCommandOutPutArea.getTextArea();
-        return consoleCommandOutPutArea;
+    private void uploadTest(final UI ui) {
+        DownloadFlashButton linksArea = new DownloadFlashButton(consoleOutPut, ui);
+        linksArea.setText("Download");
+        this.contentForPrimary.add(new Div(linksArea));
+        linksArea.enableAnchorForDownloadedTheFirmware("esp-backup.bin");
+
+        buttonTestFirmware.addClickListener(event -> {
+
+
+        });
+
     }
 
-    @SneakyThrows
+    private static Path getUploadFolder() {
+        //Obtener la ruta del fichero aqui para luego guardar o escribir el firmware aqui
+        Path folder = Path.of("uploaded-files");
+        log.info("Absolute Path: {}", folder.toAbsolutePath().toString());
+
+        if (!Files.exists(folder)) {
+            try {
+                Files.createDirectories(folder);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return folder;
+    }
+
     public void consoleOutput(final UI ui) {
         this.divHeaderPorts.getValidateInput().addClickListener(e -> {
             final String command = this.divHeaderPorts.getInputCommand().getValue().trim();
@@ -192,7 +224,7 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
         });
         //esptool.py -p /dev/ttyUSB0 flash_id
         this.divHeaderPorts.getComboBoxSerialPort().addValueChangeListener((event) -> {
-            this.textAreaConsoleOutput.clear();
+            this.consoleOutPut.clear();
             if (Objects.nonNull(event.getValue())) {
                 final String port = event.getValue();
                 final int baudRate = baudRatesRadioButtonGroup.getValue().getBaudRate();
@@ -210,37 +242,40 @@ public class FlashEsp32View extends HorizontalLayout implements ResponsiveHeader
     }
 
     public void subscribeThis(Flux<String> flux, final UI ui) {
+
+        CommandsOnFirstLine.putCommansdOnFirstLine(this.commands, consoleOutPut);
+
         flux.doOnError((Throwable error) ->
                         ui.access(() -> {
                             log.info("Error: {}", error);
-                            this.textAreaConsoleOutput.setValue(textAreaConsoleOutput.getValue().concat(error.getMessage()));
+                            this.consoleOutPut.writeln(error.getMessage());
                         })
                 )
+                .doOnComplete(() -> {
+                    ui.access(() -> this.consoleOutPut.writePrompt());
+                })
                 .subscribe((String line) ->
                         ui.access(() -> {
                             log.info("Salida: subscribeThis {}", line);
-                            this.textAreaConsoleOutput.setValue(textAreaConsoleOutput.getValue().concat(line).concat("\n"));
+                            this.consoleOutPut.writeln(line);
                         })
                 );
-        final String s = this.textAreaConsoleOutput.getValue();
-        final String r = CommandsOnFirstLine.onFirstLine(s, this.commands);
-        textAreaConsoleOutput.clear();
-        textAreaConsoleOutput.setValue(r);
+
 
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-
+        super.onDetach(detachEvent);
     }
 
-    @SneakyThrows
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
+            super.onAttach(attachEvent);
             final UI ui = attachEvent.getUI();
             this.consoleOutput(ui);
+            this.uploadTest(ui);
         }
     }
 

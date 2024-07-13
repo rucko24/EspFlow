@@ -3,18 +3,17 @@ package com.nodemcuui.tool.views.readflash;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
 import com.nodemcuui.tool.data.enums.BaudRates;
-import com.nodemcuui.tool.data.service.ComPortService;
-import com.nodemcuui.tool.data.service.CommandService;
 import com.nodemcuui.tool.data.service.EsptoolService;
 import com.nodemcuui.tool.data.util.CommandsOnFirstLine;
 import com.nodemcuui.tool.data.util.NotificationBuilder;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
-import com.nodemcuui.tool.data.util.console.ConsoleCommandOutPutArea;
+import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
 import com.nodemcuui.tool.data.util.downloader.DownloadFlashButton;
 import com.nodemcuui.tool.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -28,21 +27,33 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Bottom;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.MediaType;
+import org.springframework.util.FastByteArrayOutputStream;
+import org.vaadin.firitin.components.DynamicFileDownloader;
 import reactor.core.publisher.Mono;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
@@ -62,23 +73,19 @@ import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideC
 @RequiredArgsConstructor
 public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
-    private final CommandService commandService;
-    private final ComPortService comPortService;
     private final EsptoolService esptoolService;
     private final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel();
 
     private final VerticalLayout content = new VerticalLayout();
     private final ProgressBar progressBar = new ProgressBar();
     /**
-     * Console output area
+     * Console output
      */
-    private final TextArea textAreaConsoleOutput = new ConsoleCommandOutPutArea().getTextArea();
+    private final ConsoleOutPut consoleOutPut = new ConsoleOutPut();
     private final HorizontalLayout footer = new HorizontalLayout();
 
     private final Span spanTotalDevices = new Span("Total devices: ");
     private final Span spanTotalDevicesValue = new Span();
-    private final Span decimalSize = new Span("Decimal: reading...");
-    private final Span hexSize = new Span("Hex: reading...");
 
     private String[] commands;
 
@@ -100,22 +107,21 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         this.content.add(progressBar);
 
         final var splitLayout = new SplitLayout(Orientation.VERTICAL);
-
         splitLayout.setSplitterPosition(60);
         splitLayout.setSizeFull();
         splitLayout.addToPrimary(content);
         splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
 
         final var footer = this.getFooter();
-        textAreaConsoleOutput.removeClassName(Bottom.SMALL);
-        textAreaConsoleOutput.getStyle().set(OVERFLOW_Y, "unset");
-        final var verticalLayoutToSecondary = new VerticalLayout(textAreaConsoleOutput, footer);
-        verticalLayoutToSecondary.setFlexGrow(1, textAreaConsoleOutput);
+        //consoleOutPut.removeClassName(Bottom.SMALL);
+        //consoleOutPut.getStyle().set(OVERFLOW_Y, "unset");
 
-        verticalLayoutToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
+        final var divRowToSecondary = new Div(consoleOutPut);
+        divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
+        divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
+
         //verticalLayoutToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
-        splitLayout.addToSecondary(verticalLayoutToSecondary);
-        splitLayout.setSplitterPosition(60);
+        splitLayout.addToSecondary(divRowToSecondary, footer);
 
         splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
@@ -162,9 +168,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 //                    ui.access(() -> this.spanTotalDevicesValue.setText(" " + totalDevices));
 //                });
 
+        this.progressBar.setVisible(true);
         this.esptoolService.readAllDevices()
                 .doOnError(error -> {
                     ui.access(() -> {
+                        this.progressBar.setVisible(false);
                         log.info("Error: {}", error);
                         NotificationBuilder.builder()
                                 .withText("Error al leer el microcontrolador " + error)
@@ -185,7 +193,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 })
                 .subscribe(espDeviceInfo -> {
                     ui.access(() -> {
-                        this.progressBar.setVisible(true);
                         final String flashSize = espDeviceInfo.detectedFlashSize();
                         if (flashSize != null) {
 //                            this.totalDevices.setText("Flash size: " + flashSize);
@@ -197,16 +204,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                             if (chipType.endsWith("8266") && flashSize.equals("1MB")) {
 
                                 //chipIs-currentTimeMillis-backupflash
-                                long currentTimeMillis = System.currentTimeMillis();
-                                String fileName = espDeviceInfo.chipIs().concat("-")
-                                        .concat(String.valueOf(currentTimeMillis))
-                                        .concat("-backupflash");
 
-                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
+                                var downloadTest = testDownload(ui, espDeviceInfo);
 
                                 Slide esp01sSlide = new Slide(createSlideContent(
                                         "https://www.electronicwings.com/storage/PlatformSection/TopicContent/308/description/esp8266%20module.jpg",
-                                        espDeviceInfo, downFlashButton));
+                                        espDeviceInfo, downloadTest));
 
                                 espDevicesCarousel.addSlide(esp01sSlide);
                             }
@@ -214,38 +217,36 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                             if (espDeviceInfo.chipIs().equals("ESP8285H16") && flashSize.equals("2MB")) {
 
                                 //chipIs-currentTimeMillis-backupflash
-                                long currentTimeMillis = System.currentTimeMillis();
-                                String fileName = espDeviceInfo.chipIs().concat("-")
-                                        .concat(String.valueOf(currentTimeMillis))
-                                        .concat("-backupflash");
-
-                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
-
-                                Slide esp8285H16Slide = new Slide(createSlideContent(
-                                        "https://rubn0x52.com/assets/images/esp8285h08.jpg",
-                                        espDeviceInfo,
-                                        downFlashButton));
-
-                                espDevicesCarousel.addSlide(esp8285H16Slide);
+//                                long currentTimeMillis = System.currentTimeMillis();
+//                                String fileName = espDeviceInfo.chipIs().concat("-")
+//                                        .concat(String.valueOf(currentTimeMillis))
+//                                        .concat("-backupflash.bin");
+//
+//                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
+//
+//                                Slide esp8285H16Slide = new Slide(createSlideContent(
+//                                        "https://rubn0x52.com/assets/images/esp8285h08.jpg", espDeviceInfo, null));
+//
+//                                espDevicesCarousel.addSlide(esp8285H16Slide);
 
                             }
 
                             if (chipType.endsWith("8266") && flashSize.equals("4MB")) {
 
-                                //chipIs-currentTimeMillis-backupflash
-                                long currentTimeMillis = System.currentTimeMillis();
-                                String fileName = espDeviceInfo.chipIs().concat("-")
-                                        .concat(String.valueOf(currentTimeMillis))
-                                        .concat("-backupflash");
-
-                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
-
-                                Slide esp8266Slide = new Slide(createSlideContent(
-                                        "https://rubn0x52.com/assets/images/nodemcu-v3-wifi-esp8266-ch340.png",
-                                        espDeviceInfo,
-                                        downFlashButton));
-
-                                espDevicesCarousel.addSlide(esp8266Slide);
+//                                //chipIs-currentTimeMillis-backupflash
+//                                long currentTimeMillis = System.currentTimeMillis();
+//                                String fileName = espDeviceInfo.chipIs().concat("-")
+//                                        .concat(String.valueOf(currentTimeMillis))
+//                                        .concat("-backupflash.bin");
+//
+//                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
+//
+//                                Slide esp8266Slide = new Slide(createSlideContent(
+//                                        "https://rubn0x52.com/assets/images/nodemcu-v3-wifi-esp8266-ch340.png",
+//                                        espDeviceInfo,
+//                                        downFlashButton.getDownloadFlashButton()));
+//
+//                                espDevicesCarousel.addSlide(esp8266Slide);
 
                             }
 
@@ -255,14 +256,16 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                                 long currentTimeMillis = System.currentTimeMillis();
                                 String fileName = espDeviceInfo.chipIs().concat("-")
                                         .concat(String.valueOf(currentTimeMillis))
-                                        .concat("-backupflash");
+                                        .concat("-backupflash.bin");
 
-                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
+//                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
+
+                                var downloadFlashWithNormalButton = downloadFlashWithNormalButton(ui, fileName, espDeviceInfo);
 
                                 Slide esp32s3Slide = new Slide(createSlideContent(
                                         "https://www.mouser.es/images/espressifsystems/hd/ESP32-S3-DEVKITC-1-N8_SPL.jpg",
                                         espDeviceInfo,
-                                        downFlashButton));
+                                        downloadFlashWithNormalButton));
 
                                 espDevicesCarousel.addSlide(esp32s3Slide);
                             }
@@ -287,26 +290,36 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      */
     private DownloadFlashButton downloadFlash(final UI ui, String fileName, EspDeviceInfo espDeviceInfo) {
         final DownloadFlashButton downloadFlashButton = new DownloadFlashButton();
-        downloadFlashButton.saveFirmware(fileName);
-        downloadFlashButton.getDownloadFlashButton().addClickListener(event -> {
+        //downloadFlashButton.saveFirmware(fileName);
+        return downloadFlashButton;
+    }
+
+    /**
+     * @param ui
+     * @param espDeviceInfo
+     * @return DownloadFlashButton
+     */
+    private Button downloadFlashWithNormalButton(final UI ui, String fileName, EspDeviceInfo espDeviceInfo) {
+        final Button downloadFlashButton = new Button("Download flash", VaadinIcon.DOWNLOAD.create());
+        downloadFlashButton.addClickListener(event -> {
             ui.access(() -> {
-                Notification.show("Micro es: " + espDeviceInfo.chipIs());
-                this.readFlash(ui, fileName, espDeviceInfo);
+                String currentTimeMillis = String.valueOf(System.currentTimeMillis());
+                String fileNameResult = fileName.concat("-")
+                        .concat(currentTimeMillis).concat("-backup.bin");
+                // this.readFlash(ui, fileNameResult, espDeviceInfo);
             });
         });
         return downloadFlashButton;
     }
 
     /**
-     * PORT /dev/ttyUSB1, COM
-     * <p>
-     * esptool.py --port /dev/ttyUSB1 read_flash 0 ALL esp8266-backupflash.bin
+     * <p> esptool.py --port /dev/ttyUSB1 read_flash 0 ALL esp8266-backupflash.bin <p/>
      *
      * @param ui
+     * @param fileName
+     * @param espDeviceInfo
      */
     private void readFlash(final UI ui, final String fileName, final EspDeviceInfo espDeviceInfo) {
-
-        textAreaConsoleOutput.clear();
 
         this.commands = new String[]{
                 "esptool.py",
@@ -314,27 +327,29 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 "read_flash",
                 "0",
-                "ALL",
+                "0x3000",
                 fileName
         };
+
+        CommandsOnFirstLine.putCommansdOnFirstLine(this.commands, this.consoleOutPut);
 
         this.esptoolService.downloadFlash(commands)
                 .doOnComplete(() -> {
                     ui.access(() -> {
-                        log.info("Backup creado complemante! : {}", "");
+                        log.info("Backup completado! {}", "");
                         NotificationBuilder.builder()
-                                .withText("Backup creado complemante! ")
+                                .withText("Backup completado! ")
                                 .withPosition(Position.MIDDLE)
                                 .withDuration(3000)
                                 .withIcon(VaadinIcon.INFO)
-                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                                .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
                                 .make();
+                        this.consoleOutPut.writePrompt();
                     });
                 })
                 .doOnError(onError -> {
                     ui.access(() -> {
                         log.info("Error: {}", onError);
-                        textAreaConsoleOutput.setValue(onError.getMessage());
                         NotificationBuilder.builder()
                                 .withText("Error al crear backup de esta flash " + onError)
                                 .withPosition(Position.MIDDLE)
@@ -344,19 +359,70 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                                 .make();
                     });
                 })
-                .subscribe(readLineFromOutputConsole -> {
+                .subscribe(inputLine -> {
                     ui.access(() -> {
-                        log.info("Process line: {}", readLineFromOutputConsole);
-                        this.textAreaConsoleOutput.setValue(textAreaConsoleOutput.getValue().concat(readLineFromOutputConsole).concat("\n"));
+                        this.consoleOutPut.readFlash(inputLine);
                     });
                 });
 
-        final String s = this.textAreaConsoleOutput.getValue();
-        final String r = CommandsOnFirstLine.onFirstLine(s, this.commands);
-        textAreaConsoleOutput.clear();
-        textAreaConsoleOutput.setValue(r);
+    }
+
+    public DynamicFileDownloader testDownload(final UI ui, EspDeviceInfo espDeviceInfo) {
+
+        final String[] commands = new String[]{
+                "esptool.py",
+                "--port", "/dev/ttyUSB1",
+                "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
+                "flash_id"
+        };
+
+        AtomicReference<String> fileName = new AtomicReference<>("");
+
+        return new DynamicFileDownloader(VaadinIcon.DOWNLOAD.create(),
+                "Download file with timestamp in name",
+                outputStream -> {
+
+                    log.info("Path outputStream {}" + Path.of(fileName.get()).toAbsolutePath());
+                    if(Files.exists(Path.of(fileName.get()))) {
+                        outputStream.write(firmwareToByteArray(commands).readAllBytes());
+                    }
+
+                }).withFileNameGenerator(r -> {
+                    // This is called from Vaadin RequestHandler, before the
+                    // request body is written. Request is the only parameter, but
+                    // you can also access e.g. VaadinSession with getCurrent()
+                    // or add custom headers to file download like here
+                    VaadinRequest.getCurrent().setAttribute("foo", "bar");
+                    // and do the actual task, return the filename
+                    String currentTimeMillis = String.valueOf(System.currentTimeMillis());
+                    fileName.set(espDeviceInfo.chipIs().concat("-")
+                            .concat(currentTimeMillis).concat("-backup.bin"));
+                    log.info("Path withFileNameGenerator {}" + Path.of(fileName.get()).toAbsolutePath());
+                    return fileName.get();
+                })
+                .withContentTypeGenerator(() -> MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .withTooltip("Download Flash");
 
     }
+
+    private ByteArrayInputStream firmwareToByteArray(String ...commands) {
+        try (final var bin = new BufferedInputStream(this.execute(commands).getInputStream());
+             final var baos = new FastByteArrayOutputStream()) {
+            bin.transferTo(baos);
+            return new ByteArrayInputStream(baos.toByteArray());
+        } catch (IOException ex) {
+            log.error(ex.getMessage());
+        }
+        return null;
+    }
+
+    public Process execute(String... commands) throws IOException {
+        return new ProcessBuilder()
+                .command(commands)
+                .redirectErrorStream(Boolean.TRUE)
+                .start();
+    }
+
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
@@ -368,7 +434,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             this.showDetectedDevices(ui);
-
         }
     }
 }
