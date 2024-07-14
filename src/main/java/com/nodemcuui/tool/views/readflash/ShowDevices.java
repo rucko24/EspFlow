@@ -105,12 +105,15 @@ public class ShowDevices {
         CreateSlidedStage withAutoDetectFlashSize(final Checkbox autoDetectFlashSize);
     }
 
+    /**
+     * 9
+     */
     public interface CreateSlidedStage {
         Build createSlides();
     }
 
     /**
-     * 6
+     * 10
      */
     public interface Build extends IBuilder<ShowDevices> {
     }
@@ -157,7 +160,7 @@ public class ShowDevices {
         }
 
         @Override
-        public  AllAddressSizeStage withCustomFlashSizeAddress(TextField customFlashSizeAddress) {
+        public AllAddressSizeStage withCustomFlashSizeAddress(TextField customFlashSizeAddress) {
             this.endAddressSize = customFlashSizeAddress;
             return this;
         }
@@ -178,10 +181,9 @@ public class ShowDevices {
         public Build createSlides() {
             var macAddress = espDeviceInfo.macAddress();
             if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
-                var flashSize = espDeviceInfo.detectedFlashSize();
-                showEsp01s(flashSize);
+                showEsp01s(espDeviceInfo);
                 showEso82664MB(espDeviceInfo);
-                showEsp8285(flashSize);
+                showEsp8285(espDeviceInfo);
                 showEsp32S3(espDeviceInfo);
             } else {
                 ui.access(() -> {
@@ -207,22 +209,25 @@ public class ShowDevices {
             return new ShowDevices();
         }
 
+        /**
+         * Show the ESP8285H16 slide
+         *
+         * @param espDeviceInfo the espDeviceInfo with ESP8285H16 Information
+         */
+        private void showEsp8285(EspDeviceInfo espDeviceInfo) {
+            final String chipIp = espDeviceInfo.chipIs();
+            final String flashSize = espDeviceInfo.detectedFlashSize();
+            if (chipIp.contains("ESP8285H") && flashSize.equals("2MB")) {
 
-        private void showEsp8285(String flashSize) {
-            if (espDeviceInfo.chipIs().equals("ESP8285H16") && flashSize.equals("2MB")) {
+                final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
-                //chipIs-currentTimeMillis-backupflash
-//                                long currentTimeMillis = System.currentTimeMillis();
-//                                String fileName = espDeviceInfo.chipIs().concat("-")
-//                                        .concat(String.valueOf(currentTimeMillis))
-//                                        .concat("-backupflash.bin");
-//
-//                                var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
-//
-//                                Slide esp8285H16Slide = new Slide(createSlideContent(
-//                                        "https://rubn0x52.com/assets/images/esp8285h08.jpg", espDeviceInfo, null));
-//
-//                                espDevicesCarousel.addSlide(esp8285H16Slide);
+                var downloadTest = buttonForReadFlash(ui, espDeviceInfo, flashButtonWrapper);
+
+                Slide esp8285H16Slide = new Slide(createSlideContent(
+                        "images/esp8285h08.jpg",
+                        espDeviceInfo, downloadTest, flashButtonWrapper));
+
+                espDevicesCarousel.addSlide(esp8285H16Slide);
 
             }
         }
@@ -230,41 +235,42 @@ public class ShowDevices {
         /**
          * Show the esp01s slide
          *
-         * @param flashSize
+         * @param espDeviceInfo
          */
-        private void showEsp01s(String flashSize) {
-
-            if (espDeviceInfo.chipType().endsWith("8266") && flashSize.equals("1MB")) {
+        private void showEsp01s(final EspDeviceInfo espDeviceInfo) {
+            final String chipType = espDeviceInfo.chipType();
+            final String flashSize = espDeviceInfo.detectedFlashSize();
+            if (chipType.endsWith("8266") && flashSize.equals("1MB")) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
                 var downloadTest = buttonForReadFlash(ui, espDeviceInfo, flashButtonWrapper);
 
                 Slide esp01sSlide = new Slide(createSlideContent(
-                        "https://www.electronicwings.com/storage/PlatformSection/TopicContent/308/description/esp8266%20module.jpg",
+                        "images/esp01s-1MB.jpg",
                         espDeviceInfo, downloadTest, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp01sSlide);
             }
         }
 
+        /**
+         *   Show the esp8266 slide
+         *
+         * @param espDeviceInfo
+         */
         private void showEso82664MB(EspDeviceInfo espDeviceInfo) {
             if (espDeviceInfo.chipType().endsWith("8266") && espDeviceInfo.detectedFlashSize().equals("4MB")) {
 
-//        //chipIs-currentTimeMillis-backupflash
-//        long currentTimeMillis = System.currentTimeMillis();
-//        String fileName = espDeviceInfo.chipIs().concat("-")
-//                .concat(String.valueOf(currentTimeMillis))
-//                .concat("-backupflash.bin");
-//
-//        var downFlashButton = this.downloadFlash(ui, fileName, espDeviceInfo);
-//
-//        Slide esp8266Slide = new Slide(createSlideContent(
-//                "https://rubn0x52.com/assets/images/nodemcu-v3-wifi-esp8266-ch340.png",
-//                espDeviceInfo,
-//                downFlashButton.getDownloadFlashButton()));
-//
-//        espDevicesCarousel.addSlide(esp8266Slide);
+                final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
+
+                var downFlashButton = buttonForReadFlash(ui, espDeviceInfo, flashButtonWrapper);
+
+                Slide esp8266Slide = new Slide(createSlideContent(
+                        "images/esp8266-4MB.png",
+                        espDeviceInfo, downFlashButton, flashButtonWrapper));
+
+                espDevicesCarousel.addSlide(esp8266Slide);
 
             }
         }
@@ -276,7 +282,7 @@ public class ShowDevices {
                 var downFlashButton = buttonForReadFlash(ui, espDeviceInfo, flashButtonWrapper);
 
                 Slide esp32s3Slide = new Slide(createSlideContent(
-                        "https://www.mouser.es/images/espressifsystems/hd/ESP32-S3-DEVKITC-1-N8_SPL.jpg",
+                        "images/ESP32-S3-DEVKITC-1-N8_SPL.webp",
                         espDeviceInfo, downFlashButton, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp32s3Slide);
@@ -315,7 +321,7 @@ public class ShowDevices {
         /**
          * <p> esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin <p/>
          *
-         * @param ui the {@link UI} instance
+         * @param ui                 the {@link UI} instance
          * @param writFileToTempDir
          * @param espDeviceInfo
          * @param flashButtonWrapper
@@ -325,7 +331,7 @@ public class ShowDevices {
                                final FlashButtonWrapper flashButtonWrapper) {
 
             String processAutoDetectFlashSize = "";
-            if(autoDetectFlashSize.getValue()) {
+            if (autoDetectFlashSize.getValue()) {
                 processAutoDetectFlashSize = "ALL";
             } else {
                 processAutoDetectFlashSize = "0x".concat(endAddressSize.getValue().trim());

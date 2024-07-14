@@ -78,7 +78,6 @@ class ExecuteCommandsTest {
 
     @Test
     @DisplayName("Handle error")
-    @SneakyThrows
     void handleError() {
 //        final CountDownLatch count = new CountDownLatch(1);
 //        Flux.defer(() -> this.readIntputStream("esptool.py v"))

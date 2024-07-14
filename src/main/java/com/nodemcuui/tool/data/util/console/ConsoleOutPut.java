@@ -35,7 +35,6 @@ public class ConsoleOutPut extends Div {
     private static final String CONTROL_C = "\u0003";
     private static final String CLEAR_CURRENT_LINE = "\r\u001b[K";
     private final XTerm xterm = new XTerm();
-    //private final PreserveStateAddon preserveStateAddon = new PreserveStateAddon(xterm);
     private Button buttonClear = new Button(VaadinIcon.TRASH.create());
     private Button buttonDownScroll = new Button(VaadinIcon.ARROW_CIRCLE_DOWN_O.create());
     private Div divLeftMenuItems = new Div(buttonDownScroll, buttonClear);
@@ -62,8 +61,6 @@ public class ConsoleOutPut extends Div {
         h3.getStyle().set(Top.AUTO, AUTO);
 
         xterm.setId("id-for-xterm");
-//        xterm.setSizeFull();
-//        xterm.setFontFamily("arimo");
         xterm.addClassName("xterm");
 //        preserveStateAddon.writeln("esptool terminal!");
 //        preserveStateAddon.setPrompt("root@esptool $ ");
@@ -106,7 +103,7 @@ public class ConsoleOutPut extends Div {
         this.xterm.writePrompt();
     }
 
-    public void writeln(String  line) {
+    public void writeln(String line) {
         this.xterm.writeln(line);
     }
 
@@ -119,7 +116,7 @@ public class ConsoleOutPut extends Div {
         }
     }
 
-    public void write(String  line) {
+    public void write(String line) {
         this.xterm.write(line);
     }
 
@@ -147,7 +144,7 @@ public class ConsoleOutPut extends Div {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if(attachEvent.isInitialAttach()) {
+        if (attachEvent.isInitialAttach()) {
             this.xterm.fit();
             this.xterm.focus();
         }

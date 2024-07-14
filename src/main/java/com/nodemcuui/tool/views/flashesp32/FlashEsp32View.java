@@ -1,5 +1,7 @@
 package com.nodemcuui.tool.views.flashesp32;
 
+import com.infraleap.animatecss.Animated;
+import com.infraleap.animatecss.Animated.Animation;
 import com.nodemcuui.tool.data.enums.BaudRates;
 import com.nodemcuui.tool.data.enums.FlashMode;
 import com.nodemcuui.tool.data.service.CommandService;
@@ -15,7 +17,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -96,6 +97,8 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
         splitLayout.setSizeFull();
         splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
         splitLayout.addToPrimary(contentForPrimary);
+        Animated.animate(splitLayout, Animation.FADE_IN);
+
         splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
 
         contentForPrimary.addClassName("vertical-parent");
@@ -112,6 +115,7 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
         splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
 
         super.add(splitLayout);
+        Animated.animate(splitLayout, Animation.FADE_IN);
     }
 
     private Div rowPorts() {

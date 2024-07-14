@@ -86,6 +86,10 @@
 }
 
 .div-left-content-inside-title2 {
+    display: flex;
+    margin: 16px 0 8px;
+    align-items: center;
+    justify-content: center;
     margin: 16px 0 8px;
 }
 

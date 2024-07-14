@@ -1,5 +1,7 @@
 package com.nodemcuui.tool.views.readflash;
 
+import com.infraleap.animatecss.Animated;
+import com.infraleap.animatecss.Animated.Animation;
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
 import com.nodemcuui.tool.data.entity.EspDeviceWithTotalDevices;
 import com.nodemcuui.tool.data.service.EsptoolService;
@@ -10,6 +12,7 @@ import com.nodemcuui.tool.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -61,10 +64,11 @@ import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
 public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
     private final EsptoolService esptoolService;
-    private final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel();
-
-    private final HorizontalLayout contentForPrimarySection = new HorizontalLayout();
+    //With default espcarousel div
     private final ProgressBar progressBar = new ProgressBar();
+    private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar()));
+    private final HorizontalLayout contentForPrimarySection = new HorizontalLayout();
+    private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
     private final TextField startAddress = new TextField("Start address");
     private final TextField endAddress = new TextField("End address");
     private final Checkbox autoDetectFlashSize = new Checkbox("Autodetect flash size aka ALL");
@@ -92,6 +96,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         final var footer = this.getFooter();
 
         super.add(splitLayout, footer);
+        Animated.animate(splitLayout, Animation.FADE_IN);
+
     }
 
     private SplitLayout getSplitLayout() {
@@ -106,7 +112,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
         this.progressBar.setVisible(false);
         this.progressBar.setIndeterminate(true);
-        //this.contentForPrimarySection.setSpacing(false);
         this.contentForPrimarySection.setId("div-for-primary");
         this.contentForPrimarySection.setSizeFull();
 
@@ -126,12 +131,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
             textField.setPrefixComponent(new Span("0x"));
             textField.setClearButtonVisible(true);
         });
-        final VerticalLayout memoryControls = new VerticalLayout(startAddress, endAddress, autoDetectFlashSize, progressBar);
+        final VerticalLayout memoryControls = new VerticalLayout(buttonRefreshDevices, startAddress, endAddress, autoDetectFlashSize, progressBar);
         memoryControls.setWidth("50%");
         memoryControls.setJustifyContentMode(JustifyContentMode.CENTER);
-        memoryControls.setAlignSelf(FlexComponent.Alignment.CENTER, endAddress, startAddress, autoDetectFlashSize);
+        memoryControls.setAlignSelf(FlexComponent.Alignment.CENTER,
+                buttonRefreshDevices,
+                endAddress,
+                startAddress,
+                autoDetectFlashSize);
 
-        Div divCarousel = new Div(espDevicesCarousel);
         divCarousel.setId("div-carousel");
         divCarousel.setWidth("50%");
         divCarousel.addClassNames(Padding.LARGE, AlignItems.CENTER, JustifyContent.CENTER);
@@ -192,8 +200,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         return footer;
     }
 
-    private void showDetectedDevices(final UI ui) {
-
+    private void showDetectedDevices(final UI ui, final EspDevicesCarousel espDevicesCarousel) {
         this.progressBar.setVisible(true);
         this.esptoolService.readAllDevices()
                 .doOnError(error -> {
@@ -213,7 +220,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     ui.access(() -> {
                         this.progressBar.setVisible(false);
                         espDevicesCarousel.createSlides();
-                        this.espDevicesCarousel.setVisible(true);
+                        espDevicesCarousel.setVisible(true);
                     });
                 })
                 .flatMap(item -> this.esptoolService.countAllDevices()
@@ -250,6 +257,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 .build();
     }
 
+    private void refreshDevices(final UI ui) {
+        buttonRefreshDevices.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        buttonRefreshDevices.addClickListener(event -> {
+            final EspDevicesCarousel espDevicesNew = new EspDevicesCarousel(new ProgressBar());
+            this.divCarousel.removeAll();
+            this.divCarousel.add(espDevicesNew);
+            this.showDetectedDevices(ui, espDevicesNew);
+        });
+    }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
@@ -261,7 +277,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         if (attachEvent.isInitialAttach()) {
             super.onAttach(attachEvent);
             final UI ui = attachEvent.getUI();
-            this.showDetectedDevices(ui);
+            this.refreshDevices(ui);
         }
     }
 }

@@ -9,6 +9,7 @@ import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 
 import java.util.List;
@@ -21,14 +22,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class EspDevicesCarousel extends Div {
 
     private final List<Slide> slideList = new CopyOnWriteArrayList<>();
+    private ProgressBar progressBar;
 
-    public EspDevicesCarousel() {
+    public EspDevicesCarousel(final ProgressBar progressBar) {
+        this.progressBar = progressBar;
         super.setWidth("450px");
         super.setHeight("100%");
         super.getStyle().set("border-radius", "6px");
         //getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
         super.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
+        updateProgressBar(true);
         Animated.animate(this, Animation.FADE_IN);
+    }
+
+    private void updateProgressBar(final Boolean value) {
+        super.add(progressBar);
+        this.progressBar.setIndeterminate(value);
+        this.progressBar.setVisible(value);
     }
 
     /**
@@ -47,8 +57,8 @@ public class EspDevicesCarousel extends Div {
         carousel.setSizeFull();
         carousel.setThemeName("custom-theme");
         //carousel.addChangeListener(e -> Notification.show("Slide Changed!", 1000, Position.BOTTOM_START));
-
         super.add(carousel);
+        updateProgressBar(false);
     }
 
     public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton, FlashButtonWrapper anchor) {

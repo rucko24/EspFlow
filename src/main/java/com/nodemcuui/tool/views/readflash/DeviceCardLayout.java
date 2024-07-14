@@ -16,6 +16,7 @@ import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_TYPE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CRYSTAL_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
+import static com.nodemcuui.tool.data.util.UiToolConstants.MAC;
 
 /**
  * The DeviceCardLayout
@@ -53,6 +54,10 @@ public final class DeviceCardLayout extends Div {
     private final Span chipIs = new Span(CHIP_IS);
     private final Span chipIsValue = new Span();
     private final Hr hr4 = new Hr();
+
+    private final Span spanMadAddress = new Span(MAC);
+    private final Span spanMadAddressValue = new Span();
+    private final Hr hr5 = new Hr();
 
     /**
      * The download flash button
@@ -107,13 +112,13 @@ public final class DeviceCardLayout extends Div {
         Div divControls = new Div();
         divControls.addClassName("div-controls");
 
-        if(downloadFlashButton != null) {
+        if (downloadFlashButton != null) {
             divControls.add(downloadFlashButton);
         }
-        if(dynamicFileDownloader != null) {
+        if (dynamicFileDownloader != null) {
             divControls.add(dynamicFileDownloader);
         }
-        if(flashButtonWrapper != null) {
+        if (flashButtonWrapper != null) {
             divControls.add(flashButtonWrapper);
         }
 
@@ -154,7 +159,9 @@ public final class DeviceCardLayout extends Div {
     }
 
     public Div createDivLeftContentInside2() {
-        spanState.add(VaadinIcon.CHECK_CIRCLE.create());
+        var icon = VaadinIcon.CHECK_CIRCLE.create();
+        icon.getStyle().set("color","blue");
+        spanState.add(icon);
         divLeftContentInside2.add(spanState);
         divLeftContentInside2.addClassName("div-left-content-inside-title2");
         return divLeftContentInside2;
@@ -181,7 +188,7 @@ public final class DeviceCardLayout extends Div {
 
     public Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
-        Stream.of(chipType, flashSize, crystal, chipIs).forEach(span -> span.getStyle().set("font-weight", "bold"));
+        Stream.of(chipType, flashSize, crystal, chipIs, spanMadAddress).forEach(span -> span.getStyle().set("font-weight", "bold"));
         chipTypeValue.setText(":  " + espDeviceInfo.chipType());
         chipIsValue.setText(":  " + espDeviceInfo.chipIs());
 
@@ -189,12 +196,14 @@ public final class DeviceCardLayout extends Div {
         divChipIsAndValue.addClassName("div-right-ellipsis-text");
         divChipIsAndValue.getElement().setAttribute("title", espDeviceInfo.chipIs());
 
+        spanMadAddressValue.setText(": " + espDeviceInfo.macAddress());
+
         divChipIsAndValue.setWidthFull();
         flashSizeValue.setText(":  " + espDeviceInfo.detectedFlashSize());
         crystalValue.setText(":  " + espDeviceInfo.crystalIs());
         divRightContentText.add(chipType, chipTypeValue, hr1, divChipIsAndValue, hr2,
                 flashSize, flashSizeValue, hr3,
-                crystal, crystalValue, hr4);
+                crystal, crystalValue, hr4, spanMadAddress, spanMadAddressValue, hr5);
         return divRightContentText;
     }
 
