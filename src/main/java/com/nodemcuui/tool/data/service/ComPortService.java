@@ -44,6 +44,10 @@ public class ComPortService {
         return null;
     }
 
+    public long countAllDevices() {
+        return getPortsList().size();
+    }
+
     /**
      *
      * Filter if the port is Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R

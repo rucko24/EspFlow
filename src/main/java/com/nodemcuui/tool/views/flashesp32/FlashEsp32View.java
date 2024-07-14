@@ -11,7 +11,6 @@ import com.nodemcuui.tool.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -32,9 +31,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import reactor.core.publisher.Flux;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Objects;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.AUTO;
@@ -68,7 +64,6 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
     private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<String> eraseRadioButtons = new RadioButtonGroup<>();
     private final VerticalLayout contentForPrimary = new VerticalLayout();
-    private Button buttonTestFirmware = new Button("Enable download link");
 
     /**
      * Console output area
@@ -89,7 +84,7 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
         final var divRowEraseFlash = this.rowEraseFlash();
         final var divRowUploaderFlash = this.rowUploadingFlash();
 
-        contentForPrimary.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowUploaderFlash, buttonTestFirmware);
+        contentForPrimary.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowUploaderFlash);
 
         final SplitLayout splitLayout = new SplitLayout(Orientation.VERTICAL);
         splitLayout.setSplitterPosition(60);
@@ -174,22 +169,6 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
 
     private Div rowUploadingFlash() {
         return this.divFlashUploader;
-    }
-
-
-    private static Path getUploadFolder() {
-        //Obtener la ruta del fichero aqui para luego guardar o escribir el firmware aqui
-        Path folder = Path.of("uploaded-files");
-        log.info("Absolute Path: {}", folder.toAbsolutePath().toString());
-
-        if (!Files.exists(folder)) {
-            try {
-                Files.createDirectories(folder);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return folder;
     }
 
     public void consoleOutput(final UI ui) {

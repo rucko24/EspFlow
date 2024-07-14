@@ -68,7 +68,7 @@ public class EsptoolService {
     /**
      * This returns all existing esp32-based microcontrollers in the current system.
      *
-     * @return Flux<EspDeviceInfo>
+     * @return A {@link Flux} with the {@link EspDeviceInfo}`s corresponding to each <strong>esp32+</strong> microcontrollers
      */
     public Flux<EspDeviceInfo> readAllDevices() {
         return Flux.fromIterable(comPortService.getPortsList())
@@ -77,13 +77,26 @@ public class EsptoolService {
     }
 
     /**
+     * <p>Counting of all ports filtering out those of</p>
+     *
+     * <li>
+     *     <strong>Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R</strong>
+     * </li>
+     *
+     * @return A {@link Mono} with port counting
+     */
+    public Mono<Long> countAllDevices() {
+        return Mono.just(comPortService.countAllDevices());
+    }
+
+    /**
      * <p> It processes to use as parameters the <strong>--baud<strong>, the <strong>--port<strong> and the <strong>flash_id<strong>. </p>
      * <p>
      * With the above, this method creates a map that is then mapped to the entity EspDeviceInfo,
-     * as many items are issued we need for convenience to have them in a single item or Mono.
+     * as many items are issued we need for convenience to have them in a single item or Mono. </p>
      *
      * @param port the microcontroller port to be scanned
-     * @return Mono<EspDeviceInfo>
+     * @return a {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
      */
     public Mono<EspDeviceInfo> readFlashIdFromPort(String port) {
         final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", port, "--baud",
@@ -105,8 +118,9 @@ public class EsptoolService {
      * The command is: <strong>"esptool.py  flash_id"</strong>
      * </li>
      *
-     * @return Mono<EspDeviceInfo>
+     * @return a {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
      */
+    @SuppressWarnings("unused")
     public Mono<EspDeviceInfo> readFlashIdFromDefault() {
         final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--baud",
                 String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id");
@@ -158,7 +172,7 @@ public class EsptoolService {
 
     /**
      * @param input
-     * @return
+     * @return String
      */
     private String splitPercentaje(String input) {
         if (input.contains("\\((\\d{1,2}|100) %\\)")) {
@@ -168,7 +182,7 @@ public class EsptoolService {
     }
 
     /**
-     * Create the folder named esp-backup-flash-dir in the temporary directory of the operating system
+     * Create the folder named <strong>/esp-backup-flash-dir</strong> in the temporary directory of the operating system
      */
     public void createEspBackUpFlashDirIfNotExists() {
         final Path espBackupFlashDir = Path.of(System.getProperty("java.io.tmpdir").concat("/esp-backup-flash-dir"));

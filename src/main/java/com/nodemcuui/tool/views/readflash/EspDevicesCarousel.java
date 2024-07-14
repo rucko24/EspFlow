@@ -9,15 +9,13 @@ import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Use a StepBuilder
+ * @author rubn
  */
 @Uses(Carousel.class)
 public class EspDevicesCarousel extends Div {
@@ -32,19 +30,22 @@ public class EspDevicesCarousel extends Div {
         super.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
     }
 
+    /**
+     * @param slide
+     */
     public void addSlide(Slide slide) {
         this.slideList.add(slide);
     }
 
     /**
-     * Dependiendo de lo que se lea por consola se crea una slide en base a esa lectura
+     * It is invoked inside a listener of the button that is created with each console reading.
      */
     public void createSlides() {
 
         Carousel carousel = new Carousel(slideList.toArray(Slide[]::new));
         carousel.setSizeFull();
         carousel.setThemeName("custom-theme");
-        carousel.addChangeListener(e -> Notification.show("Slide Changed!", 1000, Position.BOTTOM_START));
+        //carousel.addChangeListener(e -> Notification.show("Slide Changed!", 1000, Position.BOTTOM_START));
 
         super.add(carousel);
         Animated.animate(carousel, Animation.FADE_IN);
@@ -54,6 +55,7 @@ public class EspDevicesCarousel extends Div {
         return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo, downFlashButton, anchor);
     }
 
+    @SuppressWarnings("unused")
     public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final DynamicFileDownloader downFlashButton) {
         return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo, downFlashButton);
     }

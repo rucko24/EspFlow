@@ -14,11 +14,14 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Bottom;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Top;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.AUTO;
+import static com.nodemcuui.tool.data.util.UiToolConstants.BOX_SHADOW_PROPERTY;
+import static com.nodemcuui.tool.data.util.UiToolConstants.BOX_SHADOW_VALUE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
 
@@ -77,7 +80,7 @@ public class ConsoleOutPut extends Div {
 
         //xterm.getStyle().set(OVERFLOW_Y, AUTO);
         xterm.getElement().setAttribute("title", "output");
-//        textAreaConsoleOutput.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+        xterm.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
         //xterm.addClassName("child-text-area-console");
         xterm.focus();
         xterm.fit();
@@ -85,7 +88,7 @@ public class ConsoleOutPut extends Div {
         final Div divTextArea = new Div(xterm);
         divTextArea.setId("divXterm");
         divTextArea.setSizeFull();
-        //divTextArea.addClassNames(Left.LARGE, Right.LARGE, "text-area-console-div");
+        divTextArea.addClassNames(Left.LARGE, Right.LARGE, "text-area-console-div");
 
         super.add(divTextArea);
         super.setWidthFull();

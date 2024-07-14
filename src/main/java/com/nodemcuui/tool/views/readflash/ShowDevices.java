@@ -12,7 +12,6 @@ import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import lombok.Getter;
@@ -20,6 +19,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideContent;
 
@@ -38,7 +38,6 @@ import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideC
  *         .createSlides()
  *         .make();
  * </pre>
- *
  */
 @Log4j2
 @Getter
@@ -90,10 +89,11 @@ public class ShowDevices {
     /**
      * 6
      */
-    public interface Build extends IBuilder<ShowDevices> {}
+    public interface Build extends IBuilder<ShowDevices> {
+    }
 
-    public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage, EsptoolServiceStage, UIStage , ConsoleOutPutStage,
-    CreateSlidedStage, Build {
+    public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage, EsptoolServiceStage, UIStage, ConsoleOutPutStage,
+            CreateSlidedStage, Build {
         private EspDevicesCarousel espDevicesCarousel;
         private EsptoolService esptoolService;
         private EspDeviceInfo espDeviceInfo;
@@ -132,17 +132,29 @@ public class ShowDevices {
 
         @Override
         public Build createSlides() {
-            final String detectedFlashSize = espDeviceInfo.detectedFlashSize();
-            if(detectedFlashSize.equals("none")) {
+            var macAddress = espDeviceInfo.macAddress();
+            if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
+                var flashSize = espDeviceInfo.detectedFlashSize();
+                showEsp01s(flashSize);
+                showEso82664MB(espDeviceInfo);
+                showEsp8285(flashSize);
+                showEsp32S3(espDeviceInfo);
+            } else {
                 ui.access(() -> {
-                    Notification.show("Error with microcontroller on port" + espDeviceInfo.port());
+                    NotificationBuilder.builder()
+                            .withText("Error with microcontroller on port" + espDeviceInfo.port())
+                            .withPosition(Position.MIDDLE)
+                            .withDuration(3000)
+                            .withIcon(VaadinIcon.WARNING)
+                            .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                            .make();
                 });
             }
-            showEsp01s(detectedFlashSize);
-            showEso82664MB(espDeviceInfo);
-            showEsp8285(detectedFlashSize);
-            showEsp32S3(espDeviceInfo);
             return this;
+        }
+
+        private boolean ifItContainsMacAddressShowMeTheSlides(String macAddress) {
+            return Objects.nonNull(macAddress);
         }
 
         @Override
@@ -150,7 +162,6 @@ public class ShowDevices {
 
             return new ShowDevices();
         }
-
 
 
         private void showEsp8285(String flashSize) {
@@ -173,7 +184,6 @@ public class ShowDevices {
         }
 
         /**
-         *
          * Show the esp01s slide
          *
          * @param flashSize
@@ -230,8 +240,6 @@ public class ShowDevices {
         }
 
         /**
-         *
-         *
          * @param ui
          * @param espDeviceInfo
          * @param flashButtonWrapper

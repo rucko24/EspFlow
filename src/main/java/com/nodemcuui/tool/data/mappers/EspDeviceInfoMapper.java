@@ -95,13 +95,6 @@ public final class EspDeviceInfoMapper {
     public static Mono<EspDeviceInfo> fallback(String port) {
         return Mono.just(EspDeviceInfo.builder()
                 .port(port)
-                .detectedFlashSize("none")
-                .macAddress("none")
-                .crystalIs("none")
-                .chipType("none")
-                .chipIs("none")
-                .decimal("none")
-                .hex("none")
                 .build());
     }
 

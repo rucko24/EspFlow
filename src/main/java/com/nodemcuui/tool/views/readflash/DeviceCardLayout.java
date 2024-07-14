@@ -39,7 +39,7 @@ public final class DeviceCardLayout extends Div {
     private final Span spanState = new Span("STATE UP");
 
     private final Span chipType = new Span(CHIP_TYPE);
-    private Span chipTypeValue = new Span();
+    private final Span chipTypeValue = new Span();
     private final Hr hr1 = new Hr();
 
     private final Span flashSize = new Span(FLASH_SIZE);

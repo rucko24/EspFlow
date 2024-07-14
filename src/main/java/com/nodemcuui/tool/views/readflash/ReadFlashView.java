@@ -1,5 +1,7 @@
 package com.nodemcuui.tool.views.readflash;
 
+import com.nodemcuui.tool.data.entity.EspDeviceInfo;
+import com.nodemcuui.tool.data.entity.EspDeviceWithTotalDevices;
 import com.nodemcuui.tool.data.service.EsptoolService;
 import com.nodemcuui.tool.data.util.NotificationBuilder;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
@@ -31,10 +33,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
@@ -65,16 +66,22 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final HorizontalLayout footer = new HorizontalLayout();
 
     private final Span spanTotalDevices = new Span("Total devices: ");
-    private final Span spanTotalDevicesValue = new Span();
+    private final Span spanTotalDevicesValue = new Span(" ");
+
+    private final Span spanPortWithError = new Span("Port failure: ");
+    private final Span spanPortWithErrorValue = new Span(" ");
 
     @PostConstruct
     public void init() {
         super.setSizeFull();
         super.getStyle().set("display", "flex");
         super.getStyle().set("flex-direction", "column");
+        super.getStyle().set("overflow-x","hidden");
 
         final SplitLayout splitLayout = getSplitLayout();
-        super.add(splitLayout);
+        final var footer = this.getFooter();
+
+        super.add(splitLayout, footer);
     }
 
     private SplitLayout getSplitLayout() {
@@ -90,7 +97,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         splitLayout.addToPrimary(content);
         splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
 
-        final var footer = this.getFooter();
         //consoleOutPut.removeClassName(Bottom.SMALL);
         //consoleOutPut.getStyle().set(OVERFLOW_Y, "unset");
 
@@ -99,7 +105,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
 
         //verticalLayoutToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
-        splitLayout.addToSecondary(divRowToSecondary, footer);
+        splitLayout.addToSecondary(divRowToSecondary);
 
         splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
@@ -112,15 +118,30 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @return HorizontalLayout
      */
     private HorizontalLayout getFooter() {
-        final Div div = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
-        div.getElement().setAttribute("theme", "badge");
+        Stream.of(this.spanPortWithError, this.spanPortWithErrorValue).forEach(spanPort -> {
+            spanPort.setVisible(false);
+            spanPort.getStyle().set("color","red");
+        });
+        final Div divSpanTotalDevices = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
+        final Div divWithPortErrors = new Div( this.spanPortWithError, this.spanPortWithErrorValue);
+        divSpanTotalDevices.getElement().setAttribute("theme", "badge");
+        divWithPortErrors.getElement().setAttribute("theme", "badge");
 //        final Div div2 = new Div(this.decimalSize);
 //        final Div div3 = new Div(this.hexSize);
         footer.setWidthFull();
+        footer.setHeight("40px");
+        footer.getStyle().set("border-top"," 1px solid var(--lumo-contrast-10pct)");
+        footer.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
         footer.setAlignItems(Alignment.CENTER);
-        footer.setJustifyContentMode(JustifyContentMode.AROUND);
-        footer.add(div);
-        Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue)
+        footer.setJustifyContentMode(JustifyContentMode.START);
+
+        final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);
+        divForBadges.setId("divForBadges");
+        divForBadges.setWidthFull();
+        divForBadges.getStyle().set("margin-left","0 var(--lumo-space-s)");
+
+        footer.add(divForBadges);
+        Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue, this.spanPortWithError, this.spanPortWithErrorValue)
                 .forEach(span -> {
                     span.getStyle().set("font-size", "var(--lumo-font-size-xs)");
                     span.addClassName("row-span-flash-size-footer");
@@ -128,26 +149,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         return footer;
     }
 
-    @SneakyThrows
     private void showDetectedDevices(final UI ui) {
-        //FIXME shot total devices
-//        this.esptoolService.readAllDevices()
-//                .doOnError(error -> {
-//                    ui.access(() -> {
-//                        log.info("Error: {}", error);
-//                        NotificationBuilder.builder()
-//                                .withText("Devices: " + error)
-//                                .withPosition(Position.MIDDLE)
-//                                .withDuration(3000)
-//                                .withIcon(VaadinIcon.WARNING)
-//                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
-//                                .make();
-//                    });
-//                })
-//                .count()
-//                .subscribe(totalDevices -> {
-//                    ui.access(() -> this.spanTotalDevicesValue.setText(" " + totalDevices));
-//                });
 
         this.progressBar.setVisible(true);
         this.esptoolService.readAllDevices()
@@ -171,8 +173,18 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                         this.content.add(espDevicesCarousel);
                     });
                 })
-                .subscribe(espDeviceInfo -> {
+                .flatMap(item -> this.esptoolService.countAllDevices()
+                        .map(count -> this.espDeviceWithTotalDevices(item, count)))
+                .subscribe(espDeviceWithTotalDevices -> {
                     ui.access(() -> {
+                        var espDeviceInfo = espDeviceWithTotalDevices.espDeviceInfo();
+                        this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
+                        if(Objects.isNull(espDeviceInfo.macAddress())) {
+                            spanPortWithError.setVisible(true);
+                            spanPortWithErrorValue.setVisible(true);
+                            this.spanPortWithErrorValue.setText(" " + espDeviceInfo.port());
+                        }
+                        //this.spanPortWithErrorValue.setText();
                         ShowDevices.builder()
                                 .withEspDevicesCarousel(espDevicesCarousel)
                                 .withEsptoolService(esptoolService)
@@ -184,6 +196,14 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     });
                 });
     }
+
+    private EspDeviceWithTotalDevices espDeviceWithTotalDevices(EspDeviceInfo espDeviceInfo, Long totalDevices) {
+        return EspDeviceWithTotalDevices.builder()
+                .totalDevices(totalDevices)
+                .espDeviceInfo(espDeviceInfo)
+                .build();
+    }
+
 
 
     @Override
