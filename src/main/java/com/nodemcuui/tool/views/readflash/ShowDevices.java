@@ -11,9 +11,11 @@ import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
 import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.textfield.TextField;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -79,7 +81,28 @@ public class ShowDevices {
      * 5
      */
     public interface UIStage {
-        CreateSlidedStage withUi(final UI ui);
+        StartAddressStage withUi(final UI ui);
+    }
+
+    /**
+     * 6
+     */
+    public interface StartAddressStage {
+        EndAddressSizeStage withStartSizeAddress(TextField startSizeAddress);
+    }
+
+    /**
+     * 7
+     */
+    public interface EndAddressSizeStage {
+        AllAddressSizeStage withCustomFlashSizeAddress(TextField customFlashSizeAddress);
+    }
+
+    /**
+     * 8
+     */
+    public interface AllAddressSizeStage {
+        CreateSlidedStage withAutoDetectFlashSize(final Checkbox autoDetectFlashSize);
     }
 
     public interface CreateSlidedStage {
@@ -93,12 +116,15 @@ public class ShowDevices {
     }
 
     public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage, EsptoolServiceStage, UIStage, ConsoleOutPutStage,
-            CreateSlidedStage, Build {
+            CreateSlidedStage, StartAddressStage, EndAddressSizeStage, AllAddressSizeStage, Build {
         private EspDevicesCarousel espDevicesCarousel;
         private EsptoolService esptoolService;
         private EspDeviceInfo espDeviceInfo;
         private ConsoleOutPut consoleOutPut;
         private UI ui;
+        private TextField startAddressSize;
+        private TextField endAddressSize;
+        private Checkbox autoDetectFlashSize;
 
         @Override
         public UIStage withConsoleOutStage(ConsoleOutPut consoleOutPut) {
@@ -125,8 +151,26 @@ public class ShowDevices {
         }
 
         @Override
-        public CreateSlidedStage withUi(UI ui) {
+        public StartAddressStage withUi(UI ui) {
             this.ui = ui;
+            return this;
+        }
+
+        @Override
+        public  AllAddressSizeStage withCustomFlashSizeAddress(TextField customFlashSizeAddress) {
+            this.endAddressSize = customFlashSizeAddress;
+            return this;
+        }
+
+        @Override
+        public EndAddressSizeStage withStartSizeAddress(TextField startSizeAddress) {
+            this.startAddressSize = startSizeAddress;
+            return this;
+        }
+
+        @Override
+        public CreateSlidedStage withAutoDetectFlashSize(Checkbox autoDetectFlashSize) {
+            this.autoDetectFlashSize = autoDetectFlashSize;
             return this;
         }
 
@@ -271,21 +315,29 @@ public class ShowDevices {
         /**
          * <p> esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin <p/>
          *
-         * @param ui
+         * @param ui the {@link UI} instance
          * @param writFileToTempDir
          * @param espDeviceInfo
+         * @param flashButtonWrapper
          */
         private void readFlash(final UI ui, final String writFileToTempDir,
                                final EspDeviceInfo espDeviceInfo,
                                final FlashButtonWrapper flashButtonWrapper) {
+
+            String processAutoDetectFlashSize = "";
+            if(autoDetectFlashSize.getValue()) {
+                processAutoDetectFlashSize = "ALL";
+            } else {
+                processAutoDetectFlashSize = "0x".concat(endAddressSize.getValue().trim());
+            }
 
             final String[] commands = new String[]{
                     "esptool.py",
                     "--port", espDeviceInfo.port(),
                     "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                     "read_flash",
-                    "0",
-                    "0x3500",
+                    startAddressSize.getValue().isEmpty() ? "0" : startAddressSize.getValue().trim(),
+                    processAutoDetectFlashSize,
                     writFileToTempDir
             };
 

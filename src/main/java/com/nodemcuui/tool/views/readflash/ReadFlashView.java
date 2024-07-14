@@ -10,11 +10,13 @@ import com.nodemcuui.tool.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -22,6 +24,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -30,6 +33,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
+import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +43,8 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
+import static com.nodemcuui.tool.data.util.UiToolConstants.MARGIN_10_PX;
+import static com.nodemcuui.tool.data.util.UiToolConstants.MARGIN_LEFT;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_X;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
 
@@ -57,8 +63,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final EsptoolService esptoolService;
     private final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel();
 
-    private final VerticalLayout content = new VerticalLayout();
+    private final HorizontalLayout contentForPrimarySection = new HorizontalLayout();
     private final ProgressBar progressBar = new ProgressBar();
+    private final TextField startAddress = new TextField("Start address");
+    private final TextField endAddress = new TextField("End address");
+    private final Checkbox autoDetectFlashSize = new Checkbox("Autodetect flash size aka ALL");
+
     /**
      * Console output
      */
@@ -76,7 +86,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         super.setSizeFull();
         super.getStyle().set("display", "flex");
         super.getStyle().set("flex-direction", "column");
-        super.getStyle().set("overflow-x","hidden");
+        super.getStyle().set("overflow-x", "hidden");
 
         final SplitLayout splitLayout = getSplitLayout();
         final var footer = this.getFooter();
@@ -85,26 +95,59 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     private SplitLayout getSplitLayout() {
-        this.progressBar.setVisible(false);
-        this.progressBar.setIndeterminate(true);
-        this.content.setSpacing(false);
-        this.content.addClassNames(AlignItems.CENTER, JustifyContent.CENTER);
-        this.content.add(progressBar);
-
+        /**
+         * Primary section
+         */
         final var splitLayout = new SplitLayout(Orientation.VERTICAL);
         splitLayout.setSplitterPosition(60);
         splitLayout.setSizeFull();
-        splitLayout.addToPrimary(content);
+        splitLayout.addToPrimary(contentForPrimarySection);
         splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
+
+        this.progressBar.setVisible(false);
+        this.progressBar.setIndeterminate(true);
+        //this.contentForPrimarySection.setSpacing(false);
+        this.contentForPrimarySection.setId("div-for-primary");
+        this.contentForPrimarySection.setSizeFull();
+
+        startAddress.setTooltipText("Start address");
+        endAddress.setTooltipText("Size address to read");
+        autoDetectFlashSize.setTooltipText("ALL");
+        autoDetectFlashSize.addValueChangeListener(event -> {
+            if(event.getValue()) {
+                endAddress.clear();
+                endAddress.setEnabled(false);
+            } else {
+                endAddress.clear();
+                endAddress.setEnabled(true);
+            }
+        });
+        Stream.of(startAddress, endAddress).forEach(textField -> {
+            textField.setPrefixComponent(new Span("0x"));
+            textField.setClearButtonVisible(true);
+        });
+        final VerticalLayout memoryControls = new VerticalLayout(startAddress, endAddress, autoDetectFlashSize, progressBar);
+        memoryControls.setWidth("50%");
+        memoryControls.setJustifyContentMode(JustifyContentMode.CENTER);
+        memoryControls.setAlignSelf(FlexComponent.Alignment.CENTER, endAddress, startAddress, autoDetectFlashSize);
+
+        Div divCarousel = new Div(espDevicesCarousel);
+        divCarousel.setId("div-carousel");
+        divCarousel.setWidth("50%");
+        divCarousel.addClassNames(Padding.LARGE, AlignItems.CENTER, JustifyContent.CENTER);
+
+        this.contentForPrimarySection.add(memoryControls, divCarousel);
 
         //consoleOutPut.removeClassName(Bottom.SMALL);
         //consoleOutPut.getStyle().set(OVERFLOW_Y, "unset");
 
+        /**
+         * Secondary section
+         */
         final var divRowToSecondary = new Div(consoleOutPut);
         divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
-
-        //verticalLayoutToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
+        divRowToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
         splitLayout.addToSecondary(divRowToSecondary);
 
         splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
@@ -120,17 +163,17 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private HorizontalLayout getFooter() {
         Stream.of(this.spanPortWithError, this.spanPortWithErrorValue).forEach(spanPort -> {
             spanPort.setVisible(false);
-            spanPort.getStyle().set("color","red");
+            spanPort.getStyle().set("color", "red");
         });
         final Div divSpanTotalDevices = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
-        final Div divWithPortErrors = new Div( this.spanPortWithError, this.spanPortWithErrorValue);
+        final Div divWithPortErrors = new Div(this.spanPortWithError, this.spanPortWithErrorValue);
         divSpanTotalDevices.getElement().setAttribute("theme", "badge");
         divWithPortErrors.getElement().setAttribute("theme", "badge");
 //        final Div div2 = new Div(this.decimalSize);
 //        final Div div3 = new Div(this.hexSize);
         footer.setWidthFull();
         footer.setHeight("40px");
-        footer.getStyle().set("border-top"," 1px solid var(--lumo-contrast-10pct)");
+        footer.getStyle().set("border-top", " 1px solid var(--lumo-contrast-10pct)");
         footer.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
         footer.setAlignItems(Alignment.CENTER);
         footer.setJustifyContentMode(JustifyContentMode.START);
@@ -138,7 +181,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);
         divForBadges.setId("divForBadges");
         divForBadges.setWidthFull();
-        divForBadges.getStyle().set("margin-left","0 var(--lumo-space-s)");
+        divForBadges.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
 
         footer.add(divForBadges);
         Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue, this.spanPortWithError, this.spanPortWithErrorValue)
@@ -170,7 +213,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     ui.access(() -> {
                         this.progressBar.setVisible(false);
                         espDevicesCarousel.createSlides();
-                        this.content.add(espDevicesCarousel);
+                        this.espDevicesCarousel.setVisible(true);
                     });
                 })
                 .flatMap(item -> this.esptoolService.countAllDevices()
@@ -179,7 +222,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     ui.access(() -> {
                         var espDeviceInfo = espDeviceWithTotalDevices.espDeviceInfo();
                         this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
-                        if(Objects.isNull(espDeviceInfo.macAddress())) {
+                        if (Objects.isNull(espDeviceInfo.macAddress())) {
                             spanPortWithError.setVisible(true);
                             spanPortWithErrorValue.setVisible(true);
                             this.spanPortWithErrorValue.setText(" " + espDeviceInfo.port());
@@ -191,6 +234,9 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                                 .withEspDeviceInfo(espDeviceInfo)
                                 .withConsoleOutStage(consoleOutPut)
                                 .withUi(ui)
+                                .withStartSizeAddress(this.startAddress)
+                                .withCustomFlashSizeAddress(this.endAddress)
+                                .withAutoDetectFlashSize(this.autoDetectFlashSize)
                                 .createSlides()
                                 .make();
                     });
@@ -203,7 +249,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 .espDeviceInfo(espDeviceInfo)
                 .build();
     }
-
 
 
     @Override

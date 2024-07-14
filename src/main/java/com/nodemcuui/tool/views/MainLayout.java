@@ -5,7 +5,6 @@ import com.nodemcuui.tool.security.AuthenticatedUser;
 import com.nodemcuui.tool.views.about.AboutView;
 import com.nodemcuui.tool.views.flashesp32.FlashEsp32View;
 import com.nodemcuui.tool.views.readflash.ReadFlashView;
-import com.nodemcuui.tool.views.test.TestMatCardView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -95,10 +94,6 @@ public class MainLayout extends AppLayout {
 
         if (accessChecker.hasAccess(ReadFlashView.class)) {
             nav.addItem(new SideNavItem("Read firmware", ReadFlashView.class, LineAwesomeIcon.ARROW_CIRCLE_DOWN_SOLID.create()));
-        }
-
-        if(accessChecker.hasAccess(TestMatCardView.class)) {
-            nav.addItem(new SideNavItem("Test", TestMatCardView.class, LineAwesomeIcon.INFO_CIRCLE_SOLID.create()));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {

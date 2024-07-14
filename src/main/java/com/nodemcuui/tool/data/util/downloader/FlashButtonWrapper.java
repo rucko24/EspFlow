@@ -60,10 +60,11 @@ public class FlashButtonWrapper extends FileDownloadWrapper {
      *  Convert the firmware to byte array
      *
      * @param writFileToTempFile
-     * @return ByteArrayInputStream
+     * @return A {@link ByteArrayInputStream} with firmware read from tmp
      */
     private ByteArrayInputStream firmwareToByteArray(final String writFileToTempFile) {
         final Path path = Path.of(writFileToTempFile);
+        path.toFile().deleteOnExit();
         try (final var bin = new BufferedInputStream(Files.newInputStream(path));
              final var baos = new FastByteArrayOutputStream()) {
             //transfer

@@ -61,7 +61,10 @@ public class ConsoleOutPut extends Div {
         final H3 h3 = new H3("Console");
         h3.getStyle().set(Top.AUTO, AUTO);
 
-        xterm.setSizeFull();
+        xterm.setId("id-for-xterm");
+//        xterm.setSizeFull();
+//        xterm.setFontFamily("arimo");
+        xterm.addClassName("xterm");
 //        preserveStateAddon.writeln("esptool terminal!");
 //        preserveStateAddon.setPrompt("root@esptool $ ");
 //        preserveStateAddon.writePrompt();

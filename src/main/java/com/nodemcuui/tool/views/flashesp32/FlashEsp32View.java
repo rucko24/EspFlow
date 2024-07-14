@@ -11,8 +11,11 @@ import com.nodemcuui.tool.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -83,8 +86,10 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
         final var divRowFlashMode = this.rowFlashMode();
         final var divRowEraseFlash = this.rowEraseFlash();
         final var divRowUploaderFlash = this.rowUploadingFlash();
+        final var buttonFlash = this.buttonFlash();
 
-        contentForPrimary.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowUploaderFlash);
+        contentForPrimary.add(divRowPort, divRowBaudRate, divRowFlashMode, divRowEraseFlash, divRowUploaderFlash,
+                buttonFlash);
 
         final SplitLayout splitLayout = new SplitLayout(Orientation.VERTICAL);
         splitLayout.setSplitterPosition(60);
@@ -169,6 +174,20 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
 
     private Div rowUploadingFlash() {
         return this.divFlashUploader;
+    }
+
+    private Div buttonFlash() {
+        final Div divButtonFlash = new Div();
+        divButtonFlash.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+        final Button button = new Button(new Span("⚡"));
+        button.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        button.setTooltipText("flash me!");
+        button.setDisableOnClick(true);
+        button.addClickListener(event -> {
+            //execute flash
+        });
+        divButtonFlash.add(button);
+        return divButtonFlash;
     }
 
     public void consoleOutput(final UI ui) {
