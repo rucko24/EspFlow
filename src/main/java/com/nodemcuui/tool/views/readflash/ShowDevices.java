@@ -32,13 +32,16 @@ import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideC
  *
  * <pre>
  *     ShowDevices.builder()
- *         .withEspDevicesCarousel(espDevicesCarousel)
- *         .withEsptoolService(esptoolService)
- *         .withEspDeviceInfo(espDeviceInfo)
- *         .withConsoleOutStage(consoleOutPut)
- *         .withUi(ui)
- *         .createSlides()
- *         .make();
+ *             .withEspDevicesCarousel(espDevicesCarousel)
+ *             .withEsptoolService(esptoolService)
+ *             .withEspDeviceInfo(espDeviceInfo)
+ *             .withConsoleOutStage(consoleOutPut)
+ *             .withUi(ui)
+ *             .withStartSizeAddress(this.startAddress)
+ *             .withCustomFlashSizeAddress(this.endAddress)
+ *             .withAutoDetectFlashSize(this.autoDetectFlashSize)
+ *             .createSlides()
+ *             .make();
  * </pre>
  */
 @Log4j2
@@ -181,10 +184,10 @@ public class ShowDevices {
         public Build createSlides() {
             var macAddress = espDeviceInfo.macAddress();
             if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
-                showEsp01s(espDeviceInfo);
-                showEso82664MB(espDeviceInfo);
-                showEsp8285(espDeviceInfo);
-                showEsp32S3(espDeviceInfo);
+                showEsp01s();
+                showEso82664MB();
+                showEsp8285();
+                showEsp32S3();
             } else {
                 ui.access(() -> {
                     NotificationBuilder.builder()
@@ -211,17 +214,15 @@ public class ShowDevices {
 
         /**
          * Show the ESP8285H16 slide
-         *
-         * @param espDeviceInfo the espDeviceInfo with ESP8285H16 Information
          */
-        private void showEsp8285(EspDeviceInfo espDeviceInfo) {
+        private void showEsp8285() {
             final String chipIp = espDeviceInfo.chipIs();
             final String flashSize = espDeviceInfo.detectedFlashSize();
             if (chipIp.contains("ESP8285H") && flashSize.equals("2MB")) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
-                var downloadTest = buttonForReadFlash(ui, espDeviceInfo, flashButtonWrapper);
+                var downloadTest = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp8285H16Slide = new Slide(createSlideContent(
                         "images/esp8285h08.jpg",
@@ -235,16 +236,15 @@ public class ShowDevices {
         /**
          * Show the esp01s slide
          *
-         * @param espDeviceInfo
          */
-        private void showEsp01s(final EspDeviceInfo espDeviceInfo) {
+        private void showEsp01s() {
             final String chipType = espDeviceInfo.chipType();
             final String flashSize = espDeviceInfo.detectedFlashSize();
             if (chipType.endsWith("8266") && flashSize.equals("1MB")) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
-                var downloadTest = buttonForReadFlash(ui, espDeviceInfo, flashButtonWrapper);
+                var downloadTest = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp01sSlide = new Slide(createSlideContent(
                         "images/esp01s-1MB.jpg",
@@ -256,15 +256,13 @@ public class ShowDevices {
 
         /**
          *   Show the esp8266 slide
-         *
-         * @param espDeviceInfo
-         */
-        private void showEso82664MB(EspDeviceInfo espDeviceInfo) {
+         **/
+        private void showEso82664MB() {
             if (espDeviceInfo.chipType().endsWith("8266") && espDeviceInfo.detectedFlashSize().equals("4MB")) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
-                var downFlashButton = buttonForReadFlash(ui, espDeviceInfo, flashButtonWrapper);
+                var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp8266Slide = new Slide(createSlideContent(
                         "images/esp8266-4MB.png",
@@ -275,11 +273,15 @@ public class ShowDevices {
             }
         }
 
-        private void showEsp32S3(EspDeviceInfo espDeviceInfo) {
+        /**
+         *
+         *   Show the ESP32-s3 slide
+         */
+        private void showEsp32S3() {
             if (espDeviceInfo.chipType().endsWith("-S3")) {
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
-                var downFlashButton = buttonForReadFlash(ui, espDeviceInfo, flashButtonWrapper);
+                var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp32s3Slide = new Slide(createSlideContent(
                         "images/ESP32-S3-DEVKITC-1-N8_SPL.webp",
@@ -291,51 +293,77 @@ public class ShowDevices {
 
         /**
          * @param ui
-         * @param espDeviceInfo
          * @param flashButtonWrapper
          * @return Button
          */
-        private Button buttonForReadFlash(final UI ui, EspDeviceInfo espDeviceInfo, final FlashButtonWrapper flashButtonWrapper) {
+        private Button buttonForReadFlash(final UI ui, final FlashButtonWrapper flashButtonWrapper) {
             final Button downloadFlashButton = new Button("Read flash");
             downloadFlashButton.setTooltipText("Read flash");
             downloadFlashButton.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
             downloadFlashButton.addClickListener(event -> {
                 ui.access(() -> {
-                    esptoolService.createEspBackUpFlashDirIfNotExists();
-
-                    final String currentTimeMillis = String.valueOf(System.currentTimeMillis());
-                    final String fileNameResult = espDeviceInfo.chipIs().concat("-")
-                            .concat(currentTimeMillis).concat("-backup.bin");
-
-                    final String writFileToTempDir = System.getProperty("java.io.tmpdir")
-                            .concat("/esp-backup-flash-dir/")
-                            .concat(fileNameResult);
-
-                    this.readFlash(ui, writFileToTempDir, espDeviceInfo, flashButtonWrapper);
-
+                    validate(flashButtonWrapper);
                 });
             });
             return downloadFlashButton;
         }
 
         /**
-         * <p> esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin <p/>
-         *
-         * @param ui                 the {@link UI} instance
-         * @param writFileToTempDir
-         * @param espDeviceInfo
+         *  This will validate the textfield with the final address and the checkbox
          * @param flashButtonWrapper
          */
-        private void readFlash(final UI ui, final String writFileToTempDir,
-                               final EspDeviceInfo espDeviceInfo,
-                               final FlashButtonWrapper flashButtonWrapper) {
-
+        private void validate(final FlashButtonWrapper flashButtonWrapper) {
             String processAutoDetectFlashSize = "";
             if (autoDetectFlashSize.getValue()) {
                 processAutoDetectFlashSize = "ALL";
+                readFlash(flashButtonWrapper, processAutoDetectFlashSize);
             } else {
-                processAutoDetectFlashSize = "0x".concat(endAddressSize.getValue().trim());
+                if(!endAddressSize.getValue().isEmpty()) {
+                    processAutoDetectFlashSize = "0x".concat(endAddressSize.getValue().trim());
+                    readFlash(flashButtonWrapper, processAutoDetectFlashSize);
+                } else {
+                    NotificationBuilder.builder()
+                            .withText("Enter the memory addresses to be read!")
+                            .withPosition(Position.MIDDLE)
+                            .withDuration(3000)
+                            .withIcon(VaadinIcon.WARNING)
+                            .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                            .make();
+                    endAddressSize.focus();
+                }
+
             }
+        }
+
+        /**
+         *
+         * @param flashButtonWrapper
+         * @param processAutoDetectFlashSize
+         */
+        private void readFlash(final FlashButtonWrapper flashButtonWrapper, String processAutoDetectFlashSize) {
+            esptoolService.createEspBackUpFlashDirIfNotExists();
+            final String currentTimeMillis = String.valueOf(System.currentTimeMillis());
+            final String fileNameResult = espDeviceInfo.chipIs().concat("-")
+                    .concat(currentTimeMillis).concat("-backup.bin");
+            final String writFileToTempDir = System.getProperty("java.io.tmpdir")
+                    .concat("/esp-backup-flash-dir/")
+                    .concat(fileNameResult);
+            this.readFlash(ui, writFileToTempDir, espDeviceInfo, flashButtonWrapper, processAutoDetectFlashSize);
+        }
+
+        /**
+         * <p> esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin <p/>
+         *
+         * @param ui  the {@link UI} instance
+         * @param writFileToTempDir
+         * @param espDeviceInfo
+         * @param flashButtonWrapper
+         * @param processAutoDetectFlashSize
+         */
+        private void readFlash(final UI ui, final String writFileToTempDir,
+                               final EspDeviceInfo espDeviceInfo,
+                               final FlashButtonWrapper flashButtonWrapper,
+                               final String processAutoDetectFlashSize) {
 
             final String[] commands = new String[]{
                     "esptool.py",
@@ -346,13 +374,6 @@ public class ShowDevices {
                     processAutoDetectFlashSize,
                     writFileToTempDir
             };
-
-//        this.commands = new String[]{
-//                "esptool.py",
-//                "--port", espDeviceInfo.port(),
-//                "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
-//                "flash_id"
-//        };
 
             CommandsOnFirstLine.putCommansdOnFirstLine(commands, consoleOutPut);
 
@@ -375,8 +396,8 @@ public class ShowDevices {
                                         .withText("Stream reactivo completado pero la flash no exsite en el tmp! " + writFileToTempDir)
                                         .withPosition(Position.MIDDLE)
                                         .withDuration(3000)
-                                        .withIcon(VaadinIcon.INFO)
-                                        .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
+                                        .withIcon(VaadinIcon.WARNING)
+                                        .withThemeVariant(NotificationVariant.LUMO_ERROR)
                                         .make();
                             }
                         });

@@ -13,16 +13,15 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
@@ -32,6 +31,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignSelf;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
@@ -66,7 +66,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     //With default espcarousel div
     private final ProgressBar progressBar = new ProgressBar();
     private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar()));
-    private final HorizontalLayout contentForPrimarySection = new HorizontalLayout();
+    private final HorizontalLayout horizontalLayoutForPrimarySection = new HorizontalLayout();
     private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
     private final TextField startAddress = new TextField("Start address");
     private final TextField endAddress = new TextField("End address");
@@ -99,19 +99,55 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     private SplitLayout getSplitLayout() {
-        /**
+        final var splitLayout = new SplitLayout(Orientation.VERTICAL);
+        splitLayout.setSizeFull();
+        splitLayout.setSplitterPosition(60);
+        splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
+        splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
+        /*
          * Primary section
          */
-        final var splitLayout = new SplitLayout(Orientation.VERTICAL);
-        splitLayout.setSplitterPosition(60);
-        splitLayout.setSizeFull();
-        splitLayout.addToPrimary(contentForPrimarySection);
-        splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
+        final var rigthFormForAddress = this.rigthFormForAddress();
+        final var divForLeftCarousel = divForLeftCarousel();
+        final var horizontalLayoutToPrimarySection = horizontalLayoutToPrimarySection(rigthFormForAddress, divForLeftCarousel);
+        splitLayout.addToPrimary(horizontalLayoutToPrimarySection);
+        /*
+         * Secondary section
+         */
+        final var divForConsoleOutput = divForConsoleOutput();
+        splitLayout.addToSecondary(divForConsoleOutput);
+        /*
+         * Invoked after to prevent NPE
+         */
+        splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
+        splitLayout.getSecondaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
+        return splitLayout;
+    }
 
+    /**
+     * @param rigthFormForAddress
+     * @param divForLeftCarousel
+     * @return {@link HorizontalLayout}
+     */
+    private HorizontalLayout horizontalLayoutToPrimarySection(Div rigthFormForAddress, Div divForLeftCarousel) {
         this.progressBar.setVisible(false);
         this.progressBar.setIndeterminate(true);
-        this.contentForPrimarySection.setId("div-for-primary");
-        this.contentForPrimarySection.setSizeFull();
+        this.horizontalLayoutForPrimarySection.setId("div-for-primary");
+        this.horizontalLayoutForPrimarySection.setSizeFull();
+        this.horizontalLayoutForPrimarySection.add(rigthFormForAddress, divForLeftCarousel);
+        return horizontalLayoutForPrimarySection;
+    }
+
+    /**
+     * This part contains the form for entering the memory addresses to be read.
+     *
+     * @return {@link FormLayout}
+     */
+    private Div rigthFormForAddress() {
+        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, autoDetectFlashSize, progressBar);
+        Stream.of(buttonRefreshDevices, startAddress, endAddress, autoDetectFlashSize, progressBar)
+                        .forEach(items -> items.addClassName(AlignSelf.BASELINE));
+        formLayout.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.START, JustifyContent.CENTER);
 
         startAddress.setTooltipText("Start address");
         endAddress.setTooltipText("Size address to read");
@@ -129,48 +165,49 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
             textField.setPrefixComponent(new Span("0x"));
             textField.setClearButtonVisible(true);
         });
-        final VerticalLayout memoryControls = new VerticalLayout(buttonRefreshDevices, startAddress, endAddress, autoDetectFlashSize, progressBar);
-        memoryControls.setWidth("50%");
-        memoryControls.setJustifyContentMode(JustifyContentMode.CENTER);
-        memoryControls.setAlignSelf(FlexComponent.Alignment.CENTER,
-                buttonRefreshDevices,
-                endAddress,
-                startAddress,
-                autoDetectFlashSize);
 
+        final Div parent = new Div(formLayout);
+        parent.setWidth("50%");
+        parent.addClassNames(Display.FLEX,JustifyContent.CENTER, AlignItems.CENTER);
+
+        return parent;
+    }
+
+    /**
+     * Div for carousel
+     *
+     * @return {@link Div}
+     */
+    private Div divForLeftCarousel() {
         divCarousel.setId("div-carousel");
         divCarousel.setWidth("50%");
         divCarousel.addClassNames(Padding.LARGE, AlignItems.CENTER, JustifyContent.CENTER);
+        return divCarousel;
+    }
 
-        this.contentForPrimarySection.add(memoryControls, divCarousel);
-
-        //consoleOutPut.removeClassName(Bottom.SMALL);
-        //consoleOutPut.getStyle().set(OVERFLOW_Y, "unset");
-
-        /**
-         * Secondary section
-         */
+    /**
+     * Div for console output
+     *
+     * @return {@link Div}
+     */
+    private Div divForConsoleOutput() {
         final var divRowToSecondary = new Div(consoleOutPut);
         divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
         divRowToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
-        splitLayout.addToSecondary(divRowToSecondary);
-
-        splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
-        splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
-        splitLayout.getSecondaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
-
-        return splitLayout;
+        return divRowToSecondary;
     }
 
     /**
+     * The Footer layout
+     *
      * @return HorizontalLayout
      */
     private HorizontalLayout getFooter() {
         final HorizontalLayout footer = new HorizontalLayout();
         /*Margin left to span values */
         Stream.of(this.spanPortWithErrorValue, this.spanTotalDevicesValue)
-                        .forEach(spanValues -> spanValues.addClassName(Left.SMALL));
+                .forEach(spanValues -> spanValues.addClassName(Left.SMALL));
         /*Margin left to span values */
         Stream.of(this.spanPortWithError, this.spanPortWithErrorValue).forEach(spanPort -> {
             spanPort.getStyle().set("color", "red");
@@ -205,6 +242,13 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         return footer;
     }
 
+    /**
+     * This method is used to read the micros that are connected to the OS, in case of not being able to read any,
+     * a red SPAN will be displayed with the name of the port with the failure, that failure could be, permissions, etc.
+     *
+     * @param ui
+     * @param espDevicesCarousel
+     */
     private void showDetectedDevices(final UI ui, final EspDevicesCarousel espDevicesCarousel) {
         this.progressBar.setVisible(true);
         this.esptoolService.readAllDevices()
@@ -253,6 +297,10 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 });
     }
 
+    /**
+     *
+     * @param ui
+     */
     private void refreshDevices(final UI ui) {
         buttonRefreshDevices.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
         buttonRefreshDevices.addClickListener(event -> {
