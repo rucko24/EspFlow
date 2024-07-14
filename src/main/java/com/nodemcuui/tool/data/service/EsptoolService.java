@@ -73,7 +73,7 @@ public class EsptoolService {
     public Flux<EspDeviceInfo> readAllDevices() {
         return Flux.fromIterable(comPortService.getPortsList())
                 .flatMap(this::readFlashIdFromPort)
-                .doOnNext(onNext -> log.info("Device {}", onNext));
+                .doOnNext(onNext -> log.info("onNext device: {}", onNext));
     }
 
     /**

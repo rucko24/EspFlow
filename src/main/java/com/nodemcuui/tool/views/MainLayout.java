@@ -70,7 +70,7 @@ public class MainLayout extends AppLayout {
         if (maybeUser.isPresent()) {
             User user = maybeUser.get();
 
-            var avatar = new Avatar(user.getName(), "images/ESP8285H08.jpeg");
+            var avatar = new Avatar(user.getName(), "images/ESP8285H08-2MB.jpeg");
             avatar.setWidth("56px");
             avatar.setHeight("56px");
 

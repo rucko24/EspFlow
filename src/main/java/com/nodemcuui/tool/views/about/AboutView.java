@@ -22,7 +22,7 @@ public class AboutView extends VerticalLayout {
     public AboutView() {
         super.setSpacing(false);
 
-        final Image img = new Image("images/ESP8285H08.jpeg", "placeholder plant");
+        final Image img = new Image("images/ESP8285H08-2MB.jpeg", "placeholder plant");
         img.setWidth("30%");
         img.getStyle().set("border-radius", "2em");
         img.getStyle().set("border", "2px solid red");

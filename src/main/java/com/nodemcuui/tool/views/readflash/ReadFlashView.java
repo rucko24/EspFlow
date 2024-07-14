@@ -2,6 +2,7 @@ package com.nodemcuui.tool.views.readflash;
 
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
+import com.nodemcuui.tool.data.entity.EspDeviceWithTotalDevices;
 import com.nodemcuui.tool.data.mappers.EspDeviceWithTotalDevicesMapper;
 import com.nodemcuui.tool.data.service.EsptoolService;
 import com.nodemcuui.tool.data.util.NotificationBuilder;
@@ -43,7 +44,9 @@ import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
@@ -69,7 +72,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final HorizontalLayout horizontalLayoutForPrimarySection = new HorizontalLayout();
     private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
     private final TextField startAddress = new TextField("Start address");
-    private final TextField endAddress = new TextField("End address");
+    private final TextField endAddress = new TextField("Set size address to read");
     private final Checkbox autoDetectFlashSize = new Checkbox("Autodetect flash size aka ALL");
     private final Div divWithPortErrors = new Div();
 
@@ -78,10 +81,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      */
     private final ConsoleOutPut consoleOutPut = new ConsoleOutPut();
     private final Span spanTotalDevices = new Span("Total devices:");
+    private final Span spanPortFailure = new Span("Port failure: ");
     private final Span spanTotalDevicesValue = new Span();
-
-    private final Span spanPortWithError = new Span("Port failure:");
-    private final Span spanPortWithErrorValue = new Span();
 
     @PostConstruct
     public void init() {
@@ -98,6 +99,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
     }
 
+    /**
+     * The SplitLayout
+     *
+     * @return a configured {@link SplitLayout}
+     */
     private SplitLayout getSplitLayout() {
         final var splitLayout = new SplitLayout(Orientation.VERTICAL);
         splitLayout.setSizeFull();
@@ -146,11 +152,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private Div rigthFormForAddress() {
         final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, autoDetectFlashSize, progressBar);
         Stream.of(buttonRefreshDevices, startAddress, endAddress, autoDetectFlashSize, progressBar)
-                        .forEach(items -> items.addClassName(AlignSelf.BASELINE));
+                .forEach(items -> items.addClassName(AlignSelf.BASELINE));
         formLayout.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.START, JustifyContent.CENTER);
 
         startAddress.setTooltipText("Start address");
-        endAddress.setTooltipText("Size address to read");
+        endAddress.setTooltipText("Set size address to read");
         autoDetectFlashSize.setTooltipText("ALL");
         autoDetectFlashSize.addValueChangeListener(event -> {
             if (event.getValue()) {
@@ -168,7 +174,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
         final Div parent = new Div(formLayout);
         parent.setWidth("50%");
-        parent.addClassNames(Display.FLEX,JustifyContent.CENTER, AlignItems.CENTER);
+        parent.addClassNames(Display.FLEX, JustifyContent.CENTER, AlignItems.CENTER);
 
         return parent;
     }
@@ -205,22 +211,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      */
     private HorizontalLayout getFooter() {
         final HorizontalLayout footer = new HorizontalLayout();
-        /*Margin left to span values */
-        Stream.of(this.spanPortWithErrorValue, this.spanTotalDevicesValue)
-                .forEach(spanValues -> spanValues.addClassName(Left.SMALL));
-        /*Margin left to span values */
-        Stream.of(this.spanPortWithError, this.spanPortWithErrorValue).forEach(spanPort -> {
-            spanPort.getStyle().set("color", "red");
-        });
-        final Div divSpanTotalDevices = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
-        this.divWithPortErrors.add(this.spanPortWithError, this.spanPortWithErrorValue);
-        this.divWithPortErrors.setVisible(false);
-        Stream.of(divSpanTotalDevices, divWithPortErrors)
-                .forEach(divs -> {
-                    divs.addClassName(Right.MEDIUM);
-                    divs.getElement().setAttribute("theme", "badge");
-                });
-
         footer.setWidthFull();
         footer.setHeight("40px");
         footer.getStyle().set("border-top", " 1px solid var(--lumo-contrast-10pct)");
@@ -228,13 +218,28 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         footer.setAlignItems(Alignment.CENTER);
         footer.setJustifyContentMode(JustifyContentMode.START);
 
+        final Div divSpanTotalDevices = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
+
+        this.divWithPortErrors.setVisible(false);
+
+        spanPortFailure.addClassName(Left.SMALL);
+        this.divWithPortErrors.add(spanPortFailure);
+        divWithPortErrors.getStyle().set("color", "red");
+        Stream.of(divSpanTotalDevices, divWithPortErrors)
+                .forEach(divs -> {
+                    divs.addClassName(Right.MEDIUM);
+                    divs.getElement().setAttribute("theme", "badge");
+                });
+
         final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);
         divForBadges.setId("divForBadges");
         divForBadges.setWidthFull();
         divForBadges.addClassName(Left.MEDIUM);
-
+        /*Margin left to span values */
+        Stream.of(spanTotalDevicesValue, spanPortFailure)
+                .forEach(spans -> spans.addClassName(Left.SMALL));
         footer.add(divForBadges);
-        Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue, this.spanPortWithError, this.spanPortWithErrorValue)
+        Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue, this.divWithPortErrors)
                 .forEach(span -> {
                     span.getStyle().set("font-size", "var(--lumo-font-size-xs)");
                     span.addClassName("row-span-flash-size-footer");
@@ -243,72 +248,110 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     * This method is used to read the micros that are connected to the OS, in case of not being able to read any,
-     * a red SPAN will be displayed with the name of the port with the failure, that failure could be, permissions, etc.
+     * <p>This method is used to read the micros that are connected to the OS, in case of not being able to read any,
+     * a red SPAN will be displayed with the name of the port with the failure, that failure could be, permissions, etc.</p>
+     *
+     * <p>The reading process is performed in a Scheduler of <strong>boundedElasctic</strong> type in order not to block the UI having
+     * faster feedBack from the microcontrollers that are read, which is difficult with synchronous programming.</p>
      *
      * @param ui
      * @param espDevicesCarousel
      */
     private void showDetectedDevices(final UI ui, final EspDevicesCarousel espDevicesCarousel) {
         this.progressBar.setVisible(true);
+        final List<Span> spansList = new CopyOnWriteArrayList<>();
         this.esptoolService.readAllDevices()
-                .doOnError(error -> {
-                    ui.access(() -> {
-                        this.progressBar.setVisible(false);
-                        log.info("Error: {}", error);
-                        NotificationBuilder.builder()
-                                .withText("Error reading the microcontroller " + error)
-                                .withPosition(Position.MIDDLE)
-                                .withDuration(3000)
-                                .withIcon(VaadinIcon.WARNING)
-                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                                .make();
-                    });
-                })
                 .doOnComplete(() -> {
                     ui.access(() -> {
-                        this.progressBar.setVisible(false);
-                        espDevicesCarousel.createSlides();
-                        espDevicesCarousel.setVisible(true);
+                        onComplete(spansList, espDevicesCarousel);
                     });
                 })
                 .flatMap(item -> this.esptoolService.countAllDevices()
                         .map(count -> EspDeviceWithTotalDevicesMapper.espDeviceWithTotalDevices(item, count)))
                 .subscribe(espDeviceWithTotalDevices -> {
                     ui.access(() -> {
-                        var espDeviceInfo = espDeviceWithTotalDevices.espDeviceInfo();
-                        this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
-                        if (Objects.isNull(espDeviceInfo.macAddress())) {
-                            this.divWithPortErrors.setVisible(true);
-                            this.spanPortWithErrorValue.setText("  " + espDeviceInfo.port());
-                        }
-                        ShowDevices.builder()
-                                .withEspDevicesCarousel(espDevicesCarousel)
-                                .withEsptoolService(esptoolService)
-                                .withEspDeviceInfo(espDeviceInfo)
-                                .withConsoleOutStage(consoleOutPut)
-                                .withUi(ui)
-                                .withStartSizeAddress(this.startAddress)
-                                .withCustomFlashSizeAddress(this.endAddress)
-                                .withAutoDetectFlashSize(this.autoDetectFlashSize)
-                                .createSlides()
-                                .make();
+                        this.subscribeThis(spansList, espDeviceWithTotalDevices, espDevicesCarousel, ui);
                     });
                 });
     }
 
     /**
-     *
      * @param ui
      */
     private void refreshDevices(final UI ui) {
         buttonRefreshDevices.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
         buttonRefreshDevices.addClickListener(event -> {
-            final EspDevicesCarousel espDevicesNew = new EspDevicesCarousel(new ProgressBar());
+            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar());
             this.divCarousel.removeAll();
-            this.divCarousel.add(espDevicesNew);
-            this.showDetectedDevices(ui, espDevicesNew);
+            this.divCarousel.add(espDevicesCarousel);
+            this.showDetectedDevices(ui, espDevicesCarousel);
         });
+    }
+
+    /**
+     * @param spansList
+     * @param espDevicesCarousel
+     */
+    private void onComplete(final List<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
+        this.progressBar.setVisible(false);
+        espDevicesCarousel.createSlides();
+        espDevicesCarousel.setVisible(true);
+        if (!spansList.isEmpty()) {
+            /* The span is added with the text "Port Failure:" */
+            this.divWithPortErrors.add(spanPortFailure);
+            spansList.forEach((spanPortFailureValue) -> {
+                /*Margin left and red color to span values */
+                spanPortFailureValue.addClassName(Left.SMALL);
+                spanPortFailureValue.getStyle().set("color", "red");
+                this.divWithPortErrors.add(spanPortFailureValue);
+                this.divWithPortErrors.setVisible(true);
+            });
+            NotificationBuilder.builder()
+                    .withText("Error with microcontroller")
+                    .withPosition(Position.MIDDLE)
+                    .withDuration(3000)
+                    .withIcon(VaadinIcon.WARNING)
+                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                    .make();
+        }
+    }
+
+    /**
+     * Simply to refactor something, and not to overload the reactive stream with extra lines.
+     *
+     * @param spansList
+     * @param espDeviceWithTotalDevices
+     * @param espDevicesCarousel
+     * @param ui
+     */
+    private void subscribeThis(final List<Span> spansList,
+                               EspDeviceWithTotalDevices espDeviceWithTotalDevices,
+                               EspDevicesCarousel espDevicesCarousel,
+                               final UI ui) {
+        final var mac = espDeviceWithTotalDevices.espDeviceInfo().macAddress();
+        var espDeviceInfo = espDeviceWithTotalDevices.espDeviceInfo();
+        if (Objects.isNull(mac)) {
+            final Span spanPortFailureValue = new Span();
+            spanPortFailureValue.setText(espDeviceInfo.port());
+            spansList.add(spanPortFailureValue);
+        }
+        this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
+        if (Objects.nonNull(espDeviceInfo.macAddress())) {
+            this.divWithPortErrors.setVisible(false);
+            this.divWithPortErrors.removeAll();
+            ShowDevices.builder()
+                    .withEspDevicesCarousel(espDevicesCarousel)
+                    .withEsptoolService(esptoolService)
+                    .withEspDeviceInfo(espDeviceInfo)
+                    .withConsoleOutStage(consoleOutPut)
+                    .withUi(ui)
+                    .withStartSizeAddress(this.startAddress)
+                    .withCustomFlashSizeAddress(this.endAddress)
+                    .withAutoDetectFlashSize(this.autoDetectFlashSize)
+                    .createSlides()
+                    .make();
+        }
+
     }
 
     @Override

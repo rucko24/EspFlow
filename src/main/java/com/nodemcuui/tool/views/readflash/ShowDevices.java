@@ -188,16 +188,6 @@ public class ShowDevices {
                 showEso82664MB();
                 showEsp8285();
                 showEsp32S3();
-            } else {
-                ui.access(() -> {
-                    NotificationBuilder.builder()
-                            .withText("Error with microcontroller on port" + espDeviceInfo.port())
-                            .withPosition(Position.MIDDLE)
-                            .withDuration(3000)
-                            .withIcon(VaadinIcon.WARNING)
-                            .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                            .make();
-                });
             }
             return this;
         }
@@ -225,7 +215,7 @@ public class ShowDevices {
                 var downloadTest = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp8285H16Slide = new Slide(createSlideContent(
-                        "images/esp8285h08.jpg",
+                        "images/ESP8285H08-2MB.jpeg",
                         espDeviceInfo, downloadTest, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp8285H16Slide);
