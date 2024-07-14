@@ -5,7 +5,6 @@ import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.button.Button;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.vaadin.firitin.components.DynamicFileDownloader;
 
 /**
  * @author rubn
@@ -13,13 +12,19 @@ import org.vaadin.firitin.components.DynamicFileDownloader;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class DeviceFactoryCardLayout {
 
+    /**
+     * DeviceCardLayout div
+     *
+     * @param image
+     * @param espDeviceInfo
+     * @param downloadFlash
+     * @param flashButtonWrapper
+     *
+     * @return a {@link DeviceCardLayout}
+     */
     public static DeviceCardLayout createDeviceCard(final String image, final EspDeviceInfo espDeviceInfo,
-                                                    final Button downloadFlash, final FlashButtonWrapper anchor) {
-        return new DeviceCardLayout(image, espDeviceInfo, downloadFlash, anchor);
-    }
-
-    public static DeviceCardLayout createDeviceCard(final String image, final EspDeviceInfo espDeviceInfo, final DynamicFileDownloader downloadFlash) {
-        return new DeviceCardLayout(image, espDeviceInfo, downloadFlash);
+                                                    final Button downloadFlash, final FlashButtonWrapper flashButtonWrapper) {
+        return new DeviceCardLayout(image, espDeviceInfo, downloadFlash, flashButtonWrapper);
     }
 
 }

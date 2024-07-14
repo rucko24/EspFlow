@@ -8,8 +8,11 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import lombok.Getter;
-import org.vaadin.firitin.components.DynamicFileDownloader;
 
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
@@ -64,7 +67,6 @@ public final class DeviceCardLayout extends Div {
      */
     private Button downloadFlashButton;
     private FlashButtonWrapper flashButtonWrapper;
-    private DynamicFileDownloader dynamicFileDownloader;
 
     private String image;
     private EspDeviceInfo espDeviceInfo;
@@ -72,23 +74,13 @@ public final class DeviceCardLayout extends Div {
     public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo,
                             final Button downloadFlashButton,
                             final FlashButtonWrapper flashButtonWrapper) {
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+
         super.addClassName("card-container");
         this.image = image;
         this.espDeviceInfo = espDeviceInfo;
         this.downloadFlashButton = downloadFlashButton;
         this.flashButtonWrapper = flashButtonWrapper;
-
-        final Div toolbar = this.createDivToolbarRow();
-        final Div slideOverView = this.createDivSlideOverview();
-
-        super.add(toolbar, slideOverView);
-    }
-
-    public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo, final DynamicFileDownloader dynamicFileDownloader) {
-        super.addClassName("card-container");
-        this.image = image;
-        this.espDeviceInfo = espDeviceInfo;
-        this.dynamicFileDownloader = dynamicFileDownloader;
 
         final Div toolbar = this.createDivToolbarRow();
         final Div slideOverView = this.createDivSlideOverview();
@@ -112,13 +104,10 @@ public final class DeviceCardLayout extends Div {
         Div divControls = new Div();
         divControls.addClassName("div-controls");
 
-        if (downloadFlashButton != null) {
+        if (Objects.nonNull(downloadFlashButton)) {
             divControls.add(downloadFlashButton);
         }
-        if (dynamicFileDownloader != null) {
-            divControls.add(dynamicFileDownloader);
-        }
-        if (flashButtonWrapper != null) {
+        if (Objects.nonNull(flashButtonWrapper)) {
             divControls.add(flashButtonWrapper);
         }
 

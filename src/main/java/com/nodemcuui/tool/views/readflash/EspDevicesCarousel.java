@@ -10,7 +10,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import org.vaadin.firitin.components.DynamicFileDownloader;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -22,7 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class EspDevicesCarousel extends Div {
 
     private final List<Slide> slideList = new CopyOnWriteArrayList<>();
-    private ProgressBar progressBar;
+    private final ProgressBar progressBar;
 
     public EspDevicesCarousel(final ProgressBar progressBar) {
         this.progressBar = progressBar;
@@ -56,18 +55,12 @@ public class EspDevicesCarousel extends Div {
         Carousel carousel = new Carousel(slideList.toArray(Slide[]::new));
         carousel.setSizeFull();
         carousel.setThemeName("custom-theme");
-        //carousel.addChangeListener(e -> Notification.show("Slide Changed!", 1000, Position.BOTTOM_START));
         super.add(carousel);
         updateProgressBar(false);
     }
 
     public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton, FlashButtonWrapper anchor) {
         return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo, downFlashButton, anchor);
-    }
-
-    @SuppressWarnings("unused")
-    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final DynamicFileDownloader downFlashButton) {
-        return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo, downFlashButton);
     }
 
 }
