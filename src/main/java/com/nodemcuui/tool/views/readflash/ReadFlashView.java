@@ -2,8 +2,7 @@ package com.nodemcuui.tool.views.readflash;
 
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
-import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.nodemcuui.tool.data.entity.EspDeviceWithTotalDevices;
+import com.nodemcuui.tool.data.mappers.EspDeviceWithTotalDevicesMapper;
 import com.nodemcuui.tool.data.service.EsptoolService;
 import com.nodemcuui.tool.data.util.NotificationBuilder;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
@@ -36,6 +35,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
@@ -46,8 +47,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
-import static com.nodemcuui.tool.data.util.UiToolConstants.MARGIN_10_PX;
-import static com.nodemcuui.tool.data.util.UiToolConstants.MARGIN_LEFT;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_X;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
 
@@ -72,18 +71,17 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final TextField startAddress = new TextField("Start address");
     private final TextField endAddress = new TextField("End address");
     private final Checkbox autoDetectFlashSize = new Checkbox("Autodetect flash size aka ALL");
+    private final Div divWithPortErrors = new Div();
 
     /**
      * Console output
      */
     private final ConsoleOutPut consoleOutPut = new ConsoleOutPut();
-    private final HorizontalLayout footer = new HorizontalLayout();
+    private final Span spanTotalDevices = new Span("Total devices:");
+    private final Span spanTotalDevicesValue = new Span();
 
-    private final Span spanTotalDevices = new Span("Total devices: ");
-    private final Span spanTotalDevicesValue = new Span(" ");
-
-    private final Span spanPortWithError = new Span("Port failure: ");
-    private final Span spanPortWithErrorValue = new Span(" ");
+    private final Span spanPortWithError = new Span("Port failure:");
+    private final Span spanPortWithErrorValue = new Span();
 
     @PostConstruct
     public void init() {
@@ -119,7 +117,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         endAddress.setTooltipText("Size address to read");
         autoDetectFlashSize.setTooltipText("ALL");
         autoDetectFlashSize.addValueChangeListener(event -> {
-            if(event.getValue()) {
+            if (event.getValue()) {
                 endAddress.clear();
                 endAddress.setEnabled(false);
             } else {
@@ -169,16 +167,23 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @return HorizontalLayout
      */
     private HorizontalLayout getFooter() {
+        final HorizontalLayout footer = new HorizontalLayout();
+        /*Margin left to span values */
+        Stream.of(this.spanPortWithErrorValue, this.spanTotalDevicesValue)
+                        .forEach(spanValues -> spanValues.addClassName(Left.SMALL));
+        /*Margin left to span values */
         Stream.of(this.spanPortWithError, this.spanPortWithErrorValue).forEach(spanPort -> {
-            spanPort.setVisible(false);
             spanPort.getStyle().set("color", "red");
         });
         final Div divSpanTotalDevices = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
-        final Div divWithPortErrors = new Div(this.spanPortWithError, this.spanPortWithErrorValue);
-        divSpanTotalDevices.getElement().setAttribute("theme", "badge");
-        divWithPortErrors.getElement().setAttribute("theme", "badge");
-//        final Div div2 = new Div(this.decimalSize);
-//        final Div div3 = new Div(this.hexSize);
+        this.divWithPortErrors.add(this.spanPortWithError, this.spanPortWithErrorValue);
+        this.divWithPortErrors.setVisible(false);
+        Stream.of(divSpanTotalDevices, divWithPortErrors)
+                .forEach(divs -> {
+                    divs.addClassName(Right.MEDIUM);
+                    divs.getElement().setAttribute("theme", "badge");
+                });
+
         footer.setWidthFull();
         footer.setHeight("40px");
         footer.getStyle().set("border-top", " 1px solid var(--lumo-contrast-10pct)");
@@ -189,7 +194,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);
         divForBadges.setId("divForBadges");
         divForBadges.setWidthFull();
-        divForBadges.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
+        divForBadges.addClassName(Left.MEDIUM);
 
         footer.add(divForBadges);
         Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue, this.spanPortWithError, this.spanPortWithErrorValue)
@@ -224,17 +229,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     });
                 })
                 .flatMap(item -> this.esptoolService.countAllDevices()
-                        .map(count -> this.espDeviceWithTotalDevices(item, count)))
+                        .map(count -> EspDeviceWithTotalDevicesMapper.espDeviceWithTotalDevices(item, count)))
                 .subscribe(espDeviceWithTotalDevices -> {
                     ui.access(() -> {
                         var espDeviceInfo = espDeviceWithTotalDevices.espDeviceInfo();
                         this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
                         if (Objects.isNull(espDeviceInfo.macAddress())) {
-                            spanPortWithError.setVisible(true);
-                            spanPortWithErrorValue.setVisible(true);
-                            this.spanPortWithErrorValue.setText(" " + espDeviceInfo.port());
+                            this.divWithPortErrors.setVisible(true);
+                            this.spanPortWithErrorValue.setText("  " + espDeviceInfo.port());
                         }
-                        //this.spanPortWithErrorValue.setText();
                         ShowDevices.builder()
                                 .withEspDevicesCarousel(espDevicesCarousel)
                                 .withEsptoolService(esptoolService)
@@ -248,13 +251,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                                 .make();
                     });
                 });
-    }
-
-    private EspDeviceWithTotalDevices espDeviceWithTotalDevices(EspDeviceInfo espDeviceInfo, Long totalDevices) {
-        return EspDeviceWithTotalDevices.builder()
-                .totalDevices(totalDevices)
-                .espDeviceInfo(espDeviceInfo)
-                .build();
     }
 
     private void refreshDevices(final UI ui) {
