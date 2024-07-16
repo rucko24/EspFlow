@@ -12,6 +12,9 @@ import reactor.test.StepVerifier;
 
 import static org.mockito.Mockito.when;
 
+/**
+ * @author rubn
+ */
 @ExtendWith(MockitoExtension.class)
 class CommandServiceTest {
 
