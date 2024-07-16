@@ -7,6 +7,7 @@ import '@vaadin/radio-group/theme/lumo/vaadin-radio-group.js';
 import '@vaadin/radio-group/theme/lumo/vaadin-radio-button.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-app-layout.js';
 import '@vaadin/tooltip/theme/lumo/vaadin-tooltip.js';
+import '@vaadin-component-factory/vcf-toggle-button';
 import '@vaadin/progress-bar/theme/lumo/vaadin-progress-bar.js';
 import '@vaadin/button/theme/lumo/vaadin-button.js';
 import 'Frontend/generated/jar-resources/buttonFunctions.js';
@@ -28,7 +29,6 @@ import 'Frontend/generated/jar-resources/contextMenuConnector.js';
 import 'Frontend/generated/jar-resources/contextMenuTargetConnector.js';
 import '@vaadin/multi-select-combo-box/theme/lumo/vaadin-multi-select-combo-box.js';
 import '@vaadin/text-field/theme/lumo/vaadin-text-field.js';
-import '@vaadin/checkbox/theme/lumo/vaadin-checkbox.js';
 import '@vaadin/icons/vaadin-iconset.js';
 import 'Frontend/generated/jar-resources/file-download-wrapper.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-drawer-toggle.js';
@@ -39,12 +39,9 @@ import '@vaadin/notification/theme/lumo/vaadin-notification.js';
 import { injectGlobalCss } from 'Frontend/generated/jar-resources/theme-util.js';
 
 import { css, unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin';
-import $cssFromFile_0 from 'Frontend/generated/jar-resources/styles/vaadin-checkbox.css?inline';
+import $cssFromFile_0 from 'xterm/css/xterm.css?inline';
 
 injectGlobalCss($cssFromFile_0.toString(), 'CSSImport end', document);
-import $cssFromFile_1 from 'xterm/css/xterm.css?inline';
+import $cssFromFile_1 from 'Frontend/generated/jar-resources/animate.css?inline';
 
 injectGlobalCss($cssFromFile_1.toString(), 'CSSImport end', document);
-import $cssFromFile_2 from 'Frontend/generated/jar-resources/animate.css?inline';
-
-injectGlobalCss($cssFromFile_2.toString(), 'CSSImport end', document);

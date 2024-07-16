@@ -9,6 +9,7 @@ import com.nodemcuui.tool.data.util.IBuilder;
 import com.nodemcuui.tool.data.util.NotificationBuilder;
 import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
 import com.nodemcuui.tool.data.util.downloader.FlashButtonWrapper;
+import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -106,7 +107,7 @@ public class ShowDevices {
      * 8
      */
     public interface AllAddressSizeStage {
-        Build withAutoDetectFlashSize(final Checkbox autoDetectFlashSize);
+        Build withAutoDetectFlashSize(final ToggleButton autoDetectFlashSize);
     }
 
     /**
@@ -123,7 +124,7 @@ public class ShowDevices {
         private UI ui;
         private IntegerField startAddressSize;
         private IntegerField customSizeToRead;
-        private Checkbox autoDetectFlashSize;
+        private ToggleButton autoDetectFlashSize;
         /**
          * To bind {@link AddressRecordBinder}
          */
@@ -184,7 +185,7 @@ public class ShowDevices {
         }
 
         @Override
-        public Build withAutoDetectFlashSize(Checkbox autoDetectFlashSize) {
+        public Build withAutoDetectFlashSize(ToggleButton autoDetectFlashSize) {
             this.autoDetectFlashSize = autoDetectFlashSize;
             return this;
         }

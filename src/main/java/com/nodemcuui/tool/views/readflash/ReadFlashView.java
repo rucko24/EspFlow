@@ -192,7 +192,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
             textField.setClearButtonVisible(true);
             textField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
         });
-        autoDetectFlashSize.setTooltipText("Set custom flash size to ALL");
+        Tooltip.forComponent(autoDetectFlashSize).setText("Set custom flash size to ALL");
         autoDetectFlashSize.setSizeUndefined();
         autoDetectFlashSize.addValueChangeListener(event -> {
             if (event.getValue()) {
