@@ -1,7 +1,7 @@
 package com.nodemcuui.tool.data.exceptions;
 
 /**
- * Can read device with esptool
+ * Can read devices
  *
  * @author rubn
  */

@@ -18,17 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 
-import static com.nodemcuui.tool.data.util.UiToolConstants.BIN_SH_C;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_TYPE;
-import static com.nodemcuui.tool.data.util.UiToolConstants.CMD_C;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CRYSTAL_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.nodemcuui.tool.data.util.UiToolConstants.ESPTOOL_PY_VERSION;
 import static com.nodemcuui.tool.data.util.UiToolConstants.FLASH_SIZE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.MAC;
 import static com.nodemcuui.tool.data.util.UiToolConstants.SERIAL_PORT;
-import static com.nodemcuui.tool.data.util.UiToolConstants.SH_C;
 
 /**
  * @author rubn
@@ -41,20 +38,6 @@ public class EsptoolService {
 
     private final CommandService commandService;
     private final ComPortService comPortService;
-
-    public static String[] bash() {
-        GetOsName oS = GetOsName.getOsName();
-        if (oS == GetOsName.WINDOWS) {
-            return CMD_C;
-        } else if (oS == GetOsName.LINUX) {
-            return BIN_SH_C;
-        } else if (oS == GetOsName.FREEBSD) {
-            return BIN_SH_C;
-        } else if (oS == GetOsName.MAC) {
-            return SH_C;
-        }
-        return new String[]{GetOsName.OTHER.getName()};
-    }
 
     /**
      * The predicate to filter only the necessary lines, if you want to process one more line, this condition should be added here
@@ -80,10 +63,11 @@ public class EsptoolService {
      * <p>Counting of all ports filtering out those of</p>
      *
      * <li>
-     *     <strong>Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R</strong>
+     * <strong>Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R</strong>
      * </li>
      *
      * @return A {@link Mono} with port counting
+     *
      */
     public Mono<Long> countAllDevices() {
         return Mono.just(comPortService.countAllDevices());
@@ -96,19 +80,18 @@ public class EsptoolService {
      * as many items are issued we need for convenience to have them in a single item or Mono. </p>
      *
      * @param port the microcontroller port to be scanned
-     * @return a {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
+     * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
      */
     public Mono<EspDeviceInfo> readFlashIdFromPort(String port) {
         final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", port, "--baud",
                 String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id");
 
-        return commandService.processCommands(commands)
+        return commandService.processIntputStreamLineByLine(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
                 .flatMap(EspDeviceInfoMapper::mapToEspDeviceInfo)
                 .switchIfEmpty(Mono.defer(() -> EspDeviceInfoMapper.fallback(port)));
     }
-
 
 
     /**
@@ -118,14 +101,14 @@ public class EsptoolService {
      * The command is: <strong>"esptool.py  flash_id"</strong>
      * </li>
      *
-     * @return a {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
+     * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
      */
     @SuppressWarnings("unused")
     public Mono<EspDeviceInfo> readFlashIdFromDefault() {
         final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--baud",
                 String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id");
 
-        return commandService.processCommands(commands)
+        return commandService.processIntputStreamLineByLine(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
                 .flatMap(EspDeviceInfoMapper::mapToEspDeviceInfo)
@@ -137,20 +120,20 @@ public class EsptoolService {
     /**
      * Check if esptool is installed by executing the command esptool.py version for the current system.
      *
-     * @return Flux<String>
+     * @return A {@link Flux<String> }
      */
     public Flux<String> showEsptoolVersion() {
-        String[] commands = ArrayUtils.addAll(this.bash(), ESPTOOL_PY_VERSION);
-        return this.commandService.processCommands(commands)
+        String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), ESPTOOL_PY_VERSION);
+        return this.commandService.processIntputStreamLineByLine(commands)
                 .take(1)
                 .map(this::processLineEsptoolVersion);
     }
 
     /**
-     * This processes the line that has the esptool.py v and thus validates that the <strong>esptool.py</strong> is correctly installed.
+     * This processes the line that has the <strong>esptool.py v</strong> and thus validates that the <strong>esptool.py</strong> is correctly installed.
      *
-     * @param rawLine
-     * @return String
+     * @param rawLine from console
+     * @return A {@link String}
      */
     private String processLineEsptoolVersion(final String rawLine) {
         if (!(rawLine.contains("esptool.py v"))) {
@@ -160,10 +143,17 @@ public class EsptoolService {
     }
 
     /**
-     * esptool.py --port /dev/ttyUSB1 read_flash 0 ALL esp8266-backupflash.bin
+     * Under background, the command executed is this one by default when you want to read the full flash
      *
-     * @param commands
-     * @return Flux<String>
+     *  A custom port and baud rate is also set.
+     *
+     *   <blockquote><pre>
+     *      esptool.py --port /dev/ttyUSB1 --baud customBaudRate read_flash 0 ALL esp8266-backupflash.bin
+     *   </pre></blockquote><p>
+     *
+
+     * @param commands the commands to preocess
+     * @return A {@link Flux<String>}
      */
     public Flux<String> downloadFlash(String... commands) {
         return commandService.processCommandsWithCustomCharset(commands)
@@ -171,8 +161,10 @@ public class EsptoolService {
     }
 
     /**
-     * @param input
-     * @return String
+     * This String is the line read from the console just when the esptool.py displays the percentage
+     *
+     * @param input line
+     * @return A {@link String}
      */
     private String splitPercentaje(String input) {
         if (input.contains("\\((\\d{1,2}|100) %\\)")) {

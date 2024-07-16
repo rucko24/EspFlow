@@ -1,9 +1,7 @@
-package com.nodemcuuitool.application.esptoolservice;
+package com.nodemcuui.tool.data.service;
 
 import com.nodemcuui.tool.data.entity.EspDeviceInfo;
-import com.nodemcuui.tool.data.service.ComPortService;
-import com.nodemcuui.tool.data.service.CommandService;
-import com.nodemcuui.tool.data.service.EsptoolService;
+import com.nodemcuui.tool.data.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
@@ -55,7 +53,7 @@ class EsptoolServiceTest {
 
         String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", "/dev/ttyACM0", "--baud", "115200", "flash_id");
 
-        when(commandService.processCommands(commands))
+        when(commandService.processIntputStreamLineByLine(commands))
                 .thenReturn(actual);
 
         StepVerifier.create(esptoolService.readFlashIdFromPort("/dev/ttyACM0"))
@@ -70,9 +68,9 @@ class EsptoolServiceTest {
     @SneakyThrows
     void showEsptoolVersion() {
 
-        String[] commands = ArrayUtils.addAll(EsptoolService.bash(), ESPTOOL_PY_VERSION);
+        String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), ESPTOOL_PY_VERSION);
 
-        when(commandService.processCommands(commands)).thenReturn(Flux.just("esptool.py v4.7.0"));
+        when(commandService.processIntputStreamLineByLine(commands)).thenReturn(Flux.just("esptool.py v4.7.0"));
 
         StepVerifier.create(esptoolService.showEsptoolVersion())
                 .expectNext("esptool.py v4.7.0")

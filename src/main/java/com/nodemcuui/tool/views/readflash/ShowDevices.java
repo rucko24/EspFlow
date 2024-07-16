@@ -15,7 +15,8 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import static com.nodemcuui.tool.data.util.UiToolConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
@@ -40,7 +42,6 @@ import static com.nodemcuui.tool.views.readflash.EspDevicesCarousel.createSlideC
  *             .withStartSizeAddress(this.startAddress)
  *             .withCustomFlashSizeAddress(this.endAddress)
  *             .withAutoDetectFlashSize(this.autoDetectFlashSize)
- *             .createSlides()
  *             .make();
  * </pre>
  */
@@ -91,46 +92,42 @@ public class ShowDevices {
      * 6
      */
     public interface StartAddressStage {
-        EndAddressSizeStage withStartSizeAddress(TextField startSizeAddress);
+        EndAddressSizeStage withStartSizeAddress(IntegerField startSizeAddress);
     }
 
     /**
      * 7
      */
     public interface EndAddressSizeStage {
-        AllAddressSizeStage withCustomFlashSizeAddress(TextField customFlashSizeAddress);
+        AllAddressSizeStage withCustomFlashSizeAddress(IntegerField customFlashSizeAddress);
     }
 
     /**
      * 8
      */
     public interface AllAddressSizeStage {
-        CreateSlidedStage withAutoDetectFlashSize(final Checkbox autoDetectFlashSize);
+        Build withAutoDetectFlashSize(final Checkbox autoDetectFlashSize);
     }
 
     /**
      * 9
      */
-    public interface CreateSlidedStage {
-        Build createSlides();
-    }
-
-    /**
-     * 10
-     */
     public interface Build extends IBuilder<ShowDevices> {
     }
 
-    public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage, EsptoolServiceStage, UIStage, ConsoleOutPutStage,
-            CreateSlidedStage, StartAddressStage, EndAddressSizeStage, AllAddressSizeStage, Build {
+    public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage, EsptoolServiceStage, UIStage, ConsoleOutPutStage, StartAddressStage, EndAddressSizeStage, AllAddressSizeStage, Build {
         private EspDevicesCarousel espDevicesCarousel;
         private EsptoolService esptoolService;
         private EspDeviceInfo espDeviceInfo;
         private ConsoleOutPut consoleOutPut;
         private UI ui;
-        private TextField startAddressSize;
-        private TextField endAddressSize;
+        private IntegerField startAddressSize;
+        private IntegerField customSizeToRead;
         private Checkbox autoDetectFlashSize;
+        /**
+         * To bind {@link AddressRecordBinder}
+         */
+        private Binder<AddressRecordBinder> addressRecordBinderBinder = new Binder<>();
 
         @Override
         public UIStage withConsoleOutStage(ConsoleOutPut consoleOutPut) {
@@ -163,25 +160,37 @@ public class ShowDevices {
         }
 
         @Override
-        public AllAddressSizeStage withCustomFlashSizeAddress(TextField customFlashSizeAddress) {
-            this.endAddressSize = customFlashSizeAddress;
+        public AllAddressSizeStage withCustomFlashSizeAddress(IntegerField customFlashSizeAddress) {
+            var customSize  = customFlashSizeAddress.getValue().toString();
+            if(customSize.matches("\\d+") || customSize.isEmpty()) {
+                this.customSizeToRead = customFlashSizeAddress;
+            } else {
+                customFlashSizeAddress.clear();  // delete if it contains foreign characters and set again.
+                this.customSizeToRead = customFlashSizeAddress;
+            }
             return this;
         }
 
         @Override
-        public EndAddressSizeStage withStartSizeAddress(TextField startSizeAddress) {
-            this.startAddressSize = startSizeAddress;
+        public EndAddressSizeStage withStartSizeAddress(IntegerField startSizeAddress) {
+            var startSize  = startSizeAddress.getValue().toString();
+            if(startSize.matches("\\d+") || startSize.isEmpty()) {
+                this.startAddressSize = startSizeAddress;
+            } else {
+                startSizeAddress.clear(); // delete if it contains foreign characters and set again.
+                this.startAddressSize = startSizeAddress;
+            }
             return this;
         }
 
         @Override
-        public CreateSlidedStage withAutoDetectFlashSize(Checkbox autoDetectFlashSize) {
+        public Build withAutoDetectFlashSize(Checkbox autoDetectFlashSize) {
             this.autoDetectFlashSize = autoDetectFlashSize;
             return this;
         }
 
         @Override
-        public Build createSlides() {
+        public ShowDevices make() {
             var macAddress = espDeviceInfo.macAddress();
             if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
                 showEsp01s();
@@ -189,17 +198,11 @@ public class ShowDevices {
                 showEsp8285();
                 showEsp32S3();
             }
-            return this;
+            return new ShowDevices();
         }
 
         private boolean ifItContainsMacAddressShowMeTheSlides(String macAddress) {
             return Objects.nonNull(macAddress);
-        }
-
-        @Override
-        public ShowDevices make() {
-
-            return new ShowDevices();
         }
 
         /**
@@ -282,17 +285,42 @@ public class ShowDevices {
         }
 
         /**
+         * This button contains the listener that will do the reading to create the carousel with the detected ports.
+         *
          * @param ui
          * @param flashButtonWrapper
-         * @return Button
+         * @return A {@link Button} con el listener para la lectura
          */
         private Button buttonForReadFlash(final UI ui, final FlashButtonWrapper flashButtonWrapper) {
             final Button downloadFlashButton = new Button("Read flash");
             downloadFlashButton.setTooltipText("Read flash");
-            downloadFlashButton.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+            downloadFlashButton.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+            /*
+             * Execute the Binder 🔥🚒
+             */
+            addressRecordBinderBinder.forField(startAddressSize)
+                    .withValidator(text -> text.toString().matches("\\d+")
+                            || text.toString().isEmpty(), "Invalid input, set only numbers")
+                    .bind(AddressRecordBinder::startAddressSize, (addressRecordBinder, value) -> {});
+            addressRecordBinderBinder.forField(customSizeToRead)
+                    .withValidator(text -> text.toString().matches("\\d+")
+                            || text.toString().isEmpty(), "Invalid input, set only numbers")
+                    .bind(AddressRecordBinder::customAddresSize, (addressRecordBinder, value) -> {});
+
             downloadFlashButton.addClickListener(event -> {
                 ui.access(() -> {
-                    validate(flashButtonWrapper);
+                    var newRecord = new AddressRecordBinder(startAddressSize.getValue(), customSizeToRead.getValue());
+                    if(addressRecordBinderBinder.writeBeanIfValid(newRecord)) {
+                        validate(flashButtonWrapper);
+                    } else {
+                        NotificationBuilder.builder()
+                                .withText("Invalid input, set only numbers!")
+                                .withPosition(Position.MIDDLE)
+                                .withDuration(3000)
+                                .withIcon(VaadinIcon.WARNING)
+                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                                .make();
+                    }
                 });
             });
             return downloadFlashButton;
@@ -308,18 +336,18 @@ public class ShowDevices {
                 processAutoDetectFlashSize = "ALL";
                 readFlash(flashButtonWrapper, processAutoDetectFlashSize);
             } else {
-                if(!endAddressSize.getValue().isEmpty()) {
-                    processAutoDetectFlashSize = "0x".concat(endAddressSize.getValue().trim());
+                if(!customSizeToRead.isEmpty()) {
+                    processAutoDetectFlashSize = "0x".concat(String.valueOf(customSizeToRead.getValue()));
                     readFlash(flashButtonWrapper, processAutoDetectFlashSize);
                 } else {
                     NotificationBuilder.builder()
-                            .withText("Enter the memory addresses to be read!")
+                            .withText("Please set the custom size or enable the button for full readability.")
                             .withPosition(Position.MIDDLE)
                             .withDuration(3000)
                             .withIcon(VaadinIcon.WARNING)
                             .withThemeVariant(NotificationVariant.LUMO_ERROR)
                             .make();
-                    endAddressSize.focus();
+                    customSizeToRead.focus();
                 }
 
             }
@@ -342,7 +370,11 @@ public class ShowDevices {
         }
 
         /**
-         * <p> esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin <p/>
+         *
+         * <blockquote><pre>
+         *    esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin
+         * </pre></blockquote><p>
+         *
          *
          * @param ui  the {@link UI} instance
          * @param writFileToTempDir
@@ -360,7 +392,7 @@ public class ShowDevices {
                     "--port", espDeviceInfo.port(),
                     "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                     "read_flash",
-                    startAddressSize.getValue().isEmpty() ? "0" : startAddressSize.getValue().trim(),
+                    startAddressSize.getValue().toString().isEmpty() ? "0" : startAddressSize.getValue().toString().trim(),
                     processAutoDetectFlashSize,
                     writFileToTempDir
             };

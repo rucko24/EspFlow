@@ -147,11 +147,11 @@
             <version>3.0.0</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>in.virit</groupId>-->
-<!--            <artifactId>viritin</artifactId>-->
-<!--            <version>2.8.20</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.vaadin.componentfactory</groupId>
+            <artifactId>togglebutton</artifactId>
+            <version>3.0.0</version>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
@@ -159,7 +159,12 @@
             <artifactId>commons-io</artifactId>
             <version>2.14.0</version>
         </dependency>
-
+        <!-- https://vaadin.com/directory/component/clipboardhelper/overview-->
+        <dependency>
+            <groupId>org.vaadin.olli</groupId>
+            <artifactId>clipboardhelper</artifactId>
+            <version>2.0.0</version>
+        </dependency>
 
     </dependencies>
 

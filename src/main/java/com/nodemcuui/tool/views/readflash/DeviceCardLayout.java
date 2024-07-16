@@ -7,14 +7,19 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
+import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import lombok.Getter;
+import org.vaadin.olli.ClipboardHelper;
 
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static com.nodemcuui.tool.data.util.UiToolConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_IS;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CHIP_TYPE;
 import static com.nodemcuui.tool.data.util.UiToolConstants.CRYSTAL_IS;
@@ -71,11 +76,26 @@ public final class DeviceCardLayout extends Div {
     private String image;
     private EspDeviceInfo espDeviceInfo;
 
-    public DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo,
+    /**
+     * Create a DeviceCardLayout div
+     *
+     *
+     * @param image
+     * @param espDeviceInfo
+     * @param downloadFlashButton
+     * @param flashButtonWrapper
+     *
+     * @return A {@link DeviceCardLayout}
+     */
+    public static DeviceCardLayout of(final String image, final EspDeviceInfo espDeviceInfo,
                             final Button downloadFlashButton,
                             final FlashButtonWrapper flashButtonWrapper) {
-        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+       return new DeviceCardLayout(image, espDeviceInfo, downloadFlashButton, flashButtonWrapper);
+    }
 
+    private DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo,
+                            final Button downloadFlashButton,
+                            final FlashButtonWrapper flashButtonWrapper) {
         super.addClassName("card-container");
         this.image = image;
         this.espDeviceInfo = espDeviceInfo;
@@ -175,25 +195,78 @@ public final class DeviceCardLayout extends Div {
         return divRightSubHeader;
     }
 
+    /**
+     * Manejar largo del contenido del span value y si pasa 200 meter elipsis y el copy  button
+     * @return
+     */
     public Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
         Stream.of(chipType, flashSize, crystal, chipIs, spanMadAddress).forEach(span -> span.getStyle().set("font-weight", "bold"));
         chipTypeValue.setText(":  " + espDeviceInfo.chipType());
         chipIsValue.setText(":  " + espDeviceInfo.chipIs());
 
-        final Div divChipIsAndValue = new Div(chipIs, chipIsValue);
-        divChipIsAndValue.addClassName("div-right-ellipsis-text");
-        divChipIsAndValue.getElement().setAttribute("title", espDeviceInfo.chipIs());
-
-        spanMadAddressValue.setText(": " + espDeviceInfo.macAddress());
-
-        divChipIsAndValue.setWidthFull();
         flashSizeValue.setText(":  " + espDeviceInfo.detectedFlashSize());
+        spanMadAddressValue.setText(": " + espDeviceInfo.macAddress());
         crystalValue.setText(":  " + espDeviceInfo.crystalIs());
-        divRightContentText.add(chipType, chipTypeValue, hr1, divChipIsAndValue, hr2,
-                flashSize, flashSizeValue, hr3,
-                crystal, crystalValue, hr4, spanMadAddress, spanMadAddressValue, hr5);
+
+        /*
+         * Detecting chip type
+         */
+        var copyChipType = createDivWithCopyButton(chipType, chipTypeValue, espDeviceInfo.chipType(), "Copy chip type");
+
+        /*
+        * Chip is, // if you exceed a length of 13, it shows 12 characters more ... with the copy button
+        **/
+        Div divChipIsAndValue = null;
+        if(chipIsValue.getText().length() > 13) {
+            final String newString = espDeviceInfo.chipIs().substring(0, 12).trim().concat("...");
+            chipIsValue.setText("");
+            chipIsValue.setText(": "+newString);
+            chipIsValue.addClassName(Right.SMALL);
+            divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue,  espDeviceInfo.chipIs(), "Copy chip is");
+            divChipIsAndValue.getElement().setAttribute("title", espDeviceInfo.chipIs());
+        } else {
+            divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue, espDeviceInfo.chipIs(), "Copy chip is");
+            divChipIsAndValue.getElement().setAttribute("title", espDeviceInfo.chipIs());
+        }
+
+        /*
+         * Flash size
+         *
+         * */
+        var copyFlashSize = createDivWithCopyButton(flashSize, flashSizeValue, espDeviceInfo.detectedFlashSize(), "Copy flash size");
+
+        /*
+         * Crystal
+         *
+         * */
+        var copyCrystal = createDivWithCopyButton(crystal, crystalValue, espDeviceInfo.crystalIs(), "Copy crystal");
+
+        /*
+         *  MAC
+         *
+         * */
+        var copyMac = createDivWithCopyButton(spanMadAddress, spanMadAddressValue, espDeviceInfo.macAddress(), "Copy MAC");
+
+        divRightContentText.add(copyChipType, hr1, divChipIsAndValue, hr2, copyFlashSize, hr3, copyCrystal, hr4, copyMac,  hr5);
+
         return divRightContentText;
+    }
+
+
+    private Div createDivWithCopyButton(Span spanText, Span spanValue, String value, String copyName) {
+        final Button button = new Button(VaadinIcon.COPY_O.create());
+        button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        button.setTooltipText(copyName);
+        final ClipboardHelper clipboardHelper = new ClipboardHelper(value.trim(), button);
+        spanValue.addDoubleClickListener(event -> {
+            Notification.show("Largo " + spanValue.getText().length());
+            Notification.show("Value " + spanValue.getText());
+        });
+        final Div div = new Div(spanText, spanValue, clipboardHelper);
+        spanValue.addClassName(Right.SMALL);
+        div.addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.START, AlignItems.CENTER, Right.SMALL);
+        return div;
     }
 
 }

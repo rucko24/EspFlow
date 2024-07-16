@@ -24,26 +24,56 @@ import static com.nodemcuui.tool.data.util.UiToolConstants.COMMAND_NOT_FOUND;
 import static com.nodemcuui.tool.data.util.UiToolConstants.DMESG_TTY;
 import static com.nodemcuui.tool.data.util.UiToolConstants.NOT_FOUND;
 
+/**
+ * @author rubn
+ */
 @Log4j2
 @Component
 public final class ProcessCommandsInternals {
 
-    public Flux<String> processCommands(final String... commands) {
-        return Flux.defer(() -> this.processCommandsInternal(commands))
+    /**
+     *
+     * This processes the commands that are passed to the OS shell but in a reactive way, allowing the execution in another useful Scheduler to not block the UI, and to get feedBack with each item or line read.
+     * <p>
+     * If the command is not found, a CommandNotFoundException is thrown.
+     *
+     * @param commands a String array with commands
+     *
+     * @return A {@link Flux}
+     */
+    public Flux<String> processIntputStreamLineByLine(final String... commands) {
+        return Flux.defer(() -> this.processIntputStream(commands))
                 .subscribeOn(Schedulers.boundedElastic())
                 .transform(this::decodeDataBuffer)
                 .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND)));
     }
 
-    private Flux<DataBuffer> processCommandsInternal(final String... commands) {
+    /**
+     *  The spring DataBufferUtils is used to read the inputStream coming from the shell, with a buffer of 8192 kbs.
+     *
+     * @param commands a String array with commands
+     *
+     * @return A {@link Flux}
+     */
+    private Flux<DataBuffer> processIntputStream(final String... commands) {
         try {
             return DataBufferUtils.readInputStream(() -> this.execute(commands).getInputStream(), DefaultDataBufferFactory.sharedInstance, FileCopyUtils.BUFFER_SIZE);
         } catch (Exception ex) {
-            log.error("Error {}", ex);
+            log.error("Error to process inputstream with DataBufferUtils {}", ex.getMessage());
             return Flux.error(ex);
         }
     }
 
+    /**
+     *
+     * It is public in case you use it for additional processes, such as changing port permissions.
+     *
+     * @param commands a String array with commands
+     *
+     * @return {@link Process}
+     *
+     * @throws IOException in case of error
+     */
     public Process execute(String... commands) throws IOException {
         return new ProcessBuilder()
                 .command(commands)
@@ -51,6 +81,13 @@ public final class ProcessCommandsInternals {
                 .start();
     }
 
+    /**
+     *
+     * This allows the DataBuffer to be decoded and read line by line.
+     *
+     * @param dataBuffer to decode
+     * @return A {@link Flux}
+     */
     private Flux<String> decodeDataBuffer(final Flux<DataBuffer> dataBuffer) {
         return StringDecoder.allMimeTypes().decode(dataBuffer, null, null, null);
     }
@@ -58,19 +95,28 @@ public final class ProcessCommandsInternals {
     /**
      * Used for firmware reading
      *
-     * @param commands
-     * @return Flux<String>
+     * @param commands a String array with commands
+     * @return A {@link Flux}
      */
     public Flux<String> processCommandsWithCustomCharset(final String... commands) {
-        return Flux.defer(() -> this.processCommandsInternal(commands))
+        return Flux.defer(() -> this.processIntputStream(commands))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(this::mappingDataBuffer)
                 .onErrorResume(throwable -> {
-                    log.error("onErrorResume: {}", throwable);
+                    log.error("onErrorResume: {}", throwable.getMessage());
                     return Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND));
                 });
     }
 
+    /**
+     *
+     * This method can also read the DataBuffer but, it does not give the possibility to decode so that it can be read
+     * line by line if you want to read line by line see processIntputStreamLineByLine method
+     *
+     * @param dataBuffer to read
+     *
+     * @return A {@link String}
+     */
     private String mappingDataBuffer(final DataBuffer dataBuffer) {
         final byte[] bytes = new byte[dataBuffer.readableByteCount()];
         dataBuffer.read(bytes);
@@ -86,8 +132,8 @@ public final class ProcessCommandsInternals {
     }
 
     @SuppressWarnings("unused")
-    public Flux<String> executeDmesgForTtyPort() {
-        return processCommands(DMESG_TTY)
+    private Flux<String> executeDmesgForTtyPort() {
+        return processIntputStreamLineByLine(DMESG_TTY)
                 .map((String line) -> line.split(System.lineSeparator()))
                 .map((String[] tmp) -> Stream.of(tmp)
                         .map((String line) -> {
@@ -99,6 +145,13 @@ public final class ProcessCommandsInternals {
                         })
                         .collect(Collectors.joining())
                 ).switchIfEmpty(Mono.just(NOT_FOUND));
+    }
+
+    @SuppressWarnings("unused")
+    private static int getPID() {
+        String tmp = java.lang.management.ManagementFactory.getRuntimeMXBean().getName();
+        tmp = tmp.split("@")[0];
+        return Integer.valueOf(tmp);
     }
 
 

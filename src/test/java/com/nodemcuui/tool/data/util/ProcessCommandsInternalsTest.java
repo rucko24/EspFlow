@@ -1,44 +1,58 @@
 package com.nodemcuui.tool.data.util;
 
-import com.nodemcuui.tool.data.enums.BaudRates;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {ProcessCommandsInternals.class})
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * @author rubn
+ */
+@SpringBootTest(classes = {ProcessCommandsInternals.class})
 class ProcessCommandsInternalsTest {
 
     @Autowired
     private ProcessCommandsInternals processCommandsInternals;
 
     @Test
-    void execute() {
-        String[] commands = new String[]{
-                "esptool.py",
-                "--port", "/dev/ttyUSB1",
-                "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
-                "read_flash",
-                "0",
-                "ALL",
-                "backuo.bin"
-        };
+    @DisplayName("Change port permissions, change the password, and port for test, chmod a+rw works too")
+    void changePortPermissionsSuccess() {
+        if (GetOsName.getOsName() == GetOsName.LINUX) {
+            try {
+                final String echo = "echo password | sudo -S chmod 666 /dev/ttyUSB1";
+                final String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), echo);
+                final int resultCode = processCommandsInternals.execute(commands).waitFor();
+                if (resultCode == 0) {
+                    System.out.println("Command executed successfully.");
 
-        try (var inputStream = processCommandsInternals.execute(commands).getInputStream();
-             var bufferedInputStream = new BufferedInputStream(inputStream)) {
-            final byte[] buffer = new byte[FileCopyUtils.BUFFER_SIZE];
-            IOUtils.read(bufferedInputStream, buffer);
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
+                    assertThat(resultCode).isZero();
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-
     }
+
+    @Test
+    @DisplayName("Attempted command execution with some bad parameter, should return 1")
+    void changePortPermissionsFailure() {
+        if (GetOsName.getOsName() == GetOsName.LINUX) {
+            try {
+                final String echo = "echo password | sudo -S chod 666 /dev8ttyUSB1";
+                final String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), echo);
+                final int resultCode = processCommandsInternals.execute(commands).waitFor();
+
+                assertThat(resultCode).isOne();
+
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

@@ -9,24 +9,30 @@ import com.nodemcuui.tool.data.util.NotificationBuilder;
 import com.nodemcuui.tool.data.util.ResponsiveHeaderDiv;
 import com.nodemcuui.tool.data.util.console.ConsoleOutPut;
 import com.nodemcuui.tool.views.MainLayout;
+import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -49,6 +55,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
+import static com.nodemcuui.tool.data.util.UiToolConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.nodemcuui.tool.data.util.UiToolConstants.HIDDEN;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_X;
 import static com.nodemcuui.tool.data.util.UiToolConstants.OVERFLOW_Y;
@@ -71,11 +78,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar()));
     private final HorizontalLayout horizontalLayoutForPrimarySection = new HorizontalLayout();
     private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
-    private final TextField startAddress = new TextField("Start address");
-    private final TextField endAddress = new TextField("Set size address to read");
-    private final Checkbox autoDetectFlashSize = new Checkbox("Autodetect flash size aka ALL");
+    private final IntegerField startAddress = new IntegerField("Start address");
+    private final IntegerField endAddress = new IntegerField("Set size address to read");
+    private final ToggleButton autoDetectFlashSize = new ToggleButton();
+    private final Span spanAutoDetectFlashSize = new Span("Set size address to ALL");
     private final Div divWithPortErrors = new Div();
-
     /**
      * Console output
      */
@@ -102,20 +109,20 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     /**
      * The SplitLayout
      *
-     * @return a configured {@link SplitLayout}
+     * @return A configured {@link SplitLayout}
      */
     private SplitLayout getSplitLayout() {
         final var splitLayout = new SplitLayout(Orientation.VERTICAL);
         splitLayout.setSizeFull();
-        splitLayout.setSplitterPosition(60);
+        splitLayout.setSplitterPosition(65);
         splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
         splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
         /*
          * Primary section
          */
-        final var rigthFormForAddress = this.rigthFormForAddress();
+        final var rightFormForAddress = this.rigthFormForAddress();
         final var divForLeftCarousel = divForLeftCarousel();
-        final var horizontalLayoutToPrimarySection = horizontalLayoutToPrimarySection(rigthFormForAddress, divForLeftCarousel);
+        final var horizontalLayoutToPrimarySection = horizontalLayoutToPrimarySection(rightFormForAddress, divForLeftCarousel);
         splitLayout.addToPrimary(horizontalLayoutToPrimarySection);
         /*
          * Secondary section
@@ -131,45 +138,70 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     * @param rigthFormForAddress
-     * @param divForLeftCarousel
-     * @return {@link HorizontalLayout}
+     * @param rightFormForAddress The form in the right-hand corner with the textfields for the memory zones
+     * @param divForLeftCarousel  The carousel with the scanned scans
+     * @return A {@link HorizontalLayout} with the form on the right and the carousel on the left side
      */
-    private HorizontalLayout horizontalLayoutToPrimarySection(Div rigthFormForAddress, Div divForLeftCarousel) {
+    private HorizontalLayout horizontalLayoutToPrimarySection(Div rightFormForAddress, Div divForLeftCarousel) {
         this.progressBar.setVisible(false);
         this.progressBar.setIndeterminate(true);
         this.horizontalLayoutForPrimarySection.setId("div-for-primary");
         this.horizontalLayoutForPrimarySection.setSizeFull();
-        this.horizontalLayoutForPrimarySection.add(rigthFormForAddress, divForLeftCarousel);
+        this.horizontalLayoutForPrimarySection.add(rightFormForAddress, divForLeftCarousel);
         return horizontalLayoutForPrimarySection;
+    }
+
+    @SuppressWarnings("unused")
+    private HorizontalLayout rowStepAvatar(final String numberStep,
+                                           final String tooltip, final H3 header) {
+        final Avatar avatar = new Avatar(numberStep);
+        Tooltip.forComponent(avatar).setText(tooltip);
+        avatar.setThemeName(AvatarVariant.LUMO_LARGE.getVariantName());
+        avatar.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        avatar.getStyle().set("background", "var(--lumo-primary-color)");
+        avatar.getStyle().set("color", "var(--lumo-primary-contrast-color)");
+        final var row = new HorizontalLayout(avatar, header);
+        row.addClassNames(AlignItems.START, JustifyContent.START);
+        return row;
     }
 
     /**
      * This part contains the form for entering the memory addresses to be read.
      *
-     * @return {@link FormLayout}
+     * @return A {@link FormLayout}
      */
     private Div rigthFormForAddress() {
-        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, autoDetectFlashSize, progressBar);
-        Stream.of(buttonRefreshDevices, startAddress, endAddress, autoDetectFlashSize, progressBar)
-                .forEach(items -> items.addClassName(AlignSelf.BASELINE));
+        var rowAutoSize = new HorizontalLayout(autoDetectFlashSize, spanAutoDetectFlashSize);
+        rowAutoSize.setWidthFull();
+        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, progressBar);
+        Stream.of(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, progressBar)
+                .forEach(items -> {
+                    items.addClassName(AlignSelf.BASELINE);
+                    items.setWidthFull();
+                });
         formLayout.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.START, JustifyContent.CENTER);
 
-        startAddress.setTooltipText("Start address");
-        endAddress.setTooltipText("Set size address to read");
-        autoDetectFlashSize.setTooltipText("ALL");
-        autoDetectFlashSize.addValueChangeListener(event -> {
-            if (event.getValue()) {
-                endAddress.clear();
-                endAddress.setEnabled(false);
-            } else {
-                endAddress.clear();
-                endAddress.setEnabled(true);
-            }
-        });
+        startAddress.setTooltipText("default size is 0");
+        endAddress.setTooltipText("default size is 0, enable button to set to ALL");
         Stream.of(startAddress, endAddress).forEach(textField -> {
+            textField.setStepButtonsVisible(true);
+            textField.setWidthFull();
+            textField.setMin(0);
+            textField.setValue(0);
             textField.setPrefixComponent(new Span("0x"));
             textField.setClearButtonVisible(true);
+            textField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
+        });
+        autoDetectFlashSize.setTooltipText("Set custom flash size to ALL");
+        autoDetectFlashSize.setSizeUndefined();
+        autoDetectFlashSize.addValueChangeListener(event -> {
+            if (event.getValue()) {
+                endAddress.setValue(0);
+                endAddress.setEnabled(false);
+            } else {
+                endAddress.setValue(0);
+                endAddress.setEnabled(true);
+            }
         });
 
         final Div parent = new Div(formLayout);
@@ -182,7 +214,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     /**
      * Div for carousel
      *
-     * @return {@link Div}
+     * @return A {@link Div}
      */
     private Div divForLeftCarousel() {
         divCarousel.setId("div-carousel");
@@ -194,7 +226,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     /**
      * Div for console output
      *
-     * @return {@link Div}
+     * @return A  {@link Div}
      */
     private Div divForConsoleOutput() {
         final var divRowToSecondary = new Div(consoleOutPut);
@@ -207,14 +239,14 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     /**
      * The Footer layout
      *
-     * @return HorizontalLayout
+     * @return A {@link HorizontalLayout}
      */
     private HorizontalLayout getFooter() {
         final HorizontalLayout footer = new HorizontalLayout();
         footer.setWidthFull();
         footer.setHeight("40px");
         footer.getStyle().set("border-top", " 1px solid var(--lumo-contrast-10pct)");
-        footer.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        footer.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         footer.setAlignItems(Alignment.CENTER);
         footer.setJustifyContentMode(JustifyContentMode.START);
 
@@ -255,19 +287,24 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * faster feedBack from the microcontrollers that are read, which is difficult with synchronous programming.</p>
      *
      * @param ui
-     * @param espDevicesCarousel
+     * @param {@link espDevicesCarousel}
      */
     private void showDetectedDevices(final UI ui, final EspDevicesCarousel espDevicesCarousel) {
         this.progressBar.setVisible(true);
         final List<Span> spansList = new CopyOnWriteArrayList<>();
         this.esptoolService.readAllDevices()
+                .doOnError(onError -> {
+                    ui.access(() -> {
+                        Notification.show("Error " + onError.getMessage());
+                    });
+                })
+                .flatMap(item -> this.esptoolService.countAllDevices()
+                        .map(count -> EspDeviceWithTotalDevicesMapper.espDeviceWithTotalDevices(item, count)))
                 .doOnComplete(() -> {
                     ui.access(() -> {
                         onComplete(spansList, espDevicesCarousel);
                     });
                 })
-                .flatMap(item -> this.esptoolService.countAllDevices()
-                        .map(count -> EspDeviceWithTotalDevicesMapper.espDeviceWithTotalDevices(item, count)))
                 .subscribe(espDeviceWithTotalDevices -> {
                     ui.access(() -> {
                         this.subscribeThis(spansList, espDeviceWithTotalDevices, espDevicesCarousel, ui);
@@ -279,7 +316,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @param ui
      */
     private void refreshDevices(final UI ui) {
-        buttonRefreshDevices.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonRefreshDevices.addClickListener(event -> {
             final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar());
             this.divCarousel.removeAll();
@@ -348,7 +385,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     .withStartSizeAddress(this.startAddress)
                     .withCustomFlashSizeAddress(this.endAddress)
                     .withAutoDetectFlashSize(this.autoDetectFlashSize)
-                    .createSlides()
                     .make();
         }
 

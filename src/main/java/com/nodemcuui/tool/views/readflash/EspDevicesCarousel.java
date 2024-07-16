@@ -28,7 +28,6 @@ public class EspDevicesCarousel extends Div {
         super.setWidth("450px");
         super.setHeight("100%");
         super.getStyle().set("border-radius", "6px");
-        //getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
         super.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
         updateProgressBar(true);
         Animated.animate(this, Animation.FADE_IN);
@@ -59,8 +58,19 @@ public class EspDevicesCarousel extends Div {
         updateProgressBar(false);
     }
 
-    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton, FlashButtonWrapper anchor) {
-        return DeviceFactoryCardLayout.createDeviceCard(image, espDeviceInfo, downFlashButton, anchor);
+
+    /**
+     * Create a DeviceCardLayout div
+     *
+     * @param image
+     * @param espDeviceInfo
+     * @param downFlashButton
+     * @param flashButtonWrapper
+     *
+     * @return A {@link DeviceCardLayout}
+     */
+    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton, FlashButtonWrapper flashButtonWrapper) {
+        return DeviceCardLayout.of(image, espDeviceInfo, downFlashButton, flashButtonWrapper);
     }
 
 }
