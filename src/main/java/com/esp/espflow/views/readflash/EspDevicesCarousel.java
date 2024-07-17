@@ -1,11 +1,11 @@
 package com.esp.espflow.views.readflash;
 
+import com.esp.espflow.data.entity.EspDeviceInfo;
+import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
 import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
-import com.esp.espflow.data.entity.EspDeviceInfo;
-import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;

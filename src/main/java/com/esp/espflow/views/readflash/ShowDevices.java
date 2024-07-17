@@ -1,6 +1,5 @@
 package com.esp.espflow.views.readflash;
 
-import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.EsptoolService;
@@ -9,9 +8,10 @@ import com.esp.espflow.data.util.IBuilder;
 import com.esp.espflow.data.util.NotificationBuilder;
 import com.esp.espflow.data.util.console.ConsoleOutPut;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
+import com.flowingcode.vaadin.addons.carousel.Slide;
+import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -106,7 +106,7 @@ public class ShowDevices {
      * 8
      */
     public interface AllAddressSizeStage {
-        Build withAutoDetectFlashSize(final Checkbox autoDetectFlashSize);
+        Build withAutoDetectFlashSize(final ToggleButton autoDetectFlashSize);
     }
 
     /**
@@ -123,7 +123,7 @@ public class ShowDevices {
         private UI ui;
         private IntegerField startAddressSize;
         private IntegerField customSizeToRead;
-        private Checkbox autoDetectFlashSize;
+        private ToggleButton autoDetectFlashSize;
         /**
          * To bind {@link AddressRecordBinder}
          */
@@ -184,7 +184,7 @@ public class ShowDevices {
         }
 
         @Override
-        public Build withAutoDetectFlashSize(Checkbox autoDetectFlashSize) {
+        public Build withAutoDetectFlashSize(ToggleButton autoDetectFlashSize) {
             this.autoDetectFlashSize = autoDetectFlashSize;
             return this;
         }
