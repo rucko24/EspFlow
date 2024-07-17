@@ -3,19 +3,17 @@ package com.esp.espflow.data.generator;
 import com.esp.espflow.data.entity.User;
 import com.esp.espflow.data.enums.Role;
 import com.esp.espflow.data.service.UserRepository;
-import lombok.RequiredArgsConstructor;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 import java.util.Set;
 
-@Configuration
-@RequiredArgsConstructor
+@SpringComponent
 public class DataGenerator {
 
     @Bean
@@ -39,10 +37,10 @@ public class DataGenerator {
             user.setRoles(Collections.singleton(Role.USER));
             userRepository.save(user);
             User admin = new User();
-            admin.setName("rub`n");
-            admin.setUsername("rubn");
+            admin.setName("esptool-user");
+            admin.setUsername("esptool");
             admin.setHashedPassword(passwordEncoder.encode("admin"));
-            admin.setProfilePictureUrl("images/dualidad.jpg");
+            admin.setProfilePictureUrl("images/esp01s.jpeg");
             admin.setRoles(Set.of(Role.USER, Role.ADMIN));
             userRepository.save(admin);
 
