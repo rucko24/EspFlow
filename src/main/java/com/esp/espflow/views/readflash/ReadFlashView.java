@@ -21,7 +21,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -279,6 +278,25 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         return footer;
     }
 
+
+    /**
+     * This button triggers the scanning of the microcontrollers and creates the slides, it also updates the footer badges.
+     * <p>
+     * It is also disabled on the first click preventing the user from clicking and another scan is processed to avoid interfering with the previous one.
+     *
+     * @param ui
+     */
+    private void refreshDevices(final UI ui) {
+        buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonRefreshDevices.setDisableOnClick(true);
+        buttonRefreshDevices.addClickListener(event -> {
+            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar());
+            this.divCarousel.removeAll();
+            this.divCarousel.add(espDevicesCarousel);
+            this.showDetectedDevices(ui, espDevicesCarousel);
+        });
+    }
+
     /**
      * <p>This method is used to read the micros that are connected to the OS, in case of not being able to read any,
      * a red SPAN will be displayed with the name of the port with the failure, that failure could be, permissions, etc.</p>
@@ -293,11 +311,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         this.progressBar.setVisible(true);
         final List<Span> spansList = new CopyOnWriteArrayList<>();
         this.esptoolService.readAllDevices()
-                .doOnError(onError -> {
-                    ui.access(() -> {
-                        Notification.show("Error " + onError.getMessage());
-                    });
-                })
+                .doOnError(onError -> this.onError(ui, onError))
                 .flatMap(item -> this.esptoolService.countAllDevices()
                         .map(count -> EspDeviceWithTotalDevicesMapper.espDeviceWithTotalDevices(item, count)))
                 .doOnComplete(() -> {
@@ -313,24 +327,34 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     * @param ui
+     * Process error, show notification
+     *
+     * @param ui The UI
+     * @param onError CanNotBeReadDeviceException possibly empty ports
      */
-    private void refreshDevices(final UI ui) {
-        buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        buttonRefreshDevices.addClickListener(event -> {
-            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar());
-            this.divCarousel.removeAll();
-            this.divCarousel.add(espDevicesCarousel);
-            this.showDetectedDevices(ui, espDevicesCarousel);
+    private void onError(final UI ui, Throwable onError) {
+        ui.access(() -> {
+            this.progressBar.setVisible(false);
+            buttonRefreshDevices.setEnabled(true);
+            NotificationBuilder.builder()
+                    .withText("Error with microcontroller " + onError.getMessage())
+                    .withPosition(Position.MIDDLE)
+                    .withDuration(3000)
+                    .withIcon(VaadinIcon.WARNING)
+                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                    .make();
         });
     }
 
     /**
-     * @param spansList
-     * @param espDevicesCarousel
+     * This piece of code is executed when the reactive stream is completed.
+     *
+     * @param spansList of badges to be updated in case of port error
+     * @param espDevicesCarousel created to be set as visible
      */
     private void onComplete(final List<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
         this.progressBar.setVisible(false);
+        this.buttonRefreshDevices.setEnabled(true);
         espDevicesCarousel.createSlides();
         espDevicesCarousel.setVisible(true);
         if (!spansList.isEmpty()) {

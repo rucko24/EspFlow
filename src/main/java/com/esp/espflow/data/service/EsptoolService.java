@@ -55,8 +55,19 @@ public class EsptoolService {
      */
     public Flux<EspDeviceInfo> readAllDevices() {
         return Flux.fromIterable(comPortService.getPortsList())
+                .switchIfEmpty(this.portListingIsEmpty())
                 .flatMap(this::readFlashIdFromPort)
                 .doOnNext(onNext -> log.info("onNext device: {}", onNext));
+    }
+
+    /**
+     *
+     * This allows us to raise the exception type {@link CanNotBeReadDeviceException}, when the port list is empty.
+     *
+     * @return A {@link Mono}
+     */
+    private Mono<String> portListingIsEmpty() {
+        return Mono.defer(() -> Mono.error(new CanNotBeReadDeviceException("Possibly empty ports")));
     }
 
     /**

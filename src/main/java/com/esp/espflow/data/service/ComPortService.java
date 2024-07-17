@@ -43,21 +43,27 @@ public class ComPortService {
     public Set<String> getPortsList() {
         final SerialPort[] serialPorts = SerialPort.getCommPorts();
         return Optional.of(Arrays.stream(serialPorts))
-                .map((Stream<SerialPort> portsStream) -> {
-                    final Set<String> set = portsStream
-                            .filter(this::isSerialPortFT232R)
-                            .map(SerialPort::getSystemPortPath)
-                            .map(this::replaceCharacters)
-                            .collect(Collectors.toSet());
-                    if (set.isEmpty()) {
-                        return null;
-                    }
-                    return set;
-                }).orElseGet(() -> {
-                    log.info("Serial port length {}", serialPorts.length);
+                .map(this::mappingPorts)
+                .orElseGet(() -> {
+                    log.info("orElseGet getPortsList {}", serialPorts.length);
                     return Collections.emptySet();
                 });
     }
+
+    /**
+     *
+     * Mapping this Set<String>
+     *
+     * @param portsStream to apply the mapping
+     * @return A {@link Set} with process and filter ports
+     */
+    private Set<String> mappingPorts(Stream<SerialPort> portsStream) {
+            return portsStream
+                    .filter(this::isSerialPortFT232R)
+                    .map(SerialPort::getSystemPortPath)
+                    .map(this::replaceCharacters)
+                    .collect(Collectors.toSet());
+        }
 
     /**
      * @return a {@link long} with 0 or more items
@@ -69,7 +75,7 @@ public class ComPortService {
     /**
      * Filter if the port is Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R
      *
-     * @param filterSerialPortFT232R
+     * @param filterSerialPortFT232R the infamous <strong>FT232R</strong>
      * @return Boolean
      */
     private Boolean isSerialPortFT232R(SerialPort filterSerialPortFT232R) {
