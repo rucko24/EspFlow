@@ -36,12 +36,3 @@ import '@vaadin/avatar/theme/lumo/vaadin-avatar.js';
 import '@vaadin/scroller/theme/lumo/vaadin-scroller.js';
 import 'Frontend/generated/jar-resources/lit-renderer.ts';
 import '@vaadin/notification/theme/lumo/vaadin-notification.js';
-import { injectGlobalCss } from 'Frontend/generated/jar-resources/theme-util.js';
-
-import { css, unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin';
-import $cssFromFile_0 from 'xterm/css/xterm.css?inline';
-
-injectGlobalCss($cssFromFile_0.toString(), 'CSSImport end', document);
-import $cssFromFile_1 from 'Frontend/generated/jar-resources/animate.css?inline';
-
-injectGlobalCss($cssFromFile_1.toString(), 'CSSImport end', document);

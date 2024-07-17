@@ -63,7 +63,8 @@ public class MainLayout extends AppLayout {
 
     private void addDrawerContent() {
         Span appName = new Span();
-        final Image logo = new Image("logo/espflow-logo.svg", "logo");
+        final Image logo = new Image("images/logo/espflow.png", "logo");
+        logo.setWidth("75%");
         appName.add(logo);
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
         Header header = new Header(appName);

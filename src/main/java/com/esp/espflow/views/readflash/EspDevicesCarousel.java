@@ -7,6 +7,7 @@ import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -18,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author rubn
  */
 @Uses(Carousel.class)
+@CssImport(value = "./carousel-demo-styles.css", themeFor = "fc-l2t-paper-slider")
 public class EspDevicesCarousel extends Div {
 
     private final List<Slide> slideList = new CopyOnWriteArrayList<>();

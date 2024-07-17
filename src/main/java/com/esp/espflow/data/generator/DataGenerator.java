@@ -3,17 +3,19 @@ package com.esp.espflow.data.generator;
 import com.esp.espflow.data.entity.User;
 import com.esp.espflow.data.enums.Role;
 import com.esp.espflow.data.service.UserRepository;
-import com.vaadin.flow.spring.annotation.SpringComponent;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 import java.util.Set;
 
-@SpringComponent
+@Configuration
+@RequiredArgsConstructor
 public class DataGenerator {
 
     @Bean
@@ -24,9 +26,8 @@ public class DataGenerator {
                 logger.info("Using existing database");
                 return;
             }
-            int seed = 123;
 
-            logger.info("Generating demo data");
+            logger.info("Generating demo data {}");
 
             logger.info("... generating 2 User entities...");
             User user = new User();
