@@ -1,0 +1,11 @@
+:host(.hidden-clear) [part~=clear-button] {
+    /*display: none;*/
+}
+
+:host(.meta) [part~=meta] {
+    width: 100%;
+}
+
+[part="row"] {
+    align-items: center;
+}
