@@ -21,7 +21,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -312,11 +311,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         this.progressBar.setVisible(true);
         final List<Span> spansList = new CopyOnWriteArrayList<>();
         this.esptoolService.readAllDevices()
-                .doOnError(onError -> {
-                    ui.access(() -> {
-                        Notification.show("Error " + onError.getMessage());
-                    });
-                })
+                .doOnError(onError -> this.onError(ui, onError))
                 .flatMap(item -> this.esptoolService.countAllDevices()
                         .map(count -> EspDeviceWithTotalDevicesMapper.espDeviceWithTotalDevices(item, count)))
                 .doOnComplete(() -> {
@@ -329,6 +324,26 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                         this.subscribeThis(spansList, espDeviceWithTotalDevices, espDevicesCarousel, ui);
                     });
                 });
+    }
+
+    /**
+     * Process error, show notification
+     *
+     * @param ui The UI
+     * @param onError CanNotBeReadDeviceException possibly empty ports
+     */
+    private void onError(final UI ui, Throwable onError) {
+        ui.access(() -> {
+            this.progressBar.setVisible(false);
+            buttonRefreshDevices.setEnabled(true);
+            NotificationBuilder.builder()
+                    .withText("Error with microcontroller " + onError.getMessage())
+                    .withPosition(Position.MIDDLE)
+                    .withDuration(3000)
+                    .withIcon(VaadinIcon.WARNING)
+                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
+                    .make();
+        });
     }
 
     /**

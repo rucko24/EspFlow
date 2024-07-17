@@ -28,7 +28,7 @@ class EsptoolServiceIT {
     private ComPortService comPortService;
 
     @Test
-    @DisplayName("Se leen todas los dispositivos en el OS")
+    @DisplayName("All devices in the OS are read, pero si el Set es vacio, se elevara un CanNotBeReadDeviceException")
     void readAllDevices() {
         assertThatCode(() -> {
 

@@ -45,7 +45,7 @@ public class ComPortService {
         return Optional.of(Arrays.stream(serialPorts))
                 .map(this::mappingPorts)
                 .orElseGet(() -> {
-                    log.info("Serial port length {}", serialPorts.length);
+                    log.info("orElseGet getPortsList {}", serialPorts.length);
                     return Collections.emptySet();
                 });
     }
@@ -75,7 +75,7 @@ public class ComPortService {
     /**
      * Filter if the port is Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R
      *
-     * @param filterSerialPortFT232R
+     * @param filterSerialPortFT232R the infamous <strong>FT232R</strong>
      * @return Boolean
      */
     private Boolean isSerialPortFT232R(SerialPort filterSerialPortFT232R) {

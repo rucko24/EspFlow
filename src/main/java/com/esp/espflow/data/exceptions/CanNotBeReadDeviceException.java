@@ -5,7 +5,6 @@ package com.esp.espflow.data.exceptions;
  *
  * @author rubn
  */
-@SuppressWarnings("unused")
 public class CanNotBeReadDeviceException extends Exception {
 
     public CanNotBeReadDeviceException(final String error) {
