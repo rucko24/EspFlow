@@ -1,7 +1,5 @@
 package com.esp.espflow.views.readflash;
 
-import com.infraleap.animatecss.Animated;
-import com.infraleap.animatecss.Animated.Animation;
 import com.esp.espflow.data.entity.EspDeviceWithTotalDevices;
 import com.esp.espflow.data.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.data.service.EsptoolService;
@@ -9,6 +7,8 @@ import com.esp.espflow.data.util.NotificationBuilder;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.console.ConsoleOutPut;
 import com.esp.espflow.views.MainLayout;
+import com.infraleap.animatecss.Animated;
+import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -192,7 +192,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
             textField.setClearButtonVisible(true);
             textField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
         });
-        autoDetectFlashSize.setTooltipText("Set custom flash size to ALL");
+        Tooltip.forComponent(autoDetectFlashSize).setText("Set custom flash size to ALL");
         autoDetectFlashSize.setSizeUndefined();
         autoDetectFlashSize.addValueChangeListener(event -> {
             if (event.getValue()) {

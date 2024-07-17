@@ -1,7 +1,5 @@
 package com.esp.espflow.views.flashesp32;
 
-import com.infraleap.animatecss.Animated;
-import com.infraleap.animatecss.Animated.Animation;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.enums.FlashMode;
 import com.esp.espflow.data.service.CommandService;
@@ -10,6 +8,8 @@ import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.console.ConsoleOutPut;
 import com.esp.espflow.views.MainLayout;
+import com.infraleap.animatecss.Animated;
+import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;

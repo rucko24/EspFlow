@@ -24,8 +24,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="8"
-     inkscape:cx="62.375"
-     inkscape:cy="14.6875"
+     inkscape:cx="59.0625"
+     inkscape:cy="3.5625"
      inkscape:window-width="1854"
      inkscape:window-height="1003"
      inkscape:window-x="66"
@@ -97,7 +97,10 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.26885px;font-family:Sans;-inkscape-font-specification:'Sans, ';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#965c5c;fill-opacity:1;stroke-width:0;stroke-dasharray:none"
            x="89.737648"
            y="109.88004"
-           id="text1"><tspan
+           id="text1"
+           inkscape:export-filename="espflow-logo2.svg"
+           inkscape:export-xdpi="96"
+           inkscape:export-ydpi="96"><tspan
              sodipodi:role="line"
              id="tspan1"
              style="font-style:italic;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.26885px;font-family:Arimo;-inkscape-font-specification:'Arimo, Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#313131;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
@@ -110,9 +113,9 @@
         <rect
            style="fill:#006af5;fill-opacity:1;stroke:#303030;stroke-width:0;stroke-dasharray:none"
            id="rect1"
-           width="16.814901"
+           width="16.804565"
            height="0.51604021"
-           x="103.19132"
+           x="103.20166"
            y="110.64729"
            rx="0"
            ry="0" />
