@@ -1,2 +1,2 @@
-import {applyTheme as _applyTheme} from './theme-nodemcuuitool.generated.js';
+import {applyTheme as _applyTheme} from './theme-espflow.generated.js';
 export const applyTheme = _applyTheme;
