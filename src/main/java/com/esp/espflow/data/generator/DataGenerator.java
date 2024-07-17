@@ -24,9 +24,8 @@ public class DataGenerator {
                 logger.info("Using existing database");
                 return;
             }
-            int seed = 123;
 
-            logger.info("Generating demo data");
+            logger.info("Generating demo data {}");
 
             logger.info("... generating 2 User entities...");
             User user = new User();
@@ -38,10 +37,10 @@ public class DataGenerator {
             user.setRoles(Collections.singleton(Role.USER));
             userRepository.save(user);
             User admin = new User();
-            admin.setName("rub`n");
-            admin.setUsername("rubn");
+            admin.setName("esptool-user");
+            admin.setUsername("esptool");
             admin.setHashedPassword(passwordEncoder.encode("admin"));
-            admin.setProfilePictureUrl("images/dualidad.jpg");
+            admin.setProfilePictureUrl("images/esp01s.jpeg");
             admin.setRoles(Set.of(Role.USER, Role.ADMIN));
             userRepository.save(admin);
 
