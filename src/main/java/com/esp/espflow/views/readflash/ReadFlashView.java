@@ -279,6 +279,25 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         return footer;
     }
 
+
+    /**
+     * This button triggers the scanning of the microcontrollers and creates the slides, it also updates the footer badges.
+     * <p>
+     * It is also disabled on the first click preventing the user from clicking and another scan is processed to avoid interfering with the previous one.
+     *
+     * @param ui
+     */
+    private void refreshDevices(final UI ui) {
+        buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonRefreshDevices.setDisableOnClick(true);
+        buttonRefreshDevices.addClickListener(event -> {
+            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar());
+            this.divCarousel.removeAll();
+            this.divCarousel.add(espDevicesCarousel);
+            this.showDetectedDevices(ui, espDevicesCarousel);
+        });
+    }
+
     /**
      * <p>This method is used to read the micros that are connected to the OS, in case of not being able to read any,
      * a red SPAN will be displayed with the name of the port with the failure, that failure could be, permissions, etc.</p>
@@ -313,24 +332,14 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     * @param ui
-     */
-    private void refreshDevices(final UI ui) {
-        buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        buttonRefreshDevices.addClickListener(event -> {
-            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar());
-            this.divCarousel.removeAll();
-            this.divCarousel.add(espDevicesCarousel);
-            this.showDetectedDevices(ui, espDevicesCarousel);
-        });
-    }
-
-    /**
-     * @param spansList
-     * @param espDevicesCarousel
+     * This piece of code is executed when the reactive stream is completed.
+     *
+     * @param spansList of badges to be updated in case of port error
+     * @param espDevicesCarousel created to be set as visible
      */
     private void onComplete(final List<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
         this.progressBar.setVisible(false);
+        this.buttonRefreshDevices.setEnabled(true);
         espDevicesCarousel.createSlides();
         espDevicesCarousel.setVisible(true);
         if (!spansList.isEmpty()) {

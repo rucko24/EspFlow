@@ -43,21 +43,27 @@ public class ComPortService {
     public Set<String> getPortsList() {
         final SerialPort[] serialPorts = SerialPort.getCommPorts();
         return Optional.of(Arrays.stream(serialPorts))
-                .map((Stream<SerialPort> portsStream) -> {
-                    final Set<String> set = portsStream
-                            .filter(this::isSerialPortFT232R)
-                            .map(SerialPort::getSystemPortPath)
-                            .map(this::replaceCharacters)
-                            .collect(Collectors.toSet());
-                    if (set.isEmpty()) {
-                        return null;
-                    }
-                    return set;
-                }).orElseGet(() -> {
+                .map(this::mappingPorts)
+                .orElseGet(() -> {
                     log.info("Serial port length {}", serialPorts.length);
                     return Collections.emptySet();
                 });
     }
+
+    /**
+     *
+     * Mapping this Set<String>
+     *
+     * @param portsStream to apply the mapping
+     * @return A {@link Set} with process and filter ports
+     */
+    private Set<String> mappingPorts(Stream<SerialPort> portsStream) {
+            return portsStream
+                    .filter(this::isSerialPortFT232R)
+                    .map(SerialPort::getSystemPortPath)
+                    .map(this::replaceCharacters)
+                    .collect(Collectors.toSet());
+        }
 
     /**
      * @return a {@link long} with 0 or more items
