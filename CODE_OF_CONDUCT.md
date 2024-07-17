@@ -1,3 +1,3 @@
-# UPDATE_ME Community Code of Conduct
+# EspFlow Community Code of Conduct
 
-UPDATE_ME follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md).
+EspFlow follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md).
