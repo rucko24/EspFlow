@@ -26,11 +26,11 @@ const loadOnDemand = (key) => {
   if (key === 'e0bcf4f3081bab831fa7200d3a17527641eff25d3ccd4229c1b730c20dd50551') {
     pending.push(import('./chunks/chunk-d8ae729b8e865650b72947c8a92df148aba65c3964c84fd343c5eb0aff71e3f9.js'));
   }
-  if (key === 'ba5c454d3a92512853bd81758a5042cc7ffcf18a4943281cba5418e847285d30') {
-    pending.push(import('./chunks/chunk-6cd0ea702bab74126e1671548385485d0e63362292ad1cd2883a24ed3536a541.js'));
-  }
   if (key === 'abde3f4745195c06e11065a9babe1321675c236a20978a3047ccc3839fa05b82') {
     pending.push(import('./chunks/chunk-335a12bba41cc57cdc8a2c31a66eaa6d0535c95becbcb5bbca70d7cbc8f4bc03.js'));
+  }
+  if (key === 'ba5c454d3a92512853bd81758a5042cc7ffcf18a4943281cba5418e847285d30') {
+    pending.push(import('./chunks/chunk-6cd0ea702bab74126e1671548385485d0e63362292ad1cd2883a24ed3536a541.js'));
   }
   return Promise.all(pending);
 }
