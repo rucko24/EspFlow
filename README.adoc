@@ -1,9 +1,29 @@
-# EspFlow
+= EspFlow
 
-This project can be used as a starting point to create your own Vaadin application with Spring Boot.
-It contains all the necessary configuration and some placeholder files to get you started.
+:icons: font
 
-## Running the application
+image::images-for-asciidoctor/espflow-new.logo.svg[]
+
+This project is inspired by the https://github.com/marcelstoer/nodemcu-pyflasher[nodemcu-pyflasher^]
+
+The UI is based on Vaadin Flow and allows invoking `esptool.py` to execute operations common to microcontrollers of the esp32, and esp8266 family.
+
+== Some operations that are possible
+
+- Reading microcontrollers with `read_flash` command
+- Backup of microcontroller firmware, with the possibility of adjusting the memory sections to be read, initial and final reading size.
+
+== Flash View
+
+image::images-for-asciidoctor/flashView.png[]
+
+== Read firmware View
+
+image::images-for-asciidoctor/readfirmwareview.png[]
+
+== *New features*, will be coming soon
+
+== Running the application
 
 The project is a standard Maven project. To run it from the command line,
 type `mvnw` (Windows), or `./mvnw` (Mac & Linux), then open
@@ -13,17 +33,16 @@ You can also import the project to your IDE of choice as you would with any
 Maven project. Read more on [how to import Vaadin projects to different 
 IDEs](https://vaadin.com/docs/latest/flow/guide/step-by-step/importing) (Eclipse, IntelliJ IDEA, NetBeans, and VS Code).
 
-## Deploying to Production
+== Deploying to Production
 
 To create a production build, call `mvnw clean package -Pproduction` (Windows),
 or `./mvnw clean package -Pproduction` (Mac & Linux).
 This will build a JAR file with all the dependencies and front-end resources,
 ready to be deployed. The file can be found in the `target` folder after the build completes.
 
-Once the JAR file is built, you can run it using
-`java -jar target/nodemcuuitool-1.0-SNAPSHOT.jar`
+Once the JAR file is built, you can run it using `java -jar target/espflow-1.0-SNAPSHOT.jar`
 
-## Project structure
+== Project structure
 
 - `MainLayout.java` in `src/main/java` contains the navigation setup (i.e., the
   side/top bar and the main menu). This setup uses
@@ -32,7 +51,7 @@ Once the JAR file is built, you can run it using
 - `views` folder in `frontend/` contains the client-side JavaScript views of your application.
 - `themes` folder in `frontend/` contains the custom CSS styles.
 
-## Useful links
+== Useful links
 
 - Read the documentation at [vaadin.com/docs](https://vaadin.com/docs).
 - Follow the tutorials at [vaadin.com/tutorials](https://vaadin.com/tutorials).
@@ -46,17 +65,18 @@ Once the JAR file is built, you can run it using
 - Ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/vaadin) or join our [Discord channel](https://discord.gg/MYFq5RTbBn).
 - Report issues, create pull requests in [GitHub](https://github.com/vaadin/platform).
 
-
-## Deploying using Docker
+== Deploying using Docker
 
 To build the Dockerized version of the project, run
 
-```
-docker build . -t nodemcuuitool:latest
-```
+[source]
+----
+docker build . -t espflow:latest
+----
 
 Once the Docker image is correctly built, you can test it locally using
 
-```
-docker run -p 8080:8080 nodemcuuitool:latest
-```
+[source]
+----
+docker run -p 8081:8081 espflow:latest
+----
