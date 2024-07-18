@@ -65,7 +65,7 @@ public final class EspDeviceInfoMapper {
         return "Unknown";
     }
 
-    public static Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map) {
+    public static Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map, String descriptivePortName) {
         var serialPort = map.get(SERIAL_PORT);
         var flashSize = map.get(FLASH_SIZE);
 
@@ -82,6 +82,7 @@ public final class EspDeviceInfoMapper {
 
         return Mono.just(EspDeviceInfo.builder()
                 .port(serialPort)
+                .descriptivePortName(descriptivePortName)
                 .detectedFlashSize(flashSize)
                 .macAddress(mac)
                 .crystalIs(crystalIs)

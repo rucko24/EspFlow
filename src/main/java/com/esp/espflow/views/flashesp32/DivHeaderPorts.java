@@ -110,7 +110,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createDivComboBox() {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setPlaceholder("com port");
-        //comboBoxSerialPort.setPreventInvalidInput(Boolean.TRUE);
+        comboBoxSerialPort.setItemLabelGenerator(showMe -> showMe.split("@")[0]);
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
 

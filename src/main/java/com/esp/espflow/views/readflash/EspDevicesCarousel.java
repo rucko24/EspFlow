@@ -27,7 +27,7 @@ public class EspDevicesCarousel extends Div {
 
     public EspDevicesCarousel(final ProgressBar progressBar) {
         this.progressBar = progressBar;
-        super.setWidth("450px");
+        super.setWidth("500px");
         super.setHeight("100%");
         super.getStyle().set("border-radius", "6px");
         super.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
