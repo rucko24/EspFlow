@@ -18,14 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 
-import static com.esp.espflow.data.util.UiToolConstants.CHIP_IS;
-import static com.esp.espflow.data.util.UiToolConstants.CHIP_TYPE;
-import static com.esp.espflow.data.util.UiToolConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.UiToolConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.UiToolConstants.ESPTOOL_PY_VERSION;
-import static com.esp.espflow.data.util.UiToolConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.UiToolConstants.MAC;
-import static com.esp.espflow.data.util.UiToolConstants.SERIAL_PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
+import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.data.util.EspFlowConstants.MAC;
+import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
 
 /**
  * @author rubn

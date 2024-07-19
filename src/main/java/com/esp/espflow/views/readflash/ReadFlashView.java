@@ -54,10 +54,10 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.UiToolConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.UiToolConstants.HIDDEN;
-import static com.esp.espflow.data.util.UiToolConstants.OVERFLOW_X;
-import static com.esp.espflow.data.util.UiToolConstants.OVERFLOW_Y;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
+import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_X;
+import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
 
 /**
  * @author rubn

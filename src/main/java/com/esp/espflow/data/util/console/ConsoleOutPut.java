@@ -19,11 +19,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Top;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
-import static com.esp.espflow.data.util.UiToolConstants.AUTO;
-import static com.esp.espflow.data.util.UiToolConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.data.util.UiToolConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.data.util.UiToolConstants.HIDDEN;
-import static com.esp.espflow.data.util.UiToolConstants.OVERFLOW_Y;
+import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
+import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
 
 /**
  * @author rubn

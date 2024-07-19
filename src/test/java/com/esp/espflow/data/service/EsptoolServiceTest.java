@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
-import static com.esp.espflow.data.util.UiToolConstants.ESPTOOL_PY_VERSION;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
 import static org.mockito.Mockito.when;
 
 /**
