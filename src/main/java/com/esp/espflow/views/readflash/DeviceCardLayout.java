@@ -273,7 +273,8 @@ public final class DeviceCardLayout extends Div {
     }
 
     private Div createDivWithCopyButton(Span spanText, Span spanValue, String value, String copyName) {
-        final Button button = new Button(VaadinIcon.COPY_O.create());
+        var copyButton = createCopyButtonFromSvg();
+        final Button button = new Button(copyButton);
         button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         button.addClickListener(event -> {
             Notification.show("Copied " + spanText.getText(), 2500, Position.MIDDLE);
@@ -282,7 +283,7 @@ public final class DeviceCardLayout extends Div {
                     .delayElement(Duration.ofMillis(1500))
                     .subscribe(btn -> {
                         btn.getUI().ifPresent(ui -> ui.access(() -> {
-                            btn.setIcon(VaadinIcon.COPY_O.create());
+                            btn.setIcon(copyButton);
                         }));
                     });
         });
@@ -303,9 +304,24 @@ public final class DeviceCardLayout extends Div {
     private SvgIcon createUsbIconFromSvg() {
         //usb-port-icon.svg
         final StreamResource iconResource = new StreamResource("usb-port.svg",
-                () -> getClass().getResourceAsStream("/META-INF/resources/images/usb-port.svg"));
+                () -> getClass().getResourceAsStream("/META-INF/resources/images/svg-icons/usb-port.svg"));
         final SvgIcon icon = new SvgIcon(iconResource);
         icon.setSize("22px");
+        return icon;
+    }
+
+    /**
+     *
+     * Button with svg copy style /images/copy-alt.svg
+     *
+     * @return {@link SvgIcon}
+     */
+    private SvgIcon createCopyButtonFromSvg() {
+        //copy-alt.svg
+        final StreamResource iconResource = new StreamResource("copy-alt.svg",
+                () -> getClass().getResourceAsStream("/META-INF/resources/images/svg-icons/copy-alt.svg"));
+        final SvgIcon icon = new SvgIcon(iconResource);
+        icon.setSize("25px");
         return icon;
     }
 

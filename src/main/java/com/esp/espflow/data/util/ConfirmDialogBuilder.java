@@ -94,6 +94,9 @@ public class ConfirmDialogBuilder {
             headerRow.setAlignItems(Alignment.CENTER);
             confirmDialog.setHeader(headerRow);
             confirmDialog.setConfirmText(OK);
+            if(icon == VaadinIcon.WARNING) {
+                confirmDialog.setConfirmButtonTheme("error primary");
+            }
             confirmDialog.setText(text);
             confirmDialog.open();
             return confirmDialog;

@@ -3,6 +3,7 @@ package com.esp.espflow.views.readflash;
 import com.esp.espflow.data.entity.EspDeviceWithTotalDevices;
 import com.esp.espflow.data.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.data.service.EsptoolService;
+import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.esp.espflow.data.util.NotificationBuilder;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.console.ConsoleOutPut;
@@ -336,13 +337,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         ui.access(() -> {
             this.progressBar.setVisible(false);
             buttonRefreshDevices.setEnabled(true);
-            NotificationBuilder.builder()
-                    .withText("Error with microcontroller " + onError.getMessage())
-                    .withPosition(Position.MIDDLE)
-                    .withDuration(3000)
-                    .withIcon(VaadinIcon.WARNING)
-                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                    .make();
+            ConfirmDialogBuilder.showWarning("Error with microcontroller " + onError.getMessage());
         });
     }
 
