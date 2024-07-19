@@ -22,15 +22,15 @@ import static com.esp.espflow.data.util.EspFlowConstants.OK;
 @Uses(ConfirmDialog.class)
 public class ConfirmDialogBuilder {
 
-    public static ConfirmDialog showWarning(String text) {
-        return ConfirmDialogBuilder.builder()
+    public static void showWarning(String text) {
+        ConfirmDialogBuilder.builder()
                 .withHeaderIconAndHeaderText(VaadinIcon.WARNING, EspFlowConstants.WARNING)
                 .withText(text)
                 .make();
     }
 
-    public static ConfirmDialog showInformation(final String text) {
-        return ConfirmDialogBuilder.builder()
+    public static void showInformation(final String text) {
+        ConfirmDialogBuilder.builder()
                 .withHeaderIconAndHeaderText(VaadinIcon.INFO, EspFlowConstants.INFORMATION)
                 .withText(text)
                 .make();
