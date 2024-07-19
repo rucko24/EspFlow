@@ -4,7 +4,6 @@ import com.esp.espflow.data.entity.EspDeviceWithTotalDevices;
 import com.esp.espflow.data.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.NotificationBuilder;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.console.ConsoleOutPut;
 import com.esp.espflow.views.MainLayout;
@@ -22,8 +21,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -362,13 +359,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 this.divWithPortErrors.add(spanPortFailureValue);
                 this.divWithPortErrors.setVisible(true);
             });
-            NotificationBuilder.builder()
-                    .withText("Error with microcontroller")
-                    .withPosition(Position.MIDDLE)
-                    .withDuration(3000)
-                    .withIcon(VaadinIcon.WARNING)
-                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                    .make();
+            ConfirmDialogBuilder.showWarning("Error with microcontroller!");
         }
     }
 

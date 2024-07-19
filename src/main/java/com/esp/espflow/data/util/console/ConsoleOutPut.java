@@ -8,7 +8,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
@@ -68,7 +67,6 @@ public class ConsoleOutPut extends Div {
 //        preserveStateAddon.writePrompt();
         xterm.setPrompt("root@esptool $ ");
         xterm.writePrompt();
-        Tooltip.forComponent(xterm).setText("output");
         xterm.getElement().setProperty("readonly", Boolean.TRUE);
         xterm.setCursorBlink(true);
         xterm.setPasteWithRightClick(true);
