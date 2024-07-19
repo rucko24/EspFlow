@@ -21,10 +21,19 @@ class ComPortServiceIT {
 
     @Test
     @DisplayName("Get Set with all ports, and filter by")
-    void getPortsList() {
+    void getPortsListWithFriendlyName() {
 
-        assertThat(comPortService.getPortsList())
-                .isNullOrEmpty();
+        assertThat(comPortService.getPortsListWithFriendlyName())
+                .hasSizeGreaterThan(0);
+
+    }
+
+    @Test
+    @DisplayName("Get List with all ports without the friendly name on it")
+    void getOnlyPortsList() {
+
+        assertThat(comPortService.getOnlyPortsList())
+                .hasSizeGreaterThan(0);
 
     }
 
@@ -32,8 +41,7 @@ class ComPortServiceIT {
     @DisplayName("Process all ports, if the ports are not processed internally we return zero")
     void countAllDevices() {
         assertThat(comPortService.countAllDevices())
-                .isNotNegative()
-                .isGreaterThanOrEqualTo(0);
+                .isNotNegative();
     }
 
 }

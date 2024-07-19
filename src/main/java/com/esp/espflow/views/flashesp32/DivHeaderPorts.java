@@ -25,8 +25,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
@@ -142,8 +140,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private void showPortIsEsptoolVersionExists() {
         if(esptoolVersionCounter.get()) {
-            final Set<String> ports = this.comPortService.getPortsList();
-            if (Objects.nonNull(ports)) {
+            final List<String> ports = this.comPortService.getOnlyPortsList();
+            if (!ports.isEmpty()) {
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 ConfirmDialogBuilder.showInformation("Port found");
             } else {
