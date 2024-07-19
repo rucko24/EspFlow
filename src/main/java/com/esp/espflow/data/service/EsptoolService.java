@@ -54,7 +54,7 @@ public class EsptoolService {
      * @return A {@link Flux} with the {@link EspDeviceInfo}`s corresponding to each <strong>esp32+</strong> microcontrollers
      */
     public Flux<EspDeviceInfo> readAllDevices() {
-        return Flux.fromIterable(comPortService.getPortsList())
+        return Flux.fromIterable(comPortService.getPortsListWithFriendlyName())
                 .switchIfEmpty(this.portListingIsEmpty())
                 .flatMap(this::readFlashIdFromPort)
                 .doOnNext(onNext -> log.info("onNext device: {}", onNext));

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -38,7 +39,7 @@ public class ComPortService {
      *
      * @return A {@link Set} with name of the ports,
      */
-    public Set<String> getPortsList() {
+    public Set<String> getPortsListWithFriendlyName() {
         final SerialPort[] serialPorts = SerialPort.getCommPorts();
         return Optional.of(Arrays.stream(serialPorts))
                 .map(this::mappingPorts)
@@ -70,7 +71,7 @@ public class ComPortService {
      * @return a {@link long} with 0 or more items
      */
     public long countAllDevices() {
-        return Objects.isNull(getPortsList()) ? 0L : getPortsList().size();
+        return Objects.isNull(getPortsListWithFriendlyName()) ? 0L : getPortsListWithFriendlyName().size();
     }
 
     /**
@@ -97,5 +98,16 @@ public class ComPortService {
         return port;
     }
 
+    /**
+     * A List with only port names
+     *
+     * @return A {@link List} with name of the ports
+     */
+    public List<String> getOnlyPortsList() {
+        return this.getPortsListWithFriendlyName()
+                .stream()
+                .map(port -> port.split("@")[0])
+                .toList();
+    }
 
 }

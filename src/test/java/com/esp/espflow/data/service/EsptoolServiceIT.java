@@ -63,7 +63,7 @@ class EsptoolServiceIT {
     @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id")
     void readFlashIdFromPort() {
 
-        String port = comPortService.getPortsList()
+        String port = comPortService.getPortsListWithFriendlyName()
                 .stream()
                 .findFirst()
                 .orElse("");
