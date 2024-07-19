@@ -6,8 +6,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
@@ -110,7 +112,7 @@ public final class DeviceCardLayout extends Div {
         super.add(toolbar, slideOverView);
     }
 
-    public Div createDivToolbarRow() {
+    private Div createDivToolbarRow() {
         divToolbarRow.addClassName("toolbar-row");
         divToolbarRow.add(createSpanEspDeviceTitle(), createDivControls());
         return divToolbarRow;
@@ -178,6 +180,7 @@ public final class DeviceCardLayout extends Div {
         icon.getStyle().set("color","blue");
         spanState.add(icon);
         spanPort.setText(espDeviceInfo.port());
+        spanPort.add(this.createUsbIconFromSvg());
         //Filter the Silicon Labs CP210x UART Bridge, QinHeng Electronics CH340 serial converter
         String descriptivePortName = espDeviceInfo.descriptivePortName();
         if(descriptivePortName.contains("CP21")) {
@@ -215,7 +218,7 @@ public final class DeviceCardLayout extends Div {
      * Manejar largo del contenido del span value y si pasa 200 meter elipsis y el copy  button
      * @return
      */
-    public Div createDivRightContentText() {
+    private Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
         Stream.of(chipType, flashSize, crystal, chipIs, spanMadAddress).forEach(span -> span.getStyle().set("font-weight", "bold"));
         chipTypeValue.setText(":  " + espDeviceInfo.chipType());
@@ -269,20 +272,31 @@ public final class DeviceCardLayout extends Div {
         return divRightContentText;
     }
 
-
     private Div createDivWithCopyButton(Span spanText, Span spanValue, String value, String copyName) {
         final Button button = new Button(VaadinIcon.COPY_O.create());
         button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         button.setTooltipText(copyName);
         final ClipboardHelper clipboardHelper = new ClipboardHelper(value.trim(), button);
-        spanValue.addDoubleClickListener(event -> {
-            Notification.show("Largo " + spanValue.getText().length());
-            Notification.show("Value " + spanValue.getText());
-        });
+        Tooltip.forComponent(spanValue).setText(spanValue.getText());
         final Div div = new Div(spanText, spanValue, clipboardHelper);
         spanValue.addClassName(Right.SMALL);
         div.addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.START, AlignItems.CENTER, Right.SMALL);
         return div;
+    }
+
+    /**
+     *
+     * A custom svg icon for usb port connection /images/usb-port-icon.svg
+     *
+     * @return A {@link SvgIcon}
+     */
+    private SvgIcon createUsbIconFromSvg() {
+        //usb-port-icon.svg
+        final StreamResource iconResource = new StreamResource("usb-port.svg",
+                () -> getClass().getResourceAsStream("/META-INF/resources/images/usb-port.svg"));
+        final SvgIcon icon = new SvgIcon(iconResource);
+        icon.setSize("22px");
+        return icon;
     }
 
 }
