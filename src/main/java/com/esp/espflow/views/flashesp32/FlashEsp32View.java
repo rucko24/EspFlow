@@ -37,15 +37,15 @@ import reactor.core.publisher.Flux;
 
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.UiToolConstants.AUTO;
-import static com.esp.espflow.data.util.UiToolConstants.DISPLAY;
-import static com.esp.espflow.data.util.UiToolConstants.DMESG_GREP_TTY;
-import static com.esp.espflow.data.util.UiToolConstants.HIDDEN;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN_LEFT;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN_TOP;
-import static com.esp.espflow.data.util.UiToolConstants.OVERFLOW_X;
-import static com.esp.espflow.data.util.UiToolConstants.OVERFLOW_Y;
+import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
+import static com.esp.espflow.data.util.EspFlowConstants.DMESG_GREP_TTY;
+import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_LEFT;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_X;
+import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
 
 /**
  * @author rubn

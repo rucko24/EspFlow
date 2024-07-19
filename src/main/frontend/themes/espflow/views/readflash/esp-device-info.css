@@ -82,14 +82,17 @@
 }
 
 .div-left-content-inside-title1 {
+    display: flex;
+    justify-content: center;
     font-size: 200%;
 }
 
 .div-left-content-inside-title2 {
     display: flex;
+    flex-direction: column;
     margin: 16px 0 8px;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     margin: 16px 0 8px;
 }
 
@@ -117,7 +120,7 @@
 }
 
 .div-right-subheader {
-    margin-top: 48px;
+    margin-top: 25px;
     text-transform: capitalize;
     font-weight: 700;
     padding: 8px 8px 0 16px;

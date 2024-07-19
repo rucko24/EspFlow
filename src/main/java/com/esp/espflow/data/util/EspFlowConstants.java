@@ -1,9 +1,13 @@
 package com.esp.espflow.data.util;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 /**
  * @author rubn
  */
-public class UiToolConstants {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class EspFlowConstants {
 
     public static final String BIN_SH = "/bin/sh";
     // "bin/bash", "-c" caso particular en dmesg
@@ -36,6 +40,12 @@ public class UiToolConstants {
     public static final String CHIP_IS = "Chip is";
     public static final String FLASH_SIZE = "Detected flash size";
     public static final String CRYSTAL_IS = "Crystal is";
+
+
+    public static final String OK = "OK";
+    public static final String DIALOG_DISABLED = "Hide";
+    public static final String INFORMATION = "Information";
+    public static final String WARNING = "Warning";
 
 
 }

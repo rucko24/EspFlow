@@ -24,7 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.UiToolConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
@@ -195,6 +195,7 @@ public class ShowDevices {
             if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
                 showEsp01s();
                 showEso82664MB();
+                showEsp82664Cp201x4MB();
                 showEsp8285();
                 showEsp32S3();
             }
@@ -251,7 +252,8 @@ public class ShowDevices {
          *   Show the esp8266 slide
          **/
         private void showEso82664MB() {
-            if (espDeviceInfo.chipType().endsWith("8266") && espDeviceInfo.detectedFlashSize().equals("4MB")) {
+            if (espDeviceInfo.chipType().endsWith("8266") && espDeviceInfo.detectedFlashSize().equals("4MB")
+            && espDeviceInfo.descriptivePortName().contains("USB Serial")) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -259,6 +261,23 @@ public class ShowDevices {
 
                 Slide esp8266Slide = new Slide(createSlideContent(
                         "images/esp8266-4MB.png",
+                        espDeviceInfo, downFlashButton, flashButtonWrapper));
+
+                espDevicesCarousel.addSlide(esp8266Slide);
+
+            }
+        }
+
+        private void showEsp82664Cp201x4MB() {
+            if (espDeviceInfo.chipType().endsWith("8266") && espDeviceInfo.detectedFlashSize().equals("4MB")
+            && espDeviceInfo.descriptivePortName().contains("CP21")) {
+
+                final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
+
+                var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);
+
+                Slide esp8266Slide = new Slide(createSlideContent(
+                        "images/esp8266-cp201x.png",
                         espDeviceInfo, downFlashButton, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp8266Slide);

@@ -23,11 +23,9 @@ import java.util.stream.Stream;
  *       sudo chmod a+rw /dev/ttyUBS1 /dev/ttyACM0 etc..
  *  </pre></blockquote>
  *
- *  <blockquote><pre>
+ * <blockquote><pre>
  *      sudo chmod 666 /dev/ttyUSB1
  *  </pre></blockquote>
- *
- *
  *
  * @author rubn
  */
@@ -51,24 +49,27 @@ public class ComPortService {
     }
 
     /**
-     *
      * Mapping this Set<String>
      *
      * @param portsStream to apply the mapping
      * @return A {@link Set} with process and filter ports
      */
     private Set<String> mappingPorts(Stream<SerialPort> portsStream) {
-            return portsStream
-                    .filter(this::isSerialPortFT232R)
-                    .map(SerialPort::getSystemPortPath)
-                    .map(this::replaceCharacters)
-                    .collect(Collectors.toSet());
-        }
+        return portsStream
+                .filter(this::isSerialPortFT232R)
+                .map(this::concatSystemPortPathWithFriendlyName)
+                .map(this::replaceCharacters)
+                .collect(Collectors.toSet());
+    }
+
+    private String concatSystemPortPathWithFriendlyName(final SerialPort serialPort) {
+        return serialPort.getSystemPortPath().concat("@").concat(serialPort.getDescriptivePortName());
+    }
 
     /**
      * @return a {@link long} with 0 or more items
      */
-    public long countAllDevices()  {
+    public long countAllDevices() {
         return Objects.isNull(getPortsList()) ? 0L : getPortsList().size();
     }
 

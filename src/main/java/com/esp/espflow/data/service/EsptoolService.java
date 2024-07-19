@@ -18,14 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 
-import static com.esp.espflow.data.util.UiToolConstants.CHIP_IS;
-import static com.esp.espflow.data.util.UiToolConstants.CHIP_TYPE;
-import static com.esp.espflow.data.util.UiToolConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.UiToolConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.UiToolConstants.ESPTOOL_PY_VERSION;
-import static com.esp.espflow.data.util.UiToolConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.UiToolConstants.MAC;
-import static com.esp.espflow.data.util.UiToolConstants.SERIAL_PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
+import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.data.util.EspFlowConstants.MAC;
+import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
 
 /**
  * @author rubn
@@ -94,38 +94,17 @@ public class EsptoolService {
      * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
      */
     public Mono<EspDeviceInfo> readFlashIdFromPort(String port) {
-        final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", port, "--baud",
+        final String parsePort = port.split("@")[0];
+        final String descriptivePortName = port.split("@")[1];
+
+        final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", parsePort, "--baud",
                 String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id");
 
         return commandService.processIntputStreamLineByLine(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
-                .flatMap(EspDeviceInfoMapper::mapToEspDeviceInfo)
-                .switchIfEmpty(Mono.defer(() -> EspDeviceInfoMapper.fallback(port)));
-    }
-
-
-    /**
-     * <p>This simply executes the command to get data from the default micro, with the <strong>flash_id<strong> parameter.</p>
-     *
-     * <li>
-     * The command is: <strong>"esptool.py  flash_id"</strong>
-     * </li>
-     *
-     * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
-     */
-    @SuppressWarnings("unused")
-    public Mono<EspDeviceInfo> readFlashIdFromDefault() {
-        final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--baud",
-                String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id");
-
-        return commandService.processIntputStreamLineByLine(commands)
-                .filter(predicate)
-                .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
-                .flatMap(EspDeviceInfoMapper::mapToEspDeviceInfo)
-                .switchIfEmpty(Mono.error(new CanNotBeReadDeviceException("No existe el micro controlador")))
-                .doOnNext(onNext -> log.info("OnNext {}", onNext))
-                .doOnError(error -> log.error("Error: {}", error));
+                .flatMap(map -> EspDeviceInfoMapper.mapToEspDeviceInfo(map, descriptivePortName) )
+                .switchIfEmpty(Mono.defer(() -> EspDeviceInfoMapper.fallback(parsePort)));
     }
 
     /**

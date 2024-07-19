@@ -8,12 +8,12 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.UiToolConstants.CHIP_IS;
-import static com.esp.espflow.data.util.UiToolConstants.CHIP_TYPE;
-import static com.esp.espflow.data.util.UiToolConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.UiToolConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.UiToolConstants.MAC;
-import static com.esp.espflow.data.util.UiToolConstants.SERIAL_PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
+import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.data.util.EspFlowConstants.MAC;
+import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
 
 /**
  * The EspDeviceInfoMapper
@@ -65,7 +65,7 @@ public final class EspDeviceInfoMapper {
         return "Unknown";
     }
 
-    public static Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map) {
+    public static Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map, String descriptivePortName) {
         var serialPort = map.get(SERIAL_PORT);
         var flashSize = map.get(FLASH_SIZE);
 
@@ -82,6 +82,7 @@ public final class EspDeviceInfoMapper {
 
         return Mono.just(EspDeviceInfo.builder()
                 .port(serialPort)
+                .descriptivePortName(descriptivePortName)
                 .detectedFlashSize(flashSize)
                 .macAddress(mac)
                 .crystalIs(crystalIs)

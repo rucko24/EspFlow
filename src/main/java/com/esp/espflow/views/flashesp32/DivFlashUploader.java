@@ -23,11 +23,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.esp.espflow.data.util.UiToolConstants.AUTO;
-import static com.esp.espflow.data.util.UiToolConstants.DISPLAY;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN_LEFT;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN_TOP;
+import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_LEFT;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
 
 @Log4j2
 @UIScope

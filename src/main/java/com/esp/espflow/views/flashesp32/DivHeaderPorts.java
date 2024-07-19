@@ -3,7 +3,7 @@ package com.esp.espflow.views.flashesp32;
 import com.esp.espflow.data.service.ComPortService;
 import com.esp.espflow.data.service.CommandService;
 import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.util.NotificationBuilder;
+import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -16,8 +16,6 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -31,14 +29,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.esp.espflow.data.util.UiToolConstants.AUTO;
-import static com.esp.espflow.data.util.UiToolConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.data.util.UiToolConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.data.util.UiToolConstants.DISPLAY;
-import static com.esp.espflow.data.util.UiToolConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.UiToolConstants.MARGIN_TOP;
+import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
 
 @Log4j2
 @Getter
@@ -110,7 +108,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createDivComboBox() {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setPlaceholder("com port");
-        //comboBoxSerialPort.setPreventInvalidInput(Boolean.TRUE);
+        comboBoxSerialPort.setItemLabelGenerator(showMe -> showMe.split("@")[0]);
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
 
@@ -147,31 +145,13 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
             final Set<String> ports = this.comPortService.getPortsList();
             if (Objects.nonNull(ports)) {
                 comboBoxSerialPort.setItems(ports); //set port items to combo
-                NotificationBuilder.builder()
-                        .withText("Port found!")
-                        .withPosition(Position.MIDDLE)
-                        .withDuration(3000)
-                        .withIcon(VaadinIcon.INFO_CIRCLE)
-                        .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
-                        .make();
+                ConfirmDialogBuilder.showInformation("Port found");
             } else {
                 comboBoxSerialPort.setItems(List.of());
-                NotificationBuilder.builder()
-                        .withText("Port not found!")
-                        .withPosition(Position.MIDDLE)
-                        .withDuration(3000)
-                        .withIcon(VaadinIcon.WARNING)
-                        .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                        .make();
+                ConfirmDialogBuilder.showWarning("Port not found!");
             }
         } else {
-            NotificationBuilder.builder()
-                    .withText("Verify if esptool.py is installed !!!")
-                    .withPosition(Position.MIDDLE)
-                    .withDuration(3000)
-                    .withIcon(VaadinIcon.WARNING)
-                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                    .make();
+            ConfirmDialogBuilder.showWarning("Verify if esptool.py is installed !!!");
         }
     }
 

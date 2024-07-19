@@ -19,12 +19,12 @@ import org.vaadin.olli.ClipboardHelper;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.UiToolConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.UiToolConstants.CHIP_IS;
-import static com.esp.espflow.data.util.UiToolConstants.CHIP_TYPE;
-import static com.esp.espflow.data.util.UiToolConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.UiToolConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.UiToolConstants.MAC;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
+import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.data.util.EspFlowConstants.MAC;
 
 /**
  * The DeviceCardLayout
@@ -45,7 +45,9 @@ public final class DeviceCardLayout extends Div {
     private final Div divRightContentText = new Div();
 
     private final Span spanDeviceName = new Span();
-    private final Span spanState = new Span("STATE UP");
+    private final Span spanState = new Span("AVAILABLE");
+    private final Span spanPort = new Span();
+    private final Span spanFriendlyName = new Span();
 
     private final Span chipType = new Span(CHIP_TYPE);
     private final Span chipTypeValue = new Span();
@@ -79,8 +81,8 @@ public final class DeviceCardLayout extends Div {
     /**
      * Create a DeviceCardLayout div
      *
-     *
      * @param image
+     *
      * @param espDeviceInfo
      * @param downloadFlashButton
      * @param flashButtonWrapper
@@ -167,11 +169,25 @@ public final class DeviceCardLayout extends Div {
         return divLeftContentInside1;
     }
 
+    /**
+     *
+     * @return A {@link Div}
+     */
     public Div createDivLeftContentInside2() {
         var icon = VaadinIcon.CHECK_CIRCLE.create();
         icon.getStyle().set("color","blue");
         spanState.add(icon);
-        divLeftContentInside2.add(spanState);
+        spanPort.setText(espDeviceInfo.port());
+        //Filter the Silicon Labs CP210x UART Bridge, QinHeng Electronics CH340 serial converter
+        String descriptivePortName = espDeviceInfo.descriptivePortName();
+        if(descriptivePortName.contains("CP21")) {
+            spanFriendlyName.setText(descriptivePortName.split(" ")[0]);
+        }
+        if(descriptivePortName.startsWith("USB Serial")) {
+            spanFriendlyName.setText("CH3xx serial");
+        }
+
+        divLeftContentInside2.add(spanState, spanPort, spanFriendlyName);
         divLeftContentInside2.addClassName("div-left-content-inside-title2");
         return divLeftContentInside2;
     }

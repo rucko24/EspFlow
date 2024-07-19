@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record EspDeviceInfo(
         String port,
+        String descriptivePortName,
         String name,
         String chipType,
         String chipIs,
