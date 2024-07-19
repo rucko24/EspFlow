@@ -8,6 +8,8 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
@@ -17,7 +19,9 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import lombok.Getter;
 import org.vaadin.olli.ClipboardHelper;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -84,11 +88,9 @@ public final class DeviceCardLayout extends Div {
      * Create a DeviceCardLayout div
      *
      * @param image
-     *
      * @param espDeviceInfo
      * @param downloadFlashButton
      * @param flashButtonWrapper
-     *
      * @return A {@link DeviceCardLayout}
      */
     public static DeviceCardLayout of(final String image, final EspDeviceInfo espDeviceInfo,
@@ -172,7 +174,6 @@ public final class DeviceCardLayout extends Div {
     }
 
     /**
-     *
      * @return A {@link Div}
      */
     public Div createDivLeftContentInside2() {
@@ -215,7 +216,8 @@ public final class DeviceCardLayout extends Div {
     }
 
     /**
-     * Manejar largo del contenido del span value y si pasa 200 meter elipsis y el copy  button
+     * Handle the length of the span value content and if it exceeds 200 put ellipsis and copy button
+     *
      * @return
      */
     private Div createDivRightContentText() {
@@ -234,19 +236,17 @@ public final class DeviceCardLayout extends Div {
         var copyChipType = createDivWithCopyButton(chipType, chipTypeValue, espDeviceInfo.chipType(), "Copy chip type");
 
         /*
-        * Chip is, // if you exceed a length of 13, it shows 12 characters more ... with the copy button
-        **/
+         * Chip is, // if you exceed a length of 13, it shows 12 characters more ... with the copy button
+         **/
         Div divChipIsAndValue = null;
-        if(chipIsValue.getText().length() > 13) {
+        if (chipIsValue.getText().length() > 13) {
             final String newString = espDeviceInfo.chipIs().substring(0, 12).trim().concat("...");
             chipIsValue.setText("");
-            chipIsValue.setText(": "+newString);
+            chipIsValue.setText(": " + newString);
             chipIsValue.addClassName(Right.SMALL);
-            divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue,  espDeviceInfo.chipIs(), "Copy chip is");
-            divChipIsAndValue.getElement().setAttribute("title", espDeviceInfo.chipIs());
+            divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue, espDeviceInfo.chipIs(), "Copy chip is");
         } else {
             divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue, espDeviceInfo.chipIs(), "Copy chip is");
-            divChipIsAndValue.getElement().setAttribute("title", espDeviceInfo.chipIs());
         }
 
         /*
@@ -267,7 +267,7 @@ public final class DeviceCardLayout extends Div {
          * */
         var copyMac = createDivWithCopyButton(spanMadAddress, spanMadAddressValue, espDeviceInfo.macAddress(), "Copy MAC");
 
-        divRightContentText.add(copyChipType, hr1, divChipIsAndValue, hr2, copyFlashSize, hr3, copyCrystal, hr4, copyMac,  hr5);
+        divRightContentText.add(copyChipType, hr1, divChipIsAndValue, hr2, copyFlashSize, hr3, copyCrystal, hr4, copyMac, hr5);
 
         return divRightContentText;
     }
@@ -275,9 +275,20 @@ public final class DeviceCardLayout extends Div {
     private Div createDivWithCopyButton(Span spanText, Span spanValue, String value, String copyName) {
         final Button button = new Button(VaadinIcon.COPY_O.create());
         button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        button.addClickListener(event -> {
+            Notification.show("Copied " + spanText.getText(), 2500, Position.MIDDLE);
+            button.setIcon(VaadinIcon.CHECK.create());
+            Mono.just(button)
+                    .delayElement(Duration.ofMillis(1500))
+                    .subscribe(btn -> {
+                        btn.getUI().ifPresent(ui -> ui.access(() -> {
+                            btn.setIcon(VaadinIcon.COPY_O.create());
+                        }));
+                    });
+        });
         button.setTooltipText(copyName);
         final ClipboardHelper clipboardHelper = new ClipboardHelper(value.trim(), button);
-        Tooltip.forComponent(spanValue).setText(spanValue.getText());
+        Tooltip.forComponent(spanValue).setText(value.trim());
         final Div div = new Div(spanText, spanValue, clipboardHelper);
         spanValue.addClassName(Right.SMALL);
         div.addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.START, AlignItems.CENTER, Right.SMALL);
@@ -285,7 +296,6 @@ public final class DeviceCardLayout extends Div {
     }
 
     /**
-     *
      * A custom svg icon for usb port connection /images/usb-port-icon.svg
      *
      * @return A {@link SvgIcon}
