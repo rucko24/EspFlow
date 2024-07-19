@@ -74,7 +74,7 @@ public class ConfirmDialogBuilder {
 
         @Override
         public Build withText(String text) {
-            Objects.requireNonNull(text, "Texto no debe ser null");
+            Objects.requireNonNull(text, "Text must not be null");
             this.text = text;
             return this;
         }
