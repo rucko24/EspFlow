@@ -67,7 +67,6 @@ public class ConsoleOutPut extends Div {
 //        preserveStateAddon.writePrompt();
         xterm.setPrompt("root@esptool $ ");
         xterm.writePrompt();
-        xterm.getElement().setAttribute("title", "output");
         xterm.getElement().setProperty("readonly", Boolean.TRUE);
         xterm.setCursorBlink(true);
         xterm.setPasteWithRightClick(true);

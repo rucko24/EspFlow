@@ -4,17 +4,14 @@ import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
+import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.esp.espflow.data.util.IBuilder;
-import com.esp.espflow.data.util.NotificationBuilder;
 import com.esp.espflow.data.util.console.ConsoleOutPut;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
@@ -332,13 +329,7 @@ public class ShowDevices {
                     if(addressRecordBinderBinder.writeBeanIfValid(newRecord)) {
                         validate(flashButtonWrapper);
                     } else {
-                        NotificationBuilder.builder()
-                                .withText("Invalid input, set only numbers!")
-                                .withPosition(Position.MIDDLE)
-                                .withDuration(3000)
-                                .withIcon(VaadinIcon.WARNING)
-                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                                .make();
+                        ConfirmDialogBuilder.showWarning("Invalid input, set only numbers!");
                     }
                 });
             });
@@ -359,13 +350,7 @@ public class ShowDevices {
                     processAutoDetectFlashSize = "0x".concat(String.valueOf(customSizeToRead.getValue()));
                     readFlash(flashButtonWrapper, processAutoDetectFlashSize);
                 } else {
-                    NotificationBuilder.builder()
-                            .withText("Please set the custom size or enable the button for full readability.")
-                            .withPosition(Position.MIDDLE)
-                            .withDuration(3000)
-                            .withIcon(VaadinIcon.WARNING)
-                            .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                            .make();
+                    ConfirmDialogBuilder.showWarning("Please set the custom size or enable the button for full readability.");
                     customSizeToRead.focus();
                 }
 
@@ -424,35 +409,17 @@ public class ShowDevices {
                             consoleOutPut.writePrompt();
                             if (Files.exists(Path.of(writFileToTempDir))) {
                                 log.info("Backup completado! {}", "");
-                                NotificationBuilder.builder()
-                                        .withText("Backup completado!")
-                                        .withPosition(Position.MIDDLE)
-                                        .withDuration(3000)
-                                        .withIcon(VaadinIcon.INFO)
-                                        .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
-                                        .make();
+                                ConfirmDialogBuilder.showInformation("backup completed correctly!");
                                 flashButtonWrapper.enableAnchorForDownloadTheFirmware(writFileToTempDir);
                             } else {
-                                NotificationBuilder.builder()
-                                        .withText("Stream reactivo completado pero la flash no exsite en el tmp! " + writFileToTempDir)
-                                        .withPosition(Position.MIDDLE)
-                                        .withDuration(3000)
-                                        .withIcon(VaadinIcon.WARNING)
-                                        .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                                        .make();
+                                ConfirmDialogBuilder.showWarning("Stream reactive completed but flash does not exist in the tmp " + writFileToTempDir);
                             }
                         });
                     })
                     .doOnError(onError -> {
                         ui.access(() -> {
                             log.info("Error: {}", onError);
-                            NotificationBuilder.builder()
-                                    .withText("Error al crear backup de esta flash " + onError)
-                                    .withPosition(Position.MIDDLE)
-                                    .withDuration(3000)
-                                    .withIcon(VaadinIcon.WARNING)
-                                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                                    .make();
+                            ConfirmDialogBuilder.showWarning("Error al crear backup de esta flash " + onError);
                         });
                     })
                     .subscribe(inputLine -> {

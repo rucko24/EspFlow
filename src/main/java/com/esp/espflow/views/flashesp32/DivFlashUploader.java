@@ -1,13 +1,10 @@
 package com.esp.espflow.views.flashesp32;
 
-import com.esp.espflow.data.util.NotificationBuilder;
+import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
@@ -88,17 +85,12 @@ public class DivFlashUploader extends Div {
         });
 
         upload.addFileRejectedListener(event -> {
-            NotificationBuilder.builder()
-                    .withText(event.getErrorMessage())
-                    .withPosition(Position.MIDDLE)
-                    .withDuration(3000)
-                    .withIcon(VaadinIcon.WARNING)
-                    .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                    .make();
+            ConfirmDialogBuilder.showWarning(event.getErrorMessage());
         });
 
-        upload.addFailedListener(e -> {
-            log.error("Error addFailed Listernet {}", e.getReason().getMessage());
+        upload.addFailedListener(failedEvent -> {
+            log.error("Error addFailed Listernet {}", failedEvent.getReason().getMessage());
+            ConfirmDialogBuilder.showWarning(failedEvent.getReason().getMessage());
         });
 
     }
