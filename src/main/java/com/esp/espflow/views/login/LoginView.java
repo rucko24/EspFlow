@@ -1,18 +1,15 @@
 package com.esp.espflow.views.login;
 
-import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 
 @PageTitle("Login")
 @Route(value = "login")
@@ -24,10 +21,6 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
     public LoginView(AuthenticatedUser authenticatedUser) {
         this.authenticatedUser = authenticatedUser;
         setAction("login");
-
-        var span = new Span(SvgFactory.createLogoEspFlowFromSvg());
-        span.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
-        setTitle("EspFlow");
 
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setHeader(new LoginI18n.Header());
