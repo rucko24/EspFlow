@@ -1,7 +1,6 @@
 package com.esp.espflow.views;
 
 import com.esp.espflow.data.entity.User;
-import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp32.FlashEsp32View;
@@ -15,6 +14,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -28,15 +28,21 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Optional;
+
+import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
+import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
 public class MainLayout extends AppLayout {
 
+    private static final Logger log = LoggerFactory.getLogger(MainLayout.class);
     private H1 viewTitle;
 
     private AuthenticatedUser authenticatedUser;
@@ -62,7 +68,11 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        Span appName = new Span(SvgFactory.createLogoEspFlowFromSvg());
+        Span appName = new Span();
+        final Image logo = new Image(FRONTEND_IMAGES_LOGO + "espflow_176px.png", "logo");
+        logo.setMaxWidth("75%");
+        logo.setHeight("auto");
+        appName.add(logo);
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
         Header header = new Header(appName);
         addToDrawer(header);
@@ -71,7 +81,7 @@ public class MainLayout extends AppLayout {
         if (maybeUser.isPresent()) {
             User user = maybeUser.get();
 
-            var avatar = new Avatar(user.getName(), "images/ESP8285H08-2MB.jpeg");
+            var avatar = new Avatar(user.getName(), FRONTEND_IMAGES_ESPDEVICES + "ESP8285H08-2MB.jpeg");
             avatar.setWidth("56px");
             avatar.setHeight("56px");
 
