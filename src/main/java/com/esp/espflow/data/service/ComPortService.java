@@ -58,6 +58,16 @@ public class ComPortService {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Here we concatenate the friendlyName or vendor
+     *
+     *  <blockquote>
+     *      <pre>COM3@Silicon Labs CP210x USB to UART Bridge (COM3)</pre>
+     *  </blockquote>
+     * @param serialPort the current serial port
+     *
+     * @return A {@link String}
+     */
     private String concatSystemPortPathWithFriendlyName(final SerialPort serialPort) {
         return serialPort.getSystemPortPath().concat("@").concat(serialPort.getDescriptivePortName());
     }

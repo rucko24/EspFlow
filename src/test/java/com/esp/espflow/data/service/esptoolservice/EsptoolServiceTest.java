@@ -1,7 +1,12 @@
-package com.esp.espflow.data.service;
+package com.esp.espflow.data.service.esptoolservice;
 
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
+import com.esp.espflow.data.service.ComPortService;
+import com.esp.espflow.data.service.CommandService;
+import com.esp.espflow.data.service.EsptoolService;
+import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceArgumentProvider;
+import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -9,6 +14,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,31 +41,22 @@ class EsptoolServiceTest {
     @Mock
     private ComPortService comPortService;
 
-    @Test
+    @ParameterizedTest
+    @ArgumentsSource(EsptoolServiceArgumentProvider.class)
     @SneakyThrows
-    @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id")
-    void readFlashIdWithCustomPort() {
+    @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id, the port will come with the friendlyName")
+    void readFlashIdWithCustomPort(String portForInputStream,
+                                   String portWithFriendlyName,
+                                   Flux<String> actualLines, EspDeviceInfo expectedLines) {
 
-        Flux<String> actual = Flux.just(
-                "Detecting chip type... ESP32-S3",
-                "Chip is ESP32-S3 (QFN56) (revision v0.0)",
-                "Detected flash size: 8MB");
-
-        var expected = EspDeviceInfo.builder()
-                .detectedFlashSize("8MB")
-                .decimal("8388608")
-                .hex("800000")
-                .chipType("ESP32-S3")
-                .chipIs("ESP32-S3 (QFN56) (revision v0.0)")
-                .build();
-
-        String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", "/dev/ttyACM0", "--baud", "115200", "flash_id");
+        //The method processIntputStreamLineByLine should receive the parsed port without the vendor
+        String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), "esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id");
 
         when(commandService.processIntputStreamLineByLine(commands))
-                .thenReturn(actual);
+                .thenReturn(actualLines);
 
-        StepVerifier.create(esptoolService.readFlashIdFromPort("/dev/ttyACM0"))
-                .expectNext(expected)
+        StepVerifier.create(esptoolService.readFlashIdFromPort(portWithFriendlyName))
+                .expectNext(expectedLines)
                 .verifyComplete();
 
     }
@@ -79,9 +77,11 @@ class EsptoolServiceTest {
 
     }
 
-    @Test
+    @ParameterizedTest
+    @ArgumentsSource(EsptoolServiceRawFlashIdFromPortArgumentProvider.class)
     @DisplayName("read raw each String from this inputStream")
-    void  readRawFlashIdFromPort() {
+    void  readRawFlashIdFromPort(Flux<String> actualLines, String expetedFirtsLine,
+                                 String expetedSecondLine, String expetedThirdLine) {
 
         String[] commands = ArrayUtils.addAll(
                 GetOsName.shellOsName(),
@@ -90,17 +90,8 @@ class EsptoolServiceTest {
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID);
 
-        Flux<String> actual = Flux.just(
-                "Detecting chip type... ESP32-S3",
-                "Chip is ESP32-S3 (QFN56) (revision v0.0)",
-                "Detected flash size: 8MB");
-
         when(commandService.processIntputStreamLineByLine(commands))
-                .thenReturn(actual);
-
-        String expetedFirtsLine = "Detecting chip type... ESP32-S3";
-        String expetedSecondLine = "Chip is ESP32-S3 (QFN56) (revision v0.0)";
-        String expetedThirdLine = "Detected flash size: 8MB";
+                .thenReturn(actualLines);
 
         StepVerifier.create(this.esptoolService.readRawFlashIdFromPort(commands))
                 .expectNext(expetedFirtsLine)
