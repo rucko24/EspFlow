@@ -27,14 +27,7 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 @Log4j2
 @Getter
@@ -61,8 +54,10 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final var divCombo = this.createDivComboBox();
 
         scanPort.setTooltipText("Refresh ports!");
+        scanPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         inputCommand.setPlaceholder("input command");
         inputCommand.setClearButtonVisible(Boolean.TRUE);
+        killProcess.setEnabled(false);
         killProcess.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
         final Div divHeader = new Div(divh3SerialPort, divCombo);
@@ -143,13 +138,13 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
             final List<String> ports = this.comPortService.getOnlyPortsList();
             if (!ports.isEmpty()) {
                 comboBoxSerialPort.setItems(ports); //set port items to combo
-                ConfirmDialogBuilder.showInformation("Port found");
+                ConfirmDialogBuilder.showInformation("Port found!");
             } else {
                 comboBoxSerialPort.setItems(List.of());
                 ConfirmDialogBuilder.showWarning("Port not found!");
             }
         } else {
-            ConfirmDialogBuilder.showWarning("Verify if esptool.py is installed !!!");
+            ConfirmDialogBuilder.showWarning("Verify if esptool.py is installed!!!");
         }
     }
 

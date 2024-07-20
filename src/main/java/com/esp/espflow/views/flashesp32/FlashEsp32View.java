@@ -2,9 +2,10 @@ package com.esp.espflow.views.flashesp32;
 
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.enums.FlashMode;
-import com.esp.espflow.data.service.CommandService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
+import com.esp.espflow.data.util.ConfirmDialogBuilder;
+import com.esp.espflow.data.util.GetOsName;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.console.ConsoleOutPut;
 import com.esp.espflow.views.MainLayout;
@@ -37,15 +38,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
-import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
-import static com.esp.espflow.data.util.EspFlowConstants.DMESG_GREP_TTY;
-import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_LEFT;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
-import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_X;
-import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  * @author rubn
@@ -62,7 +55,6 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
 
     private final DivFlashUploader divFlashUploader;
     private final DivHeaderPorts divHeaderPorts;
-    private final CommandService commandService;
     private final EsptoolService esptoolService;
     private final RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
@@ -184,11 +176,12 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
         final Div divButtonFlash = new Div();
         divButtonFlash.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         final Button button = new Button(new Span("⚡"));
-        button.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         button.setTooltipText("flash me!");
-        button.setDisableOnClick(true);
+        //button.setDisableOnClick(true);
         button.addClickListener(event -> {
             //execute flash
+            ConfirmDialogBuilder.showInformation(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET);
         });
         divButtonFlash.add(button);
         return divButtonFlash;
@@ -196,48 +189,44 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
 
     public void consoleOutput(final UI ui) {
         this.divHeaderPorts.getValidateInput().addClickListener(e -> {
-            final String command = this.divHeaderPorts.getInputCommand().getValue().trim();
-            if (command.equals(DMESG_GREP_TTY)) {
-                //this.subscribeThis(this.commandService.executeDmesgForTtyPort(), ui);
-                return;
-            }
-            if (!command.isEmpty()) {
-                this.subscribeThis(this.commandService.processIntputStreamLineByLine(command.split(" ")), ui);
-            }
+            ConfirmDialogBuilder.showInformation(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET);
         });
-        //esptool.py -p /dev/ttyUSB0 flash_id
+
         this.divHeaderPorts.getComboBoxSerialPort().addValueChangeListener((event) -> {
             this.consoleOutPut.clear();
             if (Objects.nonNull(event.getValue())) {
                 final String port = event.getValue();
-                final int baudRate = baudRatesRadioButtonGroup.getValue().getBaudRate();
-                this.commands = new String[]{
-                        "esptool.py",
-                        "--port", port,
-                        "--baud",
-                        String.valueOf(baudRate), "flash_id"};
-                final String[] currentsCommands = ArrayUtils.addAll(this.commands);
-                this.subscribeThis(
-                        this.commandService.processIntputStreamLineByLine(currentsCommands), ui);
+
+                this.commands = ArrayUtils.addAll(
+                        GetOsName.shellOsName(),
+                        ESPTOOL_PY,
+                        PORT, port,
+                        BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
+                        FLASH_ID);
+
+
+                this.subscribeThis(this.esptoolService.readRawFlashIdFromPort(commands), ui);
             }
         });
 
     }
 
-    public void subscribeThis(Flux<String> flux, final UI ui) {
+    public void subscribeThis(final Flux<String> reactiveLines, final UI ui) {
 
         CommandsOnFirstLine.putCommansdOnFirstLine(this.commands, consoleOutPut);
 
-        flux.doOnError((Throwable error) ->
+        reactiveLines.doOnError((Throwable error) ->
                         ui.access(() -> {
                             log.info("Error: {}", error);
                             this.consoleOutPut.writeln(error.getMessage());
                         })
                 )
-                .doOnComplete(() -> {
-                    ui.access(() -> this.consoleOutPut.writePrompt());
+                .doOnTerminate(() -> {
+                    ui.access(() -> {
+                        this.consoleOutPut.writePrompt();
+                    });
                 })
-                .subscribe((String line) ->
+                .subscribe(line ->
                         ui.access(() -> {
                             log.info("Salida: subscribeThis {}", line);
                             this.consoleOutPut.writeln(line);

@@ -18,14 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 
-import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
-import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.EspFlowConstants.MAC;
-import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  * @author rubn
@@ -90,6 +83,16 @@ public class EsptoolService {
      * With the above, this method creates a map that is then mapped to the entity EspDeviceInfo,
      * as many items are issued we need for convenience to have them in a single item or Mono. </p>
      *
+     *  <p><strong>- On Window</strong></p>
+     *  <blockquote>
+     *      <pre>cmd.exe /c esptool.py --port parsePort --baud 115200 flash_id </pre>
+     *  </blockquote>
+     *
+     *  <p><strong>- On Linux</strong></p>
+     * <blockquote>
+     *     <pre> esptool.py --port parsePort --baud 115200 flash_id </pre>
+     * </blockquote>
+     *
      * @param port the microcontroller port to be scanned
      * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
      */
@@ -97,14 +100,42 @@ public class EsptoolService {
         final String parsePort = port.split("@")[0];
         final String descriptivePortName = port.split("@")[1];
 
-        final String[] commands = ArrayUtils.addAll(null, "esptool.py", "--port", parsePort, "--baud",
-                String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()), "flash_id");
+        final String[] commands = ArrayUtils.addAll(
+                GetOsName.shellOsName(),
+                ESPTOOL_PY,
+                PORT, parsePort,
+                BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
+                FLASH_ID);
 
         return commandService.processIntputStreamLineByLine(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
                 .flatMap(map -> EspDeviceInfoMapper.mapToEspDeviceInfo(map, descriptivePortName) )
                 .switchIfEmpty(Mono.defer(() -> EspDeviceInfoMapper.fallback(parsePort)));
+    }
+
+    /**
+     *
+     * <p>
+     *     It is used to read line by line what is returned by the flash_id command, without <strong>mapping to any Object.</strong>
+     * </p>
+     *
+     * <p><strong>- On Window</strong></p>
+     * <blockquote>
+     *     <pre>cmd.exe /c esptool.py --port parsePort --baud 115200 flash_id</pre>
+     * </blockquote>
+     *
+     * <p><strong>- On Linux</strong></p>
+     * <blockquote>
+     *    <pre>esptool.py --port parsePort --baud 115200 flash_id </pre>
+     * </blockquote>
+     *
+     * @param commands the commands
+     *
+     * @return A {@link Flux} with each String from this inputStream
+     */
+    public Flux<String> readRawFlashIdFromPort(final String ...commands) {
+        return commandService.processIntputStreamLineByLine(commands);
     }
 
     /**
@@ -115,7 +146,7 @@ public class EsptoolService {
     public Flux<String> showEsptoolVersion() {
         String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), ESPTOOL_PY_VERSION);
         return this.commandService.processIntputStreamLineByLine(commands)
-                .take(1)
+                .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
                 .map(this::processLineEsptoolVersion);
     }
 
