@@ -13,10 +13,12 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import lombok.Getter;
 import org.vaadin.olli.ClipboardHelper;
@@ -180,9 +182,12 @@ public final class DeviceCardLayout extends Div {
     public Div createDivLeftContentInside2() {
         var icon = VaadinIcon.CHECK_CIRCLE.create();
         icon.getStyle().set("color","blue");
+        icon.addClassName(Left.SMALL);
         spanState.add(icon);
         spanPort.setText(espDeviceInfo.port());
-        spanPort.add(SvgFactory.createUsbIconFromSvg());
+        var usbIcon = SvgFactory.createUsbIconFromSvg();
+        usbIcon.addClassName(Left.SMALL);
+        spanPort.add(usbIcon);
         //Filter the Silicon Labs CP210x UART Bridge, QinHeng Electronics CH340 serial converter
         String descriptivePortName = espDeviceInfo.descriptivePortName();
         if(descriptivePortName.contains("CP21")) {
