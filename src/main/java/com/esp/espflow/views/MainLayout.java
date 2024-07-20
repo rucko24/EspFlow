@@ -100,7 +100,7 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         if (accessChecker.hasAccess(FlashEsp32View.class)) {
-            nav.addItem(new SideNavItem("⚡ Flash Esp32+", FlashEsp32View.class, LineAwesomeIcon.HOME_SOLID.create()));
+            nav.addItem(new SideNavItem("⚡ Flash Esp32-ESP8266", FlashEsp32View.class, LineAwesomeIcon.HOME_SOLID.create()));
         }
 
         if (accessChecker.hasAccess(ReadFlashView.class)) {

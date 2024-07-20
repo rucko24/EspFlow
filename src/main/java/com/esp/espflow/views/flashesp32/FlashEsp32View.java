@@ -53,7 +53,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
 @Log4j2
 @UIScope
 @SpringComponent
-@PageTitle("Flash Esp32+")
+@PageTitle("Flash Esp32-ESP8266")
 @Route(value = "flash-esp32", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
