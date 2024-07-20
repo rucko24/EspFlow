@@ -1,5 +1,6 @@
 package com.esp.espflow.views.login;
 
+import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
@@ -21,6 +22,7 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
     public LoginView(AuthenticatedUser authenticatedUser) {
         this.authenticatedUser = authenticatedUser;
         setAction("login");
+        setTitle(SvgFactory.createLogoEspFlowFromSvg());
 
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setHeader(new LoginI18n.Header());

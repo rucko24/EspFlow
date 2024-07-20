@@ -1,6 +1,7 @@
 package com.esp.espflow.views;
 
 import com.esp.espflow.data.entity.User;
+import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp32.FlashEsp32View;
@@ -62,10 +63,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        Span appName = new Span();
-        final Image logo = new Image("images/logo/espflow.png", "logo");
-        logo.setWidth("75%");
-        appName.add(logo);
+        Span appName = new Span(SvgFactory.createLogoEspFlowFromSvg());
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
         Header header = new Header(appName);
         addToDrawer(header);

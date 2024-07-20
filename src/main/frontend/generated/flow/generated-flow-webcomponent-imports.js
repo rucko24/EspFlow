@@ -13,8 +13,10 @@ injectGlobalCss($cssFromFile_2.toString(), 'CSSImport end', document);
 import $cssFromFile_3 from 'Frontend/generated/jar-resources/carousel-demo-styles.css?inline';
 const $css_3 = typeof $cssFromFile_3  === 'string' ? unsafeCSS($cssFromFile_3) : $cssFromFile_3;
 registerStyles('fc-l2t-paper-slider', $css_3, {moduleId: 'flow_css_mod_3'});
+import '@vaadin/tooltip/src/vaadin-tooltip.js';
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
 import '@vaadin/login/src/vaadin-login-overlay.js';
+import '@vaadin/icon/src/vaadin-icon.js';
 import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/vaadin-lumo-styles/sizing.js';
 import '@vaadin/vaadin-lumo-styles/spacing.js';
@@ -30,7 +32,7 @@ const loadOnDemand = (key) => {
     pending.push(import('./chunks/chunk-6cd0ea702bab74126e1671548385485d0e63362292ad1cd2883a24ed3536a541.js'));
   }
   if (key === 'e0bcf4f3081bab831fa7200d3a17527641eff25d3ccd4229c1b730c20dd50551') {
-    pending.push(import('./chunks/chunk-3c755bac503e813805bfde46c786c6a7c0474058fcce9b17413cbd4fe084819f.js'));
+    pending.push(import('./chunks/chunk-693ec8a4fe827a450babdff1e43ff8507264f72006eb980349ec4b7b60b21698.js'));
   }
   return Promise.all(pending);
 }
