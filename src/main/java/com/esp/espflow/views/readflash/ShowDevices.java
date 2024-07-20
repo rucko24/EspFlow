@@ -5,6 +5,7 @@ import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
+import com.esp.espflow.data.util.GetOsName;
 import com.esp.espflow.data.util.IBuilder;
 import com.esp.espflow.data.util.console.ConsoleOutPut;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
@@ -16,17 +17,13 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
-import static com.esp.espflow.data.util.EspFlowConstants.PORT;
-import static com.esp.espflow.data.util.EspFlowConstants.READ_FLASH;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
@@ -396,7 +393,8 @@ public class ShowDevices {
                                final FlashButtonWrapper flashButtonWrapper,
                                final String processAutoDetectFlashSize) {
 
-            final String[] commands = new String[]{
+            final String[] commands = ArrayUtils.addAll(
+                    GetOsName.shellOsName(),
                     ESPTOOL_PY,
                     PORT, espDeviceInfo.port(),
                     BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
@@ -404,7 +402,7 @@ public class ShowDevices {
                     startAddressSize.getValue().toString().isEmpty() ? "0" : startAddressSize.getValue().toString().trim(),
                     processAutoDetectFlashSize,
                     writFileToTempDir
-            };
+            );
 
             CommandsOnFirstLine.putCommansdOnFirstLine(commands, consoleOutPut);
 
@@ -417,7 +415,7 @@ public class ShowDevices {
                                 ConfirmDialogBuilder.showInformation("backup completed correctly!");
                                 flashButtonWrapper.enableAnchorForDownloadTheFirmware(writFileToTempDir);
                             } else {
-                                ConfirmDialogBuilder.showWarning("Stream reactive completed but flash does not exist in the tmp " + writFileToTempDir);
+                                ConfirmDialogBuilder.showWarning("The flash does not exist in the tmp " + writFileToTempDir);
                             }
                         });
                     })

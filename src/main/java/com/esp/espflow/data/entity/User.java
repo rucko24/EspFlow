@@ -2,13 +2,7 @@ package com.esp.espflow.data.entity;
 
 import com.esp.espflow.data.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Lob;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.Set;
 

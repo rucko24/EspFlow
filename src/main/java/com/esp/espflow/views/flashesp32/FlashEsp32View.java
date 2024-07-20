@@ -64,7 +64,7 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
     /**
      * Console output area
      */
-    private ConsoleOutPut consoleOutPut = new ConsoleOutPut();
+    private final ConsoleOutPut consoleOutPut = new ConsoleOutPut();
 
     private String[] commands;
 
@@ -187,7 +187,11 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
         return divButtonFlash;
     }
 
-    public void consoleOutput(final UI ui) {
+    /**
+     *
+     * @param ui
+     */
+    private void consoleOutput(final UI ui) {
         this.divHeaderPorts.getValidateInput().addClickListener(e -> {
             ConfirmDialogBuilder.showInformation(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET);
         });
@@ -211,7 +215,12 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
 
     }
 
-    public void subscribeThis(final Flux<String> reactiveLines, final UI ui) {
+    /**
+     *
+     * @param reactiveLines
+     * @param ui
+     */
+    private void subscribeThis(final Flux<String> reactiveLines, final UI ui) {
 
         CommandsOnFirstLine.putCommansdOnFirstLine(this.commands, consoleOutPut);
 
@@ -222,9 +231,7 @@ public class FlashEsp32View extends Div implements ResponsiveHeaderDiv {
                         })
                 )
                 .doOnTerminate(() -> {
-                    ui.access(() -> {
-                        this.consoleOutPut.writePrompt();
-                    });
+                    ui.access(this.consoleOutPut::writePrompt);
                 })
                 .subscribe(line ->
                         ui.access(() -> {

@@ -8,12 +8,7 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
-import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.EspFlowConstants.MAC;
-import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  * The EspDeviceInfoMapper
