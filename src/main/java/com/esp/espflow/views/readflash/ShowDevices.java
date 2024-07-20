@@ -398,8 +398,8 @@ public class ShowDevices {
 
             final String[] commands = new String[]{
                     ESPTOOL_PY,
-                    PORT + espDeviceInfo.port(),
-                    BAUD_RATE + BaudRates.BAUD_RATE_115200.getBaudRate(),
+                    PORT, espDeviceInfo.port(),
+                    BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                     READ_FLASH,
                     startAddressSize.getValue().toString().isEmpty() ? "0" : startAddressSize.getValue().toString().trim(),
                     processAutoDetectFlashSize,

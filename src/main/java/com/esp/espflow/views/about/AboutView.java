@@ -1,6 +1,5 @@
 package com.esp.espflow.views.about;
 
-import com.esp.espflow.data.util.EspFlowConstants;
 import com.esp.espflow.views.MainLayout;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -15,7 +14,6 @@ import jakarta.annotation.security.RolesAllowed;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ABOUT;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_AVATAR_USER;
 
 @PageTitle("About")
 @Route(value = "about", layout = MainLayout.class)
