@@ -36,7 +36,6 @@ import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
  */
 public class MainLayout extends AppLayout {
 
-    private static final Logger log = LoggerFactory.getLogger(MainLayout.class);
     private H1 viewTitle;
 
     private AuthenticatedUser authenticatedUser;
