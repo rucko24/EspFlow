@@ -28,15 +28,21 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Optional;
+
+import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
+import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
 public class MainLayout extends AppLayout {
 
+    private static final Logger log = LoggerFactory.getLogger(MainLayout.class);
     private H1 viewTitle;
 
     private AuthenticatedUser authenticatedUser;
@@ -63,8 +69,9 @@ public class MainLayout extends AppLayout {
 
     private void addDrawerContent() {
         Span appName = new Span();
-        final Image logo = new Image("images/logo/espflow.png", "logo");
-        logo.setWidth("75%");
+        final Image logo = new Image(FRONTEND_IMAGES_LOGO + "espflow_176px.png", "logo");
+        logo.setMaxWidth("75%");
+        logo.setHeight("auto");
         appName.add(logo);
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
         Header header = new Header(appName);
@@ -74,7 +81,7 @@ public class MainLayout extends AppLayout {
         if (maybeUser.isPresent()) {
             User user = maybeUser.get();
 
-            var avatar = new Avatar(user.getName(), "images/ESP8285H08-2MB.jpeg");
+            var avatar = new Avatar(user.getName(), FRONTEND_IMAGES_ESPDEVICES + "ESP8285H08-2MB.jpeg");
             avatar.setWidth("56px");
             avatar.setHeight("56px");
 
@@ -93,7 +100,7 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         if (accessChecker.hasAccess(FlashEsp32View.class)) {
-            nav.addItem(new SideNavItem("⚡ Flash Esp32+", FlashEsp32View.class, LineAwesomeIcon.HOME_SOLID.create()));
+            nav.addItem(new SideNavItem("⚡ Flash Esp32-ESP8266", FlashEsp32View.class, LineAwesomeIcon.HOME_SOLID.create()));
         }
 
         if (accessChecker.hasAccess(ReadFlashView.class)) {

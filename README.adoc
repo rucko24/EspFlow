@@ -2,20 +2,20 @@
 
 :icons: font
 
-image::images-for-asciidoctor/espflow-new.logo.svg[]
+image::images-for-asciidoctor/espflow-logo.svg[]
 
 This project is inspired by the https://github.com/marcelstoer/nodemcu-pyflasher[nodemcu-pyflasher^]
 
 The UI is based on Vaadin Flow and allows invoking `esptool.py` to execute operations common to microcontrollers of the esp32, and esp8266 family.
 
-== Some operations that are possible
+== Some operations that are possible, under development ⚒
 
 - Reading microcontrollers with `read_flash` command
 - Backup of microcontroller firmware, with the possibility of adjusting the memory sections to be read, initial and final reading size.
 
 == Flash View
 
-image::images-for-asciidoctor/flashView.png[]
+image::images-for-asciidoctor/flashview.png[]
 
 == Read firmware View
 
@@ -32,6 +32,13 @@ http://localhost:8080 in your browser.
 You can also import the project to your IDE of choice as you would with any
 Maven project. Read more on [how to import Vaadin projects to different 
 IDEs](https://vaadin.com/docs/latest/flow/guide/step-by-step/importing) (Eclipse, IntelliJ IDEA, NetBeans, and VS Code).
+
+== *Environment* variables must be set to login with the esptool user
+
+- `*ADMIN_ESPFLOW_USER*`
+- `*ESPFLOW_PASSWORD*`
+
+https://github.com/rucko24/EspFlow/blob/feature/NewLogo-Customize-E-letter-%2352/src/main/resources/application.yml[see application.yml file^]
 
 == Deploying to Production
 
@@ -62,7 +69,7 @@ Once the JAR file is built, you can run it using `java -jar target/espflow-1.0-S
 - Discover Vaadin's set of CSS utility classes that enable building any UI without custom CSS in the [docs](https://vaadin.com/docs/latest/ds/foundation/utility-classes). 
 - Find a collection of solutions to common use cases in [Vaadin Cookbook](https://cookbook.vaadin.com/).
 - Find Add-ons at [vaadin.com/directory](https://vaadin.com/directory).
-- Ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/vaadin) or join our [Discord channel](https://discord.gg/MYFq5RTbBn).
+- Ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/vaadin) or join our [Vaadin forum](https://vaadin.com/forum/).
 - Report issues, create pull requests in [GitHub](https://github.com/vaadin/platform).
 
 == Deploying using Docker

@@ -2,20 +2,20 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
+import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.shared.Tooltip;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import lombok.Getter;
 import org.vaadin.olli.ClipboardHelper;
@@ -179,9 +179,12 @@ public final class DeviceCardLayout extends Div {
     public Div createDivLeftContentInside2() {
         var icon = VaadinIcon.CHECK_CIRCLE.create();
         icon.getStyle().set("color","blue");
+        icon.addClassName(Left.SMALL);
         spanState.add(icon);
         spanPort.setText(espDeviceInfo.port());
-        spanPort.add(this.createUsbIconFromSvg());
+        var usbIcon = SvgFactory.createUsbIconFromSvg();
+        usbIcon.addClassName(Left.SMALL);
+        spanPort.add(usbIcon);
         //Filter the Silicon Labs CP210x UART Bridge, QinHeng Electronics CH340 serial converter
         String descriptivePortName = espDeviceInfo.descriptivePortName();
         if(descriptivePortName.contains("CP21")) {
@@ -273,7 +276,7 @@ public final class DeviceCardLayout extends Div {
     }
 
     private Div createDivWithCopyButton(Span spanText, Span spanValue, String value, String copyName) {
-        var copyButton = createCopyButtonFromSvg();
+        var copyButton = SvgFactory.createCopyButtonFromSvg();
         final Button button = new Button(copyButton);
         button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         button.addClickListener(event -> {
@@ -294,35 +297,6 @@ public final class DeviceCardLayout extends Div {
         spanValue.addClassName(Right.SMALL);
         div.addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.START, AlignItems.CENTER, Right.SMALL);
         return div;
-    }
-
-    /**
-     * A custom svg icon for usb port connection /images/usb-port-icon.svg
-     *
-     * @return A {@link SvgIcon}
-     */
-    private SvgIcon createUsbIconFromSvg() {
-        //usb-port-icon.svg
-        final StreamResource iconResource = new StreamResource("usb-port.svg",
-                () -> getClass().getResourceAsStream("/META-INF/resources/images/svg-icons/usb-port.svg"));
-        final SvgIcon icon = new SvgIcon(iconResource);
-        icon.setSize("22px");
-        return icon;
-    }
-
-    /**
-     *
-     * Button with svg copy style /images/copy-alt.svg
-     *
-     * @return {@link SvgIcon}
-     */
-    private SvgIcon createCopyButtonFromSvg() {
-        //copy-alt.svg
-        final StreamResource iconResource = new StreamResource("copy-alt.svg",
-                () -> getClass().getResourceAsStream("/META-INF/resources/images/svg-icons/copy-alt.svg"));
-        final SvgIcon icon = new SvgIcon(iconResource);
-        icon.setSize("25px");
-        return icon;
     }
 
 }

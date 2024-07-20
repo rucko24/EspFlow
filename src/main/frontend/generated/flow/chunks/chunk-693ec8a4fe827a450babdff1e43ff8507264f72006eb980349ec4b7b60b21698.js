@@ -30,7 +30,6 @@ import '@vaadin/app-layout/src/vaadin-drawer-toggle.js';
 import '@vaadin/avatar/src/vaadin-avatar.js';
 import '@vaadin/scroller/src/vaadin-scroller.js';
 import 'Frontend/generated/jar-resources/lit-renderer.ts';
-import '@vaadin/notification/src/vaadin-notification.js';
 import { injectGlobalCss } from 'Frontend/generated/jar-resources/theme-util.js';
 
 import { css, unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin';

@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Collections;
 import java.util.Set;
 
+import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_AVATAR_USER;
+
 @SpringComponent
 public class DataGenerator {
 
@@ -39,7 +41,7 @@ public class DataGenerator {
             admin.setName(espflowUser);
             admin.setUsername("esptool");
             admin.setHashedPassword(passwordEncoder.encode(password));
-            admin.setProfilePictureUrl("images/esp01s.jpeg");
+            admin.setProfilePictureUrl(FRONTEND_IMAGES_AVATAR_USER + "esp01s.jpeg");
             admin.setRoles(Set.of(Role.USER, Role.ADMIN));
             userRepository.save(admin);
 

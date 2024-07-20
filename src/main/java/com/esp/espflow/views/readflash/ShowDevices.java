@@ -21,7 +21,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
+import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
+import static com.esp.espflow.data.util.EspFlowConstants.PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.READ_FLASH;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
@@ -216,7 +221,7 @@ public class ShowDevices {
                 var downloadTest = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp8285H16Slide = new Slide(createSlideContent(
-                        "images/ESP8285H08-2MB.jpeg",
+                        FRONTEND_IMAGES_ESPDEVICES + "ESP8285H08-2MB.jpeg",
                         espDeviceInfo, downloadTest, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp8285H16Slide);
@@ -238,7 +243,7 @@ public class ShowDevices {
                 var downloadTest = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp01sSlide = new Slide(createSlideContent(
-                        "images/esp01s-1MB.jpg",
+                        FRONTEND_IMAGES_ESPDEVICES + "esp01s-1MB.jpg",
                         espDeviceInfo, downloadTest, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp01sSlide);
@@ -257,7 +262,7 @@ public class ShowDevices {
                 var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp8266Slide = new Slide(createSlideContent(
-                        "images/esp8266-4MB.png",
+                        FRONTEND_IMAGES_ESPDEVICES + "esp8266-4MB.png",
                         espDeviceInfo, downFlashButton, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp8266Slide);
@@ -274,7 +279,7 @@ public class ShowDevices {
                 var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp8266Slide = new Slide(createSlideContent(
-                        "images/esp8266-cp201x.png",
+                        FRONTEND_IMAGES_ESPDEVICES + "esp8266-cp201x.png",
                         espDeviceInfo, downFlashButton, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp8266Slide);
@@ -293,7 +298,7 @@ public class ShowDevices {
                 var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);
 
                 Slide esp32s3Slide = new Slide(createSlideContent(
-                        "images/ESP32-S3-DEVKITC-1-N8_SPL.webp",
+                        FRONTEND_IMAGES_ESPDEVICES + "ESP32-S3-DEVKITC-1-N8_SPL.webp",
                         espDeviceInfo, downFlashButton, flashButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp32s3Slide);
@@ -392,10 +397,10 @@ public class ShowDevices {
                                final String processAutoDetectFlashSize) {
 
             final String[] commands = new String[]{
-                    "esptool.py",
-                    "--port", espDeviceInfo.port(),
-                    "--baud", String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
-                    "read_flash",
+                    ESPTOOL_PY,
+                    PORT, espDeviceInfo.port(),
+                    BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
+                    READ_FLASH,
                     startAddressSize.getValue().toString().isEmpty() ? "0" : startAddressSize.getValue().toString().trim(),
                     processAutoDetectFlashSize,
                     writFileToTempDir

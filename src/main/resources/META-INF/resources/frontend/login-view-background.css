@@ -1,14 +1,13 @@
 /*brand logo*/
 [part="brand"] {
-    background-image: url("./login/espflow.png");
+    background-image: url("./images/logo/espflow.png");
     background-size: cover;
-    /*background-position: 50% 50%;*/
     background-color: #cf2727;
 }
 
 /*bg image */
 [part="backdrop"] {
-    background-image: url("./login/background-esp01s.jpeg");
+    background-image: url("./images/login/background-esp01s.jpeg");
     background-size: cover;
     background-position: 50% 50%;
 }
