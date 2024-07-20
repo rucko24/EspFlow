@@ -2,13 +2,13 @@
 
 :icons: font
 
-image::images-for-asciidoctor/espflow-new.logo.svg[]
+image::images-for-asciidoctor/espflow-logo.svg[]
 
 This project is inspired by the https://github.com/marcelstoer/nodemcu-pyflasher[nodemcu-pyflasher^]
 
 The UI is based on Vaadin Flow and allows invoking `esptool.py` to execute operations common to microcontrollers of the esp32, and esp8266 family.
 
-== Some operations that are possible
+== Some operations that are possible, under development ⚒
 
 - Reading microcontrollers with `read_flash` command
 - Backup of microcontroller firmware, with the possibility of adjusting the memory sections to be read, initial and final reading size.
