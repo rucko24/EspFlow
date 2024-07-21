@@ -27,6 +27,7 @@ public class EspFlowConstants {
     public static final String DISPLAY = "display";
     public static final String ESPTOOL_PY_NOT_FOUND = "esptool.py not found!";
     public static final String[] ESPTOOL_PY_VERSION = new String[]{"esptool.py","version"};
+    public static final int FIRST_LINE_TO_CHECK_IF_IT_EXISTS = 1;
     public static final String NOT_FOUND = "not found!";
     public static final String COMMAND_NOT_FOUND = "command not found!";
     public static final String CHARSET_CP850 = "CP850";
@@ -56,5 +57,8 @@ public class EspFlowConstants {
     public static final String ESPTOOL_PY = "esptool.py";
     public static final String BAUD_RATE = "--baud";
     public static final String READ_FLASH = "read_flash";
+    public static final String FLASH_ID = "flash_id";
+
+    public static final String THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET = "This feature has not been implemented yet!";
 
 }

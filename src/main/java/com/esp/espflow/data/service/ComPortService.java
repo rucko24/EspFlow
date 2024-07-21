@@ -5,12 +5,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,6 +58,16 @@ public class ComPortService {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Here we concatenate the friendlyName or vendor
+     *
+     *  <blockquote>
+     *      <pre>COM3@Silicon Labs CP210x USB to UART Bridge (COM3)</pre>
+     *  </blockquote>
+     * @param serialPort the current serial port
+     *
+     * @return A {@link String}
+     */
     private String concatSystemPortPathWithFriendlyName(final SerialPort serialPort) {
         return serialPort.getSystemPortPath().concat("@").concat(serialPort.getDescriptivePortName());
     }

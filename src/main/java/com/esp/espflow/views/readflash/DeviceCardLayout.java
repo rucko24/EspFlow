@@ -25,12 +25,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
-import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.EspFlowConstants.MAC;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  * The DeviceCardLayout

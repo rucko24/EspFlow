@@ -1,12 +1,15 @@
 package com.esp.espflow.data.util;
 
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,6 +55,27 @@ class ProcessCommandsInternalsTest {
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Test
+    @DisplayName("Execute 'esptool.py version' on windows, without shell cmd.exe /c")
+    @SneakyThrows
+    void readEmbebdedExecutableEsptool_4_7_0() {
+        if (GetOsName.getOsName() == GetOsName.WINDOWS) {
+
+            final String[] shell = GetOsName.shellOsName();
+            final var esptoolExecutable = Path.of("src/test/resources/esptool-winx64/esptool.exe").toString();
+
+            var commands = ArrayUtils.addAll(null, esptoolExecutable, "version");
+
+            StepVerifier.create(processCommandsInternals.processIntputStreamLineByLine(commands)
+                            .take(1)
+                            .log())
+                    .expectNext("esptool.py v4.7.0")
+                    .verifyComplete();
+
+
         }
     }
 

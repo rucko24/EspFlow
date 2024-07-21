@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.EnumSet;
 import java.util.Locale;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BIN_SH_C;
 import static com.esp.espflow.data.util.EspFlowConstants.CMD_C;
 import static com.esp.espflow.data.util.EspFlowConstants.SH_C;
 
@@ -35,9 +34,9 @@ public enum GetOsName {
         if (oS == GetOsName.WINDOWS) {
             return CMD_C;
         } else if (oS == GetOsName.LINUX) {
-            return BIN_SH_C;
+            return new String[]{};
         } else if (oS == GetOsName.FREEBSD) {
-            return BIN_SH_C;
+            return new String[]{};
         } else if (oS == GetOsName.MAC) {
             return SH_C;
         }
