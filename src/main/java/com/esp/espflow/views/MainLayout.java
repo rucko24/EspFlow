@@ -22,8 +22,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Optional;

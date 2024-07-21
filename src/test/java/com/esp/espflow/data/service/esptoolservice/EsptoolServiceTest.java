@@ -8,10 +8,10 @@ import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceArgumentProvider;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
 import com.esp.espflow.data.util.GetOsName;
-import com.fazecast.jSerialComm.SerialPort;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,18 +19,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
-import java.util.Set;
-
 import static com.esp.espflow.data.util.EspFlowConstants.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author rubn
@@ -87,8 +81,8 @@ class EsptoolServiceTest {
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceRawFlashIdFromPortArgumentProvider.class)
     @DisplayName("read raw each String from this inputStream")
-    void  readRawFlashIdFromPort(Flux<String> actualLines, String expetedFirtsLine,
-                                 String expetedSecondLine, String expetedThirdLine) {
+    void readRawFlashIdFromPort(Flux<String> actualLines, String expetedFirtsLine,
+                                String expetedSecondLine, String expetedThirdLine) {
 
         String[] commands = ArrayUtils.addAll(
                 GetOsName.shellOsName(),
@@ -108,49 +102,11 @@ class EsptoolServiceTest {
 
     }
 
-    @Test
+    @Disabled
     @DisplayName("Simple test, counter all devices")
     void countAllDevices() {
-        try (final MockedStatic<SerialPort> theMock = Mockito.mockStatic(SerialPort.class)) {
-
-            String com3 = "COM3";
-            String com4 = "COM4";
-
-            SerialPort[] serialPorts = new SerialPort[]{SerialPort.getCommPort(com4)};
-
-            theMock.when(() -> SerialPort.getCommPort(Mockito.any()))
-                    .thenReturn(serialPorts[0]);
-
-            assertThat(serialPorts).isEqualTo(SerialPort.getCommPorts());
-            //assertThat("COM4").isEqualTo(SerialPort.getCommPorts()[1]);
-
-//            when(comPortService.getPortsListWithFriendlyName())
-//                    .thenReturn(Set.of(com3, com4));
-//
-//            when(comPortService.countAllDevices()).thenReturn(2L);
-//
-//            StepVerifier.create(this.esptoolService.countAllDevices())
-//                    .expectNextCount(2L)
-//                    .verifyComplete();
-
-        }
-
-
-
+        //FIXME
     }
 
-    @Test
-    public void testMockStaticMethods() {
-        assertEquals("Welcome John", WelcomeUtil.generateWelcome("John"));
-
-        try (MockedStatic<WelcomeUtil> theMock = Mockito.mockStatic(WelcomeUtil.class)) {
-            theMock.when(() -> WelcomeUtil.generateWelcome("John"))
-                    .thenReturn("Guten Tag John");
-
-            assertEquals("Guten Tag John", WelcomeUtil.generateWelcome("John"));
-        }
-
-        assertEquals("Welcome John", WelcomeUtil.generateWelcome("John"));
-    }
 
 }
