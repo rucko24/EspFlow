@@ -10,14 +10,19 @@ The UI is based on Vaadin Flow and allows invoking `esptool.py` to execute opera
 
 == Some operations that are possible, under development ⚒
 
-- `flash_id` with this command we read basic information from the microcontroller.
-- `read_flash` Backup of the microcontroller firmware with, with the possibility to set the memory sections to be read, custom initial and final read size, or `ALL` for full read.
-
 == Flash View
+
+- `flash_id` with this command we read basic information from the microcontroller.
 
 image::images-for-asciidoctor/flashview.png[]
 
 == Read firmware View
+
+- `read_flash` Backup of the microcontroller firmware with, with the possibility to set the memory sections to be read, custom initial and final read size, or `ALL` for full read.
+
+```sh
+esptool.py --port /dev/ttyUSB1 --baud 11500 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin
+```
 
 image::images-for-asciidoctor/readfirmwareview.png[]
 
