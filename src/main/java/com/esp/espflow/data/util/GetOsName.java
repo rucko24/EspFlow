@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import java.util.EnumSet;
 import java.util.Locale;
 
+import static com.esp.espflow.data.util.EspFlowConstants.BIN_BASH_C;
 import static com.esp.espflow.data.util.EspFlowConstants.CMD_C;
-import static com.esp.espflow.data.util.EspFlowConstants.SH_C;
 
 /**
  * Get operating system in runtime
@@ -38,7 +38,7 @@ public enum GetOsName {
         } else if (oS == GetOsName.FREEBSD) {
             return new String[]{};
         } else if (oS == GetOsName.MAC) {
-            return SH_C;
+            return BIN_BASH_C;
         }
         return new String[]{GetOsName.OTHER.getName()};
     }

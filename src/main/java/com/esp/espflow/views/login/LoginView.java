@@ -4,6 +4,8 @@ import com.esp.espflow.security.AuthenticatedUser;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -21,6 +23,10 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
     public LoginView(AuthenticatedUser authenticatedUser) {
         this.authenticatedUser = authenticatedUser;
         setAction("login");
+        var image = new Image("icons/icon.png", "icon");
+        image.setWidth("100px");
+        image.setHeight("100px");
+        setTitle(new Span(image));
 
         LoginI18n i18n = LoginI18n.createDefault();
         i18n.setHeader(new LoginI18n.Header());

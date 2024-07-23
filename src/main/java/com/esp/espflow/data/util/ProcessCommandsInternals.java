@@ -19,7 +19,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.CHARSET_CP850;
+import static com.esp.espflow.data.util.EspFlowConstants.COMMAND_NOT_FOUND;
+import static com.esp.espflow.data.util.EspFlowConstants.DMESG_TTY;
+import static com.esp.espflow.data.util.EspFlowConstants.NOT_FOUND;
 
 /**
  * @author rubn
