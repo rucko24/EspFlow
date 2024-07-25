@@ -2,7 +2,7 @@
     /*display: none;*/
 }
 
-:host(.meta) [part~=meta] {
+[part="meta"] {
     width: 100%;
 }
 
