@@ -13,6 +13,7 @@ public class EspFlowConstants {
     // "bin/bash", "-c" caso particular en dmesg
     public static final String[] BIN_SH_C = new String[]{BIN_SH, "-c"};
     public static final String[] SH_C = new String[]{"sh", "-c"};
+    public static final String[] BIN_BASH_C = new String[]{"/bin/bash", "-c"};
     public static final String[] DMESG_TTY = new String[]{BIN_SH, "-c", "dmesg | grep tty"};
     public static final String DMESG_GREP_TTY = "dmesg | grep tty";
     public static final String[] CMD_C = new String[]{"cmd", "/c"};

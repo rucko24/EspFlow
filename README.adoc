@@ -10,14 +10,19 @@ The UI is based on Vaadin Flow and allows invoking `esptool.py` to execute opera
 
 == Some operations that are possible, under development ⚒
 
-- Reading microcontrollers with `read_flash` command
-- Backup of microcontroller firmware, with the possibility of adjusting the memory sections to be read, initial and final reading size.
-
 == Flash View
+
+- `flash_id` with this command we read basic information from the microcontroller.
 
 image::images-for-asciidoctor/flashview.png[]
 
 == Read firmware View
+
+- `read_flash` Backup of the microcontroller firmware with, with the possibility to set the memory sections to be read, custom initial and final read size, or `ALL` for full read.
+
+```sh
+esptool.py --port /dev/ttyUSB1 --baud 11500 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin
+```
 
 image::images-for-asciidoctor/readfirmwareview.png[]
 
@@ -35,6 +40,8 @@ IDEs](https://vaadin.com/docs/latest/flow/guide/step-by-step/importing) (Eclipse
 
 == *Environment* variables must be set to login with the esptool user
 
+These environment variables can also be set in the `IDE` for convenience.
+
 - `*ADMIN_ESPFLOW_USER*`
 - `*ESPFLOW_PASSWORD*`
 
@@ -47,7 +54,7 @@ or `./mvnw clean package -Pproduction` (Mac & Linux).
 This will build a JAR file with all the dependencies and front-end resources,
 ready to be deployed. The file can be found in the `target` folder after the build completes.
 
-Once the JAR file is built, you can run it using `java -jar target/espflow-1.0-SNAPSHOT.jar`
+Once the JAR file is built, you can run it using `java -jar target/espflow-1.0-SNAPSHOT.jar --ADMIN_ESPFLOW_USER=xxxx --ESPFLOW_PASSWORD=xxxx`
 
 == Project structure
 

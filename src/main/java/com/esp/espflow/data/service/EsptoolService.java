@@ -18,7 +18,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
+import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
+import static com.esp.espflow.data.util.EspFlowConstants.FIRST_LINE_TO_CHECK_IF_IT_EXISTS;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.data.util.EspFlowConstants.MAC;
+import static com.esp.espflow.data.util.EspFlowConstants.PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
 
 /**
  * @author rubn

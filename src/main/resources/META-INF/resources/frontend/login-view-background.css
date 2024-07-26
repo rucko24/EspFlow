@@ -1,6 +1,5 @@
 /*brand logo*/
 [part="brand"] {
-    background-image: url("./images/logo/espflow.png");
     background-size: cover;
     background-color: #cf2727;
 }
