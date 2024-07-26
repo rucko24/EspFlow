@@ -1,4 +1,4 @@
-package com.esp.espflow.views.flashesp32;
+package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.vaadin.flow.component.AttachEvent;
@@ -13,14 +13,18 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
 import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
 import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_LEFT;
@@ -35,6 +39,7 @@ public class DivFlashUploader extends Div {
     private final FileBuffer buffer = new FileBuffer();
     private final Upload upload = new Upload();
     private final UploadExamplesI18N uploadI18N = new UploadExamplesI18N();
+    private final ApplicationEventPublisher publisher;
 
     @PostConstruct
     public void constructDiv() {
@@ -44,10 +49,12 @@ public class DivFlashUploader extends Div {
         this.i18N();
 
         final Div divUploader = new Div(upload);
+        divUploader.setWidthFull();
         final Div divH3Firmware = this.h3Firmware();
 
         super.add(divH3Firmware, divUploader);
-        super.setWidthFull();
+//        super.setWidthFull();
+        super.setSizeFull();
         super.getStyle().set(DISPLAY, "flex");
         super.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         super.addClassName("firmwareh3-vaadin-upload-div");
@@ -60,28 +67,26 @@ public class DivFlashUploader extends Div {
     }
 
     private void addListeners() {
-        AtomicReference<String> fileName = new AtomicReference<>();
 
         upload.addSucceededListener(event -> {
             upload.getElement()
                     .executeJs("this.shadowRoot.querySelector('vaadin-upload-file').className = 'meta'");
 
-            // Get information about the uploaded file
-            try (var input = new BufferedInputStream(buffer.getInputStream())) {
-
-            } catch (IOException ex) {
-
-            }
-            fileName.set(event.getFileName());
+            log.info("New file uploaded {}", event.getFileName());
             long contentLength = event.getContentLength();
             String mimeType = event.getMIMEType();
+
+            publisher.publishEvent(event.getFileName());
+            this.createUploadDir(buffer, event.getFileName());
+
+
             // Do something with the file data
             // processFile(fileData, fileName, contentLength, mimeType);
         });
 
-        upload.addStartedListener(e -> {
-            log.info("Handling upload of " + e.getFileName() + " ("
-                    + e.getContentLength() + " bytes) started");
+        upload.addStartedListener(event -> {
+            log.info("Handling upload of " + event.getFileName() + " ("
+                    + event.getContentLength() + " bytes) started");
         });
 
         upload.addFileRejectedListener(event -> {
@@ -93,6 +98,31 @@ public class DivFlashUploader extends Div {
             ConfirmDialogBuilder.showWarning(failedEvent.getReason().getMessage());
         });
 
+    }
+
+    /**
+     *
+     */
+    private void createUploadDir(FileBuffer buffer, String fileName) {
+        final String resourcesDir = "src/main/resources/";
+        final var flashesDir = Path.of(resourcesDir.concat("flashesdir/"));
+        if (!Files.exists(flashesDir)) {
+            try {
+                Files.createDirectory(flashesDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // Get information about the uploaded file
+        final Path fileNameResult = flashesDir.resolve(Path.of(fileName));
+        try (var input = new BufferedInputStream(buffer.getInputStream());
+             var outPut = new BufferedOutputStream(Files.newOutputStream(fileNameResult))) {
+
+            input.transferTo(outPut);
+
+        } catch (IOException ex) {
+            log.error("Error a la hora de escribir el {}", ex.getMessage());
+        }
     }
 
     private void uploadStyles() {
@@ -119,9 +149,7 @@ public class DivFlashUploader extends Div {
                 .setIncorrectFileType(
                         "The provided file doesn't have the correct format. Please provide a .bin file.");
         upload.setI18n(uploadI18N);
-        upload.getUploadButton().getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
-        //upload.getUploadButton().getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
-        //upload.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
+        upload.getUploadButton().addClassName(BOX_SHADOW_VAADIN_BUTTON);
 
     }
 
@@ -137,7 +165,7 @@ public class DivFlashUploader extends Div {
         upload.setI18n(uploadI18N);
     }
 
-    public class UploadExamplesI18N extends UploadI18N {
+    public static class UploadExamplesI18N extends UploadI18N {
         public UploadExamplesI18N() {
             setDropFiles(new DropFiles()
                     .setOne("Drop file here")
@@ -163,7 +191,7 @@ public class DivFlashUploader extends Div {
                             .setUnexpectedServerError("Upload failed due to server error")
                             .setForbidden("Upload forbidden")));
             setUnits(new Units()
-                    .setSize(Arrays.asList("B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")));
+                    .setSize(Arrays.asList("kB", "MB")));
         }
     }
 }

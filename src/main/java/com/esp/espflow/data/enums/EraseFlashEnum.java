@@ -8,19 +8,17 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-public enum FlashMode {
+public enum EraseFlashEnum {
 
-    QUAD_IO("QIO"),
-    Q_OUT("QOUT"),
-    DUAL_IO("DIO"),
-    DUAL_OUTPUT("DOUT");
+    NO("no"),
+    YES_WIPES_ALL_DATA("yes, wipes all data");
 
-    private final String flashMode;
+    private final String value;
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append(flashMode);
+        sb.append(value);
         return sb.toString();
     }
 }

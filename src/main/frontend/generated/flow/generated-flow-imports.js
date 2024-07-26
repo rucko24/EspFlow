@@ -14,7 +14,7 @@ import $cssFromFile_3 from 'Frontend/generated/jar-resources/carousel-demo-style
 const $css_3 = typeof $cssFromFile_3  === 'string' ? unsafeCSS($cssFromFile_3) : $cssFromFile_3;
 registerStyles('fc-l2t-paper-slider', $css_3, {moduleId: 'flow_css_mod_3'});
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
-import '@vaadin/login/src/vaadin-login-overlay.js';
+import '@vaadin/login/theme/lumo/vaadin-login-overlay.js';
 import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/vaadin-lumo-styles/color-global.js';
 import '@vaadin/vaadin-lumo-styles/typography-global.js';
@@ -26,13 +26,13 @@ import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 const loadOnDemand = (key) => {
   const pending = [];
   if (key === 'abde3f4745195c06e11065a9babe1321675c236a20978a3047ccc3839fa05b82') {
-    pending.push(import('./chunks/chunk-f93b8151c9f7f58a6906c2c17c4dfc1221ff7fb38f0422a7dfc166fd50fd692d.js'));
+    pending.push(import('./chunks/chunk-778de7907c53b6d2b9d1c87cdf55f6ecf41af5672eebfc7f0ad0aab84bfd188e.js'));
+  }
+  if (key === 'f73b0b856e2a1348c5a831f2ffa8e20fbc326dab6b2464ca178db546eded0897') {
+    pending.push(import('./chunks/chunk-25e0d4aaec262ac5781f4a2816f80841852108562a984988ea3c96e72ea865f4.js'));
   }
   if (key === 'ba5c454d3a92512853bd81758a5042cc7ffcf18a4943281cba5418e847285d30') {
-    pending.push(import('./chunks/chunk-6cd0ea702bab74126e1671548385485d0e63362292ad1cd2883a24ed3536a541.js'));
-  }
-  if (key === 'e0bcf4f3081bab831fa7200d3a17527641eff25d3ccd4229c1b730c20dd50551') {
-    pending.push(import('./chunks/chunk-693ec8a4fe827a450babdff1e43ff8507264f72006eb980349ec4b7b60b21698.js'));
+    pending.push(import('./chunks/chunk-121ff563a421a724f21f6534ea47e22fdb5c29c5996258c48c8439eea8f3b4c9.js'));
   }
   return Promise.all(pending);
 }

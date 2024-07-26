@@ -5,19 +5,19 @@ import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.GetOsName;
+import com.esp.espflow.data.util.EsptoolBundlePath;
 import com.esp.espflow.data.util.IBuilder;
-import com.esp.espflow.data.util.console.ConsoleOutPut;
+import com.esp.espflow.data.util.console.OutPutConsole;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,33 +25,35 @@ import java.util.Objects;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
 import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.data.util.EspFlowConstants.PORT;
 import static com.esp.espflow.data.util.EspFlowConstants.READ_FLASH;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
- * <p><strong>ShowDevices</strong>  this class serves as an aid to display in the Read Firmware view the microcontrollers available in the OS.</p>
+ * <p><strong>ShowDevices</strong>  this class serves as an aid to display in the <strong>ReadFirmwareView</strong> the microcontrollers available in the OS.</p>
  *
  * <p>With this StepBuilder we can set it up avoiding the nulls, and with obligatory steps </p>
  *
+ *  <blockquote>
  * <pre>
  *     ShowDevices.builder()
  *             .withEspDevicesCarousel(espDevicesCarousel)
  *             .withEsptoolService(esptoolService)
  *             .withEspDeviceInfo(espDeviceInfo)
- *             .withConsoleOutStage(consoleOutPut)
+ *             .withOutPutConsole(outPutConsole)
  *             .withUi(ui)
  *             .withStartSizeAddress(this.startAddress)
  *             .withCustomFlashSizeAddress(this.endAddress)
  *             .withAutoDetectFlashSize(this.autoDetectFlashSize)
+ *             .withBaudRatesComboBox(this.baudRatesComboBox)
  *             .make();
  * </pre>
+ * </blockquote>
  */
 @Log4j2
 @Getter
-public class ShowDevices {
+public class ShowDevicesBuilder {
 
     public static EspDevicesCarouselStage builder() {
         return new InnerBuilder();
@@ -82,7 +84,7 @@ public class ShowDevices {
      * 4
      */
     public interface ConsoleOutPutStage {
-        UIStage withConsoleOutStage(ConsoleOutPut consoleOutPut);
+        UIStage withOutPutConsole(OutPutConsole outPutConsole);
     }
 
     /**
@@ -110,32 +112,42 @@ public class ShowDevices {
      * 8
      */
     public interface AllAddressSizeStage {
-        Build withAutoDetectFlashSize(final ToggleButton autoDetectFlashSize);
+        BaudRateStage withAutoDetectFlashSize(final ToggleButton autoDetectFlashSize);
     }
 
     /**
      * 9
      */
-    public interface Build extends IBuilder<ShowDevices> {
+    public interface BaudRateStage {
+        Build withBaudRatesComboBox(final ComboBox<BaudRates> baudRatesComboBox);
     }
 
-    public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage, EsptoolServiceStage, UIStage, ConsoleOutPutStage, StartAddressStage, EndAddressSizeStage, AllAddressSizeStage, Build {
+    /**
+     * 10
+     */
+    public interface Build extends IBuilder<ShowDevicesBuilder> {
+    }
+
+    public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage,
+            EsptoolServiceStage, UIStage, ConsoleOutPutStage, StartAddressStage,
+            EndAddressSizeStage, AllAddressSizeStage, BaudRateStage, Build {
         private EspDevicesCarousel espDevicesCarousel;
         private EsptoolService esptoolService;
         private EspDeviceInfo espDeviceInfo;
-        private ConsoleOutPut consoleOutPut;
+        private OutPutConsole outPutConsole;
         private UI ui;
         private IntegerField startAddressSize;
         private IntegerField customSizeToRead;
         private ToggleButton autoDetectFlashSize;
+        private ComboBox<BaudRates> baudRatesComboBox;
         /**
          * To bind {@link AddressRecordBinder}
          */
         private Binder<AddressRecordBinder> addressRecordBinderBinder = new Binder<>();
 
         @Override
-        public UIStage withConsoleOutStage(ConsoleOutPut consoleOutPut) {
-            this.consoleOutPut = consoleOutPut;
+        public UIStage withOutPutConsole(OutPutConsole outPutConsole) {
+            this.outPutConsole = outPutConsole;
             return this;
         }
 
@@ -188,13 +200,19 @@ public class ShowDevices {
         }
 
         @Override
-        public Build withAutoDetectFlashSize(ToggleButton autoDetectFlashSize) {
+        public BaudRateStage withAutoDetectFlashSize(ToggleButton autoDetectFlashSize) {
             this.autoDetectFlashSize = autoDetectFlashSize;
             return this;
         }
 
         @Override
-        public ShowDevices make() {
+        public Build withBaudRatesComboBox(ComboBox<BaudRates> baudRatesComboBox) {
+            this.baudRatesComboBox = baudRatesComboBox;
+            return this;
+        }
+
+        @Override
+        public ShowDevicesBuilder make() {
             var macAddress = espDeviceInfo.macAddress();
             if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
                 showEsp01s();
@@ -203,7 +221,7 @@ public class ShowDevices {
                 showEsp8285();
                 showEsp32S3();
             }
-            return new ShowDevices();
+            return new ShowDevicesBuilder();
         }
 
         private boolean ifItContainsMacAddressShowMeTheSlides(String macAddress) {
@@ -382,10 +400,9 @@ public class ShowDevices {
 
         /**
          *
-         * <blockquote><pre>
-         *    esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin
-         * </pre></blockquote><p>
-         *
+         * <blockquote>
+         *     <pre>esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin</pre>
+         * </blockquote><p>
          *
          * @param ui  the {@link UI} instance
          * @param writFileToTempDir
@@ -398,26 +415,25 @@ public class ShowDevices {
                                final FlashButtonWrapper flashButtonWrapper,
                                final String processAutoDetectFlashSize) {
 
-            final String[] commands = ArrayUtils.addAll(
-                    GetOsName.shellOsName(),
-                    ESPTOOL_PY,
+            final String[] commands = {
+                    EsptoolBundlePath.esptoolBundlePath(),
                     PORT, espDeviceInfo.port(),
-                    BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
+                    BAUD_RATE, this.baudRatesComboBox.getValue().toString(),
                     READ_FLASH,
                     startAddressSize.getValue().toString().isEmpty() ? "0" : startAddressSize.getValue().toString().trim(),
                     processAutoDetectFlashSize,
                     writFileToTempDir
-            );
+            };
 
-            CommandsOnFirstLine.putCommansdOnFirstLine(commands, consoleOutPut);
+            CommandsOnFirstLine.putCommansdOnFirstLine(commands, outPutConsole);
 
             esptoolService.downloadFlash(commands)
                     .doOnComplete(() -> {
                         ui.access(() -> {
-                            consoleOutPut.writePrompt();
+                            outPutConsole.writePrompt();
                             if (Files.exists(Path.of(writFileToTempDir))) {
-                                log.info("Backup completado! {}", "");
-                                ConfirmDialogBuilder.showInformation("backup completed correctly!");
+                                log.info("Backup completed successfully! {}", "");
+                                ConfirmDialogBuilder.showInformation("Backup completed successfully!");
                                 flashButtonWrapper.enableAnchorForDownloadTheFirmware(writFileToTempDir);
                             } else {
                                 ConfirmDialogBuilder.showWarning("The flash does not exist in the tmp " + writFileToTempDir);
@@ -432,7 +448,7 @@ public class ShowDevices {
                     })
                     .subscribe(inputLine -> {
                         ui.access(() -> {
-                            consoleOutPut.readFlash(inputLine);
+                            outPutConsole.readFlash(inputLine);
                         });
                     });
 

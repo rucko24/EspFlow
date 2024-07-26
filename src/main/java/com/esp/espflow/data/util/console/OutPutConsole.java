@@ -1,6 +1,7 @@
 package com.esp.espflow.data.util.console;
 
 import com.flowingcode.vaadin.addons.xterm.ITerminalOptions;
+import com.flowingcode.vaadin.addons.xterm.PreserveStateAddon;
 import com.flowingcode.vaadin.addons.xterm.XTerm;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -30,16 +31,17 @@ import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
  */
 @Log4j2
 @Getter
-public class ConsoleOutPut extends Div {
+public class OutPutConsole extends Div {
 
     private static final String CONTROL_C = "\u0003";
     private static final String CLEAR_CURRENT_LINE = "\r\u001b[K";
-    private final XTerm xterm = new XTerm();
+    private final XTerm xtermA = new XTerm();
+    private final PreserveStateAddon xterm = new PreserveStateAddon(xtermA);
     private Button buttonClear = new Button(VaadinIcon.TRASH.create());
     private Button buttonDownScroll = new Button(VaadinIcon.ARROW_CIRCLE_DOWN_O.create());
     private Div divLeftMenuItems = new Div(buttonDownScroll, buttonClear);
 
-    public ConsoleOutPut() {
+    public OutPutConsole() {
 
         this.createDivLeftMenuItems();
         this.getConsole();
@@ -60,17 +62,17 @@ public class ConsoleOutPut extends Div {
         final H3 h3 = new H3("Console");
         h3.getStyle().set(Top.AUTO, AUTO);
 
-        xterm.setId("id-for-xterm");
-        xterm.addClassName("xterm");
+        xterm.getXTerm().setId("id-for-xterm");
+        xterm.getXTerm().addClassName("xterm");
 //        preserveStateAddon.writeln("esptool terminal!");
 //        preserveStateAddon.setPrompt("root@esptool $ ");
 //        preserveStateAddon.writePrompt();
         xterm.setPrompt("root@esptool $ ");
         xterm.writePrompt();
-        xterm.getElement().setProperty("readonly", Boolean.TRUE);
+        xterm.getXTerm().getElement().setProperty("readonly", Boolean.TRUE);
         xterm.setCursorBlink(true);
-        xterm.setPasteWithRightClick(true);
-        xterm.setCopySelection(true);
+        xterm.getXTerm().setPasteWithRightClick(true);
+        xterm.getXTerm().setCopySelection(true);
 
         xterm.setCursorStyle(ITerminalOptions.CursorStyle.UNDERLINE);
         //xterm.setUseSystemClipboard(UseSystemClipboard.READWRITE);
@@ -78,13 +80,13 @@ public class ConsoleOutPut extends Div {
         //xterm.addThemeVariants(TextAreaVariant.LUMO_SMALL);
 
         //xterm.getStyle().set(OVERFLOW_Y, AUTO);
-        xterm.getElement().setAttribute("title", "output");
-        xterm.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+        xterm.getXTerm().getElement().setAttribute("title", "output");
+        xterm.getXTerm().getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
         //xterm.addClassName("child-text-area-console");
         xterm.focus();
-        xterm.fit();
+        xterm.getXTerm().fit();
 
-        final Div divTextArea = new Div(xterm);
+        final Div divTextArea = new Div(xterm.getXTerm());
         divTextArea.setId("divXterm");
         divTextArea.setSizeFull();
         divTextArea.addClassNames(Left.LARGE, Right.LARGE, "text-area-console-div");
@@ -98,14 +100,27 @@ public class ConsoleOutPut extends Div {
 
     }
 
+    /**
+     * Write the prompt "root@esptool $"
+     */
     public void writePrompt() {
         this.xterm.writePrompt();
     }
 
+    /**
+     * Writing in xterm on the next line
+     *
+     * @param line the String line
+     */
     public void writeln(String line) {
         this.xterm.writeln(line);
     }
 
+    /**
+     * String from firmware reading
+     *
+     * @param inputLine the String inputLine
+     */
     public void readFlash(final String inputLine) {
         if (!(inputLine.contains("%"))) {
             this.writeln(inputLine);
@@ -115,6 +130,28 @@ public class ConsoleOutPut extends Div {
         }
     }
 
+    /**
+     * Line read from the flash to be written to the microcontroller.
+     *
+     * @param inputLine the String inputLine
+     */
+    public void writeFlash(final String inputLine) {
+        if (!(inputLine.contains("%"))) {
+            this.writeln(inputLine);
+        } else {
+            this.clearCurrentLine();
+            this.write(inputLine);
+            if(inputLine.contains("100 %")) {
+                this.writeln("");//forced for writing on the following line
+            }
+        }
+    }
+
+    /**
+     * Writing in xterm on the same line
+     *
+     * @param line the String line
+     */
     public void write(String line) {
         this.xterm.write(line);
     }
@@ -123,6 +160,9 @@ public class ConsoleOutPut extends Div {
         this.xterm.clear();
     }
 
+    /**
+     * Writing in xterm on the same line, and moving the carriage return to the beginning of the line
+     */
     public void clearCurrentLine() {
         this.xterm.write(CLEAR_CURRENT_LINE);
     }
@@ -132,7 +172,7 @@ public class ConsoleOutPut extends Div {
     }
 
     public void fit() {
-        this.xterm.fit();
+        this.xterm.getXTerm().fit();
     }
 
     @Override
@@ -144,7 +184,7 @@ public class ConsoleOutPut extends Div {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
-            this.xterm.fit();
+            this.xterm.getXTerm().fit();
             this.xterm.focus();
         }
     }

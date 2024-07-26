@@ -4,11 +4,10 @@ import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.data.mappers.EspDeviceInfoMapper;
-import com.esp.espflow.data.util.GetOsName;
+import com.esp.espflow.data.util.EsptoolBundlePath;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,12 +21,10 @@ import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
 import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
 import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
+import static com.esp.espflow.data.util.EspFlowConstants.DETECTED_FLASH_SIZE;
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
 import static com.esp.espflow.data.util.EspFlowConstants.FIRST_LINE_TO_CHECK_IF_IT_EXISTS;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
 import static com.esp.espflow.data.util.EspFlowConstants.MAC;
 import static com.esp.espflow.data.util.EspFlowConstants.PORT;
 import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
@@ -50,7 +47,7 @@ public class EsptoolService {
     private final Predicate<String> predicate = line ->
             line.startsWith(SERIAL_PORT) ||
                     line.startsWith(MAC) ||
-                    line.startsWith(FLASH_SIZE) || line.startsWith(CRYSTAL_IS) ||
+                    line.startsWith(DETECTED_FLASH_SIZE) || line.startsWith(CRYSTAL_IS) ||
                     line.startsWith(CHIP_TYPE) || line.startsWith(CHIP_IS);
 
     /**
@@ -66,7 +63,6 @@ public class EsptoolService {
     }
 
     /**
-     *
      * This allows us to raise the exception type {@link CanNotBeReadDeviceException}, when the port list is empty.
      *
      * @return A {@link Mono}
@@ -83,7 +79,6 @@ public class EsptoolService {
      * </li>
      *
      * @return A {@link Mono} with port counting
-     *
      */
     public Mono<Long> countAllDevices() {
         return Mono.just(comPortService.countAllDevices());
@@ -95,14 +90,8 @@ public class EsptoolService {
      * With the above, this method creates a map that is then mapped to the entity EspDeviceInfo,
      * as many items are issued we need for convenience to have them in a single item or Mono. </p>
      *
-     *  <p><strong>- On Window</strong></p>
-     *  <blockquote>
-     *      <pre>cmd.exe /c esptool.py --port parsePort --baud 115200 flash_id </pre>
-     *  </blockquote>
-     *
-     *  <p><strong>- On Linux</strong></p>
      * <blockquote>
-     *     <pre> esptool.py --port parsePort --baud 115200 flash_id </pre>
+     * <pre>esptool.py --port parsePort --baud 115200 flash_id </pre>
      * </blockquote>
      *
      * @param port the microcontroller port to be scanned
@@ -112,41 +101,32 @@ public class EsptoolService {
         final String parsePort = port.split("@")[0];
         final String descriptivePortName = port.split("@")[1];
 
-        final String[] commands = ArrayUtils.addAll(
-                GetOsName.shellOsName(),
-                ESPTOOL_PY,
+        final String[] commands = new String[]{
+                EsptoolBundlePath.esptoolBundlePath(),
                 PORT, parsePort,
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
-                FLASH_ID);
+                FLASH_ID};
 
         return commandService.processIntputStreamLineByLine(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
-                .flatMap(map -> EspDeviceInfoMapper.mapToEspDeviceInfo(map, descriptivePortName) )
+                .flatMap(map -> EspDeviceInfoMapper.mapToEspDeviceInfo(map, descriptivePortName))
                 .switchIfEmpty(Mono.defer(() -> EspDeviceInfoMapper.fallback(parsePort)));
     }
 
     /**
-     *
      * <p>
-     *     It is used to read line by line what is returned by the flash_id command, without <strong>mapping to any Object.</strong>
+     * It is used to read line by line what is returned by the flash_id command, without <strong>mapping to any Object.</strong>
      * </p>
      *
-     * <p><strong>- On Window</strong></p>
      * <blockquote>
-     *     <pre>cmd.exe /c esptool.py --port parsePort --baud 115200 flash_id</pre>
-     * </blockquote>
-     *
-     * <p><strong>- On Linux</strong></p>
-     * <blockquote>
-     *    <pre>esptool.py --port parsePort --baud 115200 flash_id </pre>
+     * <pre>esptool.py --port parsePort --baud 115200 flash_id</pre>
      * </blockquote>
      *
      * @param commands the commands
-     *
      * @return A {@link Flux} with each String from this inputStream
      */
-    public Flux<String> readRawFlashIdFromPort(final String ...commands) {
+    public Flux<String> readRawFlashIdFromPort(final String... commands) {
         return commandService.processIntputStreamLineByLine(commands);
     }
 
@@ -156,7 +136,7 @@ public class EsptoolService {
      * @return A {@link Flux<String> }
      */
     public Flux<String> showEsptoolVersion() {
-        String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), ESPTOOL_PY_VERSION);
+        final String[] commands = new String[]{EsptoolBundlePath.esptoolBundlePath()};
         return this.commandService.processIntputStreamLineByLine(commands)
                 .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
                 .map(this::processLineEsptoolVersion);
@@ -177,19 +157,34 @@ public class EsptoolService {
 
     /**
      * Under background, the command executed is this one by default when you want to read the full flash
+     * <p>
+     * A custom port and baud rate is also set.
      *
-     *  A custom port and baud rate is also set.
-     *
-     *   <blockquote><pre>
+     * <blockquote><pre>
      *      esptool.py --port /dev/ttyUSB1 --baud customBaudRate read_flash 0 ALL esp8266-backupflash.bin
      *   </pre></blockquote><p>
      *
-
-     * @param commands the commands to preocess
+     * @param commands the commands to process
      * @return A {@link Flux<String>}
      */
     public Flux<String> downloadFlash(String... commands) {
         return commandService.processCommandsWithCustomCharset(commands)
+                .distinct(this::splitPercentaje);
+    }
+
+    /**
+     *
+     *  <blockquote>
+     *   <pre>
+     *    esptool.py --port COM6 --baud 460800 write_flash --flash_mode dio --flash_size detect 0x00000 esp01s-sec2500.bin
+     *   </pre>
+     *   </blockquote><p>
+     *
+     * @param commands the commands to process
+     * @return A {@link Flux<String>}
+     */
+    public Flux<String> writeFlash(String... commands) {
+        return commandService.processIntputStreamLineByLine(commands)
                 .distinct(this::splitPercentaje);
     }
 

@@ -261,6 +261,12 @@ html {
     .row-span-flash-size-footer {
         font-size: 70% !important;
     }
+
+     [part="meta"] {
+         display: inline-grid;
+         flex-direction: column;
+     }
+
 }
 
 .xterm {

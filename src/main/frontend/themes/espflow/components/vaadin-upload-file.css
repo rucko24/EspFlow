@@ -9,3 +9,9 @@
 [part="row"] {
     align-items: center;
 }
+
+@media (max-width: 400px) {
+    [part="meta"] {
+        flex-direction: column;
+    }
+}

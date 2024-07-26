@@ -1,9 +1,10 @@
 package com.esp.espflow.views;
 
 import com.esp.espflow.data.entity.User;
+import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.views.about.AboutView;
-import com.esp.espflow.views.flashesp32.FlashEsp32View;
+import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -17,6 +18,7 @@ import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
@@ -28,12 +30,13 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Optional;
 
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ON_SVG;
 import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
+import static com.esp.espflow.data.util.EspFlowConstants.SIZE_25_PX;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -42,8 +45,8 @@ public class MainLayout extends AppLayout {
 
     private H1 viewTitle;
 
-    private AuthenticatedUser authenticatedUser;
-    private AccessAnnotationChecker accessChecker;
+    private final AuthenticatedUser authenticatedUser;
+    private final AccessAnnotationChecker accessChecker;
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
@@ -96,16 +99,16 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
 
-        if (accessChecker.hasAccess(FlashEsp32View.class)) {
-            nav.addItem(new SideNavItem("⚡ Flash Esp32-ESP8266", FlashEsp32View.class, LineAwesomeIcon.HOME_SOLID.create()));
+        if (accessChecker.hasAccess(FlashEspView.class)) {
+            nav.addItem(new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null)));
         }
 
         if (accessChecker.hasAccess(ReadFlashView.class)) {
-            nav.addItem(new SideNavItem("Read firmware", ReadFlashView.class, LineAwesomeIcon.ARROW_CIRCLE_DOWN_SOLID.create()));
+            nav.addItem(new SideNavItem("Read firmware", ReadFlashView.class, VaadinIcon.DOWNLOAD.create()));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {
-            nav.addItem(new SideNavItem("About", AboutView.class, LineAwesomeIcon.FILE.create()));
+            nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
 
         }
 

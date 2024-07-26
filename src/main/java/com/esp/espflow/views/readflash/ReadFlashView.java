@@ -1,11 +1,12 @@
 package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.data.entity.EspDeviceWithTotalDevices;
+import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
-import com.esp.espflow.data.util.console.ConsoleOutPut;
+import com.esp.espflow.data.util.console.OutPutConsole;
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
@@ -16,6 +17,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -78,12 +80,13 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final IntegerField startAddress = new IntegerField("Start address");
     private final IntegerField endAddress = new IntegerField("Set size address to read");
     private final ToggleButton autoDetectFlashSize = new ToggleButton();
+    private final ComboBox<BaudRates> baudRatesComboBox = new ComboBox<>("Baud rate");
     private final Span spanAutoDetectFlashSize = new Span("Set size address to ALL");
     private final Div divWithPortErrors = new Div();
     /**
      * Console output
      */
-    private final ConsoleOutPut consoleOutPut = new ConsoleOutPut();
+    private final OutPutConsole outPutConsole = new OutPutConsole();
     private final Span spanTotalDevices = new Span("Total devices:");
     private final Span spanPortFailure = new Span("Port failure: ");
     private final Span spanTotalDevicesValue = new Span();
@@ -91,9 +94,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     @PostConstruct
     public void init() {
         super.setSizeFull();
-        super.getStyle().set("display", "flex");
-        super.getStyle().set("flex-direction", "column");
-        super.getStyle().set("overflow-x", "hidden");
+        super.addClassNames(Display.FLEX, FlexDirection.COLUMN);
+        super.getStyle().set(OVERFLOW_X, HIDDEN);
 
         final SplitLayout splitLayout = getSplitLayout();
         final var footer = this.getFooter();
@@ -170,8 +172,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private Div rigthFormForAddress() {
         var rowAutoSize = new HorizontalLayout(autoDetectFlashSize, spanAutoDetectFlashSize);
         rowAutoSize.setWidthFull();
-        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, progressBar);
-        Stream.of(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, progressBar)
+        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, baudRatesComboBox, rowAutoSize, progressBar);
+        Stream.of(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, baudRatesComboBox, progressBar)
                 .forEach(items -> {
                     items.addClassName(AlignSelf.BASELINE);
                     items.setWidthFull();
@@ -200,7 +202,9 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 endAddress.setEnabled(true);
             }
         });
-
+        this.baudRatesComboBox.setTooltipText("Serial port baud rate default 115200");
+        this.baudRatesComboBox.setItems(BaudRates.values());
+        this.baudRatesComboBox.setValue(BaudRates.BAUD_RATE_115200);
         final Div parent = new Div(formLayout);
         parent.setWidth("50%");
         parent.addClassNames(Display.FLEX, JustifyContent.CENTER, AlignItems.CENTER);
@@ -226,7 +230,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @return A  {@link Div}
      */
     private Div divForConsoleOutput() {
-        final var divRowToSecondary = new Div(consoleOutPut);
+        final var divRowToSecondary = new Div(outPutConsole);
         divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
         divRowToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
@@ -386,15 +390,16 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         if (Objects.nonNull(espDeviceInfo.macAddress())) {
             this.divWithPortErrors.setVisible(false);
             this.divWithPortErrors.removeAll();
-            ShowDevices.builder()
+            ShowDevicesBuilder.builder()
                     .withEspDevicesCarousel(espDevicesCarousel)
                     .withEsptoolService(esptoolService)
                     .withEspDeviceInfo(espDeviceInfo)
-                    .withConsoleOutStage(consoleOutPut)
+                    .withOutPutConsole(outPutConsole)
                     .withUi(ui)
                     .withStartSizeAddress(this.startAddress)
                     .withCustomFlashSizeAddress(this.endAddress)
                     .withAutoDetectFlashSize(this.autoDetectFlashSize)
+                    .withBaudRatesComboBox(this.baudRatesComboBox)
                     .make();
         }
 

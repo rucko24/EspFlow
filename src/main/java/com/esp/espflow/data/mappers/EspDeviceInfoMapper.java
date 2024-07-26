@@ -11,7 +11,7 @@ import java.util.Objects;
 import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
 import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
 import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.data.util.EspFlowConstants.DETECTED_FLASH_SIZE;
 import static com.esp.espflow.data.util.EspFlowConstants.MAC;
 import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
 
@@ -25,8 +25,8 @@ public final class EspDeviceInfoMapper {
         if(key.contains(SERIAL_PORT)) {
             return SERIAL_PORT;
         }
-        if(key.contains(FLASH_SIZE)) {
-            return FLASH_SIZE;
+        if(key.contains(DETECTED_FLASH_SIZE)) {
+            return DETECTED_FLASH_SIZE;
         }
         if(key.contains(MAC)) {
             return MAC;
@@ -47,7 +47,7 @@ public final class EspDeviceInfoMapper {
         if(value.contains(SERIAL_PORT)) {
             return parseSerialPort(value);
         }
-        if(value.contains(FLASH_SIZE)) {
+        if(value.contains(DETECTED_FLASH_SIZE)) {
             return parseFlashSizeValue(value);
         }
         if(value.contains(MAC)) {
@@ -67,7 +67,7 @@ public final class EspDeviceInfoMapper {
 
     public static Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map, String descriptivePortName) {
         var serialPort = map.get(SERIAL_PORT);
-        var flashSize = map.get(FLASH_SIZE);
+        var flashSize = map.get(DETECTED_FLASH_SIZE);
 
         if(Objects.isNull(flashSize)) { //In order to trigger the fallback
             return Mono.empty();

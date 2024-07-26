@@ -7,6 +7,7 @@ import com.esp.espflow.data.service.CommandService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceArgumentProvider;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
+import com.esp.espflow.data.util.EsptoolBundlePath;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -24,7 +25,6 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
 import static com.esp.espflow.data.util.EspFlowConstants.PORT;
@@ -88,12 +88,11 @@ class EsptoolServiceTest {
     void readRawFlashIdFromPort(Flux<String> actualLines, String expetedFirtsLine,
                                 String expetedSecondLine, String expetedThirdLine) {
 
-        String[] commands = ArrayUtils.addAll(
-                GetOsName.shellOsName(),
-                ESPTOOL_PY,
+        String[] commands = new String[]{
+                EsptoolBundlePath.esptoolBundlePath(),
                 PORT, "COM3",
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
-                FLASH_ID);
+                FLASH_ID };
 
         when(commandService.processIntputStreamLineByLine(commands))
                 .thenReturn(actualLines);

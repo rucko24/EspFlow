@@ -1,4 +1,4 @@
-package com.esp.espflow.views.flashesp32;
+package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.data.service.ComPortService;
 import com.esp.espflow.data.service.CommandService;

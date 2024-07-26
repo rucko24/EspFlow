@@ -40,7 +40,7 @@ public class EspFlowConstants {
     public static final String MAC = "MAC";
     public static final String CHIP_TYPE = "Detecting chip type";
     public static final String CHIP_IS = "Chip is";
-    public static final String FLASH_SIZE = "Detected flash size";
+    public static final String DETECTED_FLASH_SIZE = "Detected flash size";
     public static final String CRYSTAL_IS = "Crystal is";
 
 
@@ -59,6 +59,14 @@ public class EspFlowConstants {
     public static final String BAUD_RATE = "--baud";
     public static final String READ_FLASH = "read_flash";
     public static final String FLASH_ID = "flash_id";
+    public static final String FLASH_MODE = "--flash_mode";
+    public static final String FLASH_SIZE = "--flash_size";
+    public static final String ERASE_FLASH = "--erase_flash ";
+    public static final String DEFAULT_INIT_ADDRESS_SIZE_TO_WRITE_0x_00000 = "0x00000";
+    public static final String WRITE_FLASH = "write_flash";
+    public static final String FLASH_ON_SVG = "flash-on.svg";
+    public static final String FLASH_OFF_SVG = "flash-off.svg";
+    public static final String SIZE_25_PX = "25px";
 
     public static final String THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET = "This feature has not been implemented yet!";
 

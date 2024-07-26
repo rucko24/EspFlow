@@ -1,6 +1,7 @@
 package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.data.entity.EspDeviceInfo;
+import com.esp.espflow.data.util.GetOsName;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
 import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.button.Button;
@@ -29,7 +30,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTO
 import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
 import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
 import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.data.util.EspFlowConstants.DETECTED_FLASH_SIZE;
 import static com.esp.espflow.data.util.EspFlowConstants.MAC;
 
 /**
@@ -59,8 +60,8 @@ public final class DeviceCardLayout extends Div {
     private final Span chipTypeValue = new Span();
     private final Hr hr1 = new Hr();
 
-    private final Span flashSize = new Span(FLASH_SIZE);
-    private final Span flashSizeValue = new Span();
+    private final Span detectedFlashSize = new Span(DETECTED_FLASH_SIZE);
+    private final Span detectedFlashSizeValue = new Span();
     private final Hr hr2 = new Hr();
 
     private final Span crystal = new Span(CRYSTAL_IS);
@@ -186,9 +187,17 @@ public final class DeviceCardLayout extends Div {
         usbIcon.addClassName(Left.SMALL);
         spanPort.add(usbIcon);
         //Filter the Silicon Labs CP210x UART Bridge, QinHeng Electronics CH340 serial converter
+        //Silicon Labs CP210x USB to UART Bridge windows
         String descriptivePortName = espDeviceInfo.descriptivePortName();
         if(descriptivePortName.contains("CP21")) {
-            spanFriendlyName.setText(descriptivePortName.split(" ")[0]);
+            int index = descriptivePortName.toUpperCase().indexOf("CP");
+            int lastIndexOf = descriptivePortName.lastIndexOf("x");
+            String tempDescriptiveName = descriptivePortName.substring(index, lastIndexOf +1);
+            if(GetOsName.getOsName() == GetOsName.WINDOWS) {
+                spanFriendlyName.setText(tempDescriptiveName);
+            } else {
+                spanFriendlyName.setText(descriptivePortName.split(" ")[0]);
+            }
         }
         if(descriptivePortName.startsWith("USB Serial")) {
             spanFriendlyName.setText("CH3xx serial");
@@ -225,11 +234,11 @@ public final class DeviceCardLayout extends Div {
      */
     private Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
-        Stream.of(chipType, flashSize, crystal, chipIs, spanMadAddress).forEach(span -> span.getStyle().set("font-weight", "bold"));
+        Stream.of(chipType, detectedFlashSize, crystal, chipIs, spanMadAddress).forEach(span -> span.getStyle().set("font-weight", "bold"));
         chipTypeValue.setText(":  " + espDeviceInfo.chipType());
         chipIsValue.setText(":  " + espDeviceInfo.chipIs());
 
-        flashSizeValue.setText(":  " + espDeviceInfo.detectedFlashSize());
+        detectedFlashSizeValue.setText(":  " + espDeviceInfo.detectedFlashSize());
         spanMadAddressValue.setText(": " + espDeviceInfo.macAddress());
         crystalValue.setText(":  " + espDeviceInfo.crystalIs());
 
@@ -256,7 +265,7 @@ public final class DeviceCardLayout extends Div {
          * Flash size
          *
          * */
-        var copyFlashSize = createDivWithCopyButton(flashSize, flashSizeValue, espDeviceInfo.detectedFlashSize(), "Copy flash size");
+        var copyFlashSize = createDivWithCopyButton(detectedFlashSize, detectedFlashSizeValue, espDeviceInfo.detectedFlashSize(), "Copy flash size");
 
         /*
          * Crystal

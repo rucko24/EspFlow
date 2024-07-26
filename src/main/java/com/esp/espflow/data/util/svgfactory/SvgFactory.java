@@ -3,7 +3,7 @@ package com.esp.espflow.data.util.svgfactory;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.StreamResource;
 
-import java.nio.file.Path;
+import java.util.Objects;
 
 import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_SVG_ICONS;
 
@@ -45,17 +45,19 @@ public class SvgFactory {
     /**
      *
      * Button with svg copy style /images/filename.svg
-     *
+     * @param customHeight in pixels, optional parameter
+     * @param size in pixels
      * @return {@link SvgIcon}
      */
-    public static SvgIcon createLogoEspFlowFromSvg(String path) {
+    public static SvgIcon createIconFromSvg(String fileName, String size, String customHeight) {
         //
-        var name = Path.of(path).getFileName().toString();
-        final StreamResource iconResource = new StreamResource(name,
-                () -> SvgFactory.class.getResourceAsStream(path));
+        final StreamResource iconResource = new StreamResource(fileName,
+                () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + fileName));
         var icon = new SvgIcon(iconResource);
-        icon.setSize("200px");
-        icon.getStyle().set("height","45px");
+        icon.setSize(size);
+        if(Objects.nonNull(customHeight)) {
+            icon.getStyle().set("height", customHeight);
+        }
         return icon;
     }
 
