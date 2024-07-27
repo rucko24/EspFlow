@@ -26,20 +26,20 @@ class CommandServiceTest {
 
     @Test
     @DisplayName("This part decodes the databuffer internally and allows it to be read line by line.")
-    void processIntputStreamLineByLine() {
+    void processInputStreamLineByLine() {
 
         final String[] actualCommands = {"/bin/sh", "-c", "ipconfig"};
 
         var returnedValue = Flux.just("enp5s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500",
                 "inet 192.168.1.26  netmask 255.255.255.0  broadcast 192.168.1.255");
 
-        when(processCommandsInternals.processIntputStreamLineByLine(actualCommands))
+        when(processCommandsInternals.processInputStreamLineByLine(actualCommands))
                 .thenReturn(returnedValue);
 
         String firstLine = "enp5s0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500";
          String secondLine =  "inet 192.168.1.26  netmask 255.255.255.0  broadcast 192.168.1.255";
 
-        StepVerifier.create(commandService.processIntputStreamLineByLine(actualCommands))
+        StepVerifier.create(commandService.processInputStreamLineByLine(actualCommands))
                 .expectNext(firstLine)
                 .expectNext(secondLine)
                 .verifyComplete();

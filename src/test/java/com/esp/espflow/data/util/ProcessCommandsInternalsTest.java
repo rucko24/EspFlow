@@ -67,7 +67,7 @@ class ProcessCommandsInternalsTest {
 
             var commands = new String[]{esptoolExecutable, "version"};
 
-            StepVerifier.create(processCommandsInternals.processIntputStreamLineByLine(commands)
+            StepVerifier.create(processCommandsInternals.processInputStreamLineByLine(commands)
                             .take(1)
                             .log()
                     )

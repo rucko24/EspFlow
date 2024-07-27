@@ -23,8 +23,8 @@ public class CommandService {
      * @param commands the array strings with commands
      * @return A Flux<String>
      */
-    public Flux<String> processIntputStreamLineByLine(final String... commands) {
-        return processCommandsInternals.processIntputStreamLineByLine(commands);
+    public Flux<String> processInputStreamLineByLine(final String... commands) {
+        return processCommandsInternals.processInputStreamLineByLine(commands);
     }
 
     /**

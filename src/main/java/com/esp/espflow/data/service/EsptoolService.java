@@ -107,7 +107,7 @@ public class EsptoolService {
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID};
 
-        return commandService.processIntputStreamLineByLine(commands)
+        return commandService.processInputStreamLineByLine(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
                 .flatMap(map -> EspDeviceInfoMapper.mapToEspDeviceInfo(map, descriptivePortName))
@@ -127,7 +127,7 @@ public class EsptoolService {
      * @return A {@link Flux} with each String from this inputStream
      */
     public Flux<String> readRawFlashIdFromPort(final String... commands) {
-        return commandService.processIntputStreamLineByLine(commands);
+        return commandService.processInputStreamLineByLine(commands);
     }
 
     /**
@@ -137,7 +137,7 @@ public class EsptoolService {
      */
     public Flux<String> showEsptoolVersion() {
         final String[] commands = new String[]{EsptoolBundlePath.esptoolBundlePath()};
-        return this.commandService.processIntputStreamLineByLine(commands)
+        return this.commandService.processInputStreamLineByLine(commands)
                 .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
                 .map(this::processLineEsptoolVersion);
     }
@@ -184,7 +184,7 @@ public class EsptoolService {
      * @return A {@link Flux<String>}
      */
     public Flux<String> writeFlash(String... commands) {
-        return commandService.processIntputStreamLineByLine(commands)
+        return commandService.processInputStreamLineByLine(commands)
                 .distinct(this::splitPercentaje);
     }
 

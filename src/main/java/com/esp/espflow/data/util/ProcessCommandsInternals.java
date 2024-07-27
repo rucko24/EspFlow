@@ -41,8 +41,8 @@ public final class ProcessCommandsInternals {
      *
      * @return A {@link Flux}
      */
-    public Flux<String> processIntputStreamLineByLine(final String... commands) {
-        return Flux.defer(() -> this.processIntputStream(commands))
+    public Flux<String> processInputStreamLineByLine(final String... commands) {
+        return Flux.defer(() -> this.processInputStream(commands))
                 .subscribeOn(Schedulers.boundedElastic())
                 .transform(this::decodeDataBuffer)
                 .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND)));
@@ -55,7 +55,7 @@ public final class ProcessCommandsInternals {
      *
      * @return A {@link Flux}
      */
-    private Flux<DataBuffer> processIntputStream(final String... commands) {
+    private Flux<DataBuffer> processInputStream(final String... commands) {
         try {
             return DataBufferUtils.readInputStream(() -> this.execute(commands).getInputStream(), DefaultDataBufferFactory.sharedInstance, FileCopyUtils.BUFFER_SIZE);
         } catch (Exception ex) {
@@ -99,7 +99,7 @@ public final class ProcessCommandsInternals {
      * @return A {@link Flux}
      */
     public Flux<String> processCommandsWithCustomCharset(final String... commands) {
-        return Flux.defer(() -> this.processIntputStream(commands))
+        return Flux.defer(() -> this.processInputStream(commands))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(this::mappingDataBuffer)
                 .onErrorResume(throwable -> {
@@ -111,7 +111,7 @@ public final class ProcessCommandsInternals {
     /**
      *
      * This method can also read the DataBuffer but, it does not give the possibility to decode so that it can be read
-     * line by line if you want to read line by line see processIntputStreamLineByLine method
+     * line by line if you want to read line by line see processInputStreamLineByLine method
      *
      * @param dataBuffer to read
      *
@@ -133,7 +133,7 @@ public final class ProcessCommandsInternals {
 
     @SuppressWarnings("unused")
     private Flux<String> executeDmesgForTtyPort() {
-        return processIntputStreamLineByLine(DMESG_TTY)
+        return processInputStreamLineByLine(DMESG_TTY)
                 .map((String line) -> line.split(System.lineSeparator()))
                 .map((String[] tmp) -> Stream.of(tmp)
                         .map((String line) -> {
