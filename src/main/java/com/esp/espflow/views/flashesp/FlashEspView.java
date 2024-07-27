@@ -63,7 +63,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.THIS_FEATURE_HAS_NOT_BE
 @UIScope
 @SpringComponent
 @PageTitle("Flash Esp32-ESP8266")
-@Route(value = "flash-esp32", layout = MainLayout.class)
+@Route(value = "flash-esp", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
@@ -201,8 +201,8 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
     private Div buttonFlash() {
         final Div divButtonFlash = new Div();
+        divButtonFlash.setSizeFull();
         divButtonFlash.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-        flashButton.setWidthFull();
         flashButton.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         flashButton.setTooltipText("flash me!");
         flashButton.addClickListener(event -> {

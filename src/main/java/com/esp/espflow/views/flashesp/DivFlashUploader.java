@@ -53,8 +53,8 @@ public class DivFlashUploader extends Div {
         final Div divH3Firmware = this.h3Firmware();
 
         super.add(divH3Firmware, divUploader);
-//        super.setWidthFull();
-        super.setSizeFull();
+        super.setWidthFull();
+        //super.setSizeFull();
         super.getStyle().set(DISPLAY, "flex");
         super.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         super.addClassName("firmwareh3-vaadin-upload-div");
