@@ -270,7 +270,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                 })
                 .subscribe(line ->
                         ui.access(() -> {
-                            log.info("Salida: subscribeThis {}", line);
                             this.outPutConsole.writeln(line);
                         })
                 );
