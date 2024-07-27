@@ -13,6 +13,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_MODE;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
@@ -200,26 +203,31 @@ public class WriteFlashBuilder {
                     "src/main/resources/flashesdir/" + flashFileName
             };
 
-            CommandsOnFirstLine.putCommansdOnFirstLine(commands, outPutConsole);
+            if(Stream.of(serialPort.getValue(), flashFileName).allMatch(Objects::nonNull)) {
 
-            this.esptoolService.writeFlash(commands)
-                    .doOnError(onError -> {
-                        ui.access(() -> {
-                            this.outPutConsole.writeln(onError.getMessage());
-                            ConfirmDialogBuilder.showInformation("Problema al escribir la flash");
+                CommandsOnFirstLine.putCommansdOnFirstLine(commands, outPutConsole);
+
+                this.esptoolService.writeFlash(commands)
+                        .doOnError(onError -> {
+                            ui.access(() -> {
+                                this.outPutConsole.writeln(onError.getMessage());
+                                ConfirmDialogBuilder.showInformation("Problem writing the flash!!!");
+                            });
+                        })
+                        .doOnTerminate(() -> {
+                            ui.access(() -> {
+                                ConfirmDialogBuilder.showInformation("Flash writed successfully!!!");
+                                this.outPutConsole.writePrompt();
+                            });
+                        })
+                        .subscribe(line -> {
+                            ui.access(() -> {
+                                this.outPutConsole.writeFlash(line);
+                            });
                         });
-                    })
-                    .doOnTerminate(() -> {
-                        ui.access(() -> {
-                            ConfirmDialogBuilder.showInformation("Flash writed successfully!!!");
-                            this.outPutConsole.writePrompt();
-                        });
-                    })
-                    .subscribe(line -> {
-                        ui.access(() -> {
-                            this.outPutConsole.writeFlash(line);
-                        });
-                    });
+            } else {
+                ConfirmDialogBuilder.showWarning("Incorrect data!!!");
+            }
             return new WriteFlashBuilder();
         }
 
