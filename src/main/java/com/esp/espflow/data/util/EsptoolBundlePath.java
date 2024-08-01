@@ -4,6 +4,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.file.Files;
+import java.util.ResourceBundle;
+
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_BUNDLE;
+
 /**
  * @author rubn
  */
@@ -18,7 +23,7 @@ public class EsptoolBundlePath {
     public static String esptoolBundlePath() {
         switch (GetOsName.getOsName()) {
             case WINDOWS -> {
-                return  "./esptool-bundle/esptool-winx64/esptool.exe";
+                return bundle("esptool-winx64/esptool.exe");
             }
             case LINUX -> {
                 return "./esptool-bundle/esptool-linux64/esptool";
@@ -33,6 +38,12 @@ public class EsptoolBundlePath {
                 return StringUtils.EMPTY;
             }
         }
+    }
+
+    public static String bundle(final String fileName) {
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("a");
+        ResourceBundle.getBundle("");
+        return ESPTOOL_BUNDLE + fileName;
     }
 
 }

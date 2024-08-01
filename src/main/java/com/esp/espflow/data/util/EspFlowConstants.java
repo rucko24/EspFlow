@@ -28,9 +28,10 @@ public class EspFlowConstants {
     public static final String DISPLAY = "display";
     public static final String ESPTOOL_PY_NOT_FOUND = "esptool.py not found!";
     public static final String[] ESPTOOL_PY_VERSION = new String[]{"esptool.py","version"};
+    public static final String VERSION = "version";
     public static final int FIRST_LINE_TO_CHECK_IF_IT_EXISTS = 1;
     public static final String NOT_FOUND = "not found!";
-    public static final String COMMAND_NOT_FOUND = "command not found!";
+    public static final String COMMAND_NOT_FOUND = "command not found! ";
     public static final String CHARSET_CP850 = "CP850";
     public static final String OVERFLOW_X = "overflow-x";
     public static final String OVERFLOW_Y = "overflow-y";
@@ -54,6 +55,7 @@ public class EspFlowConstants {
     public static final String FRONTEND_IMAGES_AVATAR_USER = "frontend/images/avatar-user/";
     public static final String FRONTEND_IMAGES_ABOUT = "frontend/images/about/";
     public static final String FRONTEND_IMAGES_SVG_ICONS = "/META-INF/resources/frontend/images/svg-icons/";
+    public static final String ESPTOOL_BUNDLE = "/META-INF/resources/esptool-bundle/";
     public static final String PORT = "--port";
     public static final String ESPTOOL_PY = "esptool.py";
     public static final String BAUD_RATE = "--baud";

@@ -45,7 +45,7 @@ public final class ProcessCommandsInternals {
         return Flux.defer(() -> this.processInputStream(commands))
                 .subscribeOn(Schedulers.boundedElastic())
                 .transform(this::decodeDataBuffer)
-                .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND)));
+                .onErrorResume(throwable -> Mono.error(new CommandNotFoundException(COMMAND_NOT_FOUND + throwable.getMessage())));
     }
 
     /**

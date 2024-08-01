@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
+
 /**
  * @author rubn
  */
@@ -39,7 +41,7 @@ public class CommandsOnFirstLine {
      */
     private static String[] esptoolPyOnFirstIndex(String[] newCommands) {
         var updateCommnds = Arrays.copyOf(newCommands, newCommands.length);
-        updateCommnds[0] = "esptool.py";
+        updateCommnds[0] = ESPTOOL_PY;
         return updateCommnds;
     }
 }
