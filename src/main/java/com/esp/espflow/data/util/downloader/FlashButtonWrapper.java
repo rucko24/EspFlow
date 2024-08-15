@@ -1,5 +1,6 @@
 package com.esp.espflow.data.util.downloader;
 
+import com.esp.espflow.data.util.EspFlowConstants;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.button.Button;
@@ -52,7 +53,7 @@ public class FlashButtonWrapper extends FileDownloadWrapper {
         streamResource.setCacheTime(0);
         super.setResource(streamResource);
         super.wrapComponent(download);
-        download.getStyle().set("box-shadow", "0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12)");
+        download.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         Animated.animate(download, Animation.FADE_IN);
     }
 

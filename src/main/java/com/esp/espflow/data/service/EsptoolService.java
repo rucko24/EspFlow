@@ -139,7 +139,7 @@ public class EsptoolService {
      * @return A {@link Flux<String> }
      */
     public Flux<String> showEsptoolVersion() {
-        final String[] commands = {"cmd","/c", EsptoolBundlePath.esptoolBundlePath(), VERSION};
+        final String[] commands = {EsptoolBundlePath.esptoolBundlePath(), VERSION};
         return this.commandService.processInputStreamLineByLine(commands)
                 .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
                 .map(this::processLineEsptoolVersion);

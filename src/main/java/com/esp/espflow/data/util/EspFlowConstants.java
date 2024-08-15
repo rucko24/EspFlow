@@ -55,7 +55,7 @@ public class EspFlowConstants {
     public static final String FRONTEND_IMAGES_AVATAR_USER = "frontend/images/avatar-user/";
     public static final String FRONTEND_IMAGES_ABOUT = "frontend/images/about/";
     public static final String FRONTEND_IMAGES_SVG_ICONS = "/META-INF/resources/frontend/images/svg-icons/";
-    public static final String ESPTOOL_BUNDLE = "/META-INF/resources/esptool-bundle/";
+    public static final String ESPTOOL_BUNDLE_DIR = "/META-INF/resources/esptool-bundle/";
     public static final String PORT = "--port";
     public static final String ESPTOOL_PY = "esptool.py";
     public static final String BAUD_RATE = "--baud";
