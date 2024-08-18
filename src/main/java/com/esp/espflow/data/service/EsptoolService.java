@@ -4,8 +4,7 @@ import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.data.mappers.EspDeviceInfoMapper;
-import com.esp.espflow.data.util.EspFlowConstants;
-import com.esp.espflow.data.util.EsptoolBundlePath;
+import com.esp.espflow.data.util.EsptoolPath;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,7 +23,6 @@ import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
 import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
 import static com.esp.espflow.data.util.EspFlowConstants.DETECTED_FLASH_SIZE;
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
 import static com.esp.espflow.data.util.EspFlowConstants.FIRST_LINE_TO_CHECK_IF_IT_EXISTS;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
 import static com.esp.espflow.data.util.EspFlowConstants.MAC;
@@ -105,7 +103,7 @@ public class EsptoolService {
         final String descriptivePortName = port.split("@")[1];
 
         final String[] commands = new String[]{
-                EsptoolBundlePath.esptoolBundlePath(),
+                EsptoolPath.esptoolPath(),
                 PORT, parsePort,
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID};
@@ -139,7 +137,7 @@ public class EsptoolService {
      * @return A {@link Flux<String> }
      */
     public Flux<String> showEsptoolVersion() {
-        final String[] commands = {EsptoolBundlePath.esptoolBundlePath(), VERSION};
+        final String[] commands = {EsptoolPath.esptoolPath(), VERSION};
         return this.commandService.processInputStreamLineByLine(commands)
                 .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
                 .map(this::processLineEsptoolVersion);

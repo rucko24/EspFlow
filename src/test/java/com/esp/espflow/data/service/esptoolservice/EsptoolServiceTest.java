@@ -7,7 +7,7 @@ import com.esp.espflow.data.service.CommandService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceArgumentProvider;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
-import com.esp.espflow.data.util.EsptoolBundlePath;
+import com.esp.espflow.data.util.EsptoolPath;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -89,7 +89,7 @@ class EsptoolServiceTest {
                                 String expetedSecondLine, String expetedThirdLine) {
 
         String[] commands = new String[]{
-                EsptoolBundlePath.esptoolBundlePath(),
+                EsptoolPath.esptoolPath(),
                 PORT, "COM3",
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID };

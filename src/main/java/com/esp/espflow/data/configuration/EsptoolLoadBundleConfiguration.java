@@ -1,6 +1,6 @@
 package com.esp.espflow.data.configuration;
 
-import com.esp.espflow.data.util.EsptoolBundlePath;
+import com.esp.espflow.data.util.EsptoolPath;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
@@ -14,9 +14,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_BUNDLE_DIR;
+import static com.esp.espflow.data.util.EspFlowConstants.META_INF_RESOURCES_ESPTOOL_BUNDLE;
 import static com.esp.espflow.data.util.EspFlowConstants.SET_CHMOD_X;
 import static com.esp.espflow.data.util.EspFlowConstants.SLASH;
 
@@ -25,7 +27,6 @@ import static com.esp.espflow.data.util.EspFlowConstants.SLASH;
 public class EsptoolLoadBundleConfiguration {
 
     /**
-     *
      * Move the esptool executable to the system's temporary directory in runtime
      *
      * @return A {@link CommandLineRunner}
@@ -36,8 +37,7 @@ public class EsptoolLoadBundleConfiguration {
             switch (GetOsName.getOsName()) {
                 case WINDOWS -> this.moveBundleToTempDirectory("esptool-winx64/esptool.exe");
                 case LINUX -> this.moveBundleToTempDirectory("esptool-linux-amd64/esptool");
-                case FREEBSD -> this.moveBundleToTempDirectory("esptool-freebsd-amd64/esptool");
-                case MAC -> this.moveBundleToTempDirectory("esptool-macOsx64/esptool");
+                case MAC -> this.moveBundleToTempDirectory("esptool-macosx64/esptool");
                 default -> {
                     //Do nothing
                 }
@@ -45,10 +45,15 @@ public class EsptoolLoadBundleConfiguration {
         };
     }
 
+    /**
+     * Moves the executable from the resources directory to the temporary directory
+     *
+     * @param bundleFileName the name of the executable, depending on the operating systemº
+     */
     private void moveBundleToTempDirectory(final String bundleFileName) {
 
         final String tempDir = System.getProperty("java.io.tmpdir")
-                .concat("/esptool-bundle-dir/")
+                .concat(ESPTOOL_BUNDLE_DIR)
                 .concat(bundleFileName.split(SLASH)[0]);
 
         final Path pathTempDir = Path.of(tempDir);
@@ -62,33 +67,50 @@ public class EsptoolLoadBundleConfiguration {
             }
         }
 
-        var esptoolFileNameOutput = Path.of(ESPTOOL_BUNDLE_DIR + bundleFileName).getFileName().toString();
+        var esptoolFileNameOutput = Path.of(META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName).getFileName().toString();
         var outPathFileName = Path.of(tempDir + File.separator + esptoolFileNameOutput);
 
-        try (var inputStream = EsptoolBundlePath.class.getResourceAsStream(ESPTOOL_BUNDLE_DIR + bundleFileName);
-             var bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(outPathFileName))) {
+        final var pathResourceAsStream = META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName;
 
-            assert inputStream != null;
-            inputStream.transferTo(bufferedOutputStream);
-
-        } catch (IOException ex) {
-            log.error("Error by copying the esptool executable to the temporary directory {}", ex.getMessage());
-        }
+        this.processResourceAsStream(pathResourceAsStream, outPathFileName);
 
         final var os = GetOsName.getOsName();
 
-        if(os == GetOsName.LINUX || os == GetOsName.FREEBSD || os == GetOsName.MAC) {
+        if (os == GetOsName.LINUX || os == GetOsName.MAC) {
             this.makeTheBundleExecutable(outPathFileName);
         }
 
     }
 
+    /**
+     * Reads and writes the resource and writes it to the temporary directory
+     *
+     * @param pathResourceAsStream is the input where the esptool is
+     * @param outPathFileName is the path where the esptool will be stored
+     */
+    private void processResourceAsStream(final String pathResourceAsStream, final Path outPathFileName) {
+        try (var inputStream = EsptoolPath.class.getResourceAsStream(pathResourceAsStream);
+             var bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(outPathFileName))) {
+
+            Objects.requireNonNull(inputStream, "inputStream is null");
+            inputStream.transferTo(bufferedOutputStream);
+
+        } catch (IOException ex) {
+            log.error("Error by copying the esptool executable to the temporary directory {}", ex.getMessage());
+        }
+    }
+
+    /**
+     * Set run permissions if it is a linux or macOS executable.
+     *
+     * @param esptoolPath contains the path where the esptool executable is located
+     */
     private void makeTheBundleExecutable(final Path esptoolPath) {
         try {
             Set<PosixFilePermission> permissions = PosixFilePermissions.fromString(SET_CHMOD_X);
             Files.setPosixFilePermissions(esptoolPath, permissions);
 
-            if(Files.isExecutable(esptoolPath.toAbsolutePath())) {
+            if (Files.isExecutable(esptoolPath.toAbsolutePath())) {
                 log.debug("esptool bundle is executable");
             } else {
                 log.error("Error when setting permissions in the esptool executable {}", esptoolPath);

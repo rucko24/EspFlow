@@ -6,7 +6,7 @@ import com.esp.espflow.data.enums.FlashMode;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.EsptoolBundlePath;
+import com.esp.espflow.data.util.EsptoolPath;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.console.OutPutConsole;
 import com.esp.espflow.data.util.svgfactory.SvgFactory;
@@ -239,7 +239,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                 final String port = event.getValue();
 
                 this.commands = new String[]{
-                        EsptoolBundlePath.esptoolBundlePath(),
+                        EsptoolPath.esptoolPath(),
                         PORT, port,
                         BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                         FLASH_ID

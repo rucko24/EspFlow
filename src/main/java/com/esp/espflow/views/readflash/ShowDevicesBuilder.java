@@ -5,7 +5,7 @@ import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.EsptoolBundlePath;
+import com.esp.espflow.data.util.EsptoolPath;
 import com.esp.espflow.data.util.IBuilder;
 import com.esp.espflow.data.util.console.OutPutConsole;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
@@ -416,7 +416,7 @@ public class ShowDevicesBuilder {
                                final String processAutoDetectFlashSize) {
 
             final String[] commands = {
-                    EsptoolBundlePath.esptoolBundlePath(),
+                    EsptoolPath.esptoolPath(),
                     PORT, espDeviceInfo.port(),
                     BAUD_RATE, this.baudRatesComboBox.getValue().toString(),
                     READ_FLASH,

@@ -6,7 +6,7 @@ import com.esp.espflow.data.enums.FlashMode;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.EsptoolBundlePath;
+import com.esp.espflow.data.util.EsptoolPath;
 import com.esp.espflow.data.util.IBuilder;
 import com.esp.espflow.data.util.console.OutPutConsole;
 import com.vaadin.flow.component.UI;
@@ -194,7 +194,7 @@ public class WriteFlashBuilder {
         public WriteFlashBuilder make() {
 
             final String[] commands = new String[]{
-                    EsptoolBundlePath.esptoolBundlePath(),
+                    EsptoolPath.esptoolPath(),
                     PORT, serialPort.getValue(),
                     BAUD_RATE, baudRate.getValue().toString(),
                     WRITE_FLASH,
