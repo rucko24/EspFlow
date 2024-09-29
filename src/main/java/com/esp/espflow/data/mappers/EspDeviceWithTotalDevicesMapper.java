@@ -6,7 +6,7 @@ import com.esp.espflow.data.entity.EspDeviceWithTotalDevices;
 /**
  * @author rubn
  */
-public class EspDeviceWithTotalDevicesMapper {
+public final class EspDeviceWithTotalDevicesMapper {
 
     public static final EspDeviceWithTotalDevicesMapper INSTANCE = new EspDeviceWithTotalDevicesMapper();
 
