@@ -109,21 +109,35 @@ public class EsptoolService {
      * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
      */
     public Mono<EspDeviceInfo> readFlashIdFromPort(String port) {
-        final String parsePort = port.split("@")[0];
+        final String parsedPort = port.split("@")[0];
         final String descriptivePortName = port.split("@")[1];
 
         final String[] commands = ArrayUtils.addAll(
                 GetOsName.shellOsName(),
                 ESPTOOL_PY,
-                PORT, parsePort,
+                PORT, parsedPort,
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID);
 
         return commandService.processIntputStreamLineByLine(commands)
                 .filter(predicate)
-                .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
-                .flatMap(map -> EspDeviceInfoMapper.mapToEspDeviceInfo(map, descriptivePortName) )
-                .switchIfEmpty(Mono.defer(() -> EspDeviceInfoMapper.fallback(parsePort)));
+                .collectMap(EspDeviceInfoMapper.INSTANCE::key, EspDeviceInfoMapper.INSTANCE::value)
+                .flatMap(map -> EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(map, descriptivePortName) )
+                .switchIfEmpty(Mono.defer(() -> this.fallback(parsedPort)));
+    }
+
+    /**
+     *
+     * Execute fallback with new EspDeviceInfo and parsed port
+     *
+     * @param parsedPort parsed port
+     *
+     * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
+     */
+    private Mono<EspDeviceInfo> fallback(String parsedPort) {
+        return Mono.just(EspDeviceInfo.builder()
+                .port(parsedPort)
+                .build());
     }
 
     /**
