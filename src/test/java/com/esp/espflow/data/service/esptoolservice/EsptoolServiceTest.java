@@ -4,8 +4,10 @@ import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.ComPortService;
 import com.esp.espflow.data.service.CommandService;
+import com.esp.espflow.data.service.EspDeviceInfoServiceFallback;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceArgumentProvider;
+import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceNoFlashSizeArgumentProvider;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.SneakyThrows;
@@ -21,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
@@ -28,6 +31,9 @@ import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
 import static com.esp.espflow.data.util.EspFlowConstants.PORT;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -45,6 +51,9 @@ class EsptoolServiceTest {
 
     @Mock
     private ComPortService comPortService;
+
+    @Mock
+    private EspDeviceInfoServiceFallback espDeviceInfoServiceFallback;
 
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceArgumentProvider.class)
@@ -66,6 +75,32 @@ class EsptoolServiceTest {
 
     }
 
+
+    @ParameterizedTest
+    @ArgumentsSource(EsptoolServiceNoFlashSizeArgumentProvider.class)
+    @SneakyThrows
+    @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id, " +
+            "indicates that the response of the console is incomplete and the microcontroller reading was not correct")
+    void flashSizeIsNullFromInputWhenMapping(String portForInputStream,
+                         String portWithFriendlyName,
+                         Flux<String> actualLines, EspDeviceInfo expectedLines) {
+
+        //The method processIntputStreamLineByLine should receive the parsed port without the vendor
+        String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), "esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id");
+
+        when(commandService.processIntputStreamLineByLine(commands))
+                .thenReturn(actualLines);
+
+        when(espDeviceInfoServiceFallback.fallback(portForInputStream)).thenReturn(Mono.just(expectedLines));
+
+        StepVerifier.create(esptoolService.readFlashIdFromPort(portWithFriendlyName))
+                .expectNext(expectedLines)
+                .verifyComplete();
+
+        verify(espDeviceInfoServiceFallback, times(1)).fallback(portForInputStream);
+        verifyNoMoreInteractions(espDeviceInfoServiceFallback);
+
+    }
 
     @Test
     @DisplayName("show esptool version")

@@ -43,6 +43,7 @@ public class EsptoolService {
 
     private final CommandService commandService;
     private final ComPortService comPortService;
+    private final EspDeviceInfoServiceFallback espDeviceInfoServiceFallback;
 
     /**
      * The predicate to filter only the necessary lines, if you want to process one more line, this condition should be added here
@@ -122,22 +123,10 @@ public class EsptoolService {
         return commandService.processIntputStreamLineByLine(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper.INSTANCE::key, EspDeviceInfoMapper.INSTANCE::value)
-                .flatMap(map -> EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(map, descriptivePortName) )
-                .switchIfEmpty(Mono.defer(() -> this.fallback(parsedPort)));
-    }
-
-    /**
-     *
-     * Execute fallback with new EspDeviceInfo and parsed port
-     *
-     * @param parsedPort parsed port
-     *
-     * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
-     */
-    private Mono<EspDeviceInfo> fallback(String parsedPort) {
-        return Mono.just(EspDeviceInfo.builder()
-                .port(parsedPort)
-                .build());
+                .flatMap(collectedMapInfo -> EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(
+                        collectedMapInfo, descriptivePortName)
+                )
+                .switchIfEmpty(Mono.defer(() -> this.espDeviceInfoServiceFallback.fallback(parsedPort)));
     }
 
     /**
