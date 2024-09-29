@@ -11,7 +11,7 @@ import java.util.Map;
  * @author rubn
  */
 @Service
-public class EspDeviceInfoServiceFallback {
+public class EspDeviceInfoFallBackService {
 
     /**
      *

@@ -4,7 +4,7 @@ import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.ComPortService;
 import com.esp.espflow.data.service.CommandService;
-import com.esp.espflow.data.service.EspDeviceInfoServiceFallback;
+import com.esp.espflow.data.service.EspDeviceInfoFallBackService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceArgumentProvider;
 import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceNoFlashSizeArgumentProvider;
@@ -53,7 +53,7 @@ class EsptoolServiceTest {
     private ComPortService comPortService;
 
     @Mock
-    private EspDeviceInfoServiceFallback espDeviceInfoServiceFallback;
+    private EspDeviceInfoFallBackService espDeviceInfoFallbackService;
 
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceArgumentProvider.class)
@@ -91,14 +91,14 @@ class EsptoolServiceTest {
         when(commandService.processIntputStreamLineByLine(commands))
                 .thenReturn(actualLines);
 
-        when(espDeviceInfoServiceFallback.fallback(portForInputStream)).thenReturn(Mono.just(expectedLines));
+        when(espDeviceInfoFallbackService.fallback(portForInputStream)).thenReturn(Mono.just(expectedLines));
 
         StepVerifier.create(esptoolService.readFlashIdFromPort(portWithFriendlyName))
                 .expectNext(expectedLines)
                 .verifyComplete();
 
-        verify(espDeviceInfoServiceFallback, times(1)).fallback(portForInputStream);
-        verifyNoMoreInteractions(espDeviceInfoServiceFallback);
+        verify(espDeviceInfoFallbackService, times(1)).fallback(portForInputStream);
+        verifyNoMoreInteractions(espDeviceInfoFallbackService);
 
     }
 
