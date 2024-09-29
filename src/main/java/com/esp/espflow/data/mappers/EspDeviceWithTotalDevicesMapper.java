@@ -10,6 +10,8 @@ public class EspDeviceWithTotalDevicesMapper {
 
     public static final EspDeviceWithTotalDevicesMapper INSTANCE = new EspDeviceWithTotalDevicesMapper();
 
+    private EspDeviceWithTotalDevicesMapper(){}
+
     /**
      *
      * @param espDeviceInfo

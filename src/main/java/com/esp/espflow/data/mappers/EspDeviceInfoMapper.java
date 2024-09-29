@@ -20,6 +20,8 @@ public final class EspDeviceInfoMapper {
 
     public static final EspDeviceInfoMapper INSTANCE = new EspDeviceInfoMapper();
 
+    private EspDeviceInfoMapper(){}
+
     public String key(final String key) {
         if(key.contains(SERIAL_PORT)) {
             return SERIAL_PORT;
