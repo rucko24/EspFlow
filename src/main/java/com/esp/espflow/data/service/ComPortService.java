@@ -5,12 +5,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -91,7 +86,8 @@ public class ComPortService {
      * @return Boolean
      */
     private Boolean isSerialPortFT232R(SerialPort filterSerialPortFT232R) {
-        return !(filterSerialPortFT232R.getDescriptivePortName().startsWith("FT232R"));
+        return !(filterSerialPortFT232R.getDescriptivePortName().startsWith("FT232R")
+                || filterSerialPortFT232R.getPortDescription().startsWith("FT232R"));
     }
 
     /**

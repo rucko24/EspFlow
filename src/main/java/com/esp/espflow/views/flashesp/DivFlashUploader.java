@@ -23,12 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_LEFT;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 @Log4j2
 @UIScope

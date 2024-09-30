@@ -93,8 +93,11 @@ class ProcessCommandsInternalsTest {
                 .concat("/esptool"));
 
         try {
-            Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rw-------");
-            Files.setPosixFilePermissions(esptoolPath, permissions);
+
+            if(!(GetOsName.getOsName() == GetOsName.WINDOWS)) {
+                Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rw-------");
+                Files.setPosixFilePermissions(esptoolPath, permissions);
+            }
 
             if(Files.isExecutable(esptoolPath)) {
                 var commands = new String[]{esptoolPath.toAbsolutePath().toString(), "version"};

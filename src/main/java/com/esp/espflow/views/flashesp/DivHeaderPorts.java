@@ -27,15 +27,7 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 @Log4j2
 @Getter

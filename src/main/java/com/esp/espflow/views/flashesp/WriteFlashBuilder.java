@@ -16,11 +16,7 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_MODE;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.EspFlowConstants.PORT;
-import static com.esp.espflow.data.util.EspFlowConstants.WRITE_FLASH;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  *

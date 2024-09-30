@@ -1,19 +1,15 @@
 package com.esp.espflow.views.about;
 
 import com.esp.espflow.views.MainLayout;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.infraleap.animatecss.Animated;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ABOUT;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 @PageTitle("About")
 @Route(value = "about", layout = MainLayout.class)
@@ -26,9 +22,17 @@ public class AboutView extends VerticalLayout {
     public AboutView() {
         super.setSpacing(false);
 
-        final Image img = new Image(FRONTEND_IMAGES_ABOUT + "bran-espressif-box.png", "box");
+        final Image img = new Image(FRONTEND_IMAGES_ABOUT + "bran-espressif-box.png", "alt");
+        var tooltip = Tooltip.forComponent(img);
+        tooltip.setPosition(Tooltip.TooltipPosition.TOP);
+        tooltip.setText("https://github.com/rucko24/EspFlow");
         img.setWidth("30%");
+        img.addClickListener(e -> {
+            getUI().ifPresent(ui -> ui.getPage().open("https://github.com/rucko24/EspFlow"));
+        });
+        img.getStyle().setCursor("pointer");
         img.getStyle().set("border-radius", "2em");
+        img.getStyle().set("margin-bottom", "20px");
         img.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
         super.add(img);
 
@@ -39,6 +43,8 @@ public class AboutView extends VerticalLayout {
         super.setJustifyContentMode(JustifyContentMode.CENTER);
         super.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         super.getStyle().set("text-align", "center");
+
+        Animated.animate(this, Animated.Animation.FADE_IN);
     }
 
     private Div row() {

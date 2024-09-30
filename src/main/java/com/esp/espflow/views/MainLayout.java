@@ -10,18 +10,13 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.PageTitle;
@@ -33,10 +28,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 
 import java.util.Optional;
 
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ON_SVG;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
-import static com.esp.espflow.data.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -70,8 +62,13 @@ public class MainLayout extends AppLayout {
     private void addDrawerContent() {
         Span appName = new Span();
         final Image logo = new Image(FRONTEND_IMAGES_LOGO + "espflow_176px.png", "logo");
+        Tooltip.forComponent(logo).setText("https://github.com/rucko24/EspFlow");
+        logo.getStyle().setCursor("pointer");
         logo.setMaxWidth("75%");
         logo.setHeight("auto");
+        logo.addClickListener(e -> {
+            getUI().ifPresent(ui -> ui.getPage().open("https://github.com/rucko24/EspFlow"));
+        });
         appName.add(logo);
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
         Header header = new Header(appName);
