@@ -1,8 +1,6 @@
 package com.esp.espflow.data.mappers;
 
 import com.esp.espflow.data.entity.EspDeviceInfo;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -13,10 +11,13 @@ import static com.esp.espflow.data.util.EspFlowConstants.*;
 /**
  * The EspDeviceInfoMapper
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EspDeviceInfoMapper {
 
-    public static String key(final String key) {
+    public static final EspDeviceInfoMapper INSTANCE = new EspDeviceInfoMapper();
+
+    private EspDeviceInfoMapper(){}
+
+    public String key(final String key) {
         if(key.contains(SERIAL_PORT)) {
             return SERIAL_PORT;
         }
@@ -38,7 +39,7 @@ public final class EspDeviceInfoMapper {
         return "Unknown";
     }
 
-    public static String value(final String value) {
+    public String value(final String value) {
         if(value.contains(SERIAL_PORT)) {
             return parseSerialPort(value);
         }
@@ -60,7 +61,7 @@ public final class EspDeviceInfoMapper {
         return "Unknown";
     }
 
-    public static Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map, String descriptivePortName) {
+    public Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map, String descriptivePortName) {
         var serialPort = map.get(SERIAL_PORT);
         var flashSize = map.get(DETECTED_FLASH_SIZE);
 
@@ -85,12 +86,6 @@ public final class EspDeviceInfoMapper {
                 .chipIs(chipIs)
                 .decimal(decimal)
                 .hex(hex)
-                .build());
-    }
-
-    public static Mono<EspDeviceInfo> fallback(String port) {
-        return Mono.just(EspDeviceInfo.builder()
-                .port(port)
                 .build());
     }
 

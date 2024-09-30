@@ -2,14 +2,15 @@ package com.esp.espflow.data.mappers;
 
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.entity.EspDeviceWithTotalDevices;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 
 /**
  * @author rubn
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class EspDeviceWithTotalDevicesMapper {
+public final class EspDeviceWithTotalDevicesMapper {
+
+    public static final EspDeviceWithTotalDevicesMapper INSTANCE = new EspDeviceWithTotalDevicesMapper();
+
+    private EspDeviceWithTotalDevicesMapper(){}
 
     /**
      *
@@ -18,7 +19,7 @@ public class EspDeviceWithTotalDevicesMapper {
      *
      * @return A record {@link EspDeviceWithTotalDevices}
      */
-    public static EspDeviceWithTotalDevices espDeviceWithTotalDevices(EspDeviceInfo espDeviceInfo, Long totalDevices) {
+    public EspDeviceWithTotalDevices espDeviceWithTotalDevices(EspDeviceInfo espDeviceInfo, Long totalDevices) {
         return EspDeviceWithTotalDevices.builder()
                 .totalDevices(totalDevices)
                 .espDeviceInfo(espDeviceInfo)

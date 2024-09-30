@@ -307,7 +307,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         this.esptoolService.readAllDevices()
                 .doOnError(onError -> this.onError(ui, onError))
                 .flatMap(item -> this.esptoolService.countAllDevices()
-                        .map(count -> EspDeviceWithTotalDevicesMapper.espDeviceWithTotalDevices(item, count)))
+                        .map(count -> EspDeviceWithTotalDevicesMapper.INSTANCE.espDeviceWithTotalDevices(item, count)))
                 .doOnComplete(() -> {
                     ui.access(() -> {
                         onComplete(spansList, espDevicesCarousel);

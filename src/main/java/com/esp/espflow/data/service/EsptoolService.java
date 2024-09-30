@@ -17,7 +17,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
+import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
+import static com.esp.espflow.data.util.EspFlowConstants.FIRST_LINE_TO_CHECK_IF_IT_EXISTS;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
+import static com.esp.espflow.data.util.EspFlowConstants.MAC;
+import static com.esp.espflow.data.util.EspFlowConstants.PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
 
 /**
  * @author rubn
@@ -30,6 +39,7 @@ public class EsptoolService {
 
     private final CommandService commandService;
     private final ComPortService comPortService;
+    private final EspDeviceInfoFallBackService espDeviceInfoFallBackService;
 
     /**
      * The predicate to filter only the necessary lines, if you want to process one more line, this condition should be added here
@@ -80,8 +90,14 @@ public class EsptoolService {
      * With the above, this method creates a map that is then mapped to the entity EspDeviceInfo,
      * as many items are issued we need for convenience to have them in a single item or Mono. </p>
      *
+     *  <p><strong>- On Window</strong></p>
+     *  <blockquote>
+     *      <pre>cmd.exe /c esptool.py --port parsePort --baud 115200 flash_id </pre>
+     *  </blockquote>
+     *
+     *  <p><strong>- On Linux</strong></p>
      * <blockquote>
-     * <pre>esptool.py --port parsePort --baud 115200 flash_id </pre>
+     *     <pre> esptool.py --port parsePort --baud 115200 flash_id </pre>
      * </blockquote>
      *
      * @param port the microcontroller port to be scanned
@@ -97,27 +113,37 @@ public class EsptoolService {
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID};
 
-        return commandService.processInputStreamLineByLine(commands)
+        return commandService.processIntputStreamLineByLine(commands)
                 .filter(predicate)
-                .collectMap(EspDeviceInfoMapper::key, EspDeviceInfoMapper::value)
-                .flatMap(map -> EspDeviceInfoMapper.mapToEspDeviceInfo(map, descriptivePortName))
-                .switchIfEmpty(Mono.defer(() -> EspDeviceInfoMapper.fallback(parsePort)));
+                .collectMap(EspDeviceInfoMapper.INSTANCE::key, EspDeviceInfoMapper.INSTANCE::value)
+                .flatMap(collectedMapInfo -> EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(
+                        collectedMapInfo, descriptivePortName)
+                )
+                .switchIfEmpty(Mono.defer(() -> this.espDeviceInfoFallBackService.fallback(parsedPort)));
     }
 
     /**
+     *
      * <p>
-     * It is used to read line by line what is returned by the flash_id command, without <strong>mapping to any Object.</strong>
+     *     It is used to read line by line what is returned by the flash_id command, without <strong>mapping to any Object.</strong>
      * </p>
      *
+     * <p><strong>- On Window</strong></p>
      * <blockquote>
-     * <pre>esptool.py --port parsePort --baud 115200 flash_id</pre>
+     *     <pre>cmd.exe /c esptool.py --port parsePort --baud 115200 flash_id</pre>
+     * </blockquote>
+     *
+     * <p><strong>- On Linux</strong></p>
+     * <blockquote>
+     *    <pre>esptool.py --port parsePort --baud 115200 flash_id </pre>
      * </blockquote>
      *
      * @param commands the commands
+     *
      * @return A {@link Flux} with each String from this inputStream
      */
-    public Flux<String> readRawFlashIdFromPort(final String... commands) {
-        return commandService.processInputStreamLineByLine(commands);
+    public Flux<String> readRawFlashIdFromPort(final String ...commands) {
+        return commandService.processIntputStreamLineByLine(commands);
     }
 
     /**
