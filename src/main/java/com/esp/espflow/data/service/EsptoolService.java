@@ -21,12 +21,14 @@ import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
 import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
 import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
+import static com.esp.espflow.data.util.EspFlowConstants.DETECTED_FLASH_SIZE;
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.data.util.EspFlowConstants.FIRST_LINE_TO_CHECK_IF_IT_EXISTS;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
 import static com.esp.espflow.data.util.EspFlowConstants.MAC;
 import static com.esp.espflow.data.util.EspFlowConstants.PORT;
 import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.VERSION;
 
 /**
  * @author rubn
@@ -104,16 +106,16 @@ public class EsptoolService {
      * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
      */
     public Mono<EspDeviceInfo> readFlashIdFromPort(String port) {
-        final String parsePort = port.split("@")[0];
+        final String parsedPort = port.split("@")[0];
         final String descriptivePortName = port.split("@")[1];
 
         final String[] commands = new String[]{
                 EsptoolPath.esptoolPath(),
-                PORT, parsePort,
+                PORT, parsedPort,
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID};
 
-        return commandService.processIntputStreamLineByLine(commands)
+        return commandService.processInputStreamLineByLine(commands)
                 .filter(predicate)
                 .collectMap(EspDeviceInfoMapper.INSTANCE::key, EspDeviceInfoMapper.INSTANCE::value)
                 .flatMap(collectedMapInfo -> EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(
@@ -143,7 +145,7 @@ public class EsptoolService {
      * @return A {@link Flux} with each String from this inputStream
      */
     public Flux<String> readRawFlashIdFromPort(final String ...commands) {
-        return commandService.processIntputStreamLineByLine(commands);
+        return commandService.processInputStreamLineByLine(commands);
     }
 
     /**

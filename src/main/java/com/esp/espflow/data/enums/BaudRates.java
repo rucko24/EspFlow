@@ -22,8 +22,9 @@ public enum BaudRates {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(baudRate);
-        return sb.toString();
+        return new StringBuilder()
+                .append(baudRate)
+                .append(" bauds")
+                .toString();
     }
 }

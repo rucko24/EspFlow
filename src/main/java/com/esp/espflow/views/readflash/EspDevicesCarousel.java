@@ -10,6 +10,8 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 
 import java.util.List;
@@ -32,6 +34,8 @@ public class EspDevicesCarousel extends Div {
         super.getStyle().set("border-radius", "6px");
         super.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
         updateProgressBar(true);
+        super.add(VaadinIcon.LINK.create());
+        super.add(new H3("No devices shown!"));
         Animated.animate(this, Animation.FADE_IN);
     }
 

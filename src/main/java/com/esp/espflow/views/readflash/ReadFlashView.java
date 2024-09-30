@@ -197,6 +197,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         this.baudRatesComboBox.setTooltipText("Serial port baud rate default 115200");
         this.baudRatesComboBox.setItems(BaudRates.values());
         this.baudRatesComboBox.setValue(BaudRates.BAUD_RATE_115200);
+        this.baudRatesComboBox.setItemLabelGenerator(BaudRates::toString);
         final Div parent = new Div(formLayout);
         parent.setWidth("50%");
         parent.addClassNames(Display.FLEX, JustifyContent.CENTER, AlignItems.CENTER);

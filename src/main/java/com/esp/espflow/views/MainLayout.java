@@ -101,7 +101,7 @@ public class MainLayout extends AppLayout {
         }
 
         if (accessChecker.hasAccess(ReadFlashView.class)) {
-            nav.addItem(new SideNavItem("Read firmware", ReadFlashView.class, VaadinIcon.DOWNLOAD.create()));
+            nav.addItem(new SideNavItem("Read flash/firmware", ReadFlashView.class, VaadinIcon.DOWNLOAD.create()));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {

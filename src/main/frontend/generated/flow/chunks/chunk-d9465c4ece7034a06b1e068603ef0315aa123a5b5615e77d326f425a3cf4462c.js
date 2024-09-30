@@ -18,3 +18,9 @@ import '@vaadin/icons/vaadin-iconset.js';
 import '@vaadin/app-layout/src/vaadin-drawer-toggle.js';
 import '@vaadin/avatar/src/vaadin-avatar.js';
 import '@vaadin/scroller/src/vaadin-scroller.js';
+import { injectGlobalCss } from 'Frontend/generated/jar-resources/theme-util.js';
+
+import { css, unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin';
+import $cssFromFile_0 from 'Frontend/generated/jar-resources/animate.css?inline';
+
+injectGlobalCss($cssFromFile_0.toString(), 'CSSImport end', document);

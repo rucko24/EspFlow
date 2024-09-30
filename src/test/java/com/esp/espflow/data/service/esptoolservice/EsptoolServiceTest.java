@@ -66,7 +66,7 @@ class EsptoolServiceTest {
         //The method processIntputStreamLineByLine should receive the parsed port without the vendor
         String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), "esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id");
 
-        when(commandService.processIntputStreamLineByLine(commands))
+        when(commandService.processInputStreamLineByLine(commands))
                 .thenReturn(actualLines);
 
         StepVerifier.create(esptoolService.readFlashIdFromPort(portWithFriendlyName))
@@ -85,10 +85,10 @@ class EsptoolServiceTest {
                          String portWithFriendlyName,
                          Flux<String> actualLines, EspDeviceInfo expectedLines) {
 
-        //The method processIntputStreamLineByLine should receive the parsed port without the vendor
+        //The method processInputStreamLineByLine should receive the parsed port without the vendor
         String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), "esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id");
 
-        when(commandService.processIntputStreamLineByLine(commands))
+        when(commandService.processInputStreamLineByLine(commands))
                 .thenReturn(actualLines);
 
         when(espDeviceInfoFallbackService.fallback(portForInputStream)).thenReturn(Mono.just(expectedLines));
@@ -109,7 +109,7 @@ class EsptoolServiceTest {
 
         String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), ESPTOOL_PY_VERSION);
 
-        when(commandService.processIntputStreamLineByLine(commands)).thenReturn(Flux.just("esptool.py v4.7.0"));
+        when(commandService.processInputStreamLineByLine(commands)).thenReturn(Flux.just("esptool.py v4.7.0"));
 
         StepVerifier.create(esptoolService.showEsptoolVersion())
                 .expectNext("esptool.py v4.7.0")
@@ -130,7 +130,7 @@ class EsptoolServiceTest {
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID);
 
-        when(commandService.processIntputStreamLineByLine(commands))
+        when(commandService.processInputStreamLineByLine(commands))
                 .thenReturn(actualLines);
 
         StepVerifier.create(this.esptoolService.readRawFlashIdFromPort(commands))
