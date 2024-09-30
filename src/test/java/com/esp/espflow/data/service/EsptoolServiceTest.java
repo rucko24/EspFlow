@@ -1,14 +1,10 @@
-package com.esp.espflow.data.service.esptoolservice;
+package com.esp.espflow.data.service;
 
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
-import com.esp.espflow.data.service.ComPortService;
-import com.esp.espflow.data.service.CommandService;
-import com.esp.espflow.data.service.EspDeviceInfoFallBackService;
-import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceArgumentProvider;
-import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceNoFlashSizeArgumentProvider;
-import com.esp.espflow.data.service.esptoolservice.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
+import com.esp.espflow.data.service.provider.EsptoolServiceArgumentProvider;
+import com.esp.espflow.data.service.provider.EsptoolServiceNoFlashSizeArgumentProvider;
+import com.esp.espflow.data.service.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
