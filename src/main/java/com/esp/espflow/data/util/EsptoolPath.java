@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_BUNDLE_DIR;
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
 
 /**
  * @author rubn
@@ -20,7 +21,7 @@ public class EsptoolPath {
      * @return A {@link String} with esptool bundle path
      */
     public static String esptoolPath() {
-        final String tmpDir = System.getProperty("java.io.tmpdir").concat(ESPTOOL_BUNDLE_DIR);
+        final String tmpDir = JAVA_IO_TEMPORAL_DIR_OS.concat(ESPTOOL_BUNDLE_DIR);
         switch (GetOsName.getOsName()) {
             case WINDOWS -> {
                 return tmpDir + "esptool-winx64/esptool.exe";
@@ -32,7 +33,7 @@ public class EsptoolPath {
                 return tmpDir + "esptool-macos/esptool";
             }
             case FREEBSD -> {
-                //No es obtenido desde el tmpdir sino desde la instalacion normal
+                //It must be installed from the FreeBSD ports.
                 return "esptool.py";
             }
             default -> {

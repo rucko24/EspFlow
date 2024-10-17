@@ -10,9 +10,14 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
+import com.vaadin.flow.theme.lumo.LumoUtility.Height;
+import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,19 +38,38 @@ public class EspDevicesCarousel extends Div {
         super.setHeight("100%");
         super.getStyle().set("border-radius", "6px");
         super.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
-        updateProgressBar(true);
-        super.add(VaadinIcon.LINK.create());
-        super.add(new H3("No devices shown!"));
+        this.initialCenterLogo(true);
         Animated.animate(this, Animation.FADE_IN);
     }
 
-    private void updateProgressBar(final Boolean value) {
-        super.add(progressBar);
+    /**
+     * A logo for connected devices
+     * <p>
+     * Allows you to hide the ProgressBar
+     *
+     * @param value el valor de la ProgressBaR
+     */
+    private void initialCenterLogo(final boolean value) {
+        var icon = VaadinIcon.LINK.create();
+        var h2 = new H2("No devices shown!");
+        icon.setVisible(value);
+        h2.setVisible(value);
+        final Div divCenter = new Div();
+        divCenter.setVisible(value);
+        divCenter.addClassNames(Display.FLEX, FlexDirection.COLUMN,
+                Height.FULL,
+                AlignItems.CENTER,
+                JustifyContent.CENTER);
+        this.progressBar.setWidth("50%");
         this.progressBar.setIndeterminate(value);
         this.progressBar.setVisible(value);
+        divCenter.add(icon, h2, progressBar);
+        super.add(divCenter);
     }
 
     /**
+     * We add the read devices to this slide
+     *
      * @param slide
      */
     public void addSlide(Slide slide) {
@@ -60,8 +84,9 @@ public class EspDevicesCarousel extends Div {
         Carousel carousel = new Carousel(slideList.toArray(Slide[]::new));
         carousel.setSizeFull();
         carousel.setThemeName("custom-theme");
+        Animated.animate(carousel, Animation.FADE_IN);
         super.add(carousel);
-        updateProgressBar(false);
+        this.initialCenterLogo(false);
     }
 
 

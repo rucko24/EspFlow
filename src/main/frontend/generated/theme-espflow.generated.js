@@ -7,7 +7,6 @@ import { color } from '@vaadin/vaadin-lumo-styles/color.js';
 import { spacing } from '@vaadin/vaadin-lumo-styles/spacing.js';
 import { badge } from '@vaadin/vaadin-lumo-styles/badge.js';
 import { utility } from '@vaadin/vaadin-lumo-styles/utility.js';
-import stylesCss from 'themes/espflow/styles.css?inline';
 
   let themeRemovers = new WeakMap();
   let targets = [];
@@ -20,8 +19,7 @@ removers.push(injectGlobalCss(color.cssText, '', target, true));
 removers.push(injectGlobalCss(spacing.cssText, '', target, true));
 removers.push(injectGlobalCss(badge.cssText, '', target, true));
 removers.push(injectGlobalCss(utility.cssText, '', target, true));
-removers.push(injectGlobalCss(stylesCss.toString(), '', target));
-    
+
     }
     
     

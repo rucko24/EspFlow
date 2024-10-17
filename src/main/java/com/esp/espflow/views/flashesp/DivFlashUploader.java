@@ -9,7 +9,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -23,10 +22,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_LEFT;
+import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
 
+/**
+ * @author rubn
+ */
 @Log4j2
-@UIScope
 @SpringComponent
 @RequiredArgsConstructor
 public class DivFlashUploader extends Div {
@@ -55,32 +62,36 @@ public class DivFlashUploader extends Div {
         super.addClassName("firmwareh3-vaadin-upload-div");
     }
 
+    /**
+     * Configure the uploader
+     */
     private void uploadInitialConfig() {
+        upload.setDropAllowed(true);
         upload.setReceiver(buffer);
         upload.setMaxFiles(1);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
     }
 
+    /**
+     * Adding listeners here
+     */
     private void addListeners() {
 
         upload.addSucceededListener(event -> {
             upload.getElement()
                     .executeJs("this.shadowRoot.querySelector('vaadin-upload-file').className = 'meta'");
 
-            log.info("New file uploaded {}", event.getFileName());
+            log.debug("New file uploaded {}", event.getFileName());
             long contentLength = event.getContentLength();
             String mimeType = event.getMIMEType();
 
             publisher.publishEvent(event.getFileName());
             this.createUploadDir(buffer, event.getFileName());
 
-
-            // Do something with the file data
-            // processFile(fileData, fileName, contentLength, mimeType);
         });
 
         upload.addStartedListener(event -> {
-            log.info("Handling upload of " + event.getFileName() + " ("
+            log.debug("Handling upload of " + event.getFileName() + " ("
                     + event.getContentLength() + " bytes) started");
         });
 
@@ -96,16 +107,16 @@ public class DivFlashUploader extends Div {
     }
 
     /**
+     * The flash is written to the temporary directory of the operating system once it has been uploaded from the front-end and then read from this directory.
      *
      */
     private void createUploadDir(FileBuffer buffer, String fileName) {
-        final String resourcesDir = "src/main/resources/";
-        final var flashesDir = Path.of(resourcesDir.concat("flashesdir/"));
+        final var flashesDir = Path.of(JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"));
         if (!Files.exists(flashesDir)) {
             try {
                 Files.createDirectory(flashesDir);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException ex) {
+                log.debug("Error when creating temporary directory {} {}", flashesDir, ex.getMessage());
             }
         }
         // Get information about the uploaded file
@@ -116,8 +127,9 @@ public class DivFlashUploader extends Div {
             input.transferTo(outPut);
 
         } catch (IOException ex) {
-            log.error("Error a la hora de escribir el {}", ex.getMessage());
+            log.debug("Error when writing flash to temporary directory {} {}", flashesDir, ex.getMessage());
         }
+
     }
 
     private void uploadStyles() {

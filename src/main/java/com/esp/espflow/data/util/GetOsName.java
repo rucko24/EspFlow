@@ -29,6 +29,7 @@ public enum GetOsName {
      *
      * @return A {@link String} array
      */
+    @SuppressWarnings("unused")
     public static String[] shellOsName() {
         GetOsName oS = GetOsName.getOsName();
         if (oS == GetOsName.WINDOWS) {

@@ -17,8 +17,34 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_BUNDLE_DIR;
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.data.util.EspFlowConstants.META_INF_RESOURCES_ESPTOOL_BUNDLE;
+import static com.esp.espflow.data.util.EspFlowConstants.SET_CHMOD_X;
+import static com.esp.espflow.data.util.EspFlowConstants.SLASH;
 
+/**
+ * <p>
+ *  Setting to move the esptool executable depending on the operating system to the temporary directory
+ *   to run it from there.
+ * </p>
+ *
+ * <p>Example in linux this directory is the one that will be created:</p>
+ *
+ * <ul>
+ *
+ *   <li>
+ *        <strong>/tmp/esptool-bundle-dir/esptool-linux-amd64 </strong>
+ *   </li>
+ * </ul>
+ *
+ * <p>
+ *     Para FreeBSD se debe instalar el <strong>esptool.py desde los ports </strong>
+ * </p>
+ *
+ *
+ * @author rubn
+ */
 @Log4j2
 @Configuration
 public class EsptoolLoadBundleConfiguration {
@@ -49,7 +75,7 @@ public class EsptoolLoadBundleConfiguration {
      */
     private void moveBundleToTempDirectory(final String bundleFileName) {
 
-        final String tempDir = System.getProperty("java.io.tmpdir")
+        final String tempDir = JAVA_IO_TEMPORAL_DIR_OS
                 .concat(ESPTOOL_BUNDLE_DIR)
                 .concat(bundleFileName.split(SLASH)[0]);
 

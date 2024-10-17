@@ -6,6 +6,9 @@ logging:
 spring:
   mustache:
     check-template-location: false
+  servlet:
+    multipart.max-file-size: 50MB
+    multipart.max-request-size: 50MB
 
 vaadin:
   # To improve the performance during development.

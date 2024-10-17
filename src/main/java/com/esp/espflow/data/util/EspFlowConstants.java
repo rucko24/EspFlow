@@ -75,4 +75,5 @@ public class EspFlowConstants {
 
     public static final String THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET = "This feature has not been implemented yet!";
 
+    public static final String JAVA_IO_TEMPORAL_DIR_OS = System.getProperty("java.io.tmpdir");
 }

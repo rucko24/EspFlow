@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BIN_SH_C;
+import static com.esp.espflow.data.util.EspFlowConstants.CMD_C;
+import static com.esp.espflow.data.util.EspFlowConstants.SH_C;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -49,9 +51,9 @@ class GetOsNameTest {
 
             assertThat(shellType).contains(CMD_C);
 
-        } else if(Arrays.equals(shellType, BIN_SH_C)) {//Linux, FreeBSD
+        } else if(Arrays.equals(shellType, BIN_SH_C)) {//Linux
 
-            assertThat(shellType).contains(BIN_SH_C);
+            assertThat(shellType).isEmpty();
 
         } else if(Arrays.equals(shellType, SH_C)) {//MaOS
 

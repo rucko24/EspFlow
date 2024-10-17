@@ -25,6 +25,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.DETECTED_FLASH_SIZE;
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.data.util.EspFlowConstants.FIRST_LINE_TO_CHECK_IF_IT_EXISTS;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
 import static com.esp.espflow.data.util.EspFlowConstants.MAC;
 import static com.esp.espflow.data.util.EspFlowConstants.PORT;
 import static com.esp.espflow.data.util.EspFlowConstants.SERIAL_PORT;
@@ -223,12 +224,12 @@ public class EsptoolService {
      * Create the folder named <strong>/esp-backup-flash-dir</strong> in the temporary directory of the operating system
      */
     public void createEspBackUpFlashDirIfNotExists() {
-        final Path espBackupFlashDir = Path.of(System.getProperty("java.io.tmpdir").concat("/esp-backup-flash-dir"));
+        final Path espBackupFlashDir = Path.of(JAVA_IO_TEMPORAL_DIR_OS.concat("/esp-backup-flash-dir"));
         if (!Files.exists(espBackupFlashDir)) {
             try {
                 Files.createDirectory(espBackupFlashDir);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                log.debug("Error creating directory /esp-backup-flash-dir {}", e.getMessage());
             }
         }
     }

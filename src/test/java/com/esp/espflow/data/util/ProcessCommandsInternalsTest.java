@@ -15,6 +15,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -87,7 +88,7 @@ class ProcessCommandsInternalsTest {
 
         // /tmp/esptool-bundle/esptool-linux-amd64/
 
-        var esptoolPath = Path.of(System.getProperty("java.io.tmpdir")
+        var esptoolPath = Path.of(JAVA_IO_TEMPORAL_DIR_OS
                 .concat("/esptool-bundle")
                 .concat("/esptool-linux-amd64")
                 .concat("/esptool"));

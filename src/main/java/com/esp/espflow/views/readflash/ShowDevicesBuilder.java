@@ -23,7 +23,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.data.util.EspFlowConstants.PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.READ_FLASH;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
@@ -388,7 +393,7 @@ public class ShowDevicesBuilder {
             final String currentTimeMillis = String.valueOf(System.currentTimeMillis());
             final String fileNameResult = espDeviceInfo.chipIs().concat("-")
                     .concat(currentTimeMillis).concat("-backup.bin");
-            final String writFileToTempDir = System.getProperty("java.io.tmpdir")
+            final String writFileToTempDir = JAVA_IO_TEMPORAL_DIR_OS
                     .concat("/esp-backup-flash-dir/")
                     .concat(fileNameResult);
             this.readFlash(ui, writFileToTempDir, espDeviceInfo, flashButtonWrapper, processAutoDetectFlashSize);

@@ -16,7 +16,12 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_MODE;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.data.util.EspFlowConstants.PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.WRITE_FLASH;
 
 /**
  *
@@ -192,11 +197,11 @@ public class WriteFlashBuilder {
             final String[] commands = new String[]{
                     EsptoolPath.esptoolPath(),
                     PORT, serialPort.getValue(),
-                    BAUD_RATE, baudRate.getValue().toString(),
+                    BAUD_RATE, baudRate.getValue().toString().split(" ")[0],
                     WRITE_FLASH,
                     FLASH_MODE, flashMode.getValue().toString().toLowerCase(),
                     FLASH_SIZE, "detect", flashSize,
-                    "src/main/resources/flashesdir/" + flashFileName
+                    JAVA_IO_TEMPORAL_DIR_OS + "/flash-esptool-write-dir/" + flashFileName
             };
 
             if(Stream.of(serialPort.getValue(), flashFileName).allMatch(Objects::nonNull)) {
