@@ -199,7 +199,9 @@ public final class DeviceCardLayout extends Div {
                 spanFriendlyName.setText(descriptivePortName.split(" ")[0]);
             }
         }
-        if(descriptivePortName.startsWith("USB Serial") || descriptivePortName.startsWith("USB-SERIAL")) {
+        if(descriptivePortName.startsWith("USB Serial")
+                || descriptivePortName.startsWith("USB-SERIAL")
+                || descriptivePortName.startsWith("USB2.0-Serial")) {
             spanFriendlyName.setText("CH3xx serial");
         }
 

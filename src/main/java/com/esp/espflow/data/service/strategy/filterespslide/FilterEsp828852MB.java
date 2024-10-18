@@ -14,7 +14,7 @@ public class FilterEsp828852MB implements FilterEspDeviceStrategy {
      *      <strong>Windows:</strong> the descriptivePortName is, USB-SERIAL CH340 (COM6)
      *     </li>
      *     <li>
-     *      <strong>Linux:</strong> the descriptivePortName is, USB Serial
+     *      <strong>Linux:</strong> the descriptivePortName is, USB2.0-Serial
      *     </li>
      *     <li>
      *      <strong>MAC:</strong>
@@ -34,16 +34,16 @@ public class FilterEsp828852MB implements FilterEspDeviceStrategy {
         if (GetOsName.getOsName() == GetOsName.WINDOWS) {
             usbSerial = "USB-SERIAL";
         } else if (GetOsName.getOsName() == GetOsName.LINUX) {
-            usbSerial = "USB Serial";
+            usbSerial = "USB2.0-Serial";
         } else if (GetOsName.getOsName() == GetOsName.MAC) {
             usbSerial = "USB Serial";
         } else {
             //FreeBSD or other
         }
 
-        return espDeviceInfo.chipType().contains("ESP8285H")
+        return espDeviceInfo.chipType().contains("ESP8266")
                 && espDeviceInfo.detectedFlashSize().equals("2MB")
-                && espDeviceInfo.descriptivePortName().startsWith(usbSerial)
+                && espDeviceInfo.descriptivePortName().contains(usbSerial)
                 && espDeviceInfo.chipIs().equals("ESP8285H16");
     }
 }
