@@ -13,7 +13,7 @@ spring:
 vaadin:
   # To improve the performance during development.
   # For more information https://vaadin.com/docs/flow/spring/tutorial-spring-configuration.html#special-configuration-parameters
-  whitelisted-packages: com.vaadin,org.vaadin,dev.hilla,com.esp.espflow, com.flowingcode, com.infraleap
+  allowed-packages: com.vaadin,org.vaadin,dev.hilla,com.esp.espflow, com.flowingcode, com.infraleap
   # Launch the default browser when starting the application in development mode
   launch-browser: true
 

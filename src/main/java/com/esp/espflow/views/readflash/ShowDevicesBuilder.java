@@ -3,6 +3,7 @@ package com.esp.espflow.views.readflash;
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.EsptoolService;
+import com.esp.espflow.data.service.strategy.filterespslide.*;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.esp.espflow.data.util.EsptoolPath;
@@ -217,7 +218,7 @@ public class ShowDevicesBuilder {
             var macAddress = espDeviceInfo.macAddress();
             if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
                 showEsp01s();
-                showEso82664MB();
+                showEsp8266340G4MB();
                 showEsp82664Cp201x4MB();
                 showEsp8285();
                 showEsp32S3();
@@ -230,12 +231,12 @@ public class ShowDevicesBuilder {
         }
 
         /**
-         * Show the ESP8285H16 slide
+         * Show the ESP8285H16 2MB slide
          */
         private void showEsp8285() {
-            final String chipIp = espDeviceInfo.chipIs();
-            final String flashSize = espDeviceInfo.detectedFlashSize();
-            if (chipIp.contains("ESP8285H") && flashSize.equals("2MB")) {
+            final FilterEspDeviceContext filterContext = new FilterEspDeviceContext(new FilterEsp828852MB());
+
+            if (filterContext.filter(espDeviceInfo)) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -251,13 +252,13 @@ public class ShowDevicesBuilder {
         }
 
         /**
-         * Show the esp01s slide
+         * Show the esp01s 1MB slide
          *
          */
         private void showEsp01s() {
-            final String chipType = espDeviceInfo.chipType();
-            final String flashSize = espDeviceInfo.detectedFlashSize();
-            if (chipType.endsWith("8266") && flashSize.equals("1MB")) {
+            final FilterEspDeviceContext fitlerContext = new FilterEspDeviceContext(new FilterEsp01s());
+
+            if (fitlerContext.filter(espDeviceInfo)) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -272,11 +273,12 @@ public class ShowDevicesBuilder {
         }
 
         /**
-         *   Show the esp8266 slide
+         *   Show the ESP8266 chip 340G slide
          **/
-        private void showEso82664MB() {
-            if (espDeviceInfo.chipType().endsWith("8266") && espDeviceInfo.detectedFlashSize().equals("4MB")
-            && espDeviceInfo.descriptivePortName().contains("USB Serial")) {
+        private void showEsp8266340G4MB() {
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp8266CH340G());
+
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -291,9 +293,13 @@ public class ShowDevicesBuilder {
             }
         }
 
+        /**
+         *  Show the ESP8266 4MG amica slide
+         */
         private void showEsp82664Cp201x4MB() {
-            if (espDeviceInfo.chipType().endsWith("8266") && espDeviceInfo.detectedFlashSize().equals("4MB")
-            && espDeviceInfo.descriptivePortName().contains("CP21")) {
+            final FilterEspDeviceContext context = new FilterEspDeviceContext(new FilterEsp8266Cp210x());
+
+            if (context.filter(espDeviceInfo)) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -313,7 +319,9 @@ public class ShowDevicesBuilder {
          *   Show the ESP32-s3 slide
          */
         private void showEsp32S3() {
-            if (espDeviceInfo.chipType().endsWith("-S3")) {
+            final FilterEspDeviceContext filterContext = new FilterEspDeviceContext(new FilterEsp32S3());
+
+            if (filterContext.filter(espDeviceInfo)) {
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
                 var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);
@@ -419,7 +427,7 @@ public class ShowDevicesBuilder {
             final String[] commands = {
                     EsptoolPath.esptoolPath(),
                     PORT, espDeviceInfo.port(),
-                    BAUD_RATE, this.baudRatesComboBox.getValue().toString(),
+                    BAUD_RATE, this.baudRatesComboBox.getValue().toString().split(" ")[0],
                     READ_FLASH,
                     startAddressSize.getValue().toString().isEmpty() ? "0" : startAddressSize.getValue().toString().trim(),
                     processAutoDetectFlashSize,
@@ -456,6 +464,7 @@ public class ShowDevicesBuilder {
         }
 
     }
+
 
 
 }

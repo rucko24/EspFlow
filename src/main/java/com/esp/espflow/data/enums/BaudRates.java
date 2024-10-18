@@ -24,7 +24,7 @@ public enum BaudRates {
     public String toString() {
         return new StringBuilder()
                 .append(baudRate)
-                .append(" bauds")
+                .append(" bds")
                 .toString();
     }
 }

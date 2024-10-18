@@ -6,6 +6,7 @@ import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
@@ -21,6 +22,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
 /**
  * @author rubn
@@ -31,6 +33,7 @@ public class EspDevicesCarousel extends Div {
 
     private final List<Slide> slideList = new CopyOnWriteArrayList<>();
     private final ProgressBar progressBar;
+    final Div divCenter = new Div();
 
     public EspDevicesCarousel(final ProgressBar progressBar) {
         this.progressBar = progressBar;
@@ -52,10 +55,9 @@ public class EspDevicesCarousel extends Div {
     private void initialCenterLogo(final boolean value) {
         var icon = VaadinIcon.LINK.create();
         var h2 = new H2("No devices shown!");
-        icon.setVisible(value);
-        h2.setVisible(value);
-        final Div divCenter = new Div();
-        divCenter.setVisible(value);
+        divCenter.add(icon, h2, progressBar);
+        //Set visibility
+        Stream.of(icon, h2, divCenter).forEach(component -> component.setVisible(value));
         divCenter.addClassNames(Display.FLEX, FlexDirection.COLUMN,
                 Height.FULL,
                 AlignItems.CENTER,
@@ -63,7 +65,6 @@ public class EspDevicesCarousel extends Div {
         this.progressBar.setWidth("50%");
         this.progressBar.setIndeterminate(value);
         this.progressBar.setVisible(value);
-        divCenter.add(icon, h2, progressBar);
         super.add(divCenter);
     }
 
@@ -80,15 +81,14 @@ public class EspDevicesCarousel extends Div {
      * It is invoked inside a listener of the button that is created with each console reading.
      */
     public void createSlides() {
-
-        Carousel carousel = new Carousel(slideList.toArray(Slide[]::new));
+        //remove the previous div
+        remove(divCenter);
+        final Carousel carousel = new Carousel(slideList.toArray(Slide[]::new));
         carousel.setSizeFull();
         carousel.setThemeName("custom-theme");
         Animated.animate(carousel, Animation.FADE_IN);
         super.add(carousel);
-        this.initialCenterLogo(false);
     }
-
 
     /**
      * Create a DeviceCardLayout div
