@@ -12,6 +12,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
@@ -33,15 +34,17 @@ public class EspDevicesCarousel extends Div {
 
     private final List<Slide> slideList = new CopyOnWriteArrayList<>();
     private final ProgressBar progressBar;
+    private final String title;
     final Div divCenter = new Div();
 
-    public EspDevicesCarousel(final ProgressBar progressBar) {
+    public EspDevicesCarousel(final ProgressBar progressBar, final String title) {
         this.progressBar = progressBar;
+        this.title = title;
         super.setWidth("500px");
         super.setHeight("100%");
         super.getStyle().set("border-radius", "6px");
         super.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
-        this.initialCenterLogo(true);
+        this.initialCenterLogo();
         Animated.animate(this, Animation.FADE_IN);
     }
 
@@ -50,21 +53,20 @@ public class EspDevicesCarousel extends Div {
      * <p>
      * Allows you to hide the ProgressBar
      *
-     * @param value el valor de la ProgressBaR
      */
-    private void initialCenterLogo(final boolean value) {
-        var icon = VaadinIcon.LINK.create();
-        var h2 = new H2("No devices shown!");
+    private void initialCenterLogo() {
+        final Icon icon = VaadinIcon.LINK.create();
+        final H2 h2 = new H2(title);
         divCenter.add(icon, h2, progressBar);
         //Set visibility
-        Stream.of(icon, h2, divCenter).forEach(component -> component.setVisible(value));
+        Stream.of(icon, h2, divCenter).forEach(component -> component.setVisible(true));
         divCenter.addClassNames(Display.FLEX, FlexDirection.COLUMN,
                 Height.FULL,
                 AlignItems.CENTER,
                 JustifyContent.CENTER);
         this.progressBar.setWidth("50%");
-        this.progressBar.setIndeterminate(value);
-        this.progressBar.setVisible(value);
+        this.progressBar.setIndeterminate(title.contains("Loading..."));
+        this.progressBar.setVisible(title.contains("Loading..."));
         super.add(divCenter);
     }
 

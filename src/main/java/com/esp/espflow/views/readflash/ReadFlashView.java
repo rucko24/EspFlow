@@ -74,7 +74,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final EsptoolService esptoolService;
     //With default espcarousel div
     private final ProgressBar progressBar = new ProgressBar();
-    private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar()));
+    private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar(), "No devices shown!"));
     private final HorizontalLayout horizontalLayoutForPrimarySection = new HorizontalLayout();
     private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
     private final IntegerField startAddress = new IntegerField("Start address");
@@ -293,7 +293,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonRefreshDevices.setDisableOnClick(true);
         buttonRefreshDevices.addClickListener(event -> {
-            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar());
+            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(
+                    new ProgressBar(), "Loading...");
             this.divCarousel.removeAll();
             this.divCarousel.add(espDevicesCarousel);
             this.showDetectedDevices(ui, espDevicesCarousel);
