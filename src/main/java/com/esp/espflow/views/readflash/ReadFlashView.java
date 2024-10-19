@@ -52,7 +52,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
@@ -316,7 +318,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private void showDetectedDevices(final UI ui,
                                      final EspDevicesCarousel espDevicesCarousel) {
         this.rightProgressBar.setVisible(true);
-        final List<Span> spansList = new CopyOnWriteArrayList<>();
+        final Set<Span> spansList = new CopyOnWriteArraySet<>();
         this.esptoolService.readAllDevices()
                 .doOnError(onError -> this.onError(ui, onError, espDevicesCarousel))
                 .flatMap(item -> this.esptoolService.countAllDevices()
@@ -351,12 +353,21 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
+     *
+     */
+    private void setDivCarouselNoDevicesShown() {
+        final EspDevicesCarousel resetEspDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN);
+        this.divCarousel.removeAll();
+        this.divCarousel.add(resetEspDevicesCarousel);
+    }
+
+    /**
      * This piece of code is executed when the reactive stream is completed.
      *
      * @param spansList of badges to be updated in case of port error
      * @param espDevicesCarousel created to be set as visible
      */
-    private void onComplete(final List<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
+    private void onComplete(final Set<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
         this.rightProgressBar.setVisible(false);
         this.buttonRefreshDevices.setEnabled(true);
         espDevicesCarousel.createSlides();
@@ -368,9 +379,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 /*Margin left and red color to span values */
                 spanPortFailureValue.addClassName(Left.SMALL);
                 spanPortFailureValue.getStyle().set("color", "red");
+                //FIXME no duplñicate items in this div
                 this.divWithPortErrors.add(spanPortFailureValue);
                 this.divWithPortErrors.setVisible(true);
             });
+            this.setDivCarouselNoDevicesShown();
             ConfirmDialogBuilder.showWarning("Error with microcontroller!");
         }
     }
@@ -383,7 +396,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @param espDevicesCarousel
      * @param ui
      */
-    private void subscribeThis(final List<Span> spansList,
+    private void subscribeThis(final Set<Span> spansList,
                                EspDeviceWithTotalDevices espDeviceWithTotalDevices,
                                EspDevicesCarousel espDevicesCarousel,
                                final UI ui) {
