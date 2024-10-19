@@ -9,6 +9,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +34,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
 /**
  * @author rubn
  */
+@UIScope
 @Log4j2
 @SpringComponent
 @RequiredArgsConstructor

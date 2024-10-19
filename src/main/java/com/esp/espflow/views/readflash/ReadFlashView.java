@@ -48,6 +48,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +57,8 @@ import java.util.stream.Stream;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
+import static com.esp.espflow.data.util.EspFlowConstants.LOADING;
+import static com.esp.espflow.data.util.EspFlowConstants.NO_DEVICES_SHOWN;
 import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
 
@@ -72,9 +75,9 @@ import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
 public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
     private final EsptoolService esptoolService;
+    private final ProgressBar rightProgressBar = new ProgressBar();
     //With default espcarousel div
-    private final ProgressBar progressBar = new ProgressBar();
-    private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar(), "No devices shown!"));
+    private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN));
     private final HorizontalLayout horizontalLayoutForPrimarySection = new HorizontalLayout();
     private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
     private final IntegerField startAddress = new IntegerField("Start address");
@@ -142,8 +145,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @return A {@link HorizontalLayout} with the form on the right and the carousel on the left side
      */
     private HorizontalLayout horizontalLayoutToPrimarySection(Div rightFormForAddress, Div divForLeftCarousel) {
-        this.progressBar.setVisible(false);
-        this.progressBar.setIndeterminate(true);
+        this.rightProgressBar.setVisible(false);
+        this.rightProgressBar.setIndeterminate(true);
         this.horizontalLayoutForPrimarySection.setId("div-for-primary");
         this.horizontalLayoutForPrimarySection.setSizeFull();
         this.horizontalLayoutForPrimarySection.add(rightFormForAddress, divForLeftCarousel);
@@ -172,8 +175,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private Div rigthFormForAddress() {
         var rowAutoSize = new HorizontalLayout(autoDetectFlashSize, spanAutoDetectFlashSize);
         rowAutoSize.setWidthFull();
-        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, baudRatesComboBox, rowAutoSize, progressBar);
-        Stream.of(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, baudRatesComboBox, progressBar)
+        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, baudRatesComboBox, rowAutoSize, rightProgressBar);
+        Stream.of(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, baudRatesComboBox, rightProgressBar)
                 .forEach(items -> {
                     items.addClassName(AlignSelf.BASELINE);
                     items.setWidthFull();
@@ -293,8 +296,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonRefreshDevices.setDisableOnClick(true);
         buttonRefreshDevices.addClickListener(event -> {
-            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(
-                    new ProgressBar(), "Loading...");
+            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), LOADING);
             this.divCarousel.removeAll();
             this.divCarousel.add(espDevicesCarousel);
             this.showDetectedDevices(ui, espDevicesCarousel);
@@ -305,17 +307,18 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * <p>This method is used to read the micros that are connected to the OS, in case of not being able to read any,
      * a red SPAN will be displayed with the name of the port with the failure, that failure could be, permissions, etc.</p>
      *
-     * <p>The reading process is performed in a Scheduler of <strong>boundedElasctic</strong> type in order not to block the UI having
+     * <p>The reading process is performed in a Scheduler of <strong>boundedElastic</strong> type in order not to block the UI having
      * faster feedBack from the microcontrollers that are read, which is difficult with synchronous programming.</p>
      *
      * @param ui
      * @param {@link espDevicesCarousel}
      */
-    private void showDetectedDevices(final UI ui, final EspDevicesCarousel espDevicesCarousel) {
-        this.progressBar.setVisible(true);
+    private void showDetectedDevices(final UI ui,
+                                     final EspDevicesCarousel espDevicesCarousel) {
+        this.rightProgressBar.setVisible(true);
         final List<Span> spansList = new CopyOnWriteArrayList<>();
         this.esptoolService.readAllDevices()
-                .doOnError(onError -> this.onError(ui, onError))
+                .doOnError(onError -> this.onError(ui, onError, espDevicesCarousel))
                 .flatMap(item -> this.esptoolService.countAllDevices()
                         .map(count -> EspDeviceWithTotalDevicesMapper.INSTANCE.espDeviceWithTotalDevices(item, count)))
                 .doOnComplete(() -> {
@@ -336,10 +339,13 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @param ui The UI
      * @param onError CanNotBeReadDeviceException possibly empty ports
      */
-    private void onError(final UI ui, Throwable onError) {
+    private void onError(final UI ui, Throwable onError,
+                         final EspDevicesCarousel espDevicesCarousel) {
         ui.access(() -> {
-            this.progressBar.setVisible(false);
+            this.rightProgressBar.setVisible(false);
             buttonRefreshDevices.setEnabled(true);
+            espDevicesCarousel.hiddenProgressBarAndUpdatedTitleForH2(NO_DEVICES_SHOWN);
+            this.spanTotalDevicesValue.setText(StringUtils.EMPTY);
             ConfirmDialogBuilder.showWarning("Error with microcontroller " + onError.getMessage());
         });
     }
@@ -351,14 +357,14 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @param espDevicesCarousel created to be set as visible
      */
     private void onComplete(final List<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
-        this.progressBar.setVisible(false);
+        this.rightProgressBar.setVisible(false);
         this.buttonRefreshDevices.setEnabled(true);
         espDevicesCarousel.createSlides();
         espDevicesCarousel.setVisible(true);
         if (!spansList.isEmpty()) {
             /* The span is added with the text "Port Failure:" */
             this.divWithPortErrors.add(spanPortFailure);
-            spansList.forEach((spanPortFailureValue) -> {
+            spansList.forEach(spanPortFailureValue -> {
                 /*Margin left and red color to span values */
                 spanPortFailureValue.addClassName(Left.SMALL);
                 spanPortFailureValue.getStyle().set("color", "red");

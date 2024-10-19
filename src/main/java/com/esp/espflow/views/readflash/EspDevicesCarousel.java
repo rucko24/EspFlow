@@ -6,7 +6,6 @@ import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
@@ -25,7 +24,20 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
+import static com.esp.espflow.data.util.EspFlowConstants.LOADING;
+
 /**
+ *
+ * <p>This carousel div in its first instance will be shown without units, and invisible by default, after the user refreshes
+ * from the view we will show the devices scanned from the serial port, if the reactive stream ends without error we make it visible in the method {@link ReadFlashView#onComplete(List, EspDevicesCarousel)}
+ * </p>
+ *
+ * <p>
+ *  In case the units are not scanned we will display a notification to the user and a default
+ *   message with the following text <strong>No devices shown!</strong>
+ * </p>
+ *
+ *
  * @author rubn
  */
 @Uses(Carousel.class)
@@ -35,7 +47,8 @@ public class EspDevicesCarousel extends Div {
     private final List<Slide> slideList = new CopyOnWriteArrayList<>();
     private final ProgressBar progressBar;
     private final String title;
-    final Div divCenter = new Div();
+    private final H2 h2 = new H2();
+    private final Div divCenter = new Div();
 
     public EspDevicesCarousel(final ProgressBar progressBar, final String title) {
         this.progressBar = progressBar;
@@ -49,14 +62,14 @@ public class EspDevicesCarousel extends Div {
     }
 
     /**
-     * A logo for connected devices
-     * <p>
-     * Allows you to hide the ProgressBar
+     * <p>We show by default the link icon, with the progress bar invisible.</p>
+     *
+     * <p>The progressBar will be displayed as undetermined in case the text is with <strong>Loading...</strong></p>
      *
      */
     private void initialCenterLogo() {
         final Icon icon = VaadinIcon.LINK.create();
-        final H2 h2 = new H2(title);
+        this.h2.setText(title);
         divCenter.add(icon, h2, progressBar);
         //Set visibility
         Stream.of(icon, h2, divCenter).forEach(component -> component.setVisible(true));
@@ -65,9 +78,20 @@ public class EspDevicesCarousel extends Div {
                 AlignItems.CENTER,
                 JustifyContent.CENTER);
         this.progressBar.setWidth("50%");
-        this.progressBar.setIndeterminate(title.contains("Loading..."));
-        this.progressBar.setVisible(title.contains("Loading..."));
+        this.progressBar.setIndeterminate(title.contains(LOADING));
+        this.progressBar.setVisible(title.contains(LOADING));
         super.add(divCenter);
+    }
+
+    /**
+     * We will update it when the device search is completed. {@link ReadFlashView#onComplete(List, EspDevicesCarousel)}
+     *
+     * @param title
+     */
+    public void hiddenProgressBarAndUpdatedTitleForH2(String title) {
+        this.h2.setText(title);
+        this.progressBar.setIndeterminate(false);
+        this.progressBar.setVisible(false);
     }
 
     /**

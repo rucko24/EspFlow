@@ -15,7 +15,7 @@ public class EspDeviceInfoFallBackService {
 
     /**
      *
-     * Execute fallback as long as the <strong>flashSize is null</strong> @see {@link EspDeviceInfoMapper#mapToEspDeviceInfo(Map, String)}, with new EspDeviceInfo and parsed port.
+     * Execute fallback as long as the <strong>flashSize is null</strong> {@link EspDeviceInfoMapper#mapToEspDeviceInfo(Map, String)}, with new EspDeviceInfo and parsed port.
      *
      * @param parsedPort parsed port
      *
