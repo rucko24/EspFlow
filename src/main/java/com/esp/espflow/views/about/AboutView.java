@@ -2,20 +2,14 @@ package com.esp.espflow.views.about;
 
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ABOUT;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 @PageTitle("About")
 @Route(value = "about", layout = MainLayout.class)

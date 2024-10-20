@@ -24,12 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
-import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
-import static com.esp.espflow.data.util.EspFlowConstants.PORT;
-import static com.esp.espflow.data.util.EspFlowConstants.READ_FLASH;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
@@ -234,9 +229,9 @@ public class ShowDevicesBuilder {
          * Show the ESP8285H16 2MB slide
          */
         private void showEsp8285() {
-            final FilterEspDeviceContext filterContext = new FilterEspDeviceContext(new FilterEsp828852MB());
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp828852MB());
 
-            if (filterContext.filter(espDeviceInfo)) {
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -297,9 +292,9 @@ public class ShowDevicesBuilder {
          *  Show the ESP8266 4MG amica slide
          */
         private void showEsp82664Cp201x4MB() {
-            final FilterEspDeviceContext context = new FilterEspDeviceContext(new FilterEsp8266Cp210x());
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp8266Cp210xAmica());
 
-            if (context.filter(espDeviceInfo)) {
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -319,9 +314,9 @@ public class ShowDevicesBuilder {
          *   Show the ESP32-s3 slide
          */
         private void showEsp32S3() {
-            final FilterEspDeviceContext filterContext = new FilterEspDeviceContext(new FilterEsp32S3());
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp32S3());
 
-            if (filterContext.filter(espDeviceInfo)) {
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
                 var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);

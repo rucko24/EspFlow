@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BIN_SH_C;
-import static com.esp.espflow.data.util.EspFlowConstants.CMD_C;
-import static com.esp.espflow.data.util.EspFlowConstants.SH_C;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

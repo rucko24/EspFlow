@@ -10,13 +10,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -34,10 +28,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 
 import java.util.Optional;
 
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ON_SVG;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
-import static com.esp.espflow.data.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  * The main view is a top-level placeholder for other views.

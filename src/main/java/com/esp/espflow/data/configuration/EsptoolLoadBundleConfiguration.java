@@ -17,11 +17,7 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_BUNDLE_DIR;
-import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
-import static com.esp.espflow.data.util.EspFlowConstants.META_INF_RESOURCES_ESPTOOL_BUNDLE;
-import static com.esp.espflow.data.util.EspFlowConstants.SET_CHMOD_X;
-import static com.esp.espflow.data.util.EspFlowConstants.SLASH;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  * <p>

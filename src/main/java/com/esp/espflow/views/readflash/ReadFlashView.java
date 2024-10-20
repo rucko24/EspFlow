@@ -36,31 +36,21 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignSelf;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
-import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
+import com.vaadin.flow.theme.lumo.LumoUtility.*;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
-import static com.esp.espflow.data.util.EspFlowConstants.LOADING;
-import static com.esp.espflow.data.util.EspFlowConstants.NO_DEVICES_SHOWN;
-import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_X;
-import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
+import static com.esp.espflow.data.util.EspFlowConstants.*;
 
 /**
  * @author rubn
@@ -316,7 +306,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private void showDetectedDevices(final UI ui,
                                      final EspDevicesCarousel espDevicesCarousel) {
         this.rightProgressBar.setVisible(true);
-        final List<Span> spansList = new CopyOnWriteArrayList<>();
+        final Set<Span> spansList = new CopyOnWriteArraySet<>();
         this.esptoolService.readAllDevices()
                 .doOnError(onError -> this.onError(ui, onError, espDevicesCarousel))
                 .flatMap(item -> this.esptoolService.countAllDevices()
@@ -351,16 +341,28 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
+     *
+     */
+    private void setDivCarouselNoDevicesShown() {
+        final EspDevicesCarousel resetEspDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN);
+        this.divCarousel.removeAll();
+        this.divCarousel.add(resetEspDevicesCarousel);
+    }
+
+    /**
      * This piece of code is executed when the reactive stream is completed.
      *
      * @param spansList of badges to be updated in case of port error
      * @param espDevicesCarousel created to be set as visible
      */
-    private void onComplete(final List<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
+    private void onComplete(final Set<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
         this.rightProgressBar.setVisible(false);
         this.buttonRefreshDevices.setEnabled(true);
         espDevicesCarousel.createSlides();
         espDevicesCarousel.setVisible(true);
+        if(espDevicesCarousel.getSlideList().isEmpty()) {
+            this.setDivCarouselNoDevicesShown();
+        }
         if (!spansList.isEmpty()) {
             /* The span is added with the text "Port Failure:" */
             this.divWithPortErrors.add(spanPortFailure);
@@ -368,10 +370,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 /*Margin left and red color to span values */
                 spanPortFailureValue.addClassName(Left.SMALL);
                 spanPortFailureValue.getStyle().set("color", "red");
+                //FIXME no duplñicate items in this div
                 this.divWithPortErrors.add(spanPortFailureValue);
                 this.divWithPortErrors.setVisible(true);
             });
-            ConfirmDialogBuilder.showWarning("Error with microcontroller!");
+            ConfirmDialogBuilder.showWarning("Error when trying to read a serial port!");
         }
     }
 
@@ -383,7 +386,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @param espDevicesCarousel
      * @param ui
      */
-    private void subscribeThis(final List<Span> spansList,
+    private void subscribeThis(final Set<Span> spansList,
                                EspDeviceWithTotalDevices espDeviceWithTotalDevices,
                                EspDevicesCarousel espDevicesCarousel,
                                final UI ui) {
