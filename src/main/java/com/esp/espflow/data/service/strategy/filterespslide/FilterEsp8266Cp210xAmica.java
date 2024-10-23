@@ -34,7 +34,7 @@ public class FilterEsp8266Cp210xAmica implements FilterEspDeviceStrategy {
         String usbSerial = StringUtils.EMPTY;
         String chipIs = StringUtils.EMPTY;
         if (GetOsName.getOsName() == GetOsName.WINDOWS) {
-            usbSerial = "USB-SERIAL";
+            usbSerial = "CP210x";
         } else if (GetOsName.getOsName() == GetOsName.LINUX) {
             usbSerial = "CP21";
             chipIs = "ESP8266EX";
