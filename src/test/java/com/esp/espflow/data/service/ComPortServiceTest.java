@@ -68,7 +68,7 @@ class ComPortServiceTest {
 
     @Test
     @DisplayName("When the port list is empty")
-    void listaDePuertosVacia() {
+    void emptyPortList() {
         final SerialPort[] serialPorts = null;
 
         ReflectionTestUtils.setField(comPortService, "serialPorts", serialPorts);

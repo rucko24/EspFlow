@@ -1,6 +1,6 @@
 package com.esp.espflow.data.configuration;
 
-import com.esp.espflow.data.util.EsptoolPath;
+import com.esp.espflow.data.util.EsptoolPathService;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
@@ -17,7 +17,11 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_BUNDLE_DIR;
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.data.util.EspFlowConstants.META_INF_RESOURCES_ESPTOOL_BUNDLE;
+import static com.esp.espflow.data.util.EspFlowConstants.SET_CHMOD_X;
+import static com.esp.espflow.data.util.EspFlowConstants.SLASH;
 
 /**
  * <p>
@@ -108,7 +112,7 @@ public class EsptoolLoadBundleConfiguration {
      * @param outPathFileName is the path where the esptool will be stored
      */
     private void processResourceAsStream(final String pathResourceAsStream, final Path outPathFileName) {
-        try (var inputStream = EsptoolPath.class.getResourceAsStream(pathResourceAsStream);
+        try (var inputStream = EsptoolPathService.class.getResourceAsStream(pathResourceAsStream);
              var bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(outPathFileName))) {
 
             Objects.requireNonNull(inputStream, "inputStream is null");

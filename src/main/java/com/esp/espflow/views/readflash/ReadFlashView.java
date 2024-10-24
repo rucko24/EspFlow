@@ -5,6 +5,7 @@ import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
+import com.esp.espflow.data.util.EsptoolPathService;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.console.OutPutConsole;
 import com.esp.espflow.views.MainLayout;
@@ -36,9 +37,14 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.LumoUtility.*;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignSelf;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
+import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
+import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +56,12 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
+import static com.esp.espflow.data.util.EspFlowConstants.LOADING;
+import static com.esp.espflow.data.util.EspFlowConstants.NO_DEVICES_SHOWN;
+import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_X;
+import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
 
 /**
  * @author rubn
@@ -65,6 +76,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.*;
 public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
     private final EsptoolService esptoolService;
+    private final EsptoolPathService esptoolPathService;
     private final ProgressBar rightProgressBar = new ProgressBar();
     //With default espcarousel div
     private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN));
@@ -411,6 +423,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     .withCustomFlashSizeAddress(this.endAddress)
                     .withAutoDetectFlashSize(this.autoDetectFlashSize)
                     .withBaudRatesComboBox(this.baudRatesComboBox)
+                    .withEsptoolPathService(this.esptoolPathService)
                     .make();
         }
 

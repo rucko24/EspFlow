@@ -41,7 +41,6 @@ public class ComPortServiceArgumentProvider implements ArgumentsProvider {
      * @return A {@link Arguments}
      */
     private Arguments windowsSerialPorts() {
-        System.setProperty("os.name", "Win");
 
         final SerialPort serialPort1 = SerialPort.getCommPort("COM1");
         ReflectionTestUtils.setField(serialPort1, "comPort", "COM2");
@@ -91,7 +90,7 @@ public class ComPortServiceArgumentProvider implements ArgumentsProvider {
 
     private Arguments freeBsdSerialPorts() {
 
-        final SerialPort serialPort1 = SerialPort.getCommPort("/dev/cuaU0");
+        final SerialPort serialPort1 = SerialPort.getCommPort("/dev/cuaU1");
         /**
          * Set custom port
          */

@@ -5,6 +5,7 @@ import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.provider.EsptoolServiceArgumentProvider;
 import com.esp.espflow.data.service.provider.EsptoolServiceNoFlashSizeArgumentProvider;
 import com.esp.espflow.data.service.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
+import com.esp.espflow.data.util.EsptoolPathService;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -22,8 +23,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
-import static org.mockito.Mockito.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY;
+import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_VERSION;
+import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
+import static com.esp.espflow.data.util.EspFlowConstants.PORT;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * @author rubn
@@ -44,6 +52,9 @@ class EsptoolServiceTest {
     @Mock
     private EspDeviceInfoFallBackService espDeviceInfoFallbackService;
 
+    @Mock
+    private EsptoolPathService esptoolPathService;
+
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceArgumentProvider.class)
     @SneakyThrows
@@ -53,10 +64,12 @@ class EsptoolServiceTest {
                                    Flux<String> actualLines, EspDeviceInfo expectedLines) {
 
         //The method processIntputStreamLineByLine should receive the parsed port without the vendor
-        String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), "esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id");
+        String[] commands = {"esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id"};
 
         when(commandService.processInputStreamLineByLine(commands))
                 .thenReturn(actualLines);
+
+        when(esptoolPathService.esptoolPath()).thenReturn("esptool.py");
 
         StepVerifier.create(esptoolService.readFlashIdFromPort(portWithFriendlyName))
                 .expectNext(expectedLines)
@@ -75,12 +88,14 @@ class EsptoolServiceTest {
                          Flux<String> actualLines, EspDeviceInfo expectedLines) {
 
         //The method processInputStreamLineByLine should receive the parsed port without the vendor
-        String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), "esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id");
+        String[] commands = {"esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id"};
 
         when(commandService.processInputStreamLineByLine(commands))
                 .thenReturn(actualLines);
 
         when(espDeviceInfoFallbackService.fallback(portForInputStream)).thenReturn(Mono.just(expectedLines));
+
+        when(esptoolPathService.esptoolPath()).thenReturn("esptool.py");
 
         StepVerifier.create(esptoolService.readFlashIdFromPort(portWithFriendlyName))
                 .expectNext(expectedLines)
@@ -96,9 +111,11 @@ class EsptoolServiceTest {
     @SneakyThrows
     void showEsptoolVersion() {
 
-        String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), ESPTOOL_PY_VERSION);
+        String[] commands = ESPTOOL_PY_VERSION;
 
         when(commandService.processInputStreamLineByLine(commands)).thenReturn(Flux.just("esptool.py v4.7.0"));
+
+        when(esptoolPathService.esptoolPath()).thenReturn("esptool.py");
 
         StepVerifier.create(esptoolService.showEsptoolVersion())
                 .expectNext("esptool.py v4.7.0")

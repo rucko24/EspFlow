@@ -1,9 +1,8 @@
 package com.esp.espflow.data.util;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_BUNDLE_DIR;
 import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
@@ -12,15 +11,15 @@ import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS
  * @author rubn
  */
 @Log4j2
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class EsptoolPath {
+@Service
+public class EsptoolPathService {
 
     /**
      * Use a bundle esptool.py
      *
      * @return A {@link String} with esptool bundle path
      */
-    public static String esptoolPath() {
+    public String esptoolPath() {
         final String tmpDir = JAVA_IO_TEMPORAL_DIR_OS.concat(ESPTOOL_BUNDLE_DIR);
         switch (GetOsName.getOsName()) {
             case WINDOWS -> {

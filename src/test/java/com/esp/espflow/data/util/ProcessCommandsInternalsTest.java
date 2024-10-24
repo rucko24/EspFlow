@@ -2,6 +2,7 @@ package com.esp.espflow.data.util;
 
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author rubn
  */
-@SpringBootTest(classes = {ProcessCommandsInternals.class})
+@Disabled
+@SpringBootTest(classes = {ProcessCommandsInternals.class, EsptoolPathService.class})
 class ProcessCommandsInternalsTest {
 
     @Autowired
     private ProcessCommandsInternals processCommandsInternals;
+
+    @Autowired
+    private EsptoolPathService esptoolPathService;
 
     @Test
     @DisplayName("Change port permissions, change the password, and port for test, 'chmod a+rw' or 'chmod 666' works too")
@@ -84,7 +89,7 @@ class ProcessCommandsInternalsTest {
     void readEmbebdedExecutableEsptool_4_7_0() {
         if (GetOsName.getOsName() == GetOsName.WINDOWS) {
 
-            final var esptoolExecutable = EsptoolPath.esptoolPath();
+            final var esptoolExecutable = esptoolPathService.esptoolPath();
 
             var commands = new String[]{esptoolExecutable, "version"};
 

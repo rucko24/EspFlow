@@ -2,8 +2,7 @@ package com.esp.espflow.data.util;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junitpioneer.jupiter.ClearSystemProperty;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BIN_BASH_C;
 import static com.esp.espflow.data.util.EspFlowConstants.BIN_SH_C;
@@ -13,9 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author rubn
  */
-@ExtendWith(MockitoExtension.class)
+@ClearSystemProperty(key = "os.name")
 class GetOsNameTest {
-
 
     @Test
     @DisplayName("Check OS, Windows")

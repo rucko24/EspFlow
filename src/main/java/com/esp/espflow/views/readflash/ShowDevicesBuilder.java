@@ -3,10 +3,15 @@ package com.esp.espflow.views.readflash;
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.service.strategy.filterespslide.*;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp01s;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp32S3;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp8266CH340G;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp8266Cp210xAmica;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp828852MB;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEspDeviceContext;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.EsptoolPath;
+import com.esp.espflow.data.util.EsptoolPathService;
 import com.esp.espflow.data.util.IBuilder;
 import com.esp.espflow.data.util.console.OutPutConsole;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
@@ -24,7 +29,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
+import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.data.util.EspFlowConstants.PORT;
+import static com.esp.espflow.data.util.EspFlowConstants.READ_FLASH;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
@@ -44,6 +54,7 @@ import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideCont
  *             .withCustomFlashSizeAddress(this.endAddress)
  *             .withAutoDetectFlashSize(this.autoDetectFlashSize)
  *             .withBaudRatesComboBox(this.baudRatesComboBox)
+ *             .withEsptoolPathService(this.esptoolPathService)
  *             .make();
  * </pre>
  * </blockquote>
@@ -116,18 +127,25 @@ public class ShowDevicesBuilder {
      * 9
      */
     public interface BaudRateStage {
-        Build withBaudRatesComboBox(final ComboBox<BaudRates> baudRatesComboBox);
+        EsptoolPathServiceStage withBaudRatesComboBox(final ComboBox<BaudRates> baudRatesComboBox);
     }
 
     /**
      * 10
+     */
+    public interface EsptoolPathServiceStage {
+        Build withEsptoolPathService(EsptoolPathService esptoolPathService);
+    }
+
+    /**
+     * 11
      */
     public interface Build extends IBuilder<ShowDevicesBuilder> {
     }
 
     public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage,
             EsptoolServiceStage, UIStage, ConsoleOutPutStage, StartAddressStage,
-            EndAddressSizeStage, AllAddressSizeStage, BaudRateStage, Build {
+            EndAddressSizeStage, AllAddressSizeStage, BaudRateStage, EsptoolPathServiceStage, Build {
         private EspDevicesCarousel espDevicesCarousel;
         private EsptoolService esptoolService;
         private EspDeviceInfo espDeviceInfo;
@@ -137,6 +155,8 @@ public class ShowDevicesBuilder {
         private IntegerField customSizeToRead;
         private ToggleButton autoDetectFlashSize;
         private ComboBox<BaudRates> baudRatesComboBox;
+        private EsptoolPathService esptoolPathService;
+
         /**
          * To bind {@link AddressRecordBinder}
          */
@@ -203,8 +223,14 @@ public class ShowDevicesBuilder {
         }
 
         @Override
-        public Build withBaudRatesComboBox(ComboBox<BaudRates> baudRatesComboBox) {
+        public EsptoolPathServiceStage withBaudRatesComboBox(ComboBox<BaudRates> baudRatesComboBox) {
             this.baudRatesComboBox = baudRatesComboBox;
+            return this;
+        }
+
+        @Override
+        public Build withEsptoolPathService(EsptoolPathService esptoolPathService) {
+            this.esptoolPathService = esptoolPathService;
             return this;
         }
 
@@ -420,7 +446,7 @@ public class ShowDevicesBuilder {
                                final String processAutoDetectFlashSize) {
 
             final String[] commands = {
-                    EsptoolPath.esptoolPath(),
+                    esptoolPathService.esptoolPath(),
                     PORT, espDeviceInfo.port(),
                     BAUD_RATE, this.baudRatesComboBox.getValue().toString().split(" ")[0],
                     READ_FLASH,

@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import java.util.EnumSet;
 import java.util.Locale;
 
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BIN_BASH_C;
+import static com.esp.espflow.data.util.EspFlowConstants.BIN_SH_C;
+import static com.esp.espflow.data.util.EspFlowConstants.CMD_C;
 
 /**
  * Get operating system in runtime
