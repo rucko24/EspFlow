@@ -40,7 +40,7 @@ public enum GetOsName {
         } else if (oS == GetOsName.MAC) {
             return BIN_BASH_C;
         }
-        return new String[]{GetOsName.OTHER.getName()};
+        return EspFlowConstants.OTHER;
     }
 
     /**

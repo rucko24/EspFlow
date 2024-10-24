@@ -83,7 +83,7 @@ public class EsptoolService {
      *
      *  <p><strong>- On Window</strong></p>
      *  <blockquote>
-     *      <pre>cmd.exe /c esptool.py --port parsePort --baud 115200 flash_id </pre>
+     *      <pre>esptool.py --port parsePort --baud 115200 flash_id </pre>
      *  </blockquote>
      *
      *  <p><strong>- On Linux</strong></p>

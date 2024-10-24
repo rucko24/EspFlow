@@ -2,65 +2,119 @@ package com.esp.espflow.data.util;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-
-import static com.esp.espflow.data.util.EspFlowConstants.*;
+import static com.esp.espflow.data.util.EspFlowConstants.BIN_BASH_C;
+import static com.esp.espflow.data.util.EspFlowConstants.BIN_SH_C;
+import static com.esp.espflow.data.util.EspFlowConstants.CMD_C;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author rubn
  */
+@ExtendWith(MockitoExtension.class)
 class GetOsNameTest {
 
+
     @Test
-    @DisplayName("Check OS")
-    void checkOs() {
-        GetOsName os = GetOsName.getOsName();
+    @DisplayName("Check OS, Windows")
+    void checkOsWindows() {
 
-        if (os == GetOsName.WINDOWS) {
+        System.setProperty("os.name", "window");
 
-            assertThat(os.getName()).contains(GetOsName.WINDOWS.getName());
+        assertThat(GetOsName.getOsName()).isEqualTo(GetOsName.WINDOWS);
 
-        } else if (os == GetOsName.LINUX) {
-
-            assertThat(os.getName()).contains(GetOsName.LINUX.getName());
-
-        } else if (os == GetOsName.MAC) {
-
-            assertThat(os.getName()).contains(GetOsName.MAC.getName());
-
-        } else if (os == GetOsName.FREEBSD) {
-
-            assertThat(os.getName()).contains(GetOsName.FREEBSD.getName());
-
-        } else {
-
-            assertThat(os.getName()).contains(GetOsName.OTHER.getName());
-        }
     }
 
     @Test
-    @DisplayName("Check shellOsName() type from this OS")
-    void checkShell() {
-        final String[] shellType = GetOsName.shellOsName();
+    @DisplayName("Check OS, Linux")
+    void checkOsLinux() {
 
-        if (Arrays.equals(shellType, CMD_C)) { //Windows
+        System.setProperty("os.name", "linux");
 
-            assertThat(shellType).contains(CMD_C);
+        assertThat(GetOsName.getOsName()).isEqualTo(GetOsName.LINUX);
 
-        } else if(Arrays.equals(shellType, BIN_SH_C)) {//Linux
+    }
 
-            assertThat(shellType).isEmpty();
+    @Test
+    @DisplayName("Check OS, mac")
+    void checkOsMac() {
 
-        } else if(Arrays.equals(shellType, SH_C)) {//MaOS
+        System.setProperty("os.name", "mac os");
 
-            assertThat(shellType).contains(SH_C);
+        assertThat(GetOsName.getOsName()).isEqualTo(GetOsName.MAC);
 
-        } else { //Other
+    }
 
-            assertThat(shellType).contains(GetOsName.OTHER.getName());
-        }
+    @Test
+    @DisplayName("Check OS, freebsd")
+    void checkOsFreeBSD() {
+
+        System.setProperty("os.name", "freebsd");
+
+        assertThat(GetOsName.getOsName()).isEqualTo(GetOsName.FREEBSD);
+
+    }
+
+    @Test
+    @DisplayName("Check shellOsName(), windows")
+    void checkShellWindow() {
+
+        System.setProperty("os.name", "window");
+
+        assertThat(GetOsName.shellOsName()).isEqualTo(CMD_C);
+
+    }
+
+    @Test
+    @DisplayName("Check shellOsName(), linux")
+    void checkShellLinux() {
+
+        System.setProperty("os.name", "linux");
+
+        assertThat(GetOsName.shellOsName()).isEqualTo(BIN_BASH_C);
+
+    }
+
+    @Test
+    @DisplayName("Check shellOsName(), macOs")
+    void checkShellMacOs() {
+
+        System.setProperty("os.name", "mac os");
+
+        assertThat(GetOsName.shellOsName()).isEqualTo(BIN_BASH_C);
+
+    }
+
+    @Test
+    @DisplayName("Check shellOsName(), FreeBSD")
+    void checkShellFreeBSD() {
+
+        System.setProperty("os.name", "freebsd");
+
+        assertThat(GetOsName.shellOsName()).isEqualTo(BIN_SH_C);
+
+    }
+
+    @Test
+    @DisplayName("Os not found")
+    void osNotFound() {
+
+        System.setProperty("os.name", "agaga");
+
+        assertThat(GetOsName.getOsName()).isEqualTo(GetOsName.OTHER);
+
+    }
+
+    @Test
+    @DisplayName("Shell OS not found")
+    void shellOsNotFound() {
+
+        System.setProperty("os.name", "no shell");
+
+        assertThat(GetOsName.shellOsName()).isEqualTo(EspFlowConstants.OTHER);
+
     }
 
 }

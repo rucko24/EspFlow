@@ -17,6 +17,7 @@ public class EspFlowConstants {
     public static final String[] DMESG_TTY = new String[]{BIN_SH, "-c", "dmesg | grep tty"};
     public static final String DMESG_GREP_TTY = "dmesg | grep tty";
     public static final String[] CMD_C = new String[]{"cmd", "/c"};
+    public static final String[] OTHER = new String[]{"other"};
     public static final String BOX_SHADOW_PROPERTY = "box-shadow";
     public static final String BOX_SHADOW_VALUE = "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)";
     public static final String BOX_SHADOW_VAADIN_BUTTON= "custom-box-shadow-vaadin-button";
