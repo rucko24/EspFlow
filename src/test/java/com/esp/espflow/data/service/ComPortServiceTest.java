@@ -45,6 +45,7 @@ class ComPortServiceTest {
 
             assertThat(actualPortsListWithFriendlyName)
                     .isNotEmpty()
+                    .hasSize(2)
                     .containsExactly(expectedDevUsb1, expectedDevUsb2);
 
         }
@@ -95,6 +96,7 @@ class ComPortServiceTest {
 
             assertThat(comPortService.getOnlyPortsList())
                     .isNotEmpty()
+                    .hasSize(2)
                     .containsExactly(expectedDevUsb1.split("@")[0], expectedDevUsb2.split("@")[0]);
         }
 
