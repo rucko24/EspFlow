@@ -5,6 +5,7 @@ import com.esp.espflow.data.service.CommandService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
+import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -15,10 +16,14 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -108,10 +113,23 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private Div createDivComboBox() {
         comboBoxSerialPort.setClearButtonVisible(true);
+        comboBoxSerialPort.setWidthFull();
         comboBoxSerialPort.setPlaceholder("com port");
-        comboBoxSerialPort.setItemLabelGenerator(showMe -> showMe.split("@")[0]);
+        comboBoxSerialPort.setPrefixComponent(SvgFactory.prefixOsIcon());
+        comboBoxSerialPort.setRenderer(new ComponentRenderer<>(this::getIconItemSubMenu));
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
+
+    private Div getIconItemSubMenu(String serialPortName) {
+        final Div div = new Div();
+        div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
+        final SvgIcon icon = SvgFactory.prefixOsIcon();
+        final Span span = new Span(serialPortName);
+        span.addClassNames(LumoUtility.Padding.Left.SMALL);
+        div.add(icon, span);
+        return div;
+    }
+
 
     private Div createH3SerialPort() {
         final Div divH3 = new Div(new H3("Serial port"));

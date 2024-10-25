@@ -382,7 +382,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 /*Margin left and red color to span values */
                 spanPortFailureValue.addClassName(Left.SMALL);
                 spanPortFailureValue.getStyle().set("color", "red");
-                //FIXME no duplñicate items in this div
+                //FIXME no duplicate items in this div
                 this.divWithPortErrors.add(spanPortFailureValue);
                 this.divWithPortErrors.setVisible(true);
             });
