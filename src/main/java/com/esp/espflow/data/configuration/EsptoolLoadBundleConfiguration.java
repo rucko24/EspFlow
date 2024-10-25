@@ -60,7 +60,7 @@ public class EsptoolLoadBundleConfiguration {
             switch (GetOsName.getOsName()) {
                 case WINDOWS -> this.moveBundleToTempDirectory("esptool-winx64/esptool.exe");
                 case LINUX -> this.moveBundleToTempDirectory("esptool-linux-amd64/esptool");
-                case MAC -> this.moveBundleToTempDirectory("esptool-macosx64/esptool");
+                case MAC -> this.moveBundleToTempDirectory("esptool-macosx64/esptool.py");
                 default -> {
                     //Do nothing
                 }

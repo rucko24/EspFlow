@@ -104,6 +104,20 @@ class ProcessCommandsInternalsTest {
                     .verifyComplete();
         }
 
+        if (GetOsName.getOsName() == GetOsName.MAC) {
+
+            final var esptoolExecutable = esptoolPathService.esptoolPath();
+
+            var commands = new String[]{esptoolExecutable, "version"};
+
+            StepVerifier.create(processCommandsInternals.processInputStreamLineByLine(commands)
+                            .take(1)
+                            .log()
+                    )
+                    .expectNext("esptool.py v4.7.0")
+                    .verifyComplete();
+        }
+
     }
 
     @Test

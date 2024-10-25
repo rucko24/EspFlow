@@ -30,7 +30,7 @@ public class EsptoolPathService {
                 return tmpDir + "esptool-linux-amd64/esptool";
             }
             case MAC -> {
-                return tmpDir + "esptool-macos/esptool";
+                return "esptool.py";
             }
             case FREEBSD -> {
                 //It must be installed from the FreeBSD ports.
