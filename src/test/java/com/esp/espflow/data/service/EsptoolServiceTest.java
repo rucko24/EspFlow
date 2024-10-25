@@ -5,7 +5,6 @@ import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.provider.EsptoolServiceArgumentProvider;
 import com.esp.espflow.data.service.provider.EsptoolServiceNoFlashSizeArgumentProvider;
 import com.esp.espflow.data.service.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
-import com.esp.espflow.data.util.EsptoolPathService;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;

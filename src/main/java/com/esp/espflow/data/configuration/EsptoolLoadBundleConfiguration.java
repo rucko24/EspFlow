@@ -1,6 +1,6 @@
 package com.esp.espflow.data.configuration;
 
-import com.esp.espflow.data.util.EsptoolPathService;
+import com.esp.espflow.data.service.EsptoolPathService;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;

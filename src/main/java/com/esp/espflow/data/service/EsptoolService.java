@@ -4,7 +4,6 @@ import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.data.mappers.EspDeviceInfoMapper;
-import com.esp.espflow.data.util.EsptoolPathService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

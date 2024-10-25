@@ -3,7 +3,7 @@ package com.esp.espflow.data.service;
 import com.esp.espflow.data.util.GetOsName;
 import com.fazecast.jSerialComm.SerialPort;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,10 +30,8 @@ import java.util.stream.Stream;
  * @author rubn
  */
 @Log4j2
-@Service
+@Configuration
 public class ComPortService {
-
-    private final SerialPort[] serialPorts = SerialPort.getCommPorts();
 
     /**
      * A Set to avoid repeating the processed ports.
@@ -41,6 +39,7 @@ public class ComPortService {
      * @return A {@link Set} with name of the ports,
      */
     public Set<String> getPortsListWithFriendlyName() {
+        final SerialPort[] serialPorts = SerialPort.getCommPorts();
         return serialPorts == null
                 ? Collections.emptySet()
                 : this.mappingPorts(Arrays.stream(serialPorts));
@@ -80,16 +79,16 @@ public class ComPortService {
      * @return a {@link long} with 0 or more items
      */
     public long countAllDevices() {
-        return Objects.isNull(getPortsListWithFriendlyName()) ? 0L : getPortsListWithFriendlyName().size();
+        return getPortsListWithFriendlyName().isEmpty() ? 0L : getPortsListWithFriendlyName().size();
     }
 
     /**
      * Filter if the port is Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R
      *
      * @param serialPort maybe the infamous <strong>FT232R</strong>
-     * @return Boolean
+     * @return boolean
      */
-    private Boolean isSerialPortFT232R(SerialPort serialPort) {
+    private boolean isSerialPortFT232R(SerialPort serialPort) {
         if (Objects.isNull(serialPort)) {
             log.debug("serialPort isSerialPortFT232R() {}", "is null");
             return false;

@@ -1,5 +1,6 @@
 package com.esp.espflow.data.util;
 
+import com.esp.espflow.data.service.EsptoolPathService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Disabled;
@@ -44,6 +45,8 @@ class ProcessCommandsInternalsTest {
                     System.out.println("Command executed successfully.");
 
                     assertThat(resultCode).isZero();
+                } else {
+                    System.out.println("Command executed failed.");
                 }
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
