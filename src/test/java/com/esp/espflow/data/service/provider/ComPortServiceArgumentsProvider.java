@@ -9,7 +9,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.stream.Stream;
 
-public class ComPortServiceArgumentProvider implements ArgumentsProvider {
+public class ComPortServiceArgumentsProvider implements ArgumentsProvider {
+
+    private static final String COM_PORT = "comPort";
+    private static final String PORT_DESCRIPTION = "portDescription";
+    private static final String FRIENDLY_NAME = "friendlyName";
 
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
@@ -43,14 +47,20 @@ public class ComPortServiceArgumentProvider implements ArgumentsProvider {
     private Arguments windowsSerialPorts() {
 
         final SerialPort serialPort1 = SerialPort.getCommPort("COM1");
-        ReflectionTestUtils.setField(serialPort1, "comPort", "COM2");
-        ReflectionTestUtils.setField(serialPort1, "portDescription", "COM2");
-        ReflectionTestUtils.setField(serialPort1, "friendlyName", "Silicon Labs CP210x USB to UART Bridge (COM2)");
+        /*
+         * Set custom port
+         */
+        ReflectionTestUtils.setField(serialPort1, COM_PORT, "COM2");
+        ReflectionTestUtils.setField(serialPort1, PORT_DESCRIPTION, "COM2");
+        ReflectionTestUtils.setField(serialPort1, FRIENDLY_NAME, "Silicon Labs CP210x USB to UART Bridge (COM2)");
 
         final SerialPort serialPort2 = SerialPort.getCommPort("COM1");
-        ReflectionTestUtils.setField(serialPort1, "comPort", "COM3");
-        ReflectionTestUtils.setField(serialPort1, "portDescription", "COM3");
-        ReflectionTestUtils.setField(serialPort1, "friendlyName", "Silicon Labs CP210x USB to UART Bridge (COM3)");
+        /*
+         * Set custom port
+         */
+        ReflectionTestUtils.setField(serialPort2, COM_PORT, "COM3");
+        ReflectionTestUtils.setField(serialPort2, PORT_DESCRIPTION, "COM3");
+        ReflectionTestUtils.setField(serialPort2, FRIENDLY_NAME, "Silicon Labs CP210x USB to UART Bridge (COM3)");
 
         final SerialPort[] actualSerialPorts = new SerialPort[]{serialPort1, serialPort2};
 
@@ -63,20 +73,20 @@ public class ComPortServiceArgumentProvider implements ArgumentsProvider {
     private Arguments linuxSerialPorts() {
 
         final SerialPort serialPort1 = SerialPort.getCommPort("/dev/ttyUSB0");
-        /**
+        /*
          * Set custom port
          */
-        ReflectionTestUtils.setField(serialPort1, "comPort", "/dev/ttyUSB1");
-        ReflectionTestUtils.setField(serialPort1, "portDescription", "/dev/ttyUSB1");
-        ReflectionTestUtils.setField(serialPort1, "friendlyName", "Serial-1");
+        ReflectionTestUtils.setField(serialPort1, COM_PORT, "/dev/ttyUSB1");
+        ReflectionTestUtils.setField(serialPort1, PORT_DESCRIPTION, "/dev/ttyUSB1");
+        ReflectionTestUtils.setField(serialPort1, FRIENDLY_NAME, "Serial-1");
 
         final SerialPort serialPort2 = SerialPort.getCommPort("/dev/ttyUSB0");
-        /**
+        /*
          * Set custom port
          */
-        ReflectionTestUtils.setField(serialPort2, "comPort", "/dev/ttyUSB2");
-        ReflectionTestUtils.setField(serialPort2, "portDescription", "/dev/ttyUSB2");
-        ReflectionTestUtils.setField(serialPort2, "friendlyName", "Serial-2");
+        ReflectionTestUtils.setField(serialPort2, COM_PORT, "/dev/ttyUSB2");
+        ReflectionTestUtils.setField(serialPort2, PORT_DESCRIPTION, "/dev/ttyUSB2");
+        ReflectionTestUtils.setField(serialPort2, FRIENDLY_NAME, "Serial-2");
 
         final SerialPort[] actualSerialPorts = new SerialPort[]{serialPort1, serialPort2};
 
@@ -91,20 +101,20 @@ public class ComPortServiceArgumentProvider implements ArgumentsProvider {
     private Arguments freeBsdSerialPorts() {
 
         final SerialPort serialPort1 = SerialPort.getCommPort("/dev/cuaU1");
-        /**
+        /*
          * Set custom port
          */
-        ReflectionTestUtils.setField(serialPort1, "comPort", "/dev/cuaU1");
-        ReflectionTestUtils.setField(serialPort1, "portDescription", "/dev/cuaU1");
-        ReflectionTestUtils.setField(serialPort1, "friendlyName", "Serial-1");
+        ReflectionTestUtils.setField(serialPort1, COM_PORT, "/dev/cuaU1");
+        ReflectionTestUtils.setField(serialPort1, PORT_DESCRIPTION, "/dev/cuaU1");
+        ReflectionTestUtils.setField(serialPort1, FRIENDLY_NAME, "Serial-1");
 
         final SerialPort serialPort2 = SerialPort.getCommPort("/dev/cuaU0");
-        /**
+        /*
          * Set custom port
          */
-        ReflectionTestUtils.setField(serialPort2, "comPort", "/dev/cuaU2");
-        ReflectionTestUtils.setField(serialPort2, "portDescription", "/dev/cuaU2");
-        ReflectionTestUtils.setField(serialPort2, "friendlyName", "Serial-2");
+        ReflectionTestUtils.setField(serialPort2, COM_PORT, "/dev/cuaU2");
+        ReflectionTestUtils.setField(serialPort2, PORT_DESCRIPTION, "/dev/cuaU2");
+        ReflectionTestUtils.setField(serialPort2, FRIENDLY_NAME, "Serial-2");
 
         final SerialPort[] actualSerialPorts = new SerialPort[]{serialPort1, serialPort2};
 

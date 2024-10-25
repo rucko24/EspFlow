@@ -1,6 +1,6 @@
 package com.esp.espflow.data.service;
 
-import com.esp.espflow.data.service.provider.ComPortServiceArgumentProvider;
+import com.esp.espflow.data.service.provider.ComPortServiceArgumentsProvider;
 import com.fazecast.jSerialComm.SerialPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -32,7 +32,7 @@ class ComPortServiceTest {
 
     @Order(1)
     @ParameterizedTest
-    @ArgumentsSource(ComPortServiceArgumentProvider.class)
+    @ArgumentsSource(ComPortServiceArgumentsProvider.class)
     @DisplayName("We obtain the list of serial ports, of the type comPort@friendlyName, " +
             "the portDescription is equal to the comPort")
     void getPortsListWithFriendlyName(SerialPort[] actualSerialPorts, String expectedDevUsb1, String expectedDevUsb2) {
@@ -53,7 +53,7 @@ class ComPortServiceTest {
 
     @Order(2)
     @ParameterizedTest
-    @ArgumentsSource(ComPortServiceArgumentProvider.class)
+    @ArgumentsSource(ComPortServiceArgumentsProvider.class)
     @DisplayName("Serial port count, for this example there are 2 ports")
     void countAllDevices(SerialPort[] actualSerialPorts, String expectedDevUsb1, String expectedDevUsb2) {
 
@@ -85,7 +85,7 @@ class ComPortServiceTest {
 
     @Order(4)
     @ParameterizedTest
-    @ArgumentsSource(ComPortServiceArgumentProvider.class)
+    @ArgumentsSource(ComPortServiceArgumentsProvider.class)
     @DisplayName("We verify that you only have the name of the ports before the @, for linux")
     void getOnlyPortsList(SerialPort[] actualSerialPorts, String expectedDevUsb1, String expectedDevUsb2) {
 
@@ -120,7 +120,7 @@ class ComPortServiceTest {
 
     @Order(6)
     @ParameterizedTest
-    @ArgumentsSource(ComPortServiceArgumentProvider.class)
+    @ArgumentsSource(ComPortServiceArgumentsProvider.class)
     @DisplayName("One of the serial ports is null")
     void oneSerialPortIsNull(SerialPort[] actualSerialPorts, String expectedDevUsb1, String expectedDevUsb2) {
 
@@ -141,7 +141,7 @@ class ComPortServiceTest {
     @Order(7)
     @SetSystemProperty(key = "os.name", value = "window")
     @ParameterizedTest
-    @ArgumentsSource(ComPortServiceArgumentProvider.class)
+    @ArgumentsSource(ComPortServiceArgumentsProvider.class)
     @DisplayName("We simulate window to replace the characters of the port")
     void replaceCharacters(SerialPort[] actualSerialPorts, String expectedDevUsb1, String expectedDevUsb2) {
 

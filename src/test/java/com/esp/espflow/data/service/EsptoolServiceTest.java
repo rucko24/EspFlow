@@ -2,9 +2,9 @@ package com.esp.espflow.data.service;
 
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
-import com.esp.espflow.data.service.provider.EsptoolServiceArgumentProvider;
-import com.esp.espflow.data.service.provider.EsptoolServiceNoFlashSizeArgumentProvider;
-import com.esp.espflow.data.service.provider.EsptoolServiceRawFlashIdFromPortArgumentProvider;
+import com.esp.espflow.data.service.provider.EsptoolServiceArgumentsProvider;
+import com.esp.espflow.data.service.provider.EsptoolServiceNoFlashSizeArgumentsProvider;
+import com.esp.espflow.data.service.provider.EsptoolServiceRawFlashIdFromPortArgumentsProvider;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -55,7 +55,7 @@ class EsptoolServiceTest {
     private EsptoolPathService esptoolPathService;
 
     @ParameterizedTest
-    @ArgumentsSource(EsptoolServiceArgumentProvider.class)
+    @ArgumentsSource(EsptoolServiceArgumentsProvider.class)
     @SneakyThrows
     @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id, the port will come with the friendlyName")
     void readFlashIdWithCustomPort(String portForInputStream,
@@ -78,7 +78,7 @@ class EsptoolServiceTest {
 
 
     @ParameterizedTest
-    @ArgumentsSource(EsptoolServiceNoFlashSizeArgumentProvider.class)
+    @ArgumentsSource(EsptoolServiceNoFlashSizeArgumentsProvider.class)
     @SneakyThrows
     @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id, " +
             "indicates that the response of the console is incomplete and the microcontroller reading was not correct")
@@ -123,7 +123,7 @@ class EsptoolServiceTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(EsptoolServiceRawFlashIdFromPortArgumentProvider.class)
+    @ArgumentsSource(EsptoolServiceRawFlashIdFromPortArgumentsProvider.class)
     @DisplayName("read raw each String from this inputStream")
     void readRawFlashIdFromPort(Flux<String> actualLines, String expetedFirtsLine,
                                 String expetedSecondLine, String expetedThirdLine) {

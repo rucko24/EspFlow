@@ -8,7 +8,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.stream.Stream;
 
-public class EsptoolServiceArgumentProvider implements ArgumentsProvider {
+public class EsptoolServiceArgumentsProvider implements ArgumentsProvider {
 
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
