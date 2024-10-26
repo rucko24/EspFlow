@@ -36,6 +36,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.data.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.data.util.EspFlowConstants.MARGIN;
@@ -70,7 +71,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
         scanPort.setTooltipText("Refresh ports!");
         scanPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        unlockPort.setTooltipText("Unlock Serial port!");
+        unlockPort.setEnabled(false);
+        unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS);
         unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         inputCommand.setPlaceholder("input command");
         inputCommand.setClearButtonVisible(Boolean.TRUE);
@@ -86,11 +88,11 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
         final Div divUnlockPort = this.createDiv(unlockPort, MARGIN, MARGIN_10_PX);
         final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
-        divHeader.add(divScanPort, divUnlockPort, divInputCommand);
+        divHeader.add(divScanPort, divUnlockPort);
 
         final Div divReadCommand = this.createDiv(validateInput, MARGIN, MARGIN_10_PX);
         final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
-        divHeader.add(divReadCommand, divKillProcess);
+        //divHeader.add(divReadCommand, divKillProcess);
 
         final Hr hr = new Hr();
         hr.setHeight("6px");
@@ -119,7 +121,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createDivComboBox() {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setWidthFull();
-        comboBoxSerialPort.setPlaceholder("com port");
+        comboBoxSerialPort.setPlaceholder("port");
         comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon("30px", null));
         comboBoxSerialPort.setRenderer(new ComponentRenderer<>(this::getIconItemSubMenu));
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
@@ -182,6 +184,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         if(esptoolVersionCounter.get()) {
             final List<String> ports = this.comPortService.getOnlyPortsList();
             if (!ports.isEmpty()) {
+                unlockPort.setEnabled(true);
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 ConfirmDialogBuilder.showInformation("Port found!");
             } else {

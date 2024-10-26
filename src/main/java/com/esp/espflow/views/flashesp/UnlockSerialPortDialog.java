@@ -30,7 +30,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
-import java.time.Duration;
+
+import static com.esp.espflow.data.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 
 /**
  * It will allow us to change the permissions to the serial port
@@ -45,7 +46,7 @@ import java.time.Duration;
 public class UnlockSerialPortDialog extends Dialog {
 
     private final ProgressBar progressBar = new ProgressBar();
-    private final Button change = new Button("Change permissions", VaadinIcon.UNLOCK.create());
+    private final Button writePasswordButton = new Button("Write password!", VaadinIcon.UNLOCK.create());
     private final ComboBox<String> copyComboBox = new ComboBox<>();
     private final PasswordField passwordField = new PasswordField();
     private final VerticalLayout verticalLayout = new VerticalLayout();
@@ -66,7 +67,6 @@ public class UnlockSerialPortDialog extends Dialog {
     }
 
     /**
-     *
      * A new ComboBox
      *
      * @param comboBoxSerialPort from {@link DivHeaderPorts#initListeners()}
@@ -74,7 +74,7 @@ public class UnlockSerialPortDialog extends Dialog {
      */
     private ComboBox<String> fillCopyComboBox(ComboBox<String> comboBoxSerialPort) {
         copyComboBox.setClearButtonVisible(true);
-        copyComboBox.setPlaceholder("com port");
+        copyComboBox.setPlaceholder("port");
         copyComboBox.setWidthFull();
         copyComboBox.setPrefixComponent(SvgFactory.OsIcon("30px", null));
         copyComboBox.setItems(comboBoxSerialPort.getListDataView().getItems().toList());
@@ -85,7 +85,7 @@ public class UnlockSerialPortDialog extends Dialog {
      * Initial configuration for the Dialog
      */
     private void config() {
-        super.setHeaderTitle("Unlock Serial port");
+        super.setHeaderTitle(CHANGE_SERIAL_PORT_PERMISSIONS);
         super.setModal(true);
         super.setCloseOnEsc(true);
         final Button closeButton = new Button(new Icon("lumo", "cross"),
@@ -103,22 +103,22 @@ public class UnlockSerialPortDialog extends Dialog {
 
         final SvgIcon icon = SvgFactory.OsIcon("70px", null);
         verticalLayout.setHeight("200px");
-        verticalLayout.setWidth("300px");
+        verticalLayout.setWidthFull();
         passwordField.setWidthFull();
         passwordField.setClearButtonVisible(true);
         passwordField.setPlaceholder("input password");
-        change.setWidthFull();
+        writePasswordButton.setWidthFull();
         verticalLayout.add(icon, passwordField);
         verticalLayout.setAlignSelf(Alignment.CENTER, icon);
 
-        change.addClickShortcut(Key.ENTER);
-        change.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
-        change.setTooltipText("Change permissions");
-        change.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        change.addClickListener(event -> this.changeSerialPortPermissionsTo666());
+        writePasswordButton.addClickShortcut(Key.ENTER);
+        writePasswordButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+        writePasswordButton.setTooltipText("Write password!");
+        writePasswordButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        writePasswordButton.addClickListener(event -> this.changeSerialPortPermissionsTo666());
 
         progressBar.setVisible(false);
-        super.getFooter().add(progressBar, change);
+        super.getFooter().add(progressBar, writePasswordButton);
 
         return verticalLayout;
     }
@@ -127,38 +127,34 @@ public class UnlockSerialPortDialog extends Dialog {
      * Change the number of permit posts to 666.
      */
     private void changeSerialPortPermissionsTo666() {
-        String ports = copyComboBox.getValue();
-        if (GetOsName.getOsName() == GetOsName.LINUX) {
-
-            Flux.defer(() -> this.execute(ports, passwordField.getValue()))
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .switchIfEmpty(Mono.error(new CanNotBeReadDeviceException("Serial port permissions change failed!")))
-                    .doOnError(error -> {
-                        getUI().ifPresent((ui) -> {
-                            ui.access(() -> {
-                                ConfirmDialogBuilder.showWarning(error.getMessage());
-                                this.updateProgressBar(false);
-                            });
-                        });
-                    })
-                    .subscribe(result -> {
-                        getUI().ifPresent((ui) -> {
-                            ui.access(() -> {
-                                if(result == 0) {
-                                    ConfirmDialogBuilder.showInformation("Permission successfully Changed!");
-                                    this.updateProgressBar(false);
-                                }
-                            });
+        final String ports = copyComboBox.getValue();
+        Flux.defer(() -> this.execute(ports, passwordField.getValue()))
+                .subscribeOn(Schedulers.boundedElastic())
+                .switchIfEmpty(Mono.error(new CanNotBeReadDeviceException("Serial port permissions change failed!")))
+                .doOnError(error -> {
+                    getUI().ifPresent((ui) -> {
+                        ui.access(() -> {
+                            ConfirmDialogBuilder.showWarning(error.getMessage());
+                            this.updateProgressBar(false);
                         });
                     });
-        }
+                })
+                .subscribe(result -> {
+                    getUI().ifPresent((ui) -> {
+                        ui.access(() -> {
+                            if (result == 0) {
+                                ConfirmDialogBuilder.showInformation("Permission successfully Changed!");
+                                this.updateProgressBar(false);
+                            }
+                        });
+                    });
+                });
     }
 
     /**
+     * Return 0 wrapped to <strong>Mono.empty</strong> if permissions were changed successfully, otherwise 1
      *
-     * Return 0 if permissions were changed successfully, otherwise 1
-     *
-     * @param port the port
+     * @param port     the port
      * @param password the password
      */
     private Mono<Integer> execute(final String port, String password) {
@@ -182,7 +178,6 @@ public class UnlockSerialPortDialog extends Dialog {
     }
 
     /**
-     *
      * Show the progress bar to the user and hide it in case of error when changing permissions
      *
      * @param value for progressBar
