@@ -4,6 +4,7 @@ import com.esp.espflow.data.service.ComPortService;
 import com.esp.espflow.data.service.CommandService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
+import com.esp.espflow.data.util.GetOsName;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.AttachEvent;
@@ -184,7 +185,11 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         if(esptoolVersionCounter.get()) {
             final List<String> ports = this.comPortService.getOnlyPortsList();
             if (!ports.isEmpty()) {
-                unlockPort.setEnabled(true);
+                if(!(GetOsName.getOsName() == GetOsName.WINDOWS)) {
+                    unlockPort.setEnabled(true);
+                } else {
+                    unlockPort.setEnabled(false);
+                }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 ConfirmDialogBuilder.showInformation("Port found!");
             } else {
