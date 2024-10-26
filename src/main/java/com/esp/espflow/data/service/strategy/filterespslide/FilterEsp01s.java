@@ -1,7 +1,6 @@
 package com.esp.espflow.data.service.strategy.filterespslide;
 
 import com.esp.espflow.data.entity.EspDeviceInfo;
-import com.esp.espflow.data.util.GetOsName;
 
 /**
  * The FilterEsp01s

@@ -39,7 +39,7 @@ public class DataGenerator {
             userRepository.save(user);
             User admin = new User();
             admin.setName(espflowUser);
-            admin.setUsername("esptool");
+            admin.setUsername("espflow");
             admin.setHashedPassword(passwordEncoder.encode(password));
             admin.setProfilePictureUrl(FRONTEND_IMAGES_AVATAR_USER + "esp01s.jpeg");
             admin.setRoles(Set.of(Role.USER, Role.ADMIN));

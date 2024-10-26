@@ -34,17 +34,19 @@ public class FilterEsp32S3 implements FilterEspDeviceStrategy {
         String chipIs = "";
         if(GetOsName.getOsName() == GetOsName.LINUX) {
             descriptivePortName = "CP2102N USB to UART";
-            chipIs = "ESP32-S3 (QFN56) (revision v0.0)";
+            chipIs = "ESP32-S3";
         } else if(GetOsName.getOsName() == GetOsName.WINDOWS) {
 
         } else if(GetOsName.getOsName() == GetOsName.MAC){
             //Do nothing
         } else if(GetOsName.getOsName() == GetOsName.FREEBSD){
             //Do nothing
+            descriptivePortName = "Serial Port";
+            chipIs = "ESP32-S3";
         }
 
         return espDeviceInfo.chipType().endsWith("-S3")
                 && espDeviceInfo.descriptivePortName().contains(descriptivePortName)
-                && espDeviceInfo.chipIs().equals(chipIs);
+                && espDeviceInfo.chipIs().contains(chipIs);
     }
 }

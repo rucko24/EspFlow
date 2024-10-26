@@ -4,7 +4,9 @@ import com.esp.espflow.data.service.ComPortService;
 import com.esp.espflow.data.service.CommandService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
+import com.esp.espflow.data.util.GetOsName;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
+import com.esp.espflow.data.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -15,10 +17,14 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +37,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.data.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
 import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.data.util.EspFlowConstants.MARGIN;
@@ -45,6 +52,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
 public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
+    private final Button unlockPort = new Button(VaadinIcon.UNLOCK.create());
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
     private final TextField inputCommand = new TextField();
     private final Button validateInput = new Button(VaadinIcon.CHECK.create());
@@ -52,6 +60,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final ComPortService comPortService;
     private final CommandService commandService;
     private final EsptoolService esptoolService;
+    private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final H2 h2EsptoolVersion = new H2();
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
 
@@ -63,6 +72,9 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
         scanPort.setTooltipText("Refresh ports!");
         scanPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        unlockPort.setEnabled(false);
+        unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS);
+        unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         inputCommand.setPlaceholder("input command");
         inputCommand.setClearButtonVisible(Boolean.TRUE);
         killProcess.setEnabled(false);
@@ -75,12 +87,13 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         divHeader.getStyle().set("align-items", "baseline");
 
         final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
+        final Div divUnlockPort = this.createDiv(unlockPort, MARGIN, MARGIN_10_PX);
         final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
-        divHeader.add(divScanPort, divInputCommand);
+        divHeader.add(divScanPort, divUnlockPort);
 
         final Div divReadCommand = this.createDiv(validateInput, MARGIN, MARGIN_10_PX);
         final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
-        divHeader.add(divReadCommand, divKillProcess);
+        //divHeader.add(divReadCommand, divKillProcess);
 
         final Hr hr = new Hr();
         hr.setHeight("6px");
@@ -108,10 +121,23 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private Div createDivComboBox() {
         comboBoxSerialPort.setClearButtonVisible(true);
-        comboBoxSerialPort.setPlaceholder("com port");
-        comboBoxSerialPort.setItemLabelGenerator(showMe -> showMe.split("@")[0]);
+        comboBoxSerialPort.setWidthFull();
+        comboBoxSerialPort.setPlaceholder("port");
+        comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon("30px", null));
+        comboBoxSerialPort.setRenderer(new ComponentRenderer<>(this::getIconItemSubMenu));
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
+
+    private Div getIconItemSubMenu(String serialPortName) {
+        final Div div = new Div();
+        div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
+        final SvgIcon icon = SvgFactory.OsIcon("25px", null);
+        final Span span = new Span(serialPortName);
+        span.addClassNames(LumoUtility.Padding.Left.SMALL);
+        div.add(icon, span);
+        return div;
+    }
+
 
     private Div createH3SerialPort() {
         final Div divH3 = new Div(new H3("Serial port"));
@@ -120,6 +146,11 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         return divH3;
     }
 
+    /**
+     * Check if there is a version of esptool.py y la muestra en el H2
+     *
+     * @param ui
+     */
     public void getEspToolVersion(final UI ui) {
         h2EsptoolVersion.addClassName("pulse");
 
@@ -136,15 +167,29 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 }));
     }
 
-    private void initListeners(final UI ui) {
+    /**
+     *
+     * Listener for scanPort and unlockPort
+     */
+    private void initListeners() {
         this.scanPort.addClickListener(e -> showPortIsEsptoolVersionExists());
+        this.unlockPort.addClickListener(event -> this.changeSerialPortPermissionDialog.open(this.comboBoxSerialPort));
 
     }
 
+    /**
+     * Fills in the ports detected in the ComboBox in case of successful scan by the
+     * {@link com.fazecast.jSerialComm.SerialPort}
+     */
     private void showPortIsEsptoolVersionExists() {
         if(esptoolVersionCounter.get()) {
             final List<String> ports = this.comPortService.getOnlyPortsList();
             if (!ports.isEmpty()) {
+                if(!(GetOsName.getOsName() == GetOsName.WINDOWS)) {
+                    unlockPort.setEnabled(true);
+                } else {
+                    unlockPort.setEnabled(false);
+                }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 ConfirmDialogBuilder.showInformation("Port found!");
             } else {
@@ -166,7 +211,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
-            this.initListeners(ui);
+            this.initListeners();
             this.getEspToolVersion(ui);
         }
     }

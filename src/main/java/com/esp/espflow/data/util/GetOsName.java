@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.Locale;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BIN_BASH_C;
+import static com.esp.espflow.data.util.EspFlowConstants.BIN_SH_C;
 import static com.esp.espflow.data.util.EspFlowConstants.CMD_C;
 
 /**
@@ -35,13 +36,13 @@ public enum GetOsName {
         if (oS == GetOsName.WINDOWS) {
             return CMD_C;
         } else if (oS == GetOsName.LINUX) {
-            return new String[]{};
+            return BIN_BASH_C;
         } else if (oS == GetOsName.FREEBSD) {
-            return new String[]{};
+            return BIN_SH_C;
         } else if (oS == GetOsName.MAC) {
             return BIN_BASH_C;
         }
-        return new String[]{GetOsName.OTHER.getName()};
+        return EspFlowConstants.OTHER;
     }
 
     /**

@@ -1,12 +1,18 @@
 package com.esp.espflow.views.readflash;
 
+import com.esp.espflow.data.entity.AddressRecordBinder;
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
+import com.esp.espflow.data.service.EsptoolPathService;
 import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.service.strategy.filterespslide.*;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp01s;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp32S3;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp8266CH340G;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp8266Cp210xAmica;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp828852MB;
+import com.esp.espflow.data.service.strategy.filterespslide.FilterEspDeviceContext;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.EsptoolPath;
 import com.esp.espflow.data.util.IBuilder;
 import com.esp.espflow.data.util.console.OutPutConsole;
 import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
@@ -49,6 +55,7 @@ import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideCont
  *             .withCustomFlashSizeAddress(this.endAddress)
  *             .withAutoDetectFlashSize(this.autoDetectFlashSize)
  *             .withBaudRatesComboBox(this.baudRatesComboBox)
+ *             .withEsptoolPathService(this.esptoolPathService)
  *             .make();
  * </pre>
  * </blockquote>
@@ -121,18 +128,25 @@ public class ShowDevicesBuilder {
      * 9
      */
     public interface BaudRateStage {
-        Build withBaudRatesComboBox(final ComboBox<BaudRates> baudRatesComboBox);
+        EsptoolPathServiceStage withBaudRatesComboBox(final ComboBox<BaudRates> baudRatesComboBox);
     }
 
     /**
      * 10
+     */
+    public interface EsptoolPathServiceStage {
+        Build withEsptoolPathService(EsptoolPathService esptoolPathService);
+    }
+
+    /**
+     * 11
      */
     public interface Build extends IBuilder<ShowDevicesBuilder> {
     }
 
     public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage,
             EsptoolServiceStage, UIStage, ConsoleOutPutStage, StartAddressStage,
-            EndAddressSizeStage, AllAddressSizeStage, BaudRateStage, Build {
+            EndAddressSizeStage, AllAddressSizeStage, BaudRateStage, EsptoolPathServiceStage, Build {
         private EspDevicesCarousel espDevicesCarousel;
         private EsptoolService esptoolService;
         private EspDeviceInfo espDeviceInfo;
@@ -142,6 +156,8 @@ public class ShowDevicesBuilder {
         private IntegerField customSizeToRead;
         private ToggleButton autoDetectFlashSize;
         private ComboBox<BaudRates> baudRatesComboBox;
+        private EsptoolPathService esptoolPathService;
+
         /**
          * To bind {@link AddressRecordBinder}
          */
@@ -208,8 +224,14 @@ public class ShowDevicesBuilder {
         }
 
         @Override
-        public Build withBaudRatesComboBox(ComboBox<BaudRates> baudRatesComboBox) {
+        public EsptoolPathServiceStage withBaudRatesComboBox(ComboBox<BaudRates> baudRatesComboBox) {
             this.baudRatesComboBox = baudRatesComboBox;
+            return this;
+        }
+
+        @Override
+        public Build withEsptoolPathService(EsptoolPathService esptoolPathService) {
+            this.esptoolPathService = esptoolPathService;
             return this;
         }
 
@@ -234,9 +256,9 @@ public class ShowDevicesBuilder {
          * Show the ESP8285H16 2MB slide
          */
         private void showEsp8285() {
-            final FilterEspDeviceContext filterContext = new FilterEspDeviceContext(new FilterEsp828852MB());
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp828852MB());
 
-            if (filterContext.filter(espDeviceInfo)) {
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -297,9 +319,9 @@ public class ShowDevicesBuilder {
          *  Show the ESP8266 4MG amica slide
          */
         private void showEsp82664Cp201x4MB() {
-            final FilterEspDeviceContext context = new FilterEspDeviceContext(new FilterEsp8266Cp210x());
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp8266Cp210xAmica());
 
-            if (context.filter(espDeviceInfo)) {
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
 
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
@@ -319,9 +341,9 @@ public class ShowDevicesBuilder {
          *   Show the ESP32-s3 slide
          */
         private void showEsp32S3() {
-            final FilterEspDeviceContext filterContext = new FilterEspDeviceContext(new FilterEsp32S3());
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp32S3());
 
-            if (filterContext.filter(espDeviceInfo)) {
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
                 final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
 
                 var downFlashButton = buttonForReadFlash(ui, flashButtonWrapper);
@@ -425,7 +447,7 @@ public class ShowDevicesBuilder {
                                final String processAutoDetectFlashSize) {
 
             final String[] commands = {
-                    EsptoolPath.esptoolPath(),
+                    esptoolPathService.esptoolPath(),
                     PORT, espDeviceInfo.port(),
                     BAUD_RATE, this.baudRatesComboBox.getValue().toString().split(" ")[0],
                     READ_FLASH,

@@ -4,7 +4,6 @@ import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.data.mappers.EspDeviceInfoMapper;
-import com.esp.espflow.data.util.EsptoolPath;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -43,6 +42,7 @@ public class EsptoolService {
     private final CommandService commandService;
     private final ComPortService comPortService;
     private final EspDeviceInfoFallBackService espDeviceInfoFallBackService;
+    private final EsptoolPathService esptoolPathService;
 
     /**
      * The predicate to filter only the necessary lines, if you want to process one more line, this condition should be added here
@@ -95,7 +95,7 @@ public class EsptoolService {
      *
      *  <p><strong>- On Window</strong></p>
      *  <blockquote>
-     *      <pre>cmd.exe /c esptool.py --port parsePort --baud 115200 flash_id </pre>
+     *      <pre>esptool.py --port parsePort --baud 115200 flash_id </pre>
      *  </blockquote>
      *
      *  <p><strong>- On Linux</strong></p>
@@ -111,7 +111,7 @@ public class EsptoolService {
         final String descriptivePortName = port.split("@")[1];
 
         final String[] commands = new String[]{
-                EsptoolPath.esptoolPath(),
+                esptoolPathService.esptoolPath(),
                 PORT, parsedPort,
                 BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID};
@@ -155,7 +155,7 @@ public class EsptoolService {
      * @return A {@link Flux<String> }
      */
     public Flux<String> showEsptoolVersion() {
-        final String[] commands = {EsptoolPath.esptoolPath(), VERSION};
+        final String[] commands = {esptoolPathService.esptoolPath(), VERSION};
         return this.commandService.processInputStreamLineByLine(commands)
                 .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
                 .map(this::processLineEsptoolVersion);

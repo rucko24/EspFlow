@@ -3,18 +3,19 @@ package com.esp.espflow.views.flashesp;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.enums.EraseFlashEnum;
 import com.esp.espflow.data.enums.FlashMode;
+import com.esp.espflow.data.service.EsptoolPathService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.EsptoolPath;
 import com.esp.espflow.data.util.IBuilder;
 import com.esp.espflow.data.util.console.OutPutConsole;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_MODE;
@@ -37,6 +38,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.WRITE_FLASH;
  *           .withEraseFlashOption(this.eraseRadioButtons)
  *           .withFlashFileName(this.flashFileName)
  *           .withOutPutConsole(this.outPutConsole)
+ *           .withEsptoolPathService(this.esptoolPathService)
  *           .make();
  *  </pre>
  * </blockquote>
@@ -111,11 +113,18 @@ public class WriteFlashBuilder {
      *  9
      */
     public interface OutPutConsoleStage {
-        Build withOutPutConsole(final OutPutConsole outPutConsole);
+        EsptoolPathServiceStage withOutPutConsole(final OutPutConsole outPutConsole);
     }
 
     /**
      * 10
+     */
+    public interface EsptoolPathServiceStage {
+        Build withEsptoolPathService(EsptoolPathService esptoolPathService);
+    }
+
+    /**
+     * 11
      */
     public interface Build extends IBuilder<WriteFlashBuilder> {
     }
@@ -125,7 +134,7 @@ public class WriteFlashBuilder {
      */
     public static class InnerBuilder implements EsptoolServiceStage, ComboBoxSerialPortStage,
             BaudRateStage, FlashModeStage, FlashSizeStage, UIStage, EraseFlashStage,
-            FlashFileNameStage, OutPutConsoleStage, Build {
+            FlashFileNameStage, OutPutConsoleStage, EsptoolPathServiceStage, Build {
 
         private EsptoolService esptoolService;
         private RadioButtonGroup<BaudRates> baudRate;
@@ -136,6 +145,7 @@ public class WriteFlashBuilder {
         private UI ui;
         private String flashSize;
         private String flashFileName;
+        private EsptoolPathService esptoolPathService;
 
         @Override
         public ComboBoxSerialPortStage withEsptoolService(EsptoolService esptoolService) {
@@ -186,25 +196,45 @@ public class WriteFlashBuilder {
         }
 
         @Override
-        public Build withOutPutConsole(OutPutConsole outPutConsole) {
+        public EsptoolPathServiceStage withOutPutConsole(OutPutConsole outPutConsole) {
             this.outPutConsole = outPutConsole;
+            return this;
+        }
+
+        @Override
+        public Build withEsptoolPathService(EsptoolPathService esptoolPathService) {
+            this.esptoolPathService = esptoolPathService;
             return this;
         }
 
         @Override
         public WriteFlashBuilder make() {
 
-            final String[] commands = new String[]{
-                    EsptoolPath.esptoolPath(),
+            final String[] preCommands = new String[]{
+                    esptoolPathService.esptoolPath(),
                     PORT, serialPort.getValue(),
                     BAUD_RATE, baudRate.getValue().toString().split(" ")[0],
-                    WRITE_FLASH,
+                    WRITE_FLASH, eraseFlashOption.getValue().getValue(),
                     FLASH_MODE, flashMode.getValue().toString().toLowerCase(),
                     FLASH_SIZE, "detect", flashSize,
                     JAVA_IO_TEMPORAL_DIR_OS + "/flash-esptool-write-dir/" + flashFileName
             };
 
-            if(Stream.of(serialPort.getValue(), flashFileName).allMatch(Objects::nonNull)) {
+            final String[] commands = Arrays.stream(preCommands)
+                    .filter(item -> !item.isEmpty()) //remove empty Strings
+                    .toArray(String[]::new);
+
+            final List<String> errorFields = new CopyOnWriteArrayList<>();
+
+            if(serialPort.getValue() == null){
+                errorFields.add("Serial port is null");
+            }
+
+            if(flashFileName == null) {
+                errorFields.add("flashFileName port is null");
+            }
+
+            if(errorFields.isEmpty()) {
 
                 CommandsOnFirstLine.putCommansdOnFirstLine(commands, outPutConsole);
 
@@ -227,7 +257,7 @@ public class WriteFlashBuilder {
                             });
                         });
             } else {
-                ConfirmDialogBuilder.showWarning("Incorrect data!!!");
+                ConfirmDialogBuilder.showWarning("Incorrect data!!!" + errorFields);
             }
             return new WriteFlashBuilder();
         }

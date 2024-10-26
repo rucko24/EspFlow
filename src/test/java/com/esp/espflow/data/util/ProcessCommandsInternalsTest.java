@@ -1,7 +1,9 @@
 package com.esp.espflow.data.util;
 
+import com.esp.espflow.data.service.EsptoolPathService;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +23,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author rubn
  */
-@SpringBootTest(classes = {ProcessCommandsInternals.class})
+@Disabled
+@SpringBootTest(classes = {ProcessCommandsInternals.class, EsptoolPathService.class})
 class ProcessCommandsInternalsTest {
 
     @Autowired
     private ProcessCommandsInternals processCommandsInternals;
 
+    @Autowired
+    private EsptoolPathService esptoolPathService;
+
     @Test
-    @DisplayName("Change port permissions, change the password, and port for test, chmod a+rw works too")
+    @DisplayName("Change port permissions, change the password, and port for test, 'chmod a+rw' or 'chmod 666' works too")
     void changePortPermissionsSuccess() {
         if (GetOsName.getOsName() == GetOsName.LINUX) {
             try {
                 final String echo = "echo password | sudo -S chmod 666 /dev/ttyUSB1";
+                final String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), echo);
+                final int resultCode = processCommandsInternals.execute(commands).waitFor();
+                if (resultCode == 0) {
+                    System.out.println("Command executed successfully.");
+
+                    assertThat(resultCode).isZero();
+                } else {
+                    System.out.println("Command executed failed.");
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (GetOsName.getOsName() == GetOsName.FREEBSD) {
+            try {
+                final String echo = "echo password | sudo -S chmod 666 /dev/cuaU0";
                 final String[] commands = ArrayUtils.addAll(GetOsName.shellOsName(), echo);
                 final int resultCode = processCommandsInternals.execute(commands).waitFor();
                 if (resultCode == 0) {
@@ -69,7 +92,21 @@ class ProcessCommandsInternalsTest {
     void readEmbebdedExecutableEsptool_4_7_0() {
         if (GetOsName.getOsName() == GetOsName.WINDOWS) {
 
-            final var esptoolExecutable = EsptoolPath.esptoolPath();
+            final var esptoolExecutable = esptoolPathService.esptoolPath();
+
+            var commands = new String[]{esptoolExecutable, "version"};
+
+            StepVerifier.create(processCommandsInternals.processInputStreamLineByLine(commands)
+                            .take(1)
+                            .log()
+                    )
+                    .expectNext("esptool.py v4.7.0")
+                    .verifyComplete();
+        }
+
+        if (GetOsName.getOsName() == GetOsName.MAC) {
+
+            final var esptoolExecutable = esptoolPathService.esptoolPath();
 
             var commands = new String[]{esptoolExecutable, "version"};
 

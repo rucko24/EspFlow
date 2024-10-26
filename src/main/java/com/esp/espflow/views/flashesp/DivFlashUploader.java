@@ -174,7 +174,10 @@ public class DivFlashUploader extends Div {
         upload.setI18n(uploadI18N);
     }
 
-    public static class UploadExamplesI18N extends UploadI18N {
+    /**
+     * Class for traslation
+     */
+    private static class UploadExamplesI18N extends UploadI18N {
         public UploadExamplesI18N() {
             setDropFiles(new DropFiles()
                     .setOne("Drop file here")

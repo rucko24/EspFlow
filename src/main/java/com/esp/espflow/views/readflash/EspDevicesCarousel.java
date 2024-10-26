@@ -19,6 +19,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.Height;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,19 +41,20 @@ import static com.esp.espflow.data.util.EspFlowConstants.LOADING;
  *
  * @author rubn
  */
+@Getter
 @Uses(Carousel.class)
 @CssImport(value = "./carousel-demo-styles.css", themeFor = "fc-l2t-paper-slider")
 public class EspDevicesCarousel extends Div {
 
     private final List<Slide> slideList = new CopyOnWriteArrayList<>();
     private final ProgressBar progressBar;
-    private final String title;
+    private final String titleForH2;
     private final H2 h2 = new H2();
     private final Div divCenter = new Div();
 
-    public EspDevicesCarousel(final ProgressBar progressBar, final String title) {
+    public EspDevicesCarousel(final ProgressBar progressBar, final String titleForH2) {
         this.progressBar = progressBar;
-        this.title = title;
+        this.titleForH2 = titleForH2;
         super.setWidth("500px");
         super.setHeight("100%");
         super.getStyle().set("border-radius", "6px");
@@ -69,7 +71,7 @@ public class EspDevicesCarousel extends Div {
      */
     private void initialCenterLogo() {
         final Icon icon = VaadinIcon.LINK.create();
-        this.h2.setText(title);
+        this.h2.setText(titleForH2);
         divCenter.add(icon, h2, progressBar);
         //Set visibility
         Stream.of(icon, h2, divCenter).forEach(component -> component.setVisible(true));
@@ -78,8 +80,8 @@ public class EspDevicesCarousel extends Div {
                 AlignItems.CENTER,
                 JustifyContent.CENTER);
         this.progressBar.setWidth("50%");
-        this.progressBar.setIndeterminate(title.contains(LOADING));
-        this.progressBar.setVisible(title.contains(LOADING));
+        this.progressBar.setIndeterminate(titleForH2.contains(LOADING));
+        this.progressBar.setVisible(titleForH2.contains(LOADING));
         super.add(divCenter);
     }
 

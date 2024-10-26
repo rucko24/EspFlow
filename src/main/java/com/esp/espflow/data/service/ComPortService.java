@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,12 +40,9 @@ public class ComPortService {
      */
     public Set<String> getPortsListWithFriendlyName() {
         final SerialPort[] serialPorts = SerialPort.getCommPorts();
-        return Optional.of(Arrays.stream(serialPorts))
-                .map(this::mappingPorts)
-                .orElseGet(() -> {
-                    log.info("orElseGet getPortsList {}", serialPorts.length);
-                    return Collections.emptySet();
-                });
+        return serialPorts == null
+                ? Collections.emptySet()
+                : this.mappingPorts(Arrays.stream(serialPorts));
     }
 
     /**
@@ -66,11 +62,13 @@ public class ComPortService {
     /**
      * Here we concatenate the friendlyName or vendor
      *
-     *  <blockquote>
-     *      <pre>COM3@Silicon Labs CP210x USB to UART Bridge (COM3)</pre>
-     *  </blockquote>
-     * @param serialPort the current serial port
+     * <blockquote>
+     * <pre>Windows: COM3@Silicon Labs CP210x USB to UART Bridge (COM3)</pre>
+     * <pre>Linux: /dev/ttyUSB1@USB2.0-Serial</pre>
+     * <pre>FreeBSD: /dev/cuaU0@Serial</pre>
+     * </blockquote>
      *
+     * @param serialPort the current serial port
      * @return A {@link String}
      */
     private String concatSystemPortPathWithFriendlyName(final SerialPort serialPort) {
@@ -81,18 +79,22 @@ public class ComPortService {
      * @return a {@link long} with 0 or more items
      */
     public long countAllDevices() {
-        return Objects.isNull(getPortsListWithFriendlyName()) ? 0L : getPortsListWithFriendlyName().size();
+        return getPortsListWithFriendlyName().isEmpty() ? 0L : getPortsListWithFriendlyName().size();
     }
 
     /**
      * Filter if the port is Future Technology Devices International, Ltd FT232 Serial (UART) IC -> FT232R
      *
-     * @param filterSerialPortFT232R the infamous <strong>FT232R</strong>
-     * @return Boolean
+     * @param serialPort maybe the infamous <strong>FT232R</strong>
+     * @return boolean
      */
-    private Boolean isSerialPortFT232R(SerialPort filterSerialPortFT232R) {
-        return !(filterSerialPortFT232R.getDescriptivePortName().startsWith("FT232R")
-                || filterSerialPortFT232R.getPortDescription().startsWith("FT232R"));
+    private boolean isSerialPortFT232R(SerialPort serialPort) {
+        if (Objects.isNull(serialPort)) {
+            log.debug("serialPort isSerialPortFT232R() {}", "is null");
+            return false;
+        }
+        return !(serialPort.getDescriptivePortName().startsWith("FT232R")
+                || serialPort.getPortDescription().startsWith("FT232R"));
     }
 
     /**

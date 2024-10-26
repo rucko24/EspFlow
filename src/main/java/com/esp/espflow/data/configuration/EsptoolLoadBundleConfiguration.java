@@ -1,6 +1,6 @@
 package com.esp.espflow.data.configuration;
 
-import com.esp.espflow.data.util.EsptoolPath;
+import com.esp.espflow.data.service.EsptoolPathService;
 import com.esp.espflow.data.util.GetOsName;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
@@ -60,7 +60,7 @@ public class EsptoolLoadBundleConfiguration {
             switch (GetOsName.getOsName()) {
                 case WINDOWS -> this.moveBundleToTempDirectory("esptool-winx64/esptool.exe");
                 case LINUX -> this.moveBundleToTempDirectory("esptool-linux-amd64/esptool");
-                case MAC -> this.moveBundleToTempDirectory("esptool-macosx64/esptool");
+                //case MAC -> this.moveBundleToTempDirectory("esptool-macosx64/esptool.py");
                 default -> {
                     //Do nothing
                 }
@@ -93,13 +93,9 @@ public class EsptoolLoadBundleConfiguration {
         var esptoolFileNameOutput = Path.of(META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName).getFileName().toString();
         var outPathFileName = Path.of(tempDir + File.separator + esptoolFileNameOutput);
 
-        final var pathResourceAsStream = META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName;
-
-        this.processResourceAsStream(pathResourceAsStream, outPathFileName);
-
-        final var os = GetOsName.getOsName();
-
-        if (os == GetOsName.LINUX || os == GetOsName.MAC) {
+        if (GetOsName.getOsName() == GetOsName.LINUX) {
+            final var pathResourceAsStream = META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName;
+            this.processResourceAsStream(pathResourceAsStream, outPathFileName);
             this.makeTheBundleExecutable(outPathFileName);
         }
 
@@ -112,7 +108,7 @@ public class EsptoolLoadBundleConfiguration {
      * @param outPathFileName is the path where the esptool will be stored
      */
     private void processResourceAsStream(final String pathResourceAsStream, final Path outPathFileName) {
-        try (var inputStream = EsptoolPath.class.getResourceAsStream(pathResourceAsStream);
+        try (var inputStream = EsptoolPathService.class.getResourceAsStream(pathResourceAsStream);
              var bufferedOutputStream = new BufferedOutputStream(Files.newOutputStream(outPathFileName))) {
 
             Objects.requireNonNull(inputStream, "inputStream is null");

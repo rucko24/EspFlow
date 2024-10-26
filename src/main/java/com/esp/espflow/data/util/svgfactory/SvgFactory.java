@@ -1,5 +1,6 @@
 package com.esp.espflow.data.util.svgfactory;
 
+import com.esp.espflow.data.util.GetOsName;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.StreamResource;
 
@@ -28,7 +29,6 @@ public class SvgFactory {
     }
 
     /**
-     *
      * Button with svg copy style /images/copy-alt.svg
      *
      * @return {@link SvgIcon}
@@ -43,10 +43,10 @@ public class SvgFactory {
     }
 
     /**
-     *
      * Button with svg copy style /images/filename.svg
+     *
      * @param customHeight in pixels, optional parameter
-     * @param size in pixels
+     * @param size         in pixels
      * @return {@link SvgIcon}
      */
     public static SvgIcon createIconFromSvg(String fileName, String size, String customHeight) {
@@ -55,10 +55,34 @@ public class SvgFactory {
                 () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + fileName));
         var icon = new SvgIcon(iconResource);
         icon.setSize(size);
-        if(Objects.nonNull(customHeight)) {
+        if (Objects.nonNull(customHeight)) {
             icon.getStyle().set("height", customHeight);
         }
         return icon;
+    }
+
+    /**
+     * Os logo at runtime
+     *
+     * @param customHeight in pixels, optional parameter
+     * @param size         in pixels
+     *
+     * @return {@link SvgIcon}
+     */
+    public static SvgIcon OsIcon(String size, String customHeight) {
+        SvgIcon svgIcon;
+        if (GetOsName.WINDOWS == GetOsName.getOsName()) {
+            svgIcon = SvgFactory.createIconFromSvg("window.svg", size, customHeight);
+        } else if (GetOsName.LINUX == GetOsName.getOsName()) {
+            svgIcon = SvgFactory.createIconFromSvg("linux.svg", size, customHeight);
+        } else if (GetOsName.MAC == GetOsName.getOsName()) {
+            svgIcon = SvgFactory.createIconFromSvg("mac.svg", size, customHeight);
+        } else if (GetOsName.FREEBSD == GetOsName.getOsName()) {
+            svgIcon = SvgFactory.createIconFromSvg("freebsd.svg", size, customHeight);
+        } else {
+            svgIcon = SvgFactory.createIconFromSvg("no-os.svg", size, customHeight);
+        }
+        return svgIcon;
     }
 
 }

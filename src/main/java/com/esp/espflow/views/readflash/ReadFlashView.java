@@ -3,6 +3,7 @@ package com.esp.espflow.views.readflash;
 import com.esp.espflow.data.entity.EspDeviceWithTotalDevices;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.mappers.EspDeviceWithTotalDevicesMapper;
+import com.esp.espflow.data.service.EsptoolPathService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
@@ -50,10 +51,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
@@ -77,6 +76,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
 public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
     private final EsptoolService esptoolService;
+    private final EsptoolPathService esptoolPathService;
     private final ProgressBar rightProgressBar = new ProgressBar();
     //With default espcarousel div
     private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN));
@@ -372,6 +372,9 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         this.buttonRefreshDevices.setEnabled(true);
         espDevicesCarousel.createSlides();
         espDevicesCarousel.setVisible(true);
+        if(espDevicesCarousel.getSlideList().isEmpty()) {
+            this.setDivCarouselNoDevicesShown();
+        }
         if (!spansList.isEmpty()) {
             /* The span is added with the text "Port Failure:" */
             this.divWithPortErrors.add(spanPortFailure);
@@ -379,12 +382,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 /*Margin left and red color to span values */
                 spanPortFailureValue.addClassName(Left.SMALL);
                 spanPortFailureValue.getStyle().set("color", "red");
-                //FIXME no duplñicate items in this div
+                //FIXME no duplicate items in this div
                 this.divWithPortErrors.add(spanPortFailureValue);
                 this.divWithPortErrors.setVisible(true);
             });
-            this.setDivCarouselNoDevicesShown();
-            ConfirmDialogBuilder.showWarning("Error with microcontroller!");
+            ConfirmDialogBuilder.showWarning("Error when trying to read a serial port!");
         }
     }
 
@@ -421,6 +423,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     .withCustomFlashSizeAddress(this.endAddress)
                     .withAutoDetectFlashSize(this.autoDetectFlashSize)
                     .withBaudRatesComboBox(this.baudRatesComboBox)
+                    .withEsptoolPathService(this.esptoolPathService)
                     .make();
         }
 

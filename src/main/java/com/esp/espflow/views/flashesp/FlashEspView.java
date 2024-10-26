@@ -3,10 +3,10 @@ package com.esp.espflow.views.flashesp;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.enums.EraseFlashEnum;
 import com.esp.espflow.data.enums.FlashMode;
+import com.esp.espflow.data.service.EsptoolPathService;
 import com.esp.espflow.data.service.EsptoolService;
 import com.esp.espflow.data.util.CommandsOnFirstLine;
 import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.EsptoolPath;
 import com.esp.espflow.data.util.ResponsiveHeaderDiv;
 import com.esp.espflow.data.util.console.OutPutConsole;
 import com.esp.espflow.data.util.svgfactory.SvgFactory;
@@ -72,6 +72,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final DivFlashUploader divFlashUploader;
     private final DivHeaderPorts divHeaderPorts;
     private final EsptoolService esptoolService;
+    private final EsptoolPathService esptoolPathService;
     private final RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<EraseFlashEnum> eraseRadioButtons = new RadioButtonGroup<>();
@@ -184,6 +185,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divh3EraseFlash = new Div(h3);
 
+        this.eraseRadioButtons.setItemLabelGenerator(EraseFlashEnum::getDescriptionForEraseFlash);
         this.eraseRadioButtons.setItems(EraseFlashEnum.values());
         this.eraseRadioButtons.setValue(EraseFlashEnum.NO);
         final Div divEraseRadioButton = this.createDiv(eraseRadioButtons, MARGIN_LEFT, MARGIN_10_PX);
@@ -218,6 +220,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                     .withEraseFlashOption(this.eraseRadioButtons)
                     .withFlashFileName(this.flashFileName)
                     .withOutPutConsole(this.outPutConsole)
+                    .withEsptoolPathService(this.esptoolPathService)
                     .make();
         });
 
@@ -239,7 +242,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                 final String port = event.getValue();
 
                 this.commands = new String[]{
-                        EsptoolPath.esptoolPath(),
+                        esptoolPathService.esptoolPath(),
                         PORT, port,
                         BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                         FLASH_ID
