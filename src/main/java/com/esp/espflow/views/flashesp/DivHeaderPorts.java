@@ -50,6 +50,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
 public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
+    private final Button unlockPort = new Button(VaadinIcon.LOCK.create());
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
     private final TextField inputCommand = new TextField();
     private final Button validateInput = new Button(VaadinIcon.CHECK.create());
@@ -57,6 +58,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final ComPortService comPortService;
     private final CommandService commandService;
     private final EsptoolService esptoolService;
+    private final UnlockSerialPortDialog unlockSerialPortDialog;
     private final H2 h2EsptoolVersion = new H2();
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
 
@@ -68,6 +70,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
         scanPort.setTooltipText("Refresh ports!");
         scanPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        unlockPort.setTooltipText("Unlock port!");
+        unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         inputCommand.setPlaceholder("input command");
         inputCommand.setClearButtonVisible(Boolean.TRUE);
         killProcess.setEnabled(false);
@@ -80,8 +84,9 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         divHeader.getStyle().set("align-items", "baseline");
 
         final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
+        final Div divUnlockPort = this.createDiv(unlockPort, MARGIN, MARGIN_10_PX);
         final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
-        divHeader.add(divScanPort, divInputCommand);
+        divHeader.add(divScanPort, divUnlockPort, divInputCommand);
 
         final Div divReadCommand = this.createDiv(validateInput, MARGIN, MARGIN_10_PX);
         final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
@@ -115,7 +120,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setWidthFull();
         comboBoxSerialPort.setPlaceholder("com port");
-        comboBoxSerialPort.setPrefixComponent(SvgFactory.prefixOsIcon());
+        comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon());
         comboBoxSerialPort.setRenderer(new ComponentRenderer<>(this::getIconItemSubMenu));
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
@@ -123,7 +128,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div getIconItemSubMenu(String serialPortName) {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-        final SvgIcon icon = SvgFactory.prefixOsIcon();
+        final SvgIcon icon = SvgFactory.OsIcon();
         final Span span = new Span(serialPortName);
         span.addClassNames(LumoUtility.Padding.Left.SMALL);
         div.add(icon, span);
@@ -156,6 +161,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private void initListeners(final UI ui) {
         this.scanPort.addClickListener(e -> showPortIsEsptoolVersionExists());
+        this.unlockPort.addClickListener(event -> this.unlockSerialPortDialog.open());
 
     }
 

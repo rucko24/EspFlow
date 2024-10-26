@@ -66,7 +66,7 @@ public class SvgFactory {
      *
      * @return {@link SvgIcon}
      */
-    public static SvgIcon prefixOsIcon() {
+    public static SvgIcon OsIcon() {
         SvgIcon svgIcon;
         if (GetOsName.WINDOWS == GetOsName.getOsName()) {
             svgIcon = SvgFactory.createIconFromSvg("window.svg", "50", null);
