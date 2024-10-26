@@ -59,7 +59,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final ComPortService comPortService;
     private final CommandService commandService;
     private final EsptoolService esptoolService;
-    private final UnlockSerialPortDialog unlockSerialPortDialog;
+    private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final H2 h2EsptoolVersion = new H2();
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
 
@@ -172,7 +172,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      */
     private void initListeners() {
         this.scanPort.addClickListener(e -> showPortIsEsptoolVersionExists());
-        this.unlockPort.addClickListener(event -> this.unlockSerialPortDialog.open(this.comboBoxSerialPort));
+        this.unlockPort.addClickListener(event -> this.changeSerialPortPermissionDialog.open(this.comboBoxSerialPort));
 
     }
 

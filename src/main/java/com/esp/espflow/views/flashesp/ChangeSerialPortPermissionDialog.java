@@ -43,7 +43,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERM
 @UIScope
 @SpringComponent
 @RequiredArgsConstructor
-public class UnlockSerialPortDialog extends Dialog {
+public class ChangeSerialPortPermissionDialog extends Dialog {
 
     private final ProgressBar progressBar = new ProgressBar();
     private final Button writePasswordButton = new Button("Write password!", VaadinIcon.UNLOCK.create());
