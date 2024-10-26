@@ -64,20 +64,23 @@ public class SvgFactory {
     /**
      * Os logo at runtime
      *
+     * @param customHeight in pixels, optional parameter
+     * @param size         in pixels
+     *
      * @return {@link SvgIcon}
      */
-    public static SvgIcon OsIcon() {
+    public static SvgIcon OsIcon(String size, String customHeight) {
         SvgIcon svgIcon;
         if (GetOsName.WINDOWS == GetOsName.getOsName()) {
-            svgIcon = SvgFactory.createIconFromSvg("window.svg", "50", null);
+            svgIcon = SvgFactory.createIconFromSvg("window.svg", size, customHeight);
         } else if (GetOsName.LINUX == GetOsName.getOsName()) {
-            svgIcon = SvgFactory.createIconFromSvg("linux.svg", "50", null);
+            svgIcon = SvgFactory.createIconFromSvg("linux.svg", size, customHeight);
         } else if (GetOsName.MAC == GetOsName.getOsName()) {
-            svgIcon = SvgFactory.createIconFromSvg("mac.svg", "50", null);
+            svgIcon = SvgFactory.createIconFromSvg("mac.svg", size, customHeight);
         } else if (GetOsName.FREEBSD == GetOsName.getOsName()) {
-            svgIcon = SvgFactory.createIconFromSvg("freebsd.svg", "50", null);
+            svgIcon = SvgFactory.createIconFromSvg("freebsd.svg", size, customHeight);
         } else {
-            svgIcon = SvgFactory.createIconFromSvg("no-os.svg", "50", null);
+            svgIcon = SvgFactory.createIconFromSvg("no-os.svg", size, customHeight);
         }
         return svgIcon;
     }
