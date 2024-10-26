@@ -13,8 +13,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 
-import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.data.util.EspFlowConstants.FLASH_MODE;
@@ -209,17 +210,31 @@ public class WriteFlashBuilder {
         @Override
         public WriteFlashBuilder make() {
 
-            final String[] commands = new String[]{
+            final String[] preCommands = new String[]{
                     esptoolPathService.esptoolPath(),
                     PORT, serialPort.getValue(),
                     BAUD_RATE, baudRate.getValue().toString().split(" ")[0],
-                    WRITE_FLASH,
+                    WRITE_FLASH, eraseFlashOption.getValue().getValue(),
                     FLASH_MODE, flashMode.getValue().toString().toLowerCase(),
                     FLASH_SIZE, "detect", flashSize,
                     JAVA_IO_TEMPORAL_DIR_OS + "/flash-esptool-write-dir/" + flashFileName
             };
 
-            if(Stream.of(serialPort.getValue(), flashFileName).allMatch(Objects::nonNull)) {
+            final String[] commands = Arrays.stream(preCommands)
+                    .filter(item -> !item.isEmpty()) //remove empty Strings
+                    .toArray(String[]::new);
+
+            final List<String> errorFields = new CopyOnWriteArrayList<>();
+
+            if(serialPort.getValue() == null){
+                errorFields.add("Serial port is null");
+            }
+
+            if(flashFileName == null) {
+                errorFields.add("flashFileName port is null");
+            }
+
+            if(errorFields.isEmpty()) {
 
                 CommandsOnFirstLine.putCommansdOnFirstLine(commands, outPutConsole);
 
@@ -242,7 +257,7 @@ public class WriteFlashBuilder {
                             });
                         });
             } else {
-                ConfirmDialogBuilder.showWarning("Incorrect data!!!");
+                ConfirmDialogBuilder.showWarning("Incorrect data!!!" + errorFields);
             }
             return new WriteFlashBuilder();
         }

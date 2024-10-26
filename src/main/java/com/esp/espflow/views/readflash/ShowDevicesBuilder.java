@@ -1,5 +1,6 @@
 package com.esp.espflow.views.readflash;
 
+import com.esp.espflow.data.entity.AddressRecordBinder;
 import com.esp.espflow.data.entity.EspDeviceInfo;
 import com.esp.espflow.data.enums.BaudRates;
 import com.esp.espflow.data.service.EsptoolPathService;

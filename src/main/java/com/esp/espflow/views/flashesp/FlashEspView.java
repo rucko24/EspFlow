@@ -185,6 +185,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divh3EraseFlash = new Div(h3);
 
+        this.eraseRadioButtons.setItemLabelGenerator(EraseFlashEnum::getDescriptionForEraseFlash);
         this.eraseRadioButtons.setItems(EraseFlashEnum.values());
         this.eraseRadioButtons.setValue(EraseFlashEnum.NO);
         final Div divEraseRadioButton = this.createDiv(eraseRadioButtons, MARGIN_LEFT, MARGIN_10_PX);

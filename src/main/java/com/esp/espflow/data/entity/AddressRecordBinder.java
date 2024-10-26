@@ -1,4 +1,4 @@
-package com.esp.espflow.views.readflash;
+package com.esp.espflow.data.entity;
 
 /**
  *
