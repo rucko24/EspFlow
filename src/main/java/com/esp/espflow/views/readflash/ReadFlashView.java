@@ -200,10 +200,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         autoDetectFlashSize.setSizeUndefined();
         autoDetectFlashSize.addValueChangeListener(event -> {
             if (event.getValue()) {
-                endAddress.setValue(0);
                 endAddress.setEnabled(false);
             } else {
-                endAddress.setValue(0);
                 endAddress.setEnabled(true);
             }
         });

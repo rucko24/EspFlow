@@ -161,7 +161,7 @@ public class ShowDevicesBuilder {
         /**
          * To bind {@link AddressRecordBinder}
          */
-        private Binder<AddressRecordBinder> addressRecordBinderBinder = new Binder<>();
+        private final Binder<AddressRecordBinder> addressRecordBinderBinder = new Binder<>();
 
         @Override
         public UIStage withOutPutConsole(OutPutConsole outPutConsole) {
@@ -375,8 +375,9 @@ public class ShowDevicesBuilder {
                             || text.toString().isEmpty(), "Invalid input, set only numbers")
                     .bind(AddressRecordBinder::startAddressSize, (addressRecordBinder, value) -> {});
             addressRecordBinderBinder.forField(customSizeToRead)
-                    .withValidator(text -> text.toString().matches("\\d+")
-                            || text.toString().isEmpty(), "Invalid input, set only numbers")
+                    .withValidator(text -> text.toString().matches("^[1-9]\\d*$\n")
+                            || text.toString().isEmpty()
+                            || text != 0, "Invalid input, set only numbers and greater than zero")
                     .bind(AddressRecordBinder::customAddresSize, (addressRecordBinder, value) -> {});
 
             downloadFlashButton.addClickListener(event -> {
@@ -385,7 +386,7 @@ public class ShowDevicesBuilder {
                     if(addressRecordBinderBinder.writeBeanIfValid(newRecord)) {
                         validate(flashButtonWrapper);
                     } else {
-                        ConfirmDialogBuilder.showWarning("Invalid input, set only numbers!");
+                        ConfirmDialogBuilder.showWarning("Invalid input, please check!");
                     }
                 });
             });
