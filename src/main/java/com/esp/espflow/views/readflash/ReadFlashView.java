@@ -1,13 +1,13 @@
 package com.esp.espflow.views.readflash;
 
-import com.esp.espflow.data.entity.EspDeviceWithTotalDevices;
-import com.esp.espflow.data.enums.BaudRates;
-import com.esp.espflow.data.mappers.EspDeviceWithTotalDevicesMapper;
-import com.esp.espflow.data.service.EsptoolPathService;
-import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.ResponsiveHeaderDiv;
-import com.esp.espflow.data.util.console.OutPutConsole;
+import com.esp.espflow.entity.EspDeviceWithTotalDevices;
+import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
+import com.esp.espflow.service.EsptoolPathService;
+import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.util.ConfirmDialogBuilder;
+import com.esp.espflow.util.ResponsiveHeaderDiv;
+import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
@@ -56,12 +56,12 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
-import static com.esp.espflow.data.util.EspFlowConstants.LOADING;
-import static com.esp.espflow.data.util.EspFlowConstants.NO_DEVICES_SHOWN;
-import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_X;
-import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.HIDDEN;
+import static com.esp.espflow.util.EspFlowConstants.LOADING;
+import static com.esp.espflow.util.EspFlowConstants.NO_DEVICES_SHOWN;
+import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
+import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 
 /**
  * @author rubn
@@ -383,6 +383,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 //FIXME no duplicate items in this div
                 this.divWithPortErrors.add(spanPortFailureValue);
                 this.divWithPortErrors.setVisible(true);
+                this.spanTotalDevicesValue.setText("  " + spansList.size());
             });
             ConfirmDialogBuilder.showWarning("Error when trying to read a serial port!");
         }
@@ -406,6 +407,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
             final Span spanPortFailureValue = new Span();
             spanPortFailureValue.setText(espDeviceInfo.port());
             spansList.add(spanPortFailureValue);
+            this.spanTotalDevicesValue.setText("  " + spansList.size());
         }
         this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
         if (Objects.nonNull(espDeviceInfo.macAddress())) {

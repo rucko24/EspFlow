@@ -1,9 +1,9 @@
 package com.esp.espflow.views.readflash;
 
-import com.esp.espflow.data.entity.EspDeviceInfo;
-import com.esp.espflow.data.util.GetOsName;
-import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
-import com.esp.espflow.data.util.svgfactory.SvgFactory;
+import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.util.GetOsName;
+import com.esp.espflow.util.downloader.FlashButtonWrapper;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -26,12 +26,12 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.CHIP_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.CHIP_TYPE;
-import static com.esp.espflow.data.util.EspFlowConstants.CRYSTAL_IS;
-import static com.esp.espflow.data.util.EspFlowConstants.DETECTED_FLASH_SIZE;
-import static com.esp.espflow.data.util.EspFlowConstants.MAC;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.CHIP_IS;
+import static com.esp.espflow.util.EspFlowConstants.CHIP_TYPE;
+import static com.esp.espflow.util.EspFlowConstants.CRYSTAL_IS;
+import static com.esp.espflow.util.EspFlowConstants.DETECTED_FLASH_SIZE;
+import static com.esp.espflow.util.EspFlowConstants.MAC;
 
 /**
  * The DeviceCardLayout

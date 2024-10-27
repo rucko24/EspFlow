@@ -1,15 +1,15 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.data.enums.BaudRates;
-import com.esp.espflow.data.enums.EraseFlashEnum;
-import com.esp.espflow.data.enums.FlashMode;
-import com.esp.espflow.data.service.EsptoolPathService;
-import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.util.CommandsOnFirstLine;
-import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.ResponsiveHeaderDiv;
-import com.esp.espflow.data.util.console.OutPutConsole;
-import com.esp.espflow.data.util.svgfactory.SvgFactory;
+import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.EraseFlashEnum;
+import com.esp.espflow.enums.FlashMode;
+import com.esp.espflow.service.EsptoolPathService;
+import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.util.CommandsOnFirstLine;
+import com.esp.espflow.util.ConfirmDialogBuilder;
+import com.esp.espflow.util.ResponsiveHeaderDiv;
+import com.esp.espflow.util.console.OutPutConsole;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
@@ -40,21 +40,21 @@ import reactor.core.publisher.Flux;
 
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
-import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.DEFAULT_INIT_ADDRESS_SIZE_TO_WRITE_0x_00000;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ID;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_OFF_SVG;
-import static com.esp.espflow.data.util.EspFlowConstants.HIDDEN;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_LEFT;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
-import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_X;
-import static com.esp.espflow.data.util.EspFlowConstants.OVERFLOW_Y;
-import static com.esp.espflow.data.util.EspFlowConstants.PORT;
-import static com.esp.espflow.data.util.EspFlowConstants.SIZE_25_PX;
-import static com.esp.espflow.data.util.EspFlowConstants.THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET;
+import static com.esp.espflow.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.DEFAULT_INIT_ADDRESS_SIZE_TO_WRITE_0x_00000;
+import static com.esp.espflow.util.EspFlowConstants.FLASH_ID;
+import static com.esp.espflow.util.EspFlowConstants.FLASH_OFF_SVG;
+import static com.esp.espflow.util.EspFlowConstants.HIDDEN;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN_10_PX;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN_LEFT;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
+import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
+import static com.esp.espflow.util.EspFlowConstants.PORT;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET;
 
 /**
  * @author rubn
@@ -207,6 +207,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         divButtonFlash.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         flashButton.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         flashButton.setTooltipText("flash me!");
+
         flashButton.addClickListener(event -> {
             this.outPutConsole.clear();
             //write flash

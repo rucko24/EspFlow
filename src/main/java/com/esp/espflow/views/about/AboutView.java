@@ -13,9 +13,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ABOUT;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ABOUT;
 
 @PageTitle("About")
 @Route(value = "about", layout = MainLayout.class)

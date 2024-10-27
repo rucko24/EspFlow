@@ -1,14 +1,14 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.data.enums.BaudRates;
-import com.esp.espflow.data.enums.EraseFlashEnum;
-import com.esp.espflow.data.enums.FlashMode;
-import com.esp.espflow.data.service.EsptoolPathService;
-import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.util.CommandsOnFirstLine;
-import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.IBuilder;
-import com.esp.espflow.data.util.console.OutPutConsole;
+import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.EraseFlashEnum;
+import com.esp.espflow.enums.FlashMode;
+import com.esp.espflow.service.EsptoolPathService;
+import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.util.CommandsOnFirstLine;
+import com.esp.espflow.util.ConfirmDialogBuilder;
+import com.esp.espflow.util.IBuilder;
+import com.esp.espflow.util.console.OutPutConsole;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
@@ -17,12 +17,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_MODE;
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_SIZE;
-import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
-import static com.esp.espflow.data.util.EspFlowConstants.PORT;
-import static com.esp.espflow.data.util.EspFlowConstants.WRITE_FLASH;
+import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.util.EspFlowConstants.FLASH_MODE;
+import static com.esp.espflow.util.EspFlowConstants.FLASH_SIZE;
+import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.util.EspFlowConstants.PORT;
+import static com.esp.espflow.util.EspFlowConstants.WRITE_FLASH;
 
 /**
  *

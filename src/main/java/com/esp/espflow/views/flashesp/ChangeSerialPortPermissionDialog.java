@@ -1,16 +1,19 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.data.exceptions.CanNotBeReadDeviceException;
-import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.EspFlowConstants;
-import com.esp.espflow.data.util.GetOsName;
-import com.esp.espflow.data.util.ProcessCommandsInternals;
-import com.esp.espflow.data.util.svgfactory.SvgFactory;
+import com.esp.espflow.entity.AddressRecordBinder;
+import com.esp.espflow.entity.ChangePasswordRecordBinder;
+import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
+import com.esp.espflow.util.ConfirmDialogBuilder;
+import com.esp.espflow.util.EspFlowConstants;
+import com.esp.espflow.util.GetOsName;
+import com.esp.espflow.util.ProcessCommandsInternals;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -18,6 +21,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.PostConstruct;
@@ -31,7 +35,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 
-import static com.esp.espflow.data.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
+import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 
 /**
  * It will allow us to change the permissions to the serial port
@@ -45,6 +49,7 @@ import static com.esp.espflow.data.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERM
 @RequiredArgsConstructor
 public class ChangeSerialPortPermissionDialog extends Dialog {
 
+    private final H3 userName = new H3(System.getProperty("user.name"));
     private final ProgressBar progressBar = new ProgressBar();
     private final Button writePasswordButton = new Button("Write password!", VaadinIcon.UNLOCK.create());
     private final ComboBox<String> copyComboBox = new ComboBox<>();
@@ -63,7 +68,10 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
     public void open(ComboBox<String> comboBoxSerialPort) {
         super.open();
 
-        this.verticalLayout.addComponentAtIndex(1, this.fillCopyComboBox(comboBoxSerialPort));
+        this.verticalLayout.addComponentAtIndex(1, userName);
+        this.verticalLayout.addComponentAtIndex(2, this.fillCopyComboBox(comboBoxSerialPort));
+        this.verticalLayout.setAlignSelf(Alignment.CENTER, userName);
+
     }
 
     /**
@@ -106,7 +114,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         verticalLayout.setWidthFull();
         passwordField.setWidthFull();
         passwordField.setClearButtonVisible(true);
-        passwordField.setPlaceholder("input password");
+        passwordField.setPlaceholder("input user system password");
         writePasswordButton.setWidthFull();
         verticalLayout.add(icon, passwordField);
         verticalLayout.setAlignSelf(Alignment.CENTER, icon);
@@ -115,7 +123,26 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         writePasswordButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         writePasswordButton.setTooltipText("Write password!");
         writePasswordButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        writePasswordButton.addClickListener(event -> this.changeSerialPortPermissionsTo666());
+
+        final Binder<ChangePasswordRecordBinder> binder = new Binder<>();
+        binder.forField(copyComboBox)
+                        .withValidator(item -> !item.isEmpty(), "Invalid port")
+                .bind(ChangePasswordRecordBinder::port, (key, value) -> {});
+        binder.forField(passwordField)
+                .withValidator(item -> !item.isEmpty(), "Invalid password")
+                .bind(ChangePasswordRecordBinder::password, (key, value) -> {});
+
+        writePasswordButton.addClickListener(event -> {
+
+            var changePasswordRecord = new ChangePasswordRecordBinder(copyComboBox.getValue(), passwordField.getValue());
+
+            if(binder.writeBeanIfValid(changePasswordRecord)) {
+                this.changeSerialPortPermissionsTo666();
+            } else {
+                ConfirmDialogBuilder.showWarning("Invalid input, please check!");
+            }
+
+        });
 
         progressBar.setVisible(false);
         super.getFooter().add(progressBar, writePasswordButton);

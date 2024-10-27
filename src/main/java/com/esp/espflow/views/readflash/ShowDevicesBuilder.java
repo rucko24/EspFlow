@@ -1,21 +1,21 @@
 package com.esp.espflow.views.readflash;
 
-import com.esp.espflow.data.entity.AddressRecordBinder;
-import com.esp.espflow.data.entity.EspDeviceInfo;
-import com.esp.espflow.data.enums.BaudRates;
-import com.esp.espflow.data.service.EsptoolPathService;
-import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp01s;
-import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp32S3;
-import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp8266CH340G;
-import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp8266Cp210xAmica;
-import com.esp.espflow.data.service.strategy.filterespslide.FilterEsp828852MB;
-import com.esp.espflow.data.service.strategy.filterespslide.FilterEspDeviceContext;
-import com.esp.espflow.data.util.CommandsOnFirstLine;
-import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.IBuilder;
-import com.esp.espflow.data.util.console.OutPutConsole;
-import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
+import com.esp.espflow.entity.AddressRecordBinder;
+import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.service.EsptoolPathService;
+import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.service.strategy.filterespslide.FilterEsp01s;
+import com.esp.espflow.service.strategy.filterespslide.FilterEsp32S3;
+import com.esp.espflow.service.strategy.filterespslide.FilterEsp8266CH340G;
+import com.esp.espflow.service.strategy.filterespslide.FilterEsp8266Cp210xAmica;
+import com.esp.espflow.service.strategy.filterespslide.FilterEsp828852MB;
+import com.esp.espflow.service.strategy.filterespslide.FilterEspDeviceContext;
+import com.esp.espflow.util.CommandsOnFirstLine;
+import com.esp.espflow.util.ConfirmDialogBuilder;
+import com.esp.espflow.util.IBuilder;
+import com.esp.espflow.util.console.OutPutConsole;
+import com.esp.espflow.util.downloader.FlashButtonWrapper;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.UI;
@@ -30,12 +30,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static com.esp.espflow.data.util.EspFlowConstants.BAUD_RATE;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
-import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
-import static com.esp.espflow.data.util.EspFlowConstants.PORT;
-import static com.esp.espflow.data.util.EspFlowConstants.READ_FLASH;
+import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
+import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.util.EspFlowConstants.PORT;
+import static com.esp.espflow.util.EspFlowConstants.READ_FLASH;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
 
 /**
@@ -271,6 +271,7 @@ public class ShowDevicesBuilder {
                 espDevicesCarousel.addSlide(esp8285H16Slide);
 
             }
+            log.debug("No se puede crear la Slide de esp8255 {}", espDeviceInfo);
         }
 
         /**
@@ -292,6 +293,8 @@ public class ShowDevicesBuilder {
 
                 espDevicesCarousel.addSlide(esp01sSlide);
             }
+            log.debug("No se puede crear la Slide de esp01s {}", espDeviceInfo);
+
         }
 
         /**
@@ -313,6 +316,9 @@ public class ShowDevicesBuilder {
                 espDevicesCarousel.addSlide(esp8266Slide);
 
             }
+
+            log.debug("No se puede crear la Slide de esp8266-4MB {}", espDeviceInfo);
+
         }
 
         /**
@@ -334,6 +340,9 @@ public class ShowDevicesBuilder {
                 espDevicesCarousel.addSlide(esp8266Slide);
 
             }
+
+            log.debug("No se puede crear la Slide de esp8266-cp201x AMICA {}", espDeviceInfo);
+
         }
 
         /**
@@ -354,6 +363,9 @@ public class ShowDevicesBuilder {
 
                 espDevicesCarousel.addSlide(esp32s3Slide);
             }
+
+            log.debug("No se puede crear la Slide de ESP32-S3-DEVKITC-1-N8_SPL {}", espDeviceInfo);
+
         }
 
         /**

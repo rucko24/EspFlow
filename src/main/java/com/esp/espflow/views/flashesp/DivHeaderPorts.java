@@ -1,12 +1,12 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.data.service.ComPortService;
-import com.esp.espflow.data.service.CommandService;
-import com.esp.espflow.data.service.EsptoolService;
-import com.esp.espflow.data.util.ConfirmDialogBuilder;
-import com.esp.espflow.data.util.GetOsName;
-import com.esp.espflow.data.util.ResponsiveHeaderDiv;
-import com.esp.espflow.data.util.svgfactory.SvgFactory;
+import com.esp.espflow.service.ComPortService;
+import com.esp.espflow.service.CommandService;
+import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.util.ConfirmDialogBuilder;
+import com.esp.espflow.util.GetOsName;
+import com.esp.espflow.util.ResponsiveHeaderDiv;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -33,16 +33,16 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.data.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
-import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
-import static com.esp.espflow.data.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
+import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
+import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN_10_PX;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 
 @Log4j2
 @Getter
@@ -174,7 +174,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private void initListeners() {
         this.scanPort.addClickListener(e -> showPortIsEsptoolVersionExists());
         this.unlockPort.addClickListener(event -> this.changeSerialPortPermissionDialog.open(this.comboBoxSerialPort));
-
     }
 
     /**

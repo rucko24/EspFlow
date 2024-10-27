@@ -1,7 +1,7 @@
 package com.esp.espflow.views;
 
-import com.esp.espflow.data.entity.User;
-import com.esp.espflow.data.util.svgfactory.SvgFactory;
+import com.esp.espflow.entity.User;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
@@ -34,10 +34,10 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 
 import java.util.Optional;
 
-import static com.esp.espflow.data.util.EspFlowConstants.FLASH_ON_SVG;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
-import static com.esp.espflow.data.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
-import static com.esp.espflow.data.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
+import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
+import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
 
 /**
  * The main view is a top-level placeholder for other views.

@@ -1,7 +1,7 @@
 package com.esp.espflow.views.readflash;
 
-import com.esp.espflow.data.entity.EspDeviceInfo;
-import com.esp.espflow.data.util.downloader.FlashButtonWrapper;
+import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.util.downloader.FlashButtonWrapper;
 import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.data.util.EspFlowConstants.LOADING;
+import static com.esp.espflow.util.EspFlowConstants.LOADING;
 
 /**
  *

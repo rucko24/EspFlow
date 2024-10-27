@@ -1,6 +1,6 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.data.util.ConfirmDialogBuilder;
+import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
@@ -23,13 +23,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import static com.esp.espflow.data.util.EspFlowConstants.AUTO;
-import static com.esp.espflow.data.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.data.util.EspFlowConstants.DISPLAY;
-import static com.esp.espflow.data.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_10_PX;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_LEFT;
-import static com.esp.espflow.data.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
+import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN_10_PX;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN_LEFT;
+import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 
 /**
  * @author rubn
