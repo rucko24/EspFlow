@@ -9,6 +9,10 @@ spring:
   servlet:
     multipart.max-file-size: 50MB
     multipart.max-request-size: 50MB
+  devtools:
+    restart:
+      poll-interval: 2s
+      quiet-period: 1s
 
 vaadin:
   # To improve the performance during development.
