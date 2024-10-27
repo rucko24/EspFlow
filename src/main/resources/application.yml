@@ -16,6 +16,8 @@ vaadin:
   allowed-packages: com.vaadin,org.vaadin,dev.hilla,com.esp.espflow, com.flowingcode, com.infraleap
   # Launch the default browser when starting the application in development mode
   launch-browser: true
+  frontend:
+    hotdeploy: true
 
 login:
   access-name: ${ADMIN_ESPFLOW_USER}
