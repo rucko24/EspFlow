@@ -6,6 +6,7 @@ import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
@@ -86,14 +87,15 @@ public class EspDevicesCarousel extends Div {
     }
 
     /**
-     * We will update it when the device search is completed. {@link ReadFlashView#onComplete(List, EspDevicesCarousel)}
+     * We show Loading when starting to search for devices {@link ReadFlashView#showDetectedDevices(UI, EspDevicesCarousel)}
      *
-     * @param title
+     * @param title LOADING...
+     * @param visible to make visible the progressbar and h2
      */
-    public void hiddenProgressBarAndUpdatedTitleForH2(String title) {
+    public void showLoading(String title, boolean visible) {
         this.h2.setText(title);
-        this.progressBar.setIndeterminate(false);
-        this.progressBar.setVisible(false);
+        this.progressBar.setIndeterminate(visible);
+        this.progressBar.setVisible(visible);
     }
 
     /**
@@ -108,14 +110,16 @@ public class EspDevicesCarousel extends Div {
     /**
      * It is invoked inside a listener of the button that is created with each console reading.
      */
-    public void createSlides() {
-        //remove the previous div
-        remove(divCenter);
+    public void createSlidesAndShow() {
+        //we remove the content in the previous div
+        this.divCenter.removeAll();
         final Carousel carousel = new Carousel(slideList.toArray(Slide[]::new));
         carousel.setSizeFull();
         carousel.setThemeName("custom-theme");
         Animated.animate(carousel, Animation.FADE_IN);
-        super.add(carousel);
+        this.divCenter.add(carousel);
+        super.add(divCenter);
+        super.setVisible(true);
     }
 
     /**

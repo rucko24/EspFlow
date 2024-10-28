@@ -239,11 +239,14 @@ public class ShowDevicesBuilder {
         public ShowDevicesBuilder make() {
             var macAddress = espDeviceInfo.macAddress();
             if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
-                showEsp01s();
-                showEsp8266340G4MB();
-                showEsp82664Cp201x4MB();
-                showEsp8285();
-                showEsp32S3();
+                ui.access(() -> {
+                    showEsp01s();
+                    showEsp8266340G4MB();
+                    showEsp82664Cp201x4MB();
+                    showEsp8285();
+                    showEsp32S3();
+                });
+
             }
             return new ShowDevicesBuilder();
         }

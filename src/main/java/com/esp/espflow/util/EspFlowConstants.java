@@ -81,4 +81,5 @@ public class EspFlowConstants {
     public static final String NO_DEVICES_SHOWN = "No devices shown!";
     public static final String LOADING = "Loading...";
     public static final String CHANGE_SERIAL_PORT_PERMISSIONS = "Change serial port permissions!";
+    public static final String PORT_FAILURE = "Port failure: ";
 }

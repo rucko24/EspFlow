@@ -1,11 +1,11 @@
 package com.esp.espflow.views.readflash;
 
+import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.entity.EspDeviceWithTotalDevices;
 import com.esp.espflow.enums.BaudRates;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
-import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.views.MainLayout;
@@ -14,6 +14,7 @@ import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
@@ -50,10 +51,14 @@ import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import reactor.core.publisher.Mono;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
@@ -62,6 +67,7 @@ import static com.esp.espflow.util.EspFlowConstants.LOADING;
 import static com.esp.espflow.util.EspFlowConstants.NO_DEVICES_SHOWN;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
+import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
 
 /**
  * @author rubn
@@ -77,7 +83,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
     private final EsptoolService esptoolService;
     private final EsptoolPathService esptoolPathService;
-    private final ProgressBar rightProgressBar = new ProgressBar();
+    private final ProgressBar leftPrimarySectionProgressBar = new ProgressBar();
     //With default espcarousel div
     private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN));
     private final HorizontalLayout horizontalLayoutForPrimarySection = new HorizontalLayout();
@@ -93,7 +99,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      */
     private final OutPutConsole outPutConsole = new OutPutConsole();
     private final Span spanTotalDevices = new Span("Total devices:");
-    private final Span spanPortFailure = new Span("Port failure: ");
+    private final Span spanPortFailure = new Span(PORT_FAILURE);
     private final Span spanTotalDevicesValue = new Span();
 
     @PostConstruct
@@ -147,8 +153,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @return A {@link HorizontalLayout} with the form on the right and the carousel on the left side
      */
     private HorizontalLayout horizontalLayoutToPrimarySection(Div rightFormForAddress, Div divForLeftCarousel) {
-        this.rightProgressBar.setVisible(false);
-        this.rightProgressBar.setIndeterminate(true);
+        this.leftPrimarySectionProgressBar.setVisible(false);
+        this.leftPrimarySectionProgressBar.setIndeterminate(true);
         this.horizontalLayoutForPrimarySection.setId("div-for-primary");
         this.horizontalLayoutForPrimarySection.setSizeFull();
         this.horizontalLayoutForPrimarySection.add(rightFormForAddress, divForLeftCarousel);
@@ -177,8 +183,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private Div rigthFormForAddress() {
         var rowAutoSize = new HorizontalLayout(autoDetectFlashSize, spanAutoDetectFlashSize);
         rowAutoSize.setWidthFull();
-        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, baudRatesComboBox, rowAutoSize, rightProgressBar);
-        Stream.of(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, baudRatesComboBox, rightProgressBar)
+        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, baudRatesComboBox, rowAutoSize, leftPrimarySectionProgressBar);
+        Stream.of(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, baudRatesComboBox, leftPrimarySectionProgressBar)
                 .forEach(items -> {
                     items.addClassName(AlignSelf.BASELINE);
                     items.setWidthFull();
@@ -310,109 +316,145 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * <p>The reading process is performed in a Scheduler of <strong>boundedElastic</strong> type in order not to block the UI having
      * faster feedBack from the microcontrollers that are read, which is difficult with synchronous programming.</p>
      *
-     * @param ui
-     * @param {@link espDevicesCarousel}
+     * @param ui                      the UI
+     * @param paramEspDevicesCarousel the EspDevicesCarousel to process
      */
-    private void showDetectedDevices(final UI ui,
-                                     final EspDevicesCarousel espDevicesCarousel) {
-        this.rightProgressBar.setVisible(true);
+    private void showDetectedDevices(final UI ui, final EspDevicesCarousel paramEspDevicesCarousel) {
+
+        this.leftPrimarySectionProgressBar.setVisible(true);
         final Set<Span> spansList = new CopyOnWriteArraySet<>();
+
         this.esptoolService.readAllDevices()
-                .doOnError(onError -> this.onError(ui, onError, espDevicesCarousel))
-                .flatMap(item -> this.esptoolService.countAllDevices()
-                        .map(count -> EspDeviceWithTotalDevicesMapper.INSTANCE.espDeviceWithTotalDevices(item, count)))
-                .doOnComplete(() -> {
+                .flatMap(this.countAllDevices())
+                .flatMap(this.configureSlides(ui, paramEspDevicesCarousel, spansList))
+                .doOnComplete(() -> this.onComplete(ui, paramEspDevicesCarousel, spansList))
+                .subscribe(resultEspDevicesCarousel -> {
                     ui.access(() -> {
-                        this.onComplete(spansList, espDevicesCarousel);
-                    });
-                })
-                .subscribe(espDeviceWithTotalDevices -> {
-                    ui.access(() -> {
-                        this.subscribeThis(spansList, espDeviceWithTotalDevices, espDevicesCarousel, ui);
+                        if (resultEspDevicesCarousel.getSlideList().isEmpty()) {
+                            resultEspDevicesCarousel.showLoading(LOADING, true);
+                        } else {
+                            resultEspDevicesCarousel.createSlidesAndShow();
+                            log.info("subscribe {}", resultEspDevicesCarousel);
+                        }
                     });
                 });
+
     }
 
     /**
-     * Process error, show notification
+     * We count the available devices and map them to an object. <strong>EspDeviceWithTotalDevices</strong>
      *
-     * @param ui The UI
-     * @param onError CanNotBeReadDeviceException possibly empty ports
+     * @return A {@link Function} <EspDeviceInfo, Mono<EspDeviceWithTotalDevices>>}
      */
-    private void onError(final UI ui, Throwable onError,
-                         final EspDevicesCarousel espDevicesCarousel) {
+    private Function<EspDeviceInfo, Mono<EspDeviceWithTotalDevices>> countAllDevices() {
+
+        return item -> this.esptoolService.countAllDevices()
+                .map(count ->
+                        EspDeviceWithTotalDevicesMapper.INSTANCE.espDeviceWithTotalDevices(item, count)
+                );
+    }
+
+    /**
+     * We configure the slides for each type of device being read
+     *
+     * @param ui                      the UI
+     * @param paramEspDevicesCarousel the EspDevicesCarousel
+     * @param spansList               a Set of Span
+     *
+     * @return A {@link Function}
+     */
+    private Function<EspDeviceWithTotalDevices, Mono<EspDevicesCarousel>> configureSlides(
+            UI ui, EspDevicesCarousel paramEspDevicesCarousel, Set<Span> spansList) {
+
+        return espDeviceWithTotalDevices ->
+                this.configureSlides(spansList, espDeviceWithTotalDevices, paramEspDevicesCarousel, ui)
+                        .switchIfEmpty(Mono.defer(() -> this.fallback(ui, paramEspDevicesCarousel, spansList)));
+    }
+
+    /**
+     * <p>This is triggered before the subscription in case a device cannot be read and returns a null mac address.</p>
+     *
+     * <p>We are also going to iterate the spam Set with errors to update them in the div</p>
+     *
+     * @param ui                      the UI
+     * @param paramEspDevicesCarousel the EspDevicesCarousel
+     * @param spansList               Set with Port Span
+     * @return A {@link Mono} with EspDevicesCarousel
+     */
+    public Mono<EspDevicesCarousel> fallback(final UI ui, EspDevicesCarousel paramEspDevicesCarousel, Set<Span> spansList) {
         ui.access(() -> {
-            this.rightProgressBar.setVisible(false);
-            buttonRefreshDevices.setEnabled(true);
-            espDevicesCarousel.hiddenProgressBarAndUpdatedTitleForH2(NO_DEVICES_SHOWN);
-            this.spanTotalDevicesValue.setText(StringUtils.EMPTY);
-            ConfirmDialogBuilder.showWarning("Error with microcontroller " + onError.getMessage());
-        });
-    }
+            if (!spansList.isEmpty()) {
+                /* The span is added with the text "Port Failure:" */
+                this.divWithPortErrors.add(spanPortFailure);
+                /* Iterate through the Span Set to get the String ordemos and pass to Strings*/
+                var newSpanErrors = spansList
+                        .stream()
+                        .map(HasText::getText)
+                        .sorted(Comparator.comparing(Objects::toString))
+                        .collect(Collectors.joining(" "));
 
-    /**
-     *
-     */
-    private void setDivCarouselNoDevicesShown() {
-        final EspDevicesCarousel resetEspDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN);
-        this.divCarousel.removeAll();
-        this.divCarousel.add(resetEspDevicesCarousel);
-    }
-
-    /**
-     * This piece of code is executed when the reactive stream is completed.
-     *
-     * @param spansList of badges to be updated in case of port error
-     * @param espDevicesCarousel created to be set as visible
-     */
-    private void onComplete(final Set<Span> spansList, final EspDevicesCarousel espDevicesCarousel) {
-        this.rightProgressBar.setVisible(false);
-        this.buttonRefreshDevices.setEnabled(true);
-        espDevicesCarousel.createSlides();
-        espDevicesCarousel.setVisible(true);
-        if(espDevicesCarousel.getSlideList().isEmpty()) {
-            this.setDivCarouselNoDevicesShown();
-        }
-        if (!spansList.isEmpty()) {
-            /* The span is added with the text "Port Failure:" */
-            this.divWithPortErrors.add(spanPortFailure);
-            spansList.forEach(spanPortFailureValue -> {
-                /*Margin left and red color to span values */
-                spanPortFailureValue.addClassName(Left.SMALL);
-                spanPortFailureValue.getStyle().set("color", "red");
-                //FIXME no duplicate items in this div
-                this.divWithPortErrors.add(spanPortFailureValue);
+                this.divWithPortErrors.removeAll();
+                this.divWithPortErrors.add(spanPortFailure);
+                /* We set the ports with error in this Span */
+                this.spanPortFailure.setText(PORT_FAILURE + " " + newSpanErrors);
+                this.divWithPortErrors.add(spanPortFailure);
                 this.divWithPortErrors.setVisible(true);
                 this.spanTotalDevicesValue.setText("  " + spansList.size());
-            });
-            ConfirmDialogBuilder.showWarning("Error when trying to read a serial port!");
-        }
+
+            }
+            log.info("fallback {}", paramEspDevicesCarousel);
+        });
+
+
+        return Mono.just(paramEspDevicesCarousel);
     }
 
     /**
-     * Simply to refactor something, and not to overload the reactive stream with extra lines.
+     * If we cannot read we send a Mono.empty to trigger the fallback
+     * {@link ReadFlashView#fallback(UI, EspDevicesCarousel, Set)}, otherwise we reconfigure the Slides and add them to the internal list of the object EspDevicesCarousel.
+     *
+     * <p>The ShowDevicesBuilder when it succeeds in creating a Slide correctly adds it right in the addSlide method, e.g. {@link ShowDevicesBuilder#make}
+     *
+     * <ul>
+     *     <li>showEsp01s();</li>
+     *     <li>showEsp8266340G4MB();</li>
+     *     <li>showEsp82664Cp201x4MB();</li>
+     *     <li>showEsp8285();</li>
+     *     <li>showEsp32S3();</li>
+     * </ul>
+     *
+     *
+     * </p>
      *
      * @param spansList
      * @param espDeviceWithTotalDevices
      * @param espDevicesCarousel
-     * @param ui
+     * @param ui                        the UI
+     * @return A {@link Mono} with EspDevicesCarousel with more configuration
      */
-    private void subscribeThis(final Set<Span> spansList,
-                               EspDeviceWithTotalDevices espDeviceWithTotalDevices,
-                               EspDevicesCarousel espDevicesCarousel,
-                               final UI ui) {
+    private Mono<EspDevicesCarousel> configureSlides(final Set<Span> spansList,
+                                                     EspDeviceWithTotalDevices espDeviceWithTotalDevices,
+                                                     EspDevicesCarousel espDevicesCarousel,
+                                                     final UI ui) {
+
         final var mac = espDeviceWithTotalDevices.espDeviceInfo().macAddress();
         var espDeviceInfo = espDeviceWithTotalDevices.espDeviceInfo();
+
         if (Objects.isNull(mac)) {
-            final Span spanPortFailureValue = new Span();
-            spanPortFailureValue.setText(espDeviceInfo.port());
-            spansList.add(spanPortFailureValue);
-            this.spanTotalDevicesValue.setText("  " + spansList.size());
+            ui.access(() -> {
+                final Span spanPortFailureValue = new Span();
+                spanPortFailureValue.setText(StringUtils.EMPTY);
+                spanPortFailureValue.setText(espDeviceInfo.port());
+                spansList.add(spanPortFailureValue);
+                this.spanTotalDevicesValue.setText("  " + spansList.size());
+            });
+            return Mono.empty();
         }
-        this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
-        if (Objects.nonNull(espDeviceInfo.macAddress())) {
-            this.divWithPortErrors.setVisible(false);
-            this.divWithPortErrors.removeAll();
+
+        ui.access(() -> {
+
+            this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
+
             ShowDevicesBuilder.builder()
                     .withEspDevicesCarousel(espDevicesCarousel)
                     .withEsptoolService(esptoolService)
@@ -425,8 +467,41 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                     .withBaudRatesComboBox(this.baudRatesComboBox)
                     .withEsptoolPathService(this.esptoolPathService)
                     .make();
-        }
+        });
 
+        return Mono.just(espDevicesCarousel);
+
+    }
+
+    /**
+     * <p>This piece of code is executed when the reactive stream is completed.</p>
+     * <p>In case the Slides are empty, we display the initial text in the DIV "No devices shown!"; </p>
+     *
+     * @param ui                      the UI
+     * @param paramEspDevicesCarousel the EspDevicesCarousel
+     * @param spanErrorPortList       Span set with errors
+     */
+    private void onComplete(final UI ui, final EspDevicesCarousel paramEspDevicesCarousel, Set<Span> spanErrorPortList) {
+        ui.access(() -> {
+            this.leftPrimarySectionProgressBar.setVisible(false);
+            this.buttonRefreshDevices.setEnabled(true);
+            if (spanErrorPortList.isEmpty()) {
+                this.divWithPortErrors.setVisible(false);
+                this.divWithPortErrors.removeAll();
+            }
+            if (paramEspDevicesCarousel.getSlideList().isEmpty()) {
+                this.setDivCarouselNoDevicesShown();
+            }
+        });
+    }
+
+    /**
+     * It is invoked when the reactive stream ends, in the {@link ReadFlashView#onComplete(UI, EspDevicesCarousel, Set)}
+     */
+    private void setDivCarouselNoDevicesShown() {
+        final EspDevicesCarousel resetEspDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN);
+        this.divCarousel.removeAll();
+        this.divCarousel.add(resetEspDevicesCarousel);
     }
 
     @Override
