@@ -1,4 +1,4 @@
-package com.esp.espflow.util.downloader;
+package com.esp.espflow.service.downloader;
 
 import com.esp.espflow.util.EspFlowConstants;
 import com.infraleap.animatecss.Animated;
@@ -6,6 +6,8 @@ import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.vaadin.olli.FileDownloadWrapper;
@@ -26,13 +28,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author rubn
  */
 @Log4j2
-public class FlashButtonWrapper extends FileDownloadWrapper {
+@UIScope
+@SpringComponent
+public class FlashButtonWrapperService extends FileDownloadWrapper {
 
     private final Button download = new Button(VaadinIcon.DOWNLOAD.create());
-
-    public FlashButtonWrapper() {
-        super();
-    }
 
     /**
      * This method enables the anchor, and each time it is invoked a name is set by the Content-Disposition
@@ -74,7 +74,7 @@ public class FlashButtonWrapper extends FileDownloadWrapper {
         } catch (IOException ex) {
             log.error(ex.getMessage());
         }
-        return null;
+        return new ByteArrayInputStream(new byte[0]);
     }
 
 }

@@ -40,6 +40,7 @@ public class OutPutConsole extends Div {
     private Button buttonClear = new Button(VaadinIcon.TRASH.create());
     private Button buttonDownScroll = new Button(VaadinIcon.ARROW_CIRCLE_DOWN_O.create());
     private Div divLeftMenuItems = new Div(buttonDownScroll, buttonClear);
+    private final Div divTextArea = new Div();
 
     public OutPutConsole() {
 
@@ -86,7 +87,7 @@ public class OutPutConsole extends Div {
         xterm.focus();
         xterm.getXTerm().fit();
 
-        final Div divTextArea = new Div(xterm.getXTerm());
+        divTextArea.add(xterm.getXTerm());
         divTextArea.setId("divXterm");
         divTextArea.setSizeFull();
         divTextArea.addClassNames(Left.LARGE, Right.LARGE, "text-area-console-div");

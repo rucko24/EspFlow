@@ -57,7 +57,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
             SvgFactory.createIconFromSvg("unlock-gray.svg","30px",null));
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
     private final TextField inputCommand = new TextField();
-    private final Button validateInput = new Button(VaadinIcon.PLAY.create());
+    private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
     private final Button killProcess = new Button(VaadinIcon.STOP.create());
     private final ComPortService comPortService;
     private final CommandService commandService;
@@ -77,8 +77,9 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         unlockPort.setEnabled(false);
         unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS);
         unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        validateInput.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        validateInput.setTooltipText("Execute flash_id");
+        buttonExecuteFlashId.setEnabled(false);
+        buttonExecuteFlashId.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonExecuteFlashId.setTooltipText("Execute flash_id");
 
         //inputCommand.setPlaceholder("input command");
         //inputCommand.setClearButtonVisible(Boolean.TRUE);
@@ -94,7 +95,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
         final Div divUnlockPort = this.createDiv(unlockPort, MARGIN, MARGIN_10_PX);
         final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
-        final Div divReadCommand = this.createDiv(validateInput, MARGIN, MARGIN_10_PX);
+        final Div divReadCommand = this.createDiv(buttonExecuteFlashId, MARGIN, MARGIN_10_PX);
         final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
 
         divHeader.add(divReadCommand,divScanPort, divUnlockPort);
@@ -194,12 +195,15 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     unlockPort.setEnabled(false);
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
-                comboBoxSerialPort.setValue(ports.getFirst());
+                comboBoxSerialPort.setValue(ports.get(0));
                 ConfirmDialogBuilder.showInformation("Port found!");
                 this.unlockPort.setIcon(SvgFactory.createIconFromSvg(
                         "unlock-black.svg","30px",null));
+                buttonExecuteFlashId.setEnabled(true);
+                Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
                 Animated.animate(unlockPort, Animation.FADE_IN);
             } else {
+                buttonExecuteFlashId.setEnabled(false);
                 comboBoxSerialPort.setItems(List.of());
                 ConfirmDialogBuilder.showWarning("Port not found!");
             }

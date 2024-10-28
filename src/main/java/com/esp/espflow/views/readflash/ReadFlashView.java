@@ -6,6 +6,8 @@ import com.esp.espflow.enums.BaudRates;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.service.downloader.FlashButtonWrapperService;
+import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.views.MainLayout;
@@ -81,6 +83,7 @@ import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
 @RequiredArgsConstructor
 public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
+    private final FlashButtonWrapperService flashButtonWrapperService;
     private final EsptoolService esptoolService;
     private final EsptoolPathService esptoolPathService;
     private final ProgressBar leftPrimarySectionProgressBar = new ProgressBar();
@@ -360,7 +363,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @param ui                      the UI
      * @param paramEspDevicesCarousel the EspDevicesCarousel
      * @param spansList               a Set of Span
-     *
      * @return A {@link Function}
      */
     private Function<EspDeviceWithTotalDevices, Mono<EspDevicesCarousel>> configureSlides(
@@ -387,7 +389,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 /* The span is added with the text "Port Failure:" */
                 this.divWithPortErrors.add(spanPortFailure);
                 /* Iterate through the Span Set to get the String ordemos and pass to Strings*/
-                var newSpanErrors = spansList
+                final String newSpanErrors = spansList
                         .stream()
                         .map(HasText::getText)
                         .sorted(Comparator.comparing(Objects::toString))
@@ -451,25 +453,24 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
             return Mono.empty();
         }
 
-        ui.access(() -> {
+        //Fixme ? update using onComplete ?
+        ui.access(() -> this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices()));
 
-            this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices());
+        var resultCarousel = ShowDevicesBuilder.builder()
+                .withEspDevicesCarousel(espDevicesCarousel)
+                .withEsptoolService(this.esptoolService)
+                .withEspDeviceInfo(espDeviceInfo)
+                .withOutPutConsole(this.outPutConsole)
+                .withUi(ui)
+                .withStartSizeAddress(this.startAddress)
+                .withCustomFlashSizeAddress(this.endAddress)
+                .withAutoDetectFlashSize(this.autoDetectFlashSize)
+                .withBaudRatesComboBox(this.baudRatesComboBox)
+                .withEsptoolPathService(this.esptoolPathService)
+                .withFlashDownloadButton(this.flashButtonWrapperService)
+                .make();
 
-            ShowDevicesBuilder.builder()
-                    .withEspDevicesCarousel(espDevicesCarousel)
-                    .withEsptoolService(esptoolService)
-                    .withEspDeviceInfo(espDeviceInfo)
-                    .withOutPutConsole(outPutConsole)
-                    .withUi(ui)
-                    .withStartSizeAddress(this.startAddress)
-                    .withCustomFlashSizeAddress(this.endAddress)
-                    .withAutoDetectFlashSize(this.autoDetectFlashSize)
-                    .withBaudRatesComboBox(this.baudRatesComboBox)
-                    .withEsptoolPathService(this.esptoolPathService)
-                    .make();
-        });
-
-        return Mono.just(espDevicesCarousel);
+        return Mono.just(resultCarousel);
 
     }
 
@@ -488,6 +489,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
             if (spanErrorPortList.isEmpty()) {
                 this.divWithPortErrors.setVisible(false);
                 this.divWithPortErrors.removeAll();
+            } else {
+                ConfirmDialogBuilder.showWarning("Port`s with error: " +
+                        spanErrorPortList.stream()
+                        .map(HasText::getText)
+                        .collect(Collectors.joining(",")));
             }
             if (paramEspDevicesCarousel.getSlideList().isEmpty()) {
                 this.setDivCarouselNoDevicesShown();

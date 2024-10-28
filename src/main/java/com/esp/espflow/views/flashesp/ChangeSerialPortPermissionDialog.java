@@ -12,6 +12,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
@@ -107,15 +108,18 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
      */
     private VerticalLayout createContent() {
 
-        final SvgIcon icon = SvgFactory.OsIcon("70px", null);
+        final SvgIcon icon = SvgFactory.OsIcon("50px", null);
+        Div divIcon = new Div(icon);
+        divIcon.setWidth("50px");
+        divIcon.setHeight("50px");
         verticalLayout.setHeight("200px");
         verticalLayout.setWidthFull();
         passwordField.setWidthFull();
         passwordField.setClearButtonVisible(true);
         passwordField.setPlaceholder("input user system password");
         writePasswordButton.setWidthFull();
-        verticalLayout.add(icon, passwordField);
-        verticalLayout.setAlignSelf(Alignment.CENTER, icon);
+        verticalLayout.add(divIcon, passwordField);
+        verticalLayout.setAlignSelf(Alignment.CENTER, divIcon);
 
         writePasswordButton.addClickShortcut(Key.ENTER);
         writePasswordButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
@@ -124,10 +128,10 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
 
         final Binder<ChangePasswordRecordBinder> binder = new Binder<>();
         binder.forField(copyComboBox)
-                        .withValidator(item -> !item.isEmpty(), "Invalid port")
+                        .withValidator(item -> item != null && !item.isEmpty(), "Invalid port")
                 .bind(ChangePasswordRecordBinder::port, (key, value) -> {});
         binder.forField(passwordField)
-                .withValidator(item -> !item.isEmpty(), "Invalid password")
+                .withValidator(item -> item != null && !item.isEmpty(), "Invalid password")
                 .bind(ChangePasswordRecordBinder::password, (key, value) -> {});
 
         writePasswordButton.addClickListener(event -> {
