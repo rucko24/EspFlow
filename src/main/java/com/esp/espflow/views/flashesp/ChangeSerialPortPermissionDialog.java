@@ -1,6 +1,5 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.entity.AddressRecordBinder;
 import com.esp.espflow.entity.ChangePasswordRecordBinder;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.util.ConfirmDialogBuilder;
@@ -16,7 +15,6 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -51,7 +49,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
 
     private final H3 userName = new H3(System.getProperty("user.name"));
     private final ProgressBar progressBar = new ProgressBar();
-    private final Button writePasswordButton = new Button("Write password!", VaadinIcon.UNLOCK.create());
+    private final Button writePasswordButton = new Button("Write password!", SvgFactory.createIconFromSvg("unlock-black.svg","30px",null));
     private final ComboBox<String> copyComboBox = new ComboBox<>();
     private final PasswordField passwordField = new PasswordField();
     private final VerticalLayout verticalLayout = new VerticalLayout();

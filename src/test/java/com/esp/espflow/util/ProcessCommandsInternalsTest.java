@@ -1,8 +1,6 @@
 package com.esp.espflow.util;
 
 import com.esp.espflow.service.EsptoolPathService;
-import com.esp.espflow.util.GetOsName;
-import com.esp.espflow.util.ProcessCommandsInternals;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Disabled;

@@ -7,11 +7,12 @@ import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.svgfactory.SvgFactory;
+import com.infraleap.animatecss.Animated;
+import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -52,10 +53,11 @@ import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
-    private final Button unlockPort = new Button(VaadinIcon.UNLOCK.create());
+    private final Button unlockPort = new Button(
+            SvgFactory.createIconFromSvg("unlock-gray.svg","30px",null));
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
     private final TextField inputCommand = new TextField();
-    private final Button validateInput = new Button(VaadinIcon.CHECK.create());
+    private final Button validateInput = new Button(VaadinIcon.PLAY.create());
     private final Button killProcess = new Button(VaadinIcon.STOP.create());
     private final ComPortService comPortService;
     private final CommandService commandService;
@@ -70,15 +72,18 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final var divh3SerialPort = this.createH3SerialPort();
         final var divCombo = this.createDivComboBox();
 
-        scanPort.setTooltipText("Refresh ports!");
+        scanPort.setTooltipText("Refresh/Scan ports!");
         scanPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         unlockPort.setEnabled(false);
         unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS);
         unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        inputCommand.setPlaceholder("input command");
-        inputCommand.setClearButtonVisible(Boolean.TRUE);
-        killProcess.setEnabled(false);
-        killProcess.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        validateInput.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        validateInput.setTooltipText("Execute flash_id");
+
+        //inputCommand.setPlaceholder("input command");
+        //inputCommand.setClearButtonVisible(Boolean.TRUE);
+        //killProcess.setEnabled(false);
+        //killProcess.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
         final Div divHeader = new Div(divh3SerialPort, divCombo);
         divHeader.setWidthFull();
@@ -89,11 +94,10 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
         final Div divUnlockPort = this.createDiv(unlockPort, MARGIN, MARGIN_10_PX);
         final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
-        divHeader.add(divScanPort, divUnlockPort);
-
         final Div divReadCommand = this.createDiv(validateInput, MARGIN, MARGIN_10_PX);
         final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
-        //divHeader.add(divReadCommand, divKillProcess);
+
+        divHeader.add(divReadCommand,divScanPort, divUnlockPort);
 
         final Hr hr = new Hr();
         hr.setHeight("6px");
@@ -184,13 +188,17 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         if(esptoolVersionCounter.get()) {
             final List<String> ports = this.comPortService.getOnlyPortsList();
             if (!ports.isEmpty()) {
-                if(!(GetOsName.getOsName() == GetOsName.WINDOWS)) {
+                if(GetOsName.getOsName() != GetOsName.WINDOWS) {
                     unlockPort.setEnabled(true);
                 } else {
                     unlockPort.setEnabled(false);
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
+                comboBoxSerialPort.setValue(ports.getFirst());
                 ConfirmDialogBuilder.showInformation("Port found!");
+                this.unlockPort.setIcon(SvgFactory.createIconFromSvg(
+                        "unlock-black.svg","30px",null));
+                Animated.animate(unlockPort, Animation.FADE_IN);
             } else {
                 comboBoxSerialPort.setItems(List.of());
                 ConfirmDialogBuilder.showWarning("Port not found!");

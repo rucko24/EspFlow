@@ -6,7 +6,6 @@ import com.esp.espflow.enums.FlashMode;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.util.CommandsOnFirstLine;
-import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
@@ -54,7 +53,6 @@ import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
-import static com.esp.espflow.util.EspFlowConstants.THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET;
 
 /**
  * @author rubn
@@ -233,24 +231,26 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
      * @param ui
      */
     private void outputConsole(final UI ui) {
-        this.divHeaderPorts.getValidateInput().addClickListener(e -> {
-            ConfirmDialogBuilder.showInformation(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET);
-        });
 
-        this.divHeaderPorts.getComboBoxSerialPort().addValueChangeListener((event) -> {
+        this.divHeaderPorts.getValidateInput().addClickListener(event -> {
             this.outPutConsole.clear();
-            if (Objects.nonNull(event.getValue())) {
-                final String port = event.getValue();
+            final String valuePort = this.divHeaderPorts.getComboBoxSerialPort().getValue();
+
+            if (Objects.nonNull(valuePort)) {
 
                 this.commands = new String[]{
                         esptoolPathService.esptoolPath(),
-                        PORT, port,
+                        PORT, valuePort,
                         BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
                         FLASH_ID
                 };
 
                 this.subscribeThis(this.esptoolService.readRawFlashIdFromPort(commands), ui);
             }
+        });
+
+        this.divHeaderPorts.getComboBoxSerialPort().addValueChangeListener((event) -> {
+            this.outPutConsole.clear();
         });
 
     }

@@ -1,7 +1,5 @@
 package com.esp.espflow.util;
 
-import com.esp.espflow.util.EspFlowConstants;
-import com.esp.espflow.util.GetOsName;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearSystemProperty;
