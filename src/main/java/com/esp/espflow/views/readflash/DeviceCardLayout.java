@@ -188,6 +188,7 @@ public final class DeviceCardLayout extends Div {
         spanPort.add(usbIcon);
         //Filter the Silicon Labs CP210x UART Bridge, QinHeng Electronics CH340 serial converter
         //Silicon Labs CP210x USB to UART Bridge windows
+        //Serial Port FreeBSD
         String descriptivePortName = espDeviceInfo.descriptivePortName();
         if(descriptivePortName.contains("CP21")) {
             int index = descriptivePortName.toUpperCase().indexOf("CP");
@@ -199,6 +200,13 @@ public final class DeviceCardLayout extends Div {
                 spanFriendlyName.setText(descriptivePortName.split(" ")[0]);
             }
         }
+
+        if(descriptivePortName.contains("Serial Port")) {
+            if(GetOsName.getOsName() == GetOsName.FREEBSD) {
+                spanFriendlyName.setText(descriptivePortName);
+            }
+        }
+
         if(descriptivePortName.startsWith("USB Serial")
                 || descriptivePortName.startsWith("USB-SERIAL")
                 || descriptivePortName.startsWith("USB2.0-Serial")) {
