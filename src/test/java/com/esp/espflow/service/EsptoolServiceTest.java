@@ -2,6 +2,7 @@ package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.service.provider.EsptoolServiceArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceNoFlashSizeArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceRawFlashIdFromPortArgumentsProvider;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,8 +24,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Set;
+
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY;
+import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_VERSION;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ID;
 import static com.esp.espflow.util.EspFlowConstants.PORT;
@@ -53,6 +58,28 @@ class EsptoolServiceTest {
 
     @Mock
     private EsptoolPathService esptoolPathService;
+
+    @Test
+    @SetSystemProperty(key = "os.name", value = "linux")
+    void readAllDevices() {
+
+        when(comPortService.getPortsListWithFriendlyName())
+                .thenReturn(Set.of("/dev/ttyUSB1@Serial-1", "/dev/ttyUSB2@Serial-2"));
+
+        EspDeviceInfo expectedEspDeviceInfo = EspDeviceInfo.builder()
+                .port("/dev/ttyUSB1")
+                .build();
+
+        EspDeviceInfo expectedEspDeviceInfo2 = EspDeviceInfo.builder()
+                .port("/dev/ttyUSB2")
+                .build();
+
+        StepVerifier.create(esptoolService.readAllDevices())
+                .expectNext(expectedEspDeviceInfo)
+                .expectNext(expectedEspDeviceInfo2)
+                .verifyComplete();
+
+    }
 
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceArgumentsProvider.class)
@@ -122,6 +149,23 @@ class EsptoolServiceTest {
 
     }
 
+    @Test
+    @DisplayName("esptool.py not found!")
+    @SneakyThrows
+    void showEsptoolVersionFailure() {
+
+        String[] commands = ESPTOOL_PY_VERSION;
+
+        when(esptoolPathService.esptoolPath()).thenReturn("esptool.py");
+
+        when(commandService.processInputStreamLineByLine(commands)).thenReturn(Flux.just("not found"));
+
+        StepVerifier.create(esptoolService.showEsptoolVersion())
+                .expectNext(ESPTOOL_PY_NOT_FOUND)
+                .verifyComplete();
+
+    }
+
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceRawFlashIdFromPortArgumentsProvider.class)
     @DisplayName("read raw each String from this inputStream")
@@ -146,10 +190,17 @@ class EsptoolServiceTest {
 
     }
 
-    @Disabled
+    @Test
+    @SetSystemProperty(key = "os.name", value = "linux")
     @DisplayName("Simple test, counter all devices")
     void countAllDevices() {
-        //FIXME
+
+        when(comPortService.countAllDevices()).thenReturn(3L);
+
+        StepVerifier.create(esptoolService.countAllDevices())
+                .expectNext(3L)
+                .verifyComplete();
+
     }
 
 
