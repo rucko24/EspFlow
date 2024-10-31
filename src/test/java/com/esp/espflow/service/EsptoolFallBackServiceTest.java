@@ -11,10 +11,10 @@ import reactor.test.StepVerifier;
  * @author rubn
  */
 @ExtendWith(MockitoExtension.class)
-class EspDeviceInfoFallBackServiceTest {
+class EsptoolFallBackServiceTest {
 
     @InjectMocks
-    private EspDeviceInfoFallBackService service;
+    private EsptoolFallBackService service;
 
     @Test
     void fallback() {

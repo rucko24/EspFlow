@@ -1,6 +1,7 @@
 package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.mappers.EspDeviceInfoMapper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -27,5 +28,14 @@ public class EspDeviceInfoFallBackService {
         return Mono.just(EspDeviceInfo.builder()
                 .port(parsedPort)
                 .build());
+    }
+
+    /**
+     * This allows us to raise the exception type {@link CanNotBeReadDeviceException}, when the port list is empty.
+     *
+     * @return A {@link Mono}
+     */
+    public Mono<String> portListingIsEmpty() {
+        return Mono.error(new CanNotBeReadDeviceException("Possibly empty ports"));
     }
 }
