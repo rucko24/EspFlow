@@ -3,12 +3,14 @@ package com.esp.espflow.views.readflash;
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.entity.EspDeviceWithTotalDevices;
 import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.downloader.FlashButtonWrapperService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
+import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
@@ -18,6 +20,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
@@ -36,8 +39,13 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
@@ -82,7 +90,7 @@ import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
 @Route(value = "read-flash", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
+public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnterObserver {
 
     private final FlashButtonWrapperService flashButtonWrapperService;
     private final EsptoolService esptoolService;
@@ -105,6 +113,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     private final Span spanTotalDevices = new Span("Total devices:");
     private final Span spanPortFailure = new Span(PORT_FAILURE);
     private final Span spanTotalDevicesValue = new Span();
+
+    /**
+     * Registration for button
+     */
+    private Registration broadcasterRefreshButton;
 
     @PostConstruct
     public void init() {
@@ -149,9 +162,9 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getSecondaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getPrimaryComponent().getElement().getStyle().set(
-                "border-bottom","1px solid var(--lumo-contrast-10pct)");
+                "border-bottom", "1px solid var(--lumo-contrast-10pct)");
         splitLayout.getSecondaryComponent().getElement().getStyle().set(
-                "background","linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
+                "background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
 
         splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-width", "thin");
         splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-color", "#3b3b3b #202020");
@@ -258,7 +271,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
         divRowToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
 
-        outPutConsole.getStyle().set("overflow-x","hidden");
+        outPutConsole.getStyle().set("overflow-x", "hidden");
         outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
         outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
         outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
@@ -273,11 +286,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
                 JustifyContent.END,
                 Overflow.HIDDEN);
 
-        divColumnItems.getStyle().set("margin-left","10px");
-        divColumnItems.getStyle().set("margin-right","10px");
-        divColumnItems.getStyle().set("margin-bottom","3px");
-        divColumnItems.getStyle().set("max-width","40px");
-        divColumnItems.getStyle().set("width","40px");
+        divColumnItems.getStyle().set("margin-left", "10px");
+        divColumnItems.getStyle().set("margin-right", "10px");
+        divColumnItems.getStyle().set("margin-bottom", "3px");
+        divColumnItems.getStyle().set("max-width", "40px");
+        divColumnItems.getStyle().set("width", "40px");
         divColumnItems.getStyle().set(OVERFLOW_Y, HIDDEN);
 
         divRowToSecondary.add(divColumnItems, outPutConsole);
@@ -340,6 +353,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonRefreshDevices.setDisableOnClick(true);
         buttonRefreshDevices.addClickListener(event -> {
+            BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.DISABLE);
             final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), LOADING);
             this.divCarousel.removeAll();
             this.divCarousel.add(espDevicesCarousel);
@@ -490,7 +504,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         }
 
         //Fixme ? update using onComplete ?
-        ui.access(() -> this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices()));
+        try {
+            ui.access(() -> this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices()));
+        } catch (UIDetachedException ex) {
+            //Do nothing
+        }
 
         var resultCarousel = ShowDevicesBuilder.builder()
                 .withEspDevicesCarousel(espDevicesCarousel)
@@ -511,23 +529,28 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     *
      * En caso de no poder leer ningun puerto serie, es decir el dispositivo no esta conectado, se deberia
      * revisar la conexion con el puerto USB
      *
      * <p>new CanNotBeReadDeviceException("Possibly empty ports")</`p>
      *
-     * @param ui the UI
+     * @param ui                 the UI
      * @param canNotBeReadDevice Possibly empty ports
      */
     private void onError(final UI ui, Throwable canNotBeReadDevice) {
-        ui.access(() -> {
-            //En caso que desde Java no logremos leer ningun puerto /dev/tty* /dev/cua*
-            ConfirmDialogBuilder.showWarning(canNotBeReadDevice.getMessage());
-            this.setDivCarouselNoDevicesShown();
-            this.leftPrimarySectionProgressBar.setVisible(false);
-            this.buttonRefreshDevices.setEnabled(true);
-        });
+        try {
+            ui.access(() -> {
+                //In case we cannot read any port from Java /dev/tty* /dev/cua*
+                ConfirmDialogBuilder.showWarning(canNotBeReadDevice.getMessage());
+                this.setDivCarouselNoDevicesShown();
+                this.leftPrimarySectionProgressBar.setVisible(false);
+                this.buttonRefreshDevices.setEnabled(true);
+                BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.ENABLE);
+            });
+        } catch (UIDetachedException ex) {
+            //Do nothing
+        }
+
     }
 
     /**
@@ -542,14 +565,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         ui.access(() -> {
             this.leftPrimarySectionProgressBar.setVisible(false);
             this.buttonRefreshDevices.setEnabled(true);
+            BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.ENABLE);
             if (spanErrorPortList.isEmpty()) {
                 this.divWithPortErrors.setVisible(false);
                 this.divWithPortErrors.removeAll();
             } else {
                 ConfirmDialogBuilder.showWarning("Port`s with error: " +
                         spanErrorPortList.stream()
-                        .map(HasText::getText)
-                        .collect(Collectors.joining(",")));
+                                .map(HasText::getText)
+                                .collect(Collectors.joining(",")));
             }
             if (paramEspDevicesCarousel.getSlideList().isEmpty()) {
                 this.setDivCarouselNoDevicesShown();
@@ -569,14 +593,35 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
+        broadcasterRefreshButton.remove();
+        broadcasterRefreshButton = null;
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             super.onAttach(attachEvent);
             final UI ui = attachEvent.getUI();
             this.refreshDevices(ui);
+            //Disabled event for buttonRefreshDevices while in use
+            this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value ->
+                    ui.access(() -> this.buttonRefreshDevices.setEnabled(value))
+            );
         }
     }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        //Disabled event for buttonRefreshDevices while in use
+        this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value -> {
+            try {
+                event.getUI().access(() -> this.buttonRefreshDevices.setEnabled(value));
+            } catch (UIDetachedException ex) {
+                //Do nothing,  It is thrown when you attempt to access closed UI.
+                //https://stackoverflow.com/a/73885127/7267818
+            }
+        });
+    }
+
 }
