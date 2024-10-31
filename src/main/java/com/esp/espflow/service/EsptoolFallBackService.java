@@ -12,7 +12,7 @@ import java.util.Map;
  * @author rubn
  */
 @Service
-public class EspDeviceInfoFallBackService {
+public class EsptoolFallBackService {
 
     /**
      *
@@ -35,7 +35,7 @@ public class EspDeviceInfoFallBackService {
      *
      * @return A {@link Mono}
      */
-    public Mono<String> portListingIsEmpty() {
+    public Mono<String> fallbackEmptyPorts() {
         return Mono.error(new CanNotBeReadDeviceException("Possibly empty ports"));
     }
 }

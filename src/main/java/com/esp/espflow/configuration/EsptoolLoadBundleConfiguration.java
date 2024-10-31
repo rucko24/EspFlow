@@ -39,7 +39,7 @@ import static com.esp.espflow.util.EspFlowConstants.SLASH;
  * </ul>
  *
  * <p>
- *     Para FreeBSD se debe instalar el <strong>esptool.py desde los ports </strong>
+ *     For FreeBSD you must install the <strong>esptool.py from the <strong>ports</strong>.
  * </p>
  *
  *
@@ -71,7 +71,7 @@ public class EsptoolLoadBundleConfiguration {
     /**
      * Moves the executable from the resources directory to the temporary directory
      *
-     * @param bundleFileName the name of the executable, depending on the operating systemº
+     * @param bundleFileName the name of the executable, depending on the operating system
      */
     private void moveBundleToTempDirectory(final String bundleFileName) {
 

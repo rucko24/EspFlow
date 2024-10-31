@@ -221,17 +221,17 @@ public class WriteFlashBuilder {
             };
 
             final String[] commands = Arrays.stream(preCommands)
-                    .filter(item -> !item.isEmpty()) //remove empty Strings
+                    .filter(item -> item != null && !item.isEmpty()) //remove empty Strings
                     .toArray(String[]::new);
 
             final List<String> errorFields = new CopyOnWriteArrayList<>();
 
             if(serialPort.getValue() == null){
-                errorFields.add("Serial port is null");
+                errorFields.add("Serial port is empty");
             }
 
             if(flashFileName == null) {
-                errorFields.add("flashFileName port is null");
+                errorFields.add("Firmware does not exist");
             }
 
             if(errorFields.isEmpty()) {

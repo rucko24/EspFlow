@@ -3,13 +3,12 @@ package com.esp.espflow.service;
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.enums.BaudRates;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
-import com.esp.espflow.service.provider.ComPortServiceArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceNoFlashSizeArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceRawFlashIdFromPortArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceReadFlashArgumentsProvider;
+import com.esp.espflow.service.provider.EsptoolServiceWriteFlashArgumentsProvider;
 import com.esp.espflow.util.GetOsName;
-import com.fazecast.jSerialComm.SerialPort;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
@@ -29,12 +28,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.util.EspFlowConstants.CHIP_IS;
@@ -80,12 +80,10 @@ class EsptoolServiceTest {
     @Mock
     private EsptoolPathService esptoolPathService;
 
+    @Test
     @SetSystemProperty(key = "os.name", value = "linux")
-    @ParameterizedTest
-    @ArgumentsSource(ComPortServiceArgumentsProvider.class)
     @DisplayName("we read all the devices, the reading is completely correct")
-    void readAllDevices(SerialPort[] actualSerialPorts, String expectedDevUsb1,
-                        String expectedDevUsb2) {
+    void readAllDevices() {
 
         final Predicate<String> predicate = line -> line.startsWith(SERIAL_PORT)
                 || line.startsWith(MAC)
@@ -96,7 +94,7 @@ class EsptoolServiceTest {
 
         ReflectionTestUtils.setField(esptoolService, "predicate", predicate);
 
-        when(comPortService.getPortsListWithFriendlyName()).thenReturn(Set.of(expectedDevUsb1));
+        when(comPortService.getPortsListWithFriendlyName()).thenReturn(Set.of("/dev/ttyUSB1@Serial-1"));
 
         String[] commands = new String[]{
                 "/tmp/esptool-bundle-dir/esptool-linux-amd64/esptool",
@@ -135,42 +133,31 @@ class EsptoolServiceTest {
                 .verifyComplete();
 
         verify(esptoolFallbackService, times(0)).fallback("/dev/ttyUSB1");
-        verify(esptoolFallbackService, times(0)).portListingIsEmpty();
+        verify(esptoolFallbackService, times(0)).fallbackEmptyPorts();
         verifyNoInteractions(esptoolFallbackService);
 
     }
 
     @Test
     @SetSystemProperty(key = "os.name", value = "linux")
-    @DisplayName("Si al leer los puertos tenemos un Set vacio, procesamos un CanNotBeReadDeviceException con mensaje de error" +
-            " Possibly empty ports 🤔")
+    @DisplayName("If when reading the ports we get an empty Set, we process a CanNotBeReadDeviceException with error message Possibly empty ports 🤔")
     void readAllDevicesEmptyPorts() {
 
         when(comPortService.getPortsListWithFriendlyName()).thenReturn(Set.of());
 
         assertThat(comPortService.getPortsListWithFriendlyName()).isEmpty();
 
-        when(esptoolFallbackService.portListingIsEmpty())
+        when(esptoolFallbackService.fallbackEmptyPorts())
                 .thenReturn(Mono.error(new CanNotBeReadDeviceException("Possibly empty ports")));
 
         StepVerifier.create(esptoolService.readAllDevices())
                 .expectErrorMatches(error -> error.getMessage().contains("Possibly empty ports"))
                 .verify();
 
-        verify(esptoolFallbackService, times(1)).portListingIsEmpty();
+        verify(esptoolFallbackService, times(1)).fallbackEmptyPorts();
         verifyNoMoreInteractions(esptoolFallbackService);
 
     }
-
-    @Test
-    void aTst() {
-
-        var empty = Flux.fromIterable(Set.of());
-
-        StepVerifier.create(empty)
-                .verifyComplete();
-    }
-
 
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceArgumentsProvider.class)
@@ -191,6 +178,9 @@ class EsptoolServiceTest {
         StepVerifier.create(esptoolService.readFlashIdFromPort(portWithFriendlyName))
                 .expectNext(expectedLines)
                 .verifyComplete();
+
+        verify(esptoolFallbackService, times(0)).fallback(portForInputStream);
+        verifyNoInteractions(esptoolFallbackService);
 
     }
 
@@ -245,11 +235,10 @@ class EsptoolServiceTest {
     @SneakyThrows
     void showEsptoolVersionFailure() {
 
-        String[] commands = ESPTOOL_PY_VERSION;
-
         when(esptoolPathService.esptoolPath()).thenReturn("esptool.py");
 
-        when(commandService.processInputStreamLineByLine(commands)).thenReturn(Flux.just("not found"));
+        when(commandService.processInputStreamLineByLine(ESPTOOL_PY_VERSION))
+                .thenReturn(Flux.just("not found"));
 
         StepVerifier.create(esptoolService.showEsptoolVersion())
                 .expectNext(ESPTOOL_PY_NOT_FOUND)
@@ -296,8 +285,8 @@ class EsptoolServiceTest {
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceReadFlashArgumentsProvider.class)
     @SetSystemProperty(key = "java.osname", value = "linux")
-    @DisplayName("The entire flash of the device is read using the ALL parameter, the console will display the percentage in real time, en linux")
-    void downloadFlash(Flux<String> actualLines, String expectedLinesFromConsole) {
+    @DisplayName("The entire flash of the device is read using the ALL parameter, the console will display the percentage in real time, on linux")
+    void downloadFlash(Flux<String> actualLines, String[] expectedLinesFromConsole) {
 
         String[] commands = {"esptool.py", "--port", "/dev/ttyUSB1", "--baud", "115200", "read_flash",
                 "0", "ALL", "esp8266-backupflash.bin"};
@@ -305,7 +294,64 @@ class EsptoolServiceTest {
         when(commandService.processCommandsWithCustomCharset(commands)).thenReturn(actualLines);
 
         StepVerifier.create(esptoolService.downloadFlash(commands))
-                .expectNext(expectedLinesFromConsole)
+                .expectNext(expectedLinesFromConsole[0])
+                .expectNext(expectedLinesFromConsole[1])
+                .expectNext(expectedLinesFromConsole[2])
+                .expectNext(expectedLinesFromConsole[3])
+                .expectNext(expectedLinesFromConsole[4])
+                .expectNext(expectedLinesFromConsole[5])
+                .expectNext(expectedLinesFromConsole[6])
+                .expectNext(expectedLinesFromConsole[7])
+                .expectNext(expectedLinesFromConsole[8])
+                .expectNext(expectedLinesFromConsole[9])
+                .expectNext(expectedLinesFromConsole[10])
+                .expectNext(expectedLinesFromConsole[11])
+                .expectNext(expectedLinesFromConsole[12])
+                .verifyComplete();
+
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(EsptoolServiceWriteFlashArgumentsProvider.class)
+    @DisplayName("We write the flash and process line by line")
+    void writeFlash(Flux<String> actualLines, String[] expectedLines) {
+
+        String[] commands = {"esptool.py", "--port", "/dev/ttyUSB1", "--baud", "115200", "write_flash",
+                "--flash_mode", "dio", "--flash_size", "detect",
+                "0x00000",
+                "esp01s-sec2500.bin"};
+
+        when(commandService.processInputStreamLineByLine(commands)).thenReturn(actualLines);
+
+        StepVerifier.create(esptoolService.writeFlash(commands))
+                .expectNext(expectedLines[0])
+                .expectNext(expectedLines[1])
+                .expectNext(expectedLines[2])
+                .expectNext(expectedLines[3])
+                .expectNext(expectedLines[4])
+                .expectNext(expectedLines[5])
+                .expectNext(expectedLines[6])
+                .expectNext(expectedLines[7])
+                .expectNext(expectedLines[8])
+                .expectNext(expectedLines[9])
+                .expectNext(expectedLines[10])
+                .expectNext(expectedLines[11])
+                .expectNext(expectedLines[12])
+                .expectNext(expectedLines[13])
+                .expectNext(expectedLines[14])
+                .expectNext(expectedLines[15])
+                .expectNext(expectedLines[16])
+                .expectNext(expectedLines[17])
+                .expectNext(expectedLines[18])
+                .expectNext(expectedLines[19])
+                .expectNext(expectedLines[20])
+                .expectNext(expectedLines[21])
+                .expectNext(expectedLines[22])
+                .expectNext(expectedLines[23])
+                .expectNext(expectedLines[24])
+                .expectNext(expectedLines[25])
+                .expectNext(expectedLines[25])
+                .expectNext(expectedLines[26])
                 .verifyComplete();
 
     }
@@ -313,13 +359,31 @@ class EsptoolServiceTest {
     @Test
     @SetSystemProperty(key = "java.io.tmpdir", value = "/tmp")
     @SetSystemProperty(key = "os.name", value = "linux")
-    @DisplayName("Creacion de fichero de backup en directorio temporal")
+    @DisplayName("Creation of backup file in temporary directory, on linux")
     void createEspBackUpFlashDirIfNotExists() throws IOException {
 
-        Files.deleteIfExists(Path.of("/tmp/esp-backup-flash-dir"));
+        Path tmpPath = Path.of("/tmp/esp-backup-flash-dir");
 
-        assertThatCode(() ->
-                this.esptoolService.createEspBackUpFlashDirIfNotExists()).doesNotThrowAnyException();
+        if (Files.exists(tmpPath)) {
+            try (Stream<Path> dirStream = Files.walk(tmpPath)) {
+
+                dirStream
+                        .filter(Files::isRegularFile)
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
+
+            Files.deleteIfExists(tmpPath);
+            assertThatCode(() ->
+                    this.esptoolService.createEspBackUpFlashDirIfNotExists()).doesNotThrowAnyException();
+
+        } else {
+
+            assertThatExceptionOfType(IOException.class)
+                    .isThrownBy(() -> this.esptoolService.createEspBackUpFlashDirIfNotExists())
+                    .withMessage("Error creating directory /esp-backup-flash-dir on not-dir/esp-backup-flash-dir");
+        }
+
 
     }
 

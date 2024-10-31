@@ -209,6 +209,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         autoDetectFlashSize.setSizeUndefined();
         autoDetectFlashSize.addValueChangeListener(event -> {
             if (event.getValue()) {
+                endAddress.setValue(0);
                 endAddress.setEnabled(false);
             } else {
                 endAddress.setEnabled(true);
@@ -330,6 +331,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
         this.esptoolService.readAllDevices()
                 .flatMap(this.countAllDevices())
                 .flatMap(this.configureSlides(ui, paramEspDevicesCarousel, spansList))
+                .doOnError(canNotBeReadDevice -> this.onError(ui, canNotBeReadDevice))
                 .doOnComplete(() -> this.onComplete(ui, paramEspDevicesCarousel, spansList))
                 .subscribe(resultEspDevicesCarousel -> {
                     ui.access(() -> {
@@ -472,6 +474,26 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
 
         return Mono.just(resultCarousel);
 
+    }
+
+    /**
+     *
+     * En caso de no poder leer ningun puerto serie, es decir el dispositivo no esta conectado, se deberia
+     * revisar la conexion con el puerto USB
+     *
+     * <p>new CanNotBeReadDeviceException("Possibly empty ports")</`p>
+     *
+     * @param ui the UI
+     * @param canNotBeReadDevice Possibly empty ports
+     */
+    private void onError(final UI ui, Throwable canNotBeReadDevice) {
+        ui.access(() -> {
+            //En caso que desde Java no logremos leer ningun puerto /dev/tty* /dev/cua*
+            ConfirmDialogBuilder.showWarning(canNotBeReadDevice.getMessage());
+            this.setDivCarouselNoDevicesShown();
+            this.leftPrimarySectionProgressBar.setVisible(false);
+            this.buttonRefreshDevices.setEnabled(true);
+        });
     }
 
     /**

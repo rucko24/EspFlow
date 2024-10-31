@@ -26,6 +26,7 @@ import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -407,9 +408,8 @@ public class ShowDevicesBuilder {
                             || text.toString().isEmpty(), "Invalid input, set only numbers")
                     .bind(AddressRecordBinder::startAddressSize, (addressRecordBinder, value) -> {});
             addressRecordBinderBinder.forField(customSizeToRead)
-                    .withValidator(text -> text.toString().matches("^[1-9]\\d*$\n")
-                            || text.toString().isEmpty()
-                            || text != 0, "Invalid input, set only numbers and greater than zero")
+                    .withValidator(text -> text.toString().matches("\\d+"),
+                            "Invalid input, set only numbers and greater than zero")
                     .bind(AddressRecordBinder::customAddresSize, (addressRecordBinder, value) -> {});
 
             downloadFlashButton.addClickListener(event -> {
@@ -431,16 +431,16 @@ public class ShowDevicesBuilder {
          */
         private void validate(final FlashButtonWrapperService flashButtonWrapperService) {
             String processAutoDetectFlashSize = "";
-            if (autoDetectFlashSize.getValue()) {
+            if (Boolean.TRUE.equals(autoDetectFlashSize.getValue())) {
                 processAutoDetectFlashSize = "ALL";
-                readFlash(flashButtonWrapperService, processAutoDetectFlashSize);
+                this.readFlash(flashButtonWrapperService, processAutoDetectFlashSize);
             } else {
-                if(!customSizeToRead.isEmpty()) {
+                if(customSizeToRead.getValue() != 0) {
                     processAutoDetectFlashSize = "0x".concat(String.valueOf(customSizeToRead.getValue()));
-                    readFlash(flashButtonWrapperService, processAutoDetectFlashSize);
+                    this.readFlash(flashButtonWrapperService, processAutoDetectFlashSize);
                 } else {
-                    ConfirmDialogBuilder.showWarning("Please set the custom size or enable the button for full readability.");
                     customSizeToRead.focus();
+                    ConfirmDialogBuilder.showWarning("Please set the custom size greater than zero, or enable the button for full readability.");
                 }
 
             }
@@ -452,7 +452,11 @@ public class ShowDevicesBuilder {
          * @param processAutoDetectFlashSize
          */
         private void readFlash(final FlashButtonWrapperService flashButtonWrapperService, String processAutoDetectFlashSize) {
-            esptoolService.createEspBackUpFlashDirIfNotExists();
+            try {
+                esptoolService.createEspBackUpFlashDirIfNotExists();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             final String currentTimeMillis = String.valueOf(System.currentTimeMillis());
             final String fileNameResult = espDeviceInfo.chipIs().concat("-")
                     .concat(currentTimeMillis).concat("-backup.bin");

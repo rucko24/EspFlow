@@ -2,7 +2,6 @@ package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.enums.BaudRates;
-import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.mappers.EspDeviceInfoMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +40,7 @@ public class EsptoolService {
 
     private final CommandService commandService;
     private final ComPortService comPortService;
-    private final EspDeviceInfoFallBackService espDeviceInfoFallBackService;
+    private final EsptoolFallBackService esptoolFallBackService;
     private final EsptoolPathService esptoolPathService;
 
     /**
@@ -60,18 +59,9 @@ public class EsptoolService {
      */
     public Flux<EspDeviceInfo> readAllDevices() {
         return Flux.fromIterable(comPortService.getPortsListWithFriendlyName())
-                .switchIfEmpty(this.portListingIsEmpty())
+                .switchIfEmpty(Mono.defer(this.esptoolFallBackService::fallbackEmptyPorts))
                 .flatMap(this::readFlashIdFromPort)
                 .doOnNext(onNext -> log.info("onNext device: {}", onNext));
-    }
-
-    /**
-     * This allows us to raise the exception type {@link CanNotBeReadDeviceException}, when the port list is empty.
-     *
-     * @return A {@link Mono}
-     */
-    private Mono<String> portListingIsEmpty() {
-        return Mono.defer(() -> Mono.error(new CanNotBeReadDeviceException("Possibly empty ports")));
     }
 
     /**
@@ -122,7 +112,7 @@ public class EsptoolService {
                 .flatMap(collectedMapInfo -> EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(
                         collectedMapInfo, descriptivePortName)
                 )
-                .switchIfEmpty(Mono.defer(() -> this.espDeviceInfoFallBackService.fallback(parsedPort)));
+                .switchIfEmpty(Mono.defer(() -> this.esptoolFallBackService.fallback(parsedPort)));
     }
 
     /**
@@ -181,7 +171,8 @@ public class EsptoolService {
      *
      * <blockquote><pre>
      *      esptool.py --port /dev/ttyUSB1 --baud customBaudRate read_flash 0 ALL esp8266-backupflash.bin
-     *   </pre></blockquote><p>
+     *   </pre>
+     *   </blockquote><p>
      *
      * @param commands the commands to process
      * @return A {@link Flux<String>}
@@ -223,13 +214,13 @@ public class EsptoolService {
     /**
      * Create the folder named <strong>/esp-backup-flash-dir</strong> in the temporary directory of the operating system
      */
-    public void createEspBackUpFlashDirIfNotExists() {
+    public void createEspBackUpFlashDirIfNotExists() throws IOException {
         final Path espBackupFlashDir = Path.of(JAVA_IO_TEMPORAL_DIR_OS.concat("/esp-backup-flash-dir"));
         if (!Files.exists(espBackupFlashDir)) {
             try {
                 Files.createDirectory(espBackupFlashDir);
             } catch (IOException e) {
-                log.debug("Error creating directory /esp-backup-flash-dir {}", e.getMessage());
+                throw new IOException("Error creating directory /esp-backup-flash-dir on " + e.getMessage());
             }
         }
     }
