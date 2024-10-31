@@ -47,6 +47,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
+import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
@@ -147,6 +148,14 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
          */
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getSecondaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
+        splitLayout.getPrimaryComponent().getElement().getStyle().set(
+                "border-bottom","1px solid var(--lumo-contrast-10pct)");
+        splitLayout.getSecondaryComponent().getElement().getStyle().set(
+                "background","linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
+
+        splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-width", "thin");
+        splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-color", "#3b3b3b #202020");
+
         return splitLayout;
     }
 
@@ -244,10 +253,35 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv {
      * @return A  {@link Div}
      */
     private Div divForConsoleOutput() {
-        final var divRowToSecondary = new Div(outPutConsole);
+        final var divRowToSecondary = new Div();
         divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
         divRowToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
+
+        outPutConsole.getStyle().set("overflow-x","hidden");
+        outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
+        outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+
+        Div divColumnItems = new Div(outPutConsole.getButtonDownScroll(),
+                outPutConsole.getButtonClear());
+        divColumnItems.setId("divColumnItems");
+
+        divColumnItems.addClassNames(
+                Display.FLEX,
+                FlexDirection.COLUMN,
+                JustifyContent.END,
+                Overflow.HIDDEN);
+
+        divColumnItems.getStyle().set("margin-left","10px");
+        divColumnItems.getStyle().set("margin-right","10px");
+        divColumnItems.getStyle().set("margin-bottom","3px");
+        divColumnItems.getStyle().set("max-width","40px");
+        divColumnItems.getStyle().set("width","40px");
+        divColumnItems.getStyle().set(OVERFLOW_Y, HIDDEN);
+
+        divRowToSecondary.add(divColumnItems, outPutConsole);
+
         return divRowToSecondary;
     }
 
