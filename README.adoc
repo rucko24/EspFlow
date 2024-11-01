@@ -12,21 +12,29 @@ The UI is based on Vaadin Flow and allows invoking `esptool.py` to execute opera
 
 == Flash View
 
-- `flash_id` with this command we read basic information from the microcontroller.
+=== `flash_id`
+
+with this command we read basic information from the microcontroller.
 
 image::images-for-asciidoctor/flashid.png[]
 
-- `write_flash` to write the firmware
+=== `write_flash`
+
+to write the firmware
 
 image::images-for-asciidoctor/writeflash.png[]
 
-- `Change serial port permissions!` to change the permissions on the serial port
+=== `Change serial port permissions!` 
+
+to change the permissions on the serial port
 
 image::images-for-asciidoctor/changeportpermissions.png[]
 
 == Read firmware View
 
-- `read_flash` Backup of the microcontroller firmware with, with the possibility to set the memory sections to be read, custom initial and final read size, or `ALL` for full read.
+=== `read_flash`
+
+Backup of the microcontroller firmware with, with the possibility to set the memory sections to be read, custom initial and final read size, or `ALL` for full read.
 
 [source,sh]
 ----
