@@ -350,7 +350,6 @@ class EsptoolServiceTest {
                 .expectNext(expectedLines[23])
                 .expectNext(expectedLines[24])
                 .expectNext(expectedLines[25])
-                .expectNext(expectedLines[25])
                 .expectNext(expectedLines[26])
                 .verifyComplete();
 
