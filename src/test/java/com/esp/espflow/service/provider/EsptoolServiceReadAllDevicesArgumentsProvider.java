@@ -7,15 +7,7 @@ import org.junit.jupiter.params.provider.ArgumentsProvider;
 import reactor.core.publisher.Flux;
 
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import static com.esp.espflow.util.EspFlowConstants.CHIP_IS;
-import static com.esp.espflow.util.EspFlowConstants.CHIP_TYPE;
-import static com.esp.espflow.util.EspFlowConstants.CRYSTAL_IS;
-import static com.esp.espflow.util.EspFlowConstants.DETECTED_FLASH_SIZE;
-import static com.esp.espflow.util.EspFlowConstants.MAC;
-import static com.esp.espflow.util.EspFlowConstants.SERIAL_PORT;
 
 public class EsptoolServiceReadAllDevicesArgumentsProvider implements ArgumentsProvider {
 
