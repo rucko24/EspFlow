@@ -54,7 +54,7 @@ These environment variables can also be set in the `IDE` for convenience.
 - `*ADMIN_ESPFLOW_USER*`
 - `*ESPFLOW_PASSWORD*`
 
-https://github.com/rucko24/EspFlow/blob/main/src/main/resources/application.yml#L26[see application.yml file^]
+https://github.com/rucko24/EspFlow/blob/main/src/main/resources/application.yml[see application.yml file^]
 
 == Deploying to Production
 
