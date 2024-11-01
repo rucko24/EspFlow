@@ -14,15 +14,24 @@ The UI is based on Vaadin Flow and allows invoking `esptool.py` to execute opera
 
 - `flash_id` with this command we read basic information from the microcontroller.
 
-image::images-for-asciidoctor/flashview.png[]
+image::images-for-asciidoctor/flashid.png[]
+
+- `write_flash` to write the firmware
+
+image::images-for-asciidoctor/writeflash.png[]
+
+- `Change serial port permissions!` to change the permissions on the serial port
+
+image::images-for-asciidoctor/changeportpermissions.png[]
 
 == Read firmware View
 
 - `read_flash` Backup of the microcontroller firmware with, with the possibility to set the memory sections to be read, custom initial and final read size, or `ALL` for full read.
 
-```sh
+[source,sh]
+----
 esptool.py --port /dev/ttyUSB1 --baud 11500 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin
-```
+----
 
 image::https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgeqzm7pbsCNMlDBemO9lAiXUYl7rudejJjYCVY7ClTUphlEOsz2-_nSGPoZzAjtn28sYRlN_8DKhvLiBwhF3sl4Ap0KQtyXJZW9OPWUP5_nLxHuzWO7FrxVf1YwmtsrdC4WIecLpVofBTZk3vI3h2ePEf8BIZ0qwTynLaU4eS4d57u2ifaOna_8Ye-/s1910/gif-read-firmware.gif[]
 
@@ -54,47 +63,10 @@ or `./mvnw clean package -Pproduction` (Mac & Linux).
 This will build a JAR file with all the dependencies and front-end resources,
 ready to be deployed. The file can be found in the `target` folder after the build completes.
 
-Once the JAR file is built, you can run it using 
+Once the JAR file is built, you can run it using
 
-```sh
+[source,sh]
+----
 java -jar target/espflow-1.0-SNAPSHOT.jar --ADMIN_ESPFLOW_USER=xxxx --ESPFLOW_PASSWORD=xxxx
-```
-
-== Project structure
-
-- `MainLayout.java` in `src/main/java` contains the navigation setup (i.e., the
-  side/top bar and the main menu). This setup uses
-  [App Layout](https://vaadin.com/components/vaadin-app-layout).
-- `views` package in `src/main/java` contains the server-side Java views of your application.
-- `views` folder in `frontend/` contains the client-side JavaScript views of your application.
-- `themes` folder in `frontend/` contains the custom CSS styles.
-
-== Useful links
-
-- Read the documentation at [vaadin.com/docs](https://vaadin.com/docs).
-- Follow the tutorials at [vaadin.com/tutorials](https://vaadin.com/tutorials).
-- Watch training videos and get certified at [vaadin.com/learn/training](https://vaadin.com/learn/training).
-- Create new projects at [start.vaadin.com](https://start.vaadin.com/).
-- Search UI components and their usage examples at [vaadin.com/components](https://vaadin.com/components).
-- View use case applications that demonstrate Vaadin capabilities at [vaadin.com/examples-and-demos](https://vaadin.com/examples-and-demos).
-- Discover Vaadin's set of CSS utility classes that enable building any UI without custom CSS in the [docs](https://vaadin.com/docs/latest/ds/foundation/utility-classes). 
-- Find a collection of solutions to common use cases in [Vaadin Cookbook](https://cookbook.vaadin.com/).
-- Find Add-ons at [vaadin.com/directory](https://vaadin.com/directory).
-- Ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/vaadin) or join our [Vaadin forum](https://vaadin.com/forum/).
-- Report issues, create pull requests in [GitHub](https://github.com/vaadin/platform).
-
-== Deploying using Docker
-
-To build the Dockerized version of the project, run
-
-[source]
-----
-docker build . -t espflow:latest
 ----
 
-Once the Docker image is correctly built, you can test it locally using
-
-[source]
-----
-docker run -p 8081:8081 espflow:latest
-----
