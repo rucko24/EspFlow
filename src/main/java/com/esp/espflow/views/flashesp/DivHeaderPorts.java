@@ -178,7 +178,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      */
     private void initListeners() {
         this.scanPort.addClickListener(e -> showPortIsEsptoolVersionExists());
-        this.unlockPort.addClickListener(event -> this.changeSerialPortPermissionDialog.open(this.comboBoxSerialPort));
+        this.unlockPort.addClickListener(event -> this.changeSerialPortPermissionDialog.setComboBoxWithErrorsInPorts(this.comboBoxSerialPort));
     }
 
     /**

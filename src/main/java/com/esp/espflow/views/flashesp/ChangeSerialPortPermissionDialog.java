@@ -62,9 +62,20 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
     }
 
     /**
+     * Pasamos los puertos con errores
+     *
+     * @param ports
+     */
+    public void setPortErrors(String[] ports) {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setItems(ports);
+        this.setComboBoxWithErrorsInPorts(comboBox);
+    }
+
+    /**
      * It is invoked in the class {@link DivHeaderPorts#initListeners()}
      */
-    public void open(ComboBox<String> comboBoxSerialPort) {
+    public void setComboBoxWithErrorsInPorts(ComboBox<String> comboBoxSerialPort) {
         super.open();
 
         this.verticalLayout.addComponentAtIndex(1, userName);

@@ -12,19 +12,23 @@ import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
 import com.esp.espflow.util.console.OutPutConsole;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
+import com.esp.espflow.views.flashesp.ChangeSerialPortPermissionDialog;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -41,8 +45,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.BeforeLeaveEvent;
-import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
@@ -118,6 +120,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * Registration for button
      */
     private Registration broadcasterRefreshButton;
+    /**
+     * Change port permission
+     */
+    private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
+    private final Set<Span> spansList = new CopyOnWriteArraySet<>();
 
     @PostConstruct
     public void init() {
@@ -316,13 +323,30 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
         this.divWithPortErrors.setVisible(false);
 
+        final ContextMenu contextMenuDivPortError = new ContextMenu();
+        contextMenuDivPortError.setTarget(divWithPortErrors);
+
+        final Div divWithIconAndText = new Div();
+        divWithIconAndText.addClassNames(Display.FLEX, FlexDirection.ROW, AlignItems.CENTER, JustifyContent.START);
+        final Text text = new Text("Change port permissions");
+        divWithIconAndText.add(SvgFactory.createIconFromSvg("unlock-black.svg", "30px",null), text);
+        contextMenuDivPortError.addItem(divWithIconAndText, event -> {
+            var spanListWithError = this.spansList.stream()
+                    .map(HasText::getText)
+                    .distinct()
+                    .toArray(String[]::new);
+            this.changeSerialPortPermissionDialog.setPortErrors(spanListWithError);
+            this.spansList.clear();
+        }).setCheckable(true);
+
         spanPortFailure.addClassName(Left.SMALL);
         this.divWithPortErrors.add(spanPortFailure);
         divWithPortErrors.getStyle().set("color", "red");
+
         Stream.of(divSpanTotalDevices, divWithPortErrors)
-                .forEach(divs -> {
-                    divs.addClassName(Right.MEDIUM);
-                    divs.getElement().setAttribute("theme", "badge");
+                .forEach(div -> {
+                    div.addClassNames(Right.MEDIUM, BOX_SHADOW_VAADIN_BUTTON);
+                    div.getElement().setAttribute("theme", "badge");
                 });
 
         final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);
@@ -374,7 +398,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private void showDetectedDevices(final UI ui, final EspDevicesCarousel paramEspDevicesCarousel) {
 
         this.leftPrimarySectionProgressBar.setVisible(true);
-        final Set<Span> spansList = new CopyOnWriteArraySet<>();
 
         this.esptoolService.readAllDevices()
                 .flatMap(this.countAllDevices())
@@ -442,6 +465,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 final String newSpanErrors = spansList
                         .stream()
                         .map(HasText::getText)
+                        .distinct()
                         .sorted(Comparator.comparing(Objects::toString))
                         .collect(Collectors.joining(" "));
 
@@ -573,6 +597,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 ConfirmDialogBuilder.showWarning("Port`s with error: " +
                         spanErrorPortList.stream()
                                 .map(HasText::getText)
+                                .distinct()
                                 .collect(Collectors.joining(",")));
             }
             if (paramEspDevicesCarousel.getSlideList().isEmpty()) {
