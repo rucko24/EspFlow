@@ -46,6 +46,7 @@ image::https://github.com/user-attachments/assets/9a4631f4-d5ad-4d33-9d87-6909a3
 - espefuse.py support
 - espsecure.py support
 - parttool.py support
+- Remote Serial Ports RFC2217 (Telnet) protocol.
 
 == Running the application
 
