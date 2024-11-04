@@ -1,7 +1,7 @@
 package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfo;
-import com.esp.espflow.service.downloader.FlashButtonWrapperService;
+import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
 import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.button.Button;
@@ -80,7 +80,7 @@ public final class DeviceCardLayout extends Div {
      * The download flash button
      */
     private Button downloadFlashButton;
-    private FlashButtonWrapperService flashButtonWrapperService;
+    private FlashDownloadButtonWrapper flashDownloadButtonWrapper;
 
     private String image;
     private EspDeviceInfo espDeviceInfo;
@@ -91,23 +91,24 @@ public final class DeviceCardLayout extends Div {
      * @param image
      * @param espDeviceInfo
      * @param downloadFlashButton
-     * @param flashButtonWrapperService
+     * @param flashDownloadButtonWrapper
+     *
      * @return A {@link DeviceCardLayout}
      */
     public static DeviceCardLayout of(final String image, final EspDeviceInfo espDeviceInfo,
                             final Button downloadFlashButton,
-                            final FlashButtonWrapperService flashButtonWrapperService) {
-       return new DeviceCardLayout(image, espDeviceInfo, downloadFlashButton, flashButtonWrapperService);
+                            final FlashDownloadButtonWrapper flashDownloadButtonWrapper) {
+       return new DeviceCardLayout(image, espDeviceInfo, downloadFlashButton, flashDownloadButtonWrapper);
     }
 
     private DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo,
                             final Button downloadFlashButton,
-                            final FlashButtonWrapperService flashButtonWrapperService) {
+                            final FlashDownloadButtonWrapper flashDownloadButtonWrapper) {
         super.addClassName("card-container");
         this.image = image;
         this.espDeviceInfo = espDeviceInfo;
         this.downloadFlashButton = downloadFlashButton;
-        this.flashButtonWrapperService = flashButtonWrapperService;
+        this.flashDownloadButtonWrapper = flashDownloadButtonWrapper;
 
         final Div toolbar = this.createDivToolbarRow();
         final Div slideOverView = this.createDivSlideOverview();
@@ -134,8 +135,8 @@ public final class DeviceCardLayout extends Div {
         if (Objects.nonNull(downloadFlashButton)) {
             divControls.add(downloadFlashButton);
         }
-        if (Objects.nonNull(flashButtonWrapperService)) {
-            divControls.add(flashButtonWrapperService);
+        if (Objects.nonNull(flashDownloadButtonWrapper)) {
+            divControls.add(flashDownloadButtonWrapper);
         }
 
         return divControls;

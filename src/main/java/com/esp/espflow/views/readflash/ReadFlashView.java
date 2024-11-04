@@ -7,7 +7,7 @@ import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
-import com.esp.espflow.service.downloader.FlashButtonWrapperService;
+import com.esp.espflow.service.downloader.FlashDownloadButtonService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
@@ -94,7 +94,7 @@ import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
 @RequiredArgsConstructor
 public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnterObserver {
 
-    private final FlashButtonWrapperService flashButtonWrapperService;
+    private final FlashDownloadButtonService flashDownloadButtonService;
     private final EsptoolService esptoolService;
     private final EsptoolPathService esptoolPathService;
     private final ProgressBar leftPrimarySectionProgressBar = new ProgressBar();
@@ -329,7 +329,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         final Div divWithIconAndText = new Div();
         divWithIconAndText.addClassNames(Display.FLEX, FlexDirection.ROW, AlignItems.CENTER, JustifyContent.START);
         final Text text = new Text("Change port permissions");
-        divWithIconAndText.add(SvgFactory.createIconFromSvg("unlock-black.svg", "30px",null), text);
+        divWithIconAndText.add(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null), text);
         contextMenuDivPortError.addItem(divWithIconAndText, event -> {
             var spanListWithError = this.spansList.stream()
                     .map(HasText::getText)
@@ -545,7 +545,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 .withAutoDetectFlashSize(this.autoDetectFlashSize)
                 .withBaudRatesComboBox(this.baudRatesComboBox)
                 .withEsptoolPathService(this.esptoolPathService)
-                .withFlashDownloadButton(this.flashButtonWrapperService)
+                .withFlashDownloadButton(this.flashDownloadButtonService)
+                .applyStrategiesWithCustomContentCreationPerSlide()
                 .make();
 
         return Mono.just(resultCarousel);
