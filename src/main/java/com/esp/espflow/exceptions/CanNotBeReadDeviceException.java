@@ -1,7 +1,7 @@
 package com.esp.espflow.exceptions;
 
 /**
- * Can read devices
+ * Can not be read device exception
  *
  * @author rubn
  */

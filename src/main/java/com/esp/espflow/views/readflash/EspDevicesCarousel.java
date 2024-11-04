@@ -1,7 +1,7 @@
 package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfo;
-import com.esp.espflow.service.downloader.FlashButtonWrapperService;
+import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
 import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
@@ -128,12 +128,13 @@ public class EspDevicesCarousel extends Div {
      * @param image
      * @param espDeviceInfo
      * @param downFlashButton
-     * @param flashButtonWrapperService
+     * @param flashDownloadButtonWrapper
      *
      * @return A {@link DeviceCardLayout}
      */
-    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton, FlashButtonWrapperService flashButtonWrapperService) {
-        return DeviceCardLayout.of(image, espDeviceInfo, downFlashButton, flashButtonWrapperService);
+    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton,
+                                                      FlashDownloadButtonWrapper flashDownloadButtonWrapper) {
+        return DeviceCardLayout.of(image, espDeviceInfo, downFlashButton, flashDownloadButtonWrapper);
     }
 
 }

@@ -21,6 +21,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -192,7 +193,9 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 if(GetOsName.getOsName() != GetOsName.WINDOWS) {
                     unlockPort.setEnabled(true);
                 } else {
-                    unlockPort.setEnabled(false);
+                    unlockPort.setTooltipText("Not available for Windows");
+                    //Tooltip.forComponent(unlockPort).setText("Not available for Windows");
+                    unlockPort.addClickListener(event -> {});
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 comboBoxSerialPort.setValue(ports.get(0));

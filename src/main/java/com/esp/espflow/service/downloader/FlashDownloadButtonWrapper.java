@@ -6,8 +6,6 @@ import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.vaadin.olli.FileDownloadWrapper;
@@ -28,9 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author rubn
  */
 @Log4j2
-@UIScope
-@SpringComponent
-public class FlashButtonWrapperService extends FileDownloadWrapper {
+public class FlashDownloadButtonWrapper extends FileDownloadWrapper {
 
     private final Button download = new Button(VaadinIcon.DOWNLOAD.create());
 
@@ -58,9 +54,10 @@ public class FlashButtonWrapperService extends FileDownloadWrapper {
     }
 
     /**
-     *  Convert the firmware to byte array
+     * Convert the firmware to byte array
      *
-     * @param writFileToTempFile
+     * @param writFileToTempFile the name of the file located in the temporary OS directory
+     *
      * @return A {@link ByteArrayInputStream} with firmware read from tmp
      */
     private ByteArrayInputStream firmwareToByteArray(final String writFileToTempFile) {

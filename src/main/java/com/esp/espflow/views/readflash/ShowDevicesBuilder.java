@@ -3,9 +3,11 @@ package com.esp.espflow.views.readflash;
 import com.esp.espflow.entity.AddressRecordBinder;
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
-import com.esp.espflow.service.downloader.FlashButtonWrapperService;
+import com.esp.espflow.service.downloader.FlashDownloadButtonService;
+import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
 import com.esp.espflow.service.strategy.filterespslide.FilterEsp01s;
 import com.esp.espflow.service.strategy.filterespslide.FilterEsp32S3;
 import com.esp.espflow.service.strategy.filterespslide.FilterEsp8266CH340G;
@@ -26,7 +28,6 @@ import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -44,7 +45,7 @@ import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideCont
  *
  * <p>With this StepBuilder we can set it up avoiding the nulls, and with obligatory steps </p>
  *
- *  <blockquote>
+ * <blockquote>
  * <pre>
  *     ShowDevices.builder()
  *             .withEspDevicesCarousel(espDevicesCarousel)
@@ -58,6 +59,7 @@ import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideCont
  *             .withBaudRatesComboBox(this.baudRatesComboBox)
  *             .withEsptoolPathService(this.esptoolPathService)
  *             .withFlashDownloadButton(this.flashButtonWrapperService)
+ *             .applyStrategiesWithCustomContentCreationPerSlide()
  *             .make();
  * </pre>
  * </blockquote>
@@ -144,18 +146,26 @@ public class ShowDevicesBuilder {
      * 11
      */
     public interface FlashDownloadWrapperStage {
-        Build withFlashDownloadButton(FlashButtonWrapperService flashButtonWrapperService);
+        StrategiesPlusCustomContentCreationPerSlideStage withFlashDownloadButton(FlashDownloadButtonService flashDownloadButton);
     }
 
     /**
      * 12
+     */
+    public interface StrategiesPlusCustomContentCreationPerSlideStage {
+        Build applyStrategiesWithCustomContentCreationPerSlide();
+    }
+
+    /**
+     * 13
      */
     public interface Build extends IBuilder<EspDevicesCarousel> {
     }
 
     public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage,
             EsptoolServiceStage, UIStage, ConsoleOutPutStage, StartAddressStage,
-            EndAddressSizeStage, AllAddressSizeStage, BaudRateStage, EsptoolPathServiceStage, FlashDownloadWrapperStage, Build {
+            EndAddressSizeStage, AllAddressSizeStage, BaudRateStage, EsptoolPathServiceStage, FlashDownloadWrapperStage,
+            StrategiesPlusCustomContentCreationPerSlideStage, Build {
 
         private EspDevicesCarousel espDevicesCarousel;
         private EsptoolService esptoolService;
@@ -167,7 +177,7 @@ public class ShowDevicesBuilder {
         private ToggleButton autoDetectFlashSize;
         private ComboBox<BaudRates> baudRatesComboBox;
         private EsptoolPathService esptoolPathService;
-        private FlashButtonWrapperService flashButtonWrapperService;
+        private FlashDownloadButtonService flashDownloadButtonService;
 
         /**
          * To bind {@link AddressRecordBinder}
@@ -206,8 +216,8 @@ public class ShowDevicesBuilder {
 
         @Override
         public AllAddressSizeStage withCustomFlashSizeAddress(IntegerField customFlashSizeAddress) {
-            var customSize  = customFlashSizeAddress.getValue().toString();
-            if(customSize.matches("\\d+") || customSize.isEmpty()) {
+            var customSize = customFlashSizeAddress.getValue().toString();
+            if (customSize.matches("\\d+") || customSize.isEmpty()) {
                 this.customSizeToRead = customFlashSizeAddress;
             } else {
                 customFlashSizeAddress.clear();  // delete if it contains foreign characters and set again.
@@ -218,8 +228,8 @@ public class ShowDevicesBuilder {
 
         @Override
         public EndAddressSizeStage withStartSizeAddress(IntegerField startSizeAddress) {
-            var startSize  = startSizeAddress.getValue().toString();
-            if(startSize.matches("\\d+") || startSize.isEmpty()) {
+            var startSize = startSizeAddress.getValue().toString();
+            if (startSize.matches("\\d+") || startSize.isEmpty()) {
                 this.startAddressSize = startSizeAddress;
             } else {
                 startSizeAddress.clear(); // delete if it contains foreign characters and set again.
@@ -247,29 +257,100 @@ public class ShowDevicesBuilder {
         }
 
         @Override
-        public Build withFlashDownloadButton(FlashButtonWrapperService flashButtonWrapperService) {
-            this.flashButtonWrapperService = flashButtonWrapperService;
+        public StrategiesPlusCustomContentCreationPerSlideStage withFlashDownloadButton(FlashDownloadButtonService flashDownloadButtonService) {
+            this.flashDownloadButtonService = flashDownloadButtonService;
             return this;
         }
 
         @Override
-        public EspDevicesCarousel make() {
+        public Build applyStrategiesWithCustomContentCreationPerSlide() {
             var macAddress = espDeviceInfo.macAddress();
             if (ifItContainsMacAddressShowMeTheSlides(macAddress)) {
+                //avoid Cannot invoke "com.vaadin.flow.server.VaadinService.getInstantiator()" because "service" is null
                 ui.access(() -> {
-                    showEsp01s();
-                    showEsp8266340G4MB();
-                    showEsp82664Cp201x4MB();
-                    showEsp8285();
-                    showEsp32S3();
+                    this.showEsp01s();
+                    this.showEsp8266340G4MB();
+                    this.showEsp82664Cp201x4MB();
+                    this.showEsp8285();
+                    this.showEsp32S3();
                 });
-
             }
-            return espDevicesCarousel;
+            return this;
         }
 
         private boolean ifItContainsMacAddressShowMeTheSlides(String macAddress) {
             return Objects.nonNull(macAddress);
+        }
+
+        /**
+         * Show the esp01s 1MB slide
+         */
+        private void showEsp01s() {
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp01s());
+
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
+
+                final FlashDownloadButtonWrapper flashDownloadButtonWrapper = flashDownloadButtonService.getFlashDownloadButtonWrapper();
+
+                var downFlashButton = buttonForReadFlash(ui, flashDownloadButtonWrapper);
+
+                Slide esp01sSlide = new Slide(createSlideContent(
+                        FRONTEND_IMAGES_ESPDEVICES + "esp01s-1MB.jpg",
+                        espDeviceInfo, downFlashButton, flashDownloadButtonWrapper));
+
+                espDevicesCarousel.addSlide(esp01sSlide);
+            } else {
+                log.info("Cannot create the Slide from esp01s {}", espDeviceInfo);
+            }
+
+        }
+
+        /**
+         * Show the ESP8266 chip 340G slide
+         **/
+        private void showEsp8266340G4MB() {
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp8266CH340G());
+
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
+
+                final FlashDownloadButtonWrapper flashDownloadButtonWrapper = flashDownloadButtonService.getFlashDownloadButtonWrapper();
+
+                var downFlashButton = buttonForReadFlash(ui, flashDownloadButtonWrapper);
+
+                Slide esp8266Slide = new Slide(createSlideContent(
+                        FRONTEND_IMAGES_ESPDEVICES + "esp8266-4MB.png",
+                        espDeviceInfo, downFlashButton, flashDownloadButtonWrapper));
+
+                espDevicesCarousel.addSlide(esp8266Slide);
+
+            } else {
+                log.info("Cannot create the Slide from esp8266-4MB {}", espDeviceInfo);
+            }
+
+        }
+
+        /**
+         * Show the ESP8266 4MG amica slide
+         */
+        private void showEsp82664Cp201x4MB() {
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp8266Cp210xAmica());
+
+            if (filterEspDeviceContext.filter(espDeviceInfo)) {
+
+                final FlashDownloadButtonWrapper flashDownloadButtonWrapper = flashDownloadButtonService.getFlashDownloadButtonWrapper();
+
+                var downFlashButton = buttonForReadFlash(ui, flashDownloadButtonWrapper);
+
+                Slide esp8266Slide = new Slide(createSlideContent(
+                        FRONTEND_IMAGES_ESPDEVICES + "esp8266-cp201x.png",
+                        espDeviceInfo, downFlashButton, flashDownloadButtonWrapper));
+
+                espDevicesCarousel.addSlide(esp8266Slide);
+
+            } else {
+                log.info("Cannot create the Slide from esp8266-cp201x AMICA {}", espDeviceInfo);
+            }
+
         }
 
         /**
@@ -280,112 +361,42 @@ public class ShowDevicesBuilder {
 
             if (filterEspDeviceContext.filter(espDeviceInfo)) {
 
-                //final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
+                final FlashDownloadButtonWrapper flashDownloadButtonWrapper = flashDownloadButtonService.getFlashDownloadButtonWrapper();
 
-                var downloadTest = buttonForReadFlash(ui, flashButtonWrapperService);
+                var downloadTest = buttonForReadFlash(ui, flashDownloadButtonWrapper);
 
                 Slide esp8285H16Slide = new Slide(createSlideContent(
                         FRONTEND_IMAGES_ESPDEVICES + "ESP8285H08-2MB.jpeg",
-                        espDeviceInfo, downloadTest, flashButtonWrapperService));
+                        espDeviceInfo, downloadTest, flashDownloadButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp8285H16Slide);
 
+            } else {
+                log.info("Cannot create the Slide from esp8255 {}", espDeviceInfo);
             }
-            log.debug("No se puede crear la Slide de esp8255 {}", espDeviceInfo);
-        }
-
-        /**
-         * Show the esp01s 1MB slide
-         *
-         */
-        private void showEsp01s() {
-            final FilterEspDeviceContext fitlerContext = new FilterEspDeviceContext(new FilterEsp01s());
-
-            if (fitlerContext.filter(espDeviceInfo)) {
-
-                //final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
-
-                var downloadTest = buttonForReadFlash(ui, flashButtonWrapperService);
-
-                Slide esp01sSlide = new Slide(createSlideContent(
-                        FRONTEND_IMAGES_ESPDEVICES + "esp01s-1MB.jpg",
-                        espDeviceInfo, downloadTest, flashButtonWrapperService));
-
-                espDevicesCarousel.addSlide(esp01sSlide);
-            }
-            log.debug("No se puede crear la Slide de esp01s {}", espDeviceInfo);
 
         }
 
         /**
-         *   Show the ESP8266 chip 340G slide
-         **/
-        private void showEsp8266340G4MB() {
-            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp8266CH340G());
-
-            if (filterEspDeviceContext.filter(espDeviceInfo)) {
-
-               // final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
-
-                var downFlashButton = buttonForReadFlash(ui, flashButtonWrapperService);
-
-                Slide esp8266Slide = new Slide(createSlideContent(
-                        FRONTEND_IMAGES_ESPDEVICES + "esp8266-4MB.png",
-                        espDeviceInfo, downFlashButton, flashButtonWrapperService));
-
-                espDevicesCarousel.addSlide(esp8266Slide);
-
-            }
-
-            log.debug("No se puede crear la Slide de esp8266-4MB {}", espDeviceInfo);
-
-        }
-
-        /**
-         *  Show the ESP8266 4MG amica slide
-         */
-        private void showEsp82664Cp201x4MB() {
-            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp8266Cp210xAmica());
-
-            if (filterEspDeviceContext.filter(espDeviceInfo)) {
-
-                //final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
-
-                var downFlashButton = buttonForReadFlash(ui, flashButtonWrapperService);
-
-                Slide esp8266Slide = new Slide(createSlideContent(
-                        FRONTEND_IMAGES_ESPDEVICES + "esp8266-cp201x.png",
-                        espDeviceInfo, downFlashButton, flashButtonWrapperService));
-
-                espDevicesCarousel.addSlide(esp8266Slide);
-
-            }
-
-            log.debug("No se puede crear la Slide de esp8266-cp201x AMICA {}", espDeviceInfo);
-
-        }
-
-        /**
-         *
-         *   Show the ESP32-s3 slide
+         * Show the ESP32-s3 slide
          */
         private void showEsp32S3() {
             final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp32S3());
 
             if (filterEspDeviceContext.filter(espDeviceInfo)) {
 
-                // final FlashButtonWrapper flashButtonWrapper = new FlashButtonWrapper();
+                final FlashDownloadButtonWrapper flashDownloadButtonWrapper = flashDownloadButtonService.getFlashDownloadButtonWrapper();
 
-                var downFlashButton = buttonForReadFlash(ui, flashButtonWrapperService);
+                Button downFlashButton = this.buttonForReadFlash(ui, flashDownloadButtonWrapper);
 
                 Slide esp32s3Slide = new Slide(createSlideContent(
                         FRONTEND_IMAGES_ESPDEVICES + "ESP32-S3-DEVKITC-1-N8_SPL.webp",
-                        espDeviceInfo, downFlashButton, flashButtonWrapperService));
+                        espDeviceInfo, downFlashButton, flashDownloadButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp32s3Slide);
+            } else {
+                log.info("Cannot create the Slide from ESP32-S3-DEVKITC-1-N8_SPL {}", espDeviceInfo);
             }
-
-            log.debug("No se puede crear la Slide de ESP32-S3-DEVKITC-1-N8_SPL {}", espDeviceInfo);
 
         }
 
@@ -393,10 +404,10 @@ public class ShowDevicesBuilder {
          * This button contains the listener that will do the reading to create the carousel with the detected ports.
          *
          * @param ui
-         * @param flashButtonWrapperService
+         * @param flashDownloadButtonWrapper
          * @return A {@link Button} con el listener para la lectura
          */
-        private Button buttonForReadFlash(final UI ui, final FlashButtonWrapperService flashButtonWrapperService) {
+        private Button buttonForReadFlash(final UI ui, final FlashDownloadButtonWrapper flashDownloadButtonWrapper) {
             final Button downloadFlashButton = new Button("Read flash");
             downloadFlashButton.setTooltipText("Read flash");
             downloadFlashButton.addClassName(BOX_SHADOW_VAADIN_BUTTON);
@@ -406,17 +417,19 @@ public class ShowDevicesBuilder {
             addressRecordBinderBinder.forField(startAddressSize)
                     .withValidator(text -> text.toString().matches("\\d+")
                             || text.toString().isEmpty(), "Invalid input, set only numbers")
-                    .bind(AddressRecordBinder::startAddressSize, (addressRecordBinder, value) -> {});
+                    .bind(AddressRecordBinder::startAddressSize, (addressRecordBinder, value) -> {
+                    });
             addressRecordBinderBinder.forField(customSizeToRead)
                     .withValidator(text -> text.toString().matches("\\d+"),
                             "Invalid input, set only numbers and greater than zero")
-                    .bind(AddressRecordBinder::customAddresSize, (addressRecordBinder, value) -> {});
+                    .bind(AddressRecordBinder::customAddresSize, (addressRecordBinder, value) -> {
+                    });
 
             downloadFlashButton.addClickListener(event -> {
                 ui.access(() -> {
                     var newRecord = new AddressRecordBinder(startAddressSize.getValue(), customSizeToRead.getValue());
-                    if(addressRecordBinderBinder.writeBeanIfValid(newRecord)) {
-                        validate(flashButtonWrapperService);
+                    if (addressRecordBinderBinder.writeBeanIfValid(newRecord)) {
+                        this.validate(flashDownloadButtonWrapper);
                     } else {
                         ConfirmDialogBuilder.showWarning("Invalid input, please check!");
                     }
@@ -426,18 +439,19 @@ public class ShowDevicesBuilder {
         }
 
         /**
-         *  This will validate the textfield with the final address and the checkbox
-         * @param flashButtonWrapperService
+         * This will validate the textfield with the final address and the checkbox
+         *
+         * @param flashDownloadButtonWrapper
          */
-        private void validate(final FlashButtonWrapperService flashButtonWrapperService) {
+        private void validate(final FlashDownloadButtonWrapper flashDownloadButtonWrapper) {
             String processAutoDetectFlashSize = "";
             if (Boolean.TRUE.equals(autoDetectFlashSize.getValue())) {
                 processAutoDetectFlashSize = "ALL";
-                this.readFlash(flashButtonWrapperService, processAutoDetectFlashSize);
+                this.readFlash(flashDownloadButtonWrapper, processAutoDetectFlashSize);
             } else {
-                if(customSizeToRead.getValue() != 0) {
+                if (customSizeToRead.getValue() != 0) {
                     processAutoDetectFlashSize = "0x".concat(String.valueOf(customSizeToRead.getValue()));
-                    this.readFlash(flashButtonWrapperService, processAutoDetectFlashSize);
+                    this.readFlash(flashDownloadButtonWrapper, processAutoDetectFlashSize);
                 } else {
                     customSizeToRead.focus();
                     ConfirmDialogBuilder.showWarning("Please set the custom size greater than zero, or enable the button for full readability.");
@@ -447,40 +461,44 @@ public class ShowDevicesBuilder {
         }
 
         /**
-         *
-         * @param flashButtonWrapperService
+         * @param flashDownloadButtonWrapper
          * @param processAutoDetectFlashSize
          */
-        private void readFlash(final FlashButtonWrapperService flashButtonWrapperService, String processAutoDetectFlashSize) {
+        private String readFlash(final FlashDownloadButtonWrapper flashDownloadButtonWrapper, String processAutoDetectFlashSize) {
             try {
                 esptoolService.createEspBackUpFlashDirIfNotExists();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (CreateEspBackUpFlashDirException e) {
+                log.error("Error {} ", e.getMessage());
             }
+
             final String currentTimeMillis = String.valueOf(System.currentTimeMillis());
+
             final String fileNameResult = espDeviceInfo.chipIs().concat("-")
                     .concat(currentTimeMillis).concat("-backup.bin");
+
             final String writFileToTempDir = JAVA_IO_TEMPORAL_DIR_OS
                     .concat("/esp-backup-flash-dir/")
                     .concat(fileNameResult);
-            this.readFlash(ui, writFileToTempDir, espDeviceInfo, flashButtonWrapperService, processAutoDetectFlashSize);
+
+            this.readFlash(ui, writFileToTempDir, espDeviceInfo, flashDownloadButtonWrapper, processAutoDetectFlashSize);
+
+            return writFileToTempDir;
         }
 
         /**
-         *
          * <blockquote>
-         *     <pre>esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin</pre>
+         * <pre>esptool.py --port /dev/ttyUSB1 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin</pre>
          * </blockquote><p>
          *
-         * @param ui  the {@link UI} instance
+         * @param ui                         the {@link UI} instance
          * @param writFileToTempDir
          * @param espDeviceInfo
-         * @param flashButtonWrapperService
+         * @param flashDownloadButtonWrapper
          * @param processAutoDetectFlashSize
          */
         private void readFlash(final UI ui, final String writFileToTempDir,
                                final EspDeviceInfo espDeviceInfo,
-                               final FlashButtonWrapperService flashButtonWrapperService,
+                               final FlashDownloadButtonWrapper flashDownloadButtonWrapper,
                                final String processAutoDetectFlashSize) {
 
             final String[] commands = {
@@ -496,22 +514,22 @@ public class ShowDevicesBuilder {
             CommandsOnFirstLine.putCommansdOnFirstLine(commands, outPutConsole);
 
             esptoolService.downloadFlash(commands)
+                    .doOnError(onError -> {
+                        ui.access(() -> {
+                            log.info("Error: {}", onError);
+                            ConfirmDialogBuilder.showWarning("Error al crear backup de esta flash " + onError);
+                        });
+                    })
                     .doOnComplete(() -> {
                         ui.access(() -> {
                             outPutConsole.writePrompt();
                             if (Files.exists(Path.of(writFileToTempDir))) {
                                 log.info("Backup completed successfully! {}", "");
                                 ConfirmDialogBuilder.showInformation("Backup completed successfully!");
-                                flashButtonWrapperService.enableAnchorForDownloadTheFirmware(writFileToTempDir);
+                                flashDownloadButtonWrapper.enableAnchorForDownloadTheFirmware(writFileToTempDir);
                             } else {
                                 ConfirmDialogBuilder.showWarning("The flash does not exist in the tmp " + writFileToTempDir);
                             }
-                        });
-                    })
-                    .doOnError(onError -> {
-                        ui.access(() -> {
-                            log.info("Error: {}", onError);
-                            ConfirmDialogBuilder.showWarning("Error al crear backup de esta flash " + onError);
                         });
                     })
                     .subscribe(inputLine -> {
@@ -522,8 +540,11 @@ public class ShowDevicesBuilder {
 
         }
 
+        @Override
+        public EspDevicesCarousel make() {
+            return espDevicesCarousel;
+        }
+
     }
-
-
 
 }

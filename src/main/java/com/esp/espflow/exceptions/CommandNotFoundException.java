@@ -1,7 +1,8 @@
 package com.esp.espflow.exceptions;
 
 /**
- * Esptool not found
+ * command not found exception
+ *
  * @author rubn
  */
 public class CommandNotFoundException extends Exception {

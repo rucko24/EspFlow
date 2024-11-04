@@ -2,6 +2,7 @@ package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.mappers.EspDeviceInfoMapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -214,13 +215,13 @@ public class EsptoolService {
     /**
      * Create the folder named <strong>/esp-backup-flash-dir</strong> in the temporary directory of the operating system
      */
-    public void createEspBackUpFlashDirIfNotExists() throws IOException {
+    public void createEspBackUpFlashDirIfNotExists() throws CreateEspBackUpFlashDirException {
         final Path espBackupFlashDir = Path.of(JAVA_IO_TEMPORAL_DIR_OS.concat("/esp-backup-flash-dir"));
         if (!Files.exists(espBackupFlashDir)) {
             try {
                 Files.createDirectory(espBackupFlashDir);
             } catch (IOException e) {
-                throw new IOException("Error creating directory /esp-backup-flash-dir on " + e.getMessage());
+                throw new CreateEspBackUpFlashDirException("Error creating directory /esp-backup-flash-dir on " + e.getMessage());
             }
         }
     }
