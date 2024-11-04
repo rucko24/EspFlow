@@ -180,6 +180,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private Div rowBaudRates() {
         baudRatesRadioButtonGroup.setItems(BaudRates.values());
         baudRatesRadioButtonGroup.setValue(BaudRates.BAUD_RATE_115200);
+        baudRatesRadioButtonGroup.setRenderer(BaudRates.rendererWithTooltip());
 
         final H3 h3 = new H3("Baud rate");
         h3.getStyle().set(MARGIN_TOP, AUTO);
@@ -203,6 +204,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         this.flashModeRadioButtonGroup.setItems(FlashMode.values());
         this.flashModeRadioButtonGroup.setValue(FlashMode.DUAL_IO);
         this.flashModeRadioButtonGroup.setRequired(Boolean.TRUE);
+        this.flashModeRadioButtonGroup.setRenderer(FlashMode.rendererWithTooltip());
         final Div divFlashRadioButton = this.createDiv(flashModeRadioButtonGroup, MARGIN_LEFT, MARGIN_10_PX);
 
         final Div div = new Div(divh3FlashMode, divFlashRadioButton);

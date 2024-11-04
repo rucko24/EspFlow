@@ -200,8 +200,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 comboBoxSerialPort.setValue(ports.get(0));
                 ConfirmDialogBuilder.showInformation("Port found!");
-                this.unlockPort.setIcon(SvgFactory.createIconFromSvg(
-                        "unlock-black.svg","30px",null));
+                this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg","30px",null));
                 buttonExecuteFlashId.setEnabled(true);
                 Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
                 Animated.animate(unlockPort, Animation.FADE_IN);
