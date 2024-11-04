@@ -8,8 +8,6 @@ This project is inspired by the https://github.com/marcelstoer/nodemcu-pyflasher
 
 The UI is based on Vaadin Flow and allows invoking `esptool.py` to execute operations common to microcontrollers of the esp32, and esp8266 family.
 
-== Some operations that are possible, under development ⚒
-
 == Flash View
 
 === `flash_id`
@@ -43,7 +41,11 @@ esptool.py --port /dev/ttyUSB1 --baud 11500 read_flash 0 ALL /tmp/esp-backup-fla
 
 image::https://github.com/user-attachments/assets/9a4631f4-d5ad-4d33-9d87-6909a38fd5ad[]
 
-== *New features*, will be coming soon
+== *New features*, will be coming soon ⚒
+
+- espefuse.py support
+- espsecure.py support
+- parttool.py support
 
 == Running the application
 
