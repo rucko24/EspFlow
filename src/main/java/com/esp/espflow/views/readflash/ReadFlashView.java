@@ -2,7 +2,7 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.entity.EspDeviceWithTotalDevices;
-import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.service.EsptoolPathService;
@@ -39,11 +39,9 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
-import com.vaadin.flow.component.shared.TooltipConfiguration;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -107,7 +105,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final IntegerField startAddress = new IntegerField("Start address");
     private final IntegerField endAddress = new IntegerField("Set size address to read");
     private final ToggleButton autoDetectFlashSize = new ToggleButton();
-    private final ComboBox<BaudRates> baudRatesComboBox = new ComboBox<>("Baud rate");
+    private final ComboBox<BaudRatesEnum> baudRatesComboBox = new ComboBox<>("Baud rate");
     private final Span spanAutoDetectFlashSize = new Span("Set size address to ALL");
     private final Div divWithPortErrors = new Div();
     /**
@@ -247,9 +245,9 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             }
         });
         this.baudRatesComboBox.setTooltipText("Serial port baud rate default 115200");
-        this.baudRatesComboBox.setItems(BaudRates.values());
-        this.baudRatesComboBox.setValue(BaudRates.BAUD_RATE_115200);
-        this.baudRatesComboBox.setItemLabelGenerator(BaudRates::toString);
+        this.baudRatesComboBox.setItems(BaudRatesEnum.values());
+        this.baudRatesComboBox.setValue(BaudRatesEnum.BAUD_RATE_115200);
+        this.baudRatesComboBox.setItemLabelGenerator(BaudRatesEnum::toString);
         final Div parent = new Div(formLayout);
         parent.setWidth("50%");
         parent.addClassNames(Display.FLEX, JustifyContent.CENTER, AlignItems.CENTER);

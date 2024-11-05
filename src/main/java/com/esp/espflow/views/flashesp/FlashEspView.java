@@ -1,8 +1,8 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
-import com.esp.espflow.enums.FlashMode;
+import com.esp.espflow.enums.FlashModeEnum;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.util.CommandsOnFirstLine;
@@ -75,8 +75,8 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final DivHeaderPorts divHeaderPorts;
     private final EsptoolService esptoolService;
     private final EsptoolPathService esptoolPathService;
-    private final RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
-    private final RadioButtonGroup<FlashMode> flashModeRadioButtonGroup = new RadioButtonGroup<>();
+    private final RadioButtonGroup<BaudRatesEnum> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
+    private final RadioButtonGroup<FlashModeEnum> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<EraseFlashEnum> eraseRadioButtons = new RadioButtonGroup<>();
     private final Button flashButton = new Button(SvgFactory.createIconFromSvg(FLASH_OFF_SVG, SIZE_25_PX, null));
     private final VerticalLayout contentForPrimary = new VerticalLayout();
@@ -178,9 +178,9 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     }
 
     private Div rowBaudRates() {
-        baudRatesRadioButtonGroup.setItems(BaudRates.values());
-        baudRatesRadioButtonGroup.setValue(BaudRates.BAUD_RATE_115200);
-        baudRatesRadioButtonGroup.setRenderer(BaudRates.rendererWithTooltip());
+        baudRatesRadioButtonGroup.setItems(BaudRatesEnum.values());
+        baudRatesRadioButtonGroup.setValue(BaudRatesEnum.BAUD_RATE_115200);
+        baudRatesRadioButtonGroup.setRenderer(BaudRatesEnum.rendererWithTooltip());
 
         final H3 h3 = new H3("Baud rate");
         h3.getStyle().set(MARGIN_TOP, AUTO);
@@ -201,10 +201,10 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divh3FlashMode = new Div(h3);
 
-        this.flashModeRadioButtonGroup.setItems(FlashMode.values());
-        this.flashModeRadioButtonGroup.setValue(FlashMode.DUAL_IO);
+        this.flashModeRadioButtonGroup.setItems(FlashModeEnum.values());
+        this.flashModeRadioButtonGroup.setValue(FlashModeEnum.DUAL_IO);
         this.flashModeRadioButtonGroup.setRequired(Boolean.TRUE);
-        this.flashModeRadioButtonGroup.setRenderer(FlashMode.rendererWithTooltip());
+        this.flashModeRadioButtonGroup.setRenderer(FlashModeEnum.rendererWithTooltip());
         final Div divFlashRadioButton = this.createDiv(flashModeRadioButtonGroup, MARGIN_LEFT, MARGIN_10_PX);
 
         final Div div = new Div(divh3FlashMode, divFlashRadioButton);
@@ -219,7 +219,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divh3EraseFlash = new Div(h3);
 
-        this.eraseRadioButtons.setItemLabelGenerator(EraseFlashEnum::getDescriptionForEraseFlash);
+        this.eraseRadioButtons.setRenderer(EraseFlashEnum.rendererWithTooltip());
         this.eraseRadioButtons.setItems(EraseFlashEnum.values());
         this.eraseRadioButtons.setValue(EraseFlashEnum.NO);
         final Div divEraseRadioButton = this.createDiv(eraseRadioButtons, MARGIN_LEFT, MARGIN_10_PX);
@@ -277,7 +277,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                 this.commands = new String[]{
                         esptoolPathService.esptoolPath(),
                         PORT, valuePort,
-                        BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
+                        BAUD_RATE, String.valueOf(BaudRatesEnum.BAUD_RATE_115200.getBaudRate()),
                         FLASH_ID
                 };
 

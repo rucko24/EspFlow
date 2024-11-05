@@ -1,8 +1,8 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
-import com.esp.espflow.enums.FlashMode;
+import com.esp.espflow.enums.FlashModeEnum;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.util.CommandsOnFirstLine;
@@ -71,14 +71,14 @@ public class WriteFlashBuilder {
      * 3
      */
     public interface FlashModeStage {
-        BaudRateStage withFlashMode(RadioButtonGroup<FlashMode> flashModeRadioButtonGroup);
+        BaudRateStage withFlashMode(RadioButtonGroup<FlashModeEnum> flashModeRadioButtonGroup);
     }
 
     /**
      * 4
      */
     public interface BaudRateStage {
-        FlashSizeStage withBaudRate(RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup);
+        FlashSizeStage withBaudRate(RadioButtonGroup<BaudRatesEnum> baudRatesRadioButtonGroup);
     }
 
     /**
@@ -137,9 +137,9 @@ public class WriteFlashBuilder {
             FlashFileNameStage, OutPutConsoleStage, EsptoolPathServiceStage, Build {
 
         private EsptoolService esptoolService;
-        private RadioButtonGroup<BaudRates> baudRate;
+        private RadioButtonGroup<BaudRatesEnum> baudRate;
         private ComboBox<String> serialPort;
-        private RadioButtonGroup<FlashMode> flashMode;
+        private RadioButtonGroup<FlashModeEnum> flashMode;
         private RadioButtonGroup<EraseFlashEnum> eraseFlashOption;
         private OutPutConsole outPutConsole;
         private UI ui;
@@ -154,7 +154,7 @@ public class WriteFlashBuilder {
         }
 
         @Override
-        public FlashSizeStage withBaudRate(RadioButtonGroup<BaudRates> baudRatesRadioButtonGroup) {
+        public FlashSizeStage withBaudRate(RadioButtonGroup<BaudRatesEnum> baudRatesRadioButtonGroup) {
             this.baudRate = baudRatesRadioButtonGroup;
             return this;
         }
@@ -166,7 +166,7 @@ public class WriteFlashBuilder {
         }
 
         @Override
-        public BaudRateStage withFlashMode(RadioButtonGroup<FlashMode> flashModeRadioButtonGroup) {
+        public BaudRateStage withFlashMode(RadioButtonGroup<FlashModeEnum> flashModeRadioButtonGroup) {
             this.flashMode = flashModeRadioButtonGroup;
             return this;
         }

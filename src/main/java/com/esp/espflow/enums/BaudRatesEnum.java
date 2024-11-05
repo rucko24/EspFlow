@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-public enum BaudRates {
+public enum BaudRatesEnum {
 
     BAUD_RATE_9600(9600),
     BAUD_RATE_57600(57600),
@@ -36,8 +36,8 @@ public enum BaudRates {
     /**
      * @return ComponentRenderer<Span, BaudRates>
      */
-    public static ComponentRenderer<Div, BaudRates> rendererWithTooltip() {
-        final SerializableBiConsumer<Div, BaudRates> baudRatesWithToolTip = (div, baudRate) -> {
+    public static ComponentRenderer<Div, BaudRatesEnum> rendererWithTooltip() {
+        final SerializableBiConsumer<Div, BaudRatesEnum> baudRatesWithToolTip = (div, baudRate) -> {
             div.add(createSpan(baudRate));
         };
         return new ComponentRenderer<>(Div::new, baudRatesWithToolTip);
@@ -48,7 +48,7 @@ public enum BaudRates {
      * @param baudRate
      * @return Span
      */
-    private static Span createSpan(final BaudRates baudRate) {
+    private static Span createSpan(final BaudRatesEnum baudRate) {
         Span span = new Span(String.valueOf(baudRate.getBaudRate()).concat(" bds"));
         if (BAUD_RATE_115200 == baudRate) {
             Tooltip.forComponent(span).setText("Default baud rate");

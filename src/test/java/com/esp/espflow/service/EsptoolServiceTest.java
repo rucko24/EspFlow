@@ -1,7 +1,7 @@
 package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfo;
-import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.service.provider.EsptoolServiceArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceNoFlashSizeArgumentsProvider;
@@ -226,7 +226,7 @@ class EsptoolServiceTest {
                 GetOsName.shellOsName(),
                 ESPTOOL_PY,
                 PORT, "COM3",
-                BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
+                BAUD_RATE, String.valueOf(BaudRatesEnum.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID);
 
         when(commandService.processInputStreamLineByLine(commands))

@@ -1,5 +1,10 @@
 package com.esp.espflow.enums;
 
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -25,23 +30,29 @@ public enum EraseFlashEnum {
     }
 
     /**
+     * @return ComponentRenderer<Span, BaudRates>
+     */
+    public static ComponentRenderer<Div, EraseFlashEnum> rendererWithTooltip() {
+        final SerializableBiConsumer<Div, EraseFlashEnum> eraseFlashWithToolTip = (div, eraseFlashEnum) -> {
+            div.add(createSpan(eraseFlashEnum));
+        };
+        return new ComponentRenderer<>(Div::new, eraseFlashWithToolTip);
+    }
+
+    /**
      *
      * @param eraseFlashEnum
-     *
-     * @return A {@link String}
+     * @return Span
      */
-    public static String getDescriptionForEraseFlash(EraseFlashEnum eraseFlashEnum) {
-        switch (eraseFlashEnum) {
-            case NO -> {
-                return "no";
-            }
-            case YES_WIPES_ALL_DATA -> {
-                return "yes, wipes all data";
-            }
-            default -> {
-                return "";
-            }
+    private static Span createSpan(final EraseFlashEnum eraseFlashEnum) {
+        final String wipeStringSpan = eraseFlashEnum == YES_WIPES_ALL_DATA ? "yes, wipes all data" : "no";
+        final Span span = new Span(wipeStringSpan);
+        if (EraseFlashEnum.YES_WIPES_ALL_DATA == eraseFlashEnum) {
+            Tooltip.forComponent(span).setText("--erase-all");
+        } else {
+            Tooltip.forComponent(span).setText("nothing will go to the console");
         }
+        return span;
     }
 
 }

@@ -1,7 +1,7 @@
 package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfo;
-import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.mappers.EspDeviceInfoMapper;
 import lombok.Getter;
@@ -104,7 +104,7 @@ public class EsptoolService {
         final String[] commands = new String[]{
                 esptoolPathService.esptoolPath(),
                 PORT, parsedPort,
-                BAUD_RATE, String.valueOf(BaudRates.BAUD_RATE_115200.getBaudRate()),
+                BAUD_RATE, String.valueOf(BaudRatesEnum.BAUD_RATE_115200.getBaudRate()),
                 FLASH_ID};
 
         return commandService.processInputStreamLineByLine(commands)

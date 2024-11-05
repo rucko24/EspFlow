@@ -2,7 +2,7 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.AddressRecordBinder;
 import com.esp.espflow.entity.EspDeviceInfo;
-import com.esp.espflow.enums.BaudRates;
+import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
@@ -132,7 +132,7 @@ public class ShowDevicesBuilder {
      * 9
      */
     public interface BaudRateStage {
-        EsptoolPathServiceStage withBaudRatesComboBox(final ComboBox<BaudRates> baudRatesComboBox);
+        EsptoolPathServiceStage withBaudRatesComboBox(final ComboBox<BaudRatesEnum> baudRatesComboBox);
     }
 
     /**
@@ -175,7 +175,7 @@ public class ShowDevicesBuilder {
         private IntegerField startAddressSize;
         private IntegerField customSizeToRead;
         private ToggleButton autoDetectFlashSize;
-        private ComboBox<BaudRates> baudRatesComboBox;
+        private ComboBox<BaudRatesEnum> baudRatesComboBox;
         private EsptoolPathService esptoolPathService;
         private FlashDownloadButtonService flashDownloadButtonService;
 
@@ -245,7 +245,7 @@ public class ShowDevicesBuilder {
         }
 
         @Override
-        public EsptoolPathServiceStage withBaudRatesComboBox(ComboBox<BaudRates> baudRatesComboBox) {
+        public EsptoolPathServiceStage withBaudRatesComboBox(ComboBox<BaudRatesEnum> baudRatesComboBox) {
             this.baudRatesComboBox = baudRatesComboBox;
             return this;
         }
