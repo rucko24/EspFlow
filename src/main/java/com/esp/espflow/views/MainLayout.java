@@ -110,8 +110,8 @@ public class MainLayout extends AppLayout {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
         spanBell.addClickListener(event -> {
-            this.spanBell.remove(bellIcon);
-            this.spanBell.addComponentAtIndex(0, bellSideIcon);
+            this.spanBell.removeAll();
+            this.spanBell.add(bellSideIcon, spanCircleRed);
         });
         spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.FIXED);
         spanCircleRed.getStyle().set("margin-left","-10px");
