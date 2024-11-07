@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.messages.MessageList;
@@ -65,13 +66,15 @@ public class MainLayout extends AppLayout {
 
     private final Popover popover = new Popover();
     private final Div contentUnread = new Div();
-    private Span spanCircleRed = new Span();
+    private final SvgIcon bellIcon = SvgFactory.createIconFromSvg("bell.svg", "30px", null);
+    private final SvgIcon bellSideIcon = SvgFactory.createIconFromSvg("bell-side.svg","30px",null);
+    private final Span spanBell = new Span(bellIcon);
+    private final Span spanCircleRed = new Span();
     private final Div contentAll = new Div();
     private final MessageList messageListRead = new MessageList();
     private final MessageList messageListAll = new MessageList();
     private List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
     private List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
-
 
     private H1 viewTitle;
 
@@ -106,12 +109,14 @@ public class MainLayout extends AppLayout {
     private HorizontalLayout row() {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
-        final Span span = new Span(VaadinIcon.BELL.create());
+        spanBell.addClickListener(event -> {
+            this.spanBell.remove(bellIcon);
+            this.spanBell.addComponentAtIndex(0, bellSideIcon);
+        });
         spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.FIXED);
         spanCircleRed.getStyle().set("margin-left","-10px");
-
-        span.add(spanCircleRed);
-        div.add(span);
+        spanBell.add(spanCircleRed);
+        div.add(spanBell);
 
         Tooltip.forComponent(div).setText("Notifications");
 
@@ -296,6 +301,8 @@ public class MainLayout extends AppLayout {
                 spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
                 Animated.animate(spanCircleRed, Animated.Animation.FADE_IN);
                 if(this.contentUnread.getElement().getChildCount() == 0) {
+                    this.spanBell.remove(bellSideIcon);
+                    this.spanBell.addComponentAtIndex(0, bellIcon);
                     spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
                     contentUnread.add(messageListRead);
                 }
