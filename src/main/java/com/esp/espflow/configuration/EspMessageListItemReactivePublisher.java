@@ -7,12 +7,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 /**
+ * <p>We publish events inside a reactive Stream, to show in the notification panel an object type MessageListItem,
+ *  with LocalDatetime UTC, serial port, chip type, and the type of operation, <strong>write_flash</strong>
+ *  <strong>flash_id</strong>, <strong>read_flash</strong></p>
+ *
  * @author rubn
  */
 @Configuration
-public class EspMessageListReactivePublisher {
+public class EspMessageListItemReactivePublisher {
 
-    @Bean
+    @Bean(value = "publishMessageListItem")
     public Sinks.Many<MessageListItem> publisher() {
         return Sinks
                 .many()
@@ -20,7 +24,7 @@ public class EspMessageListReactivePublisher {
                 .onBackpressureBuffer();
     }
 
-    @Bean
+    @Bean(value = "subscribersMessageListItems")
     public Flux<MessageListItem> subscribers(Sinks.Many<MessageListItem> publisher) {
         return publisher
                 .asFlux();

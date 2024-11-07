@@ -40,6 +40,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.event.EventListener;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -84,7 +85,10 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final RadioButtonGroup<EraseFlashEnum> eraseRadioButtons = new RadioButtonGroup<>();
     private final Button flashButton = new Button(SvgFactory.createIconFromSvg(FLASH_OFF_SVG, SIZE_25_PX, null));
     private final VerticalLayout contentForPrimary = new VerticalLayout();
-    @SuppressWarnings("unuser here")
+
+    /**
+     * This string is updated when an event arrives
+     */
     private String flashFileName;
     /**
      * OutputConsole
@@ -96,7 +100,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     /*
      * Publisher for MessageListItem
      */
-    private final Sinks.Many<MessageListItem> publisher;
+    private final Sinks.Many<MessageListItem> publishMessageListItem;
 
     @PostConstruct
     public void init() {
@@ -266,6 +270,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                     .withFlashFileName(this.flashFileName)
                     .withOutPutConsole(this.outPutConsole)
                     .withEsptoolPathService(this.esptoolPathService)
+                    .withPublisher(this.publishMessageListItem)
                     .make();
         });
 
@@ -338,13 +343,13 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                         String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(this.outPutConsole.scrollBarBuffer());
                         String port = commands[2];
 
-                        final MessageListItem messageListItem = new MessageListItem(chipIs,
+                        final MessageListItem messageListItem = new MessageListItem(chipIs.concat(" executed flash_id successfully"),
                                 LocalDateTime.now().toInstant(ZoneOffset.UTC),
                                 port);
 
                         messageListItem.setUserColorIndex(1);
                         log.info("Send post event {}", messageListItem.getText());
-                        publisher.tryEmitNext(messageListItem);
+                        publishMessageListItem.tryEmitNext(messageListItem);
 
                     });
                 })
@@ -354,6 +359,11 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                         })
                 );
 
+    }
+
+    @EventListener
+    public void updateFlashFileName(String flashFileName) {
+        this.flashFileName = flashFileName;
     }
 
     @Override

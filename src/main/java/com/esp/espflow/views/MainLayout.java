@@ -69,6 +69,7 @@ public class MainLayout extends AppLayout {
     private final Div divBell = new Div();
     private final SvgIcon bellIcon = SvgFactory.createIconFromSvg("bell.svg", "24px", null);
     private final Span spanCircleRed = new Span();
+    private final Span inboxCounter = new Span("0");
     private final Div contentAll = new Div();
     private final MessageList messageListRead = new MessageList();
     private final MessageList messageListAll = new MessageList();
@@ -79,13 +80,13 @@ public class MainLayout extends AppLayout {
 
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
-    private final Flux<MessageListItem> subscribers;
+    private final Flux<MessageListItem> subscribersMessageListItems;
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
-                      Flux<MessageListItem> subscribers) {
+                      Flux<MessageListItem> subscribersMessageListItems) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
-        this.subscribers = subscribers;
+        this.subscribersMessageListItems = subscribersMessageListItems;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -111,7 +112,7 @@ public class MainLayout extends AppLayout {
         divBell.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
 
         divBell.addClickListener(event -> {
-            bellIcon.getStyle().set("transform", "rotate(30deg)");
+            bellIcon.getStyle().set("transform", "rotate(20deg)");
             this.removeRedCircleError();
             Animated.animate(bellIcon, Animated.Animation.FADE_IN);
         });
@@ -127,11 +128,7 @@ public class MainLayout extends AppLayout {
         popover.setAriaLabelledBy("notifications-heading");
         popover.setModal(true);
         popover.setBackdropVisible(true);
-        popover.addOpenedChangeListener(event -> {
-            if (!event.getSource().isOpened()) {
-                bellIcon.getStyle().set("transform", "rotate(0deg)");
-            }
-        });
+        popover.addOpenedChangeListener(this::rotateTheBellToZeroDegreesIfThePopoverIsNotOpen);
 
         final var buttonMarkAllRead = new Button("Marks all read");
         buttonMarkAllRead.addClickListener(event -> {
@@ -139,6 +136,7 @@ public class MainLayout extends AppLayout {
             messageListItemUnreadList.clear();
             bellIcon.getStyle().set("transform", "rotate(0deg)");
             contentUnread.removeAll();
+            this.inboxCounter.setVisible(false);
             Animated.removeAnimations(spanCircleRed);
         });
 
@@ -207,11 +205,11 @@ public class MainLayout extends AppLayout {
 
         if (accessChecker.hasAccess(FlashEspView.class)) {
             var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null));
-//            Span inboxCounter = new Span("12");
-//            inboxCounter.getElement().getThemeList().add("badge contrast pill");
-//            inboxCounter.getElement().setAttribute("aria-label",
-//                    "12 unread messages");
-//            itemFlash.setSuffixComponent(inboxCounter);
+            inboxCounter.setVisible(false);
+            inboxCounter.getElement().getThemeList().add("badge contrast pill");
+            inboxCounter.getElement().setAttribute("aria-label","12 unread messages");
+            Tooltip.forComponent(inboxCounter).setText("unread messages");
+            itemFlash.setSuffixComponent(inboxCounter);
             Tooltip.forComponent(itemFlash).setText("Flash Esp32-ESP8266, Execute flash_id and write flash");
             nav.addItem(itemFlash);
         }
@@ -288,9 +286,9 @@ public class MainLayout extends AppLayout {
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
-            subscribers
+            subscribersMessageListItems
                     .subscribe(messageListItem -> {
-                        this.setSubscribers(ui, messageListItem);
+                        this.subscribe(ui, messageListItem);
                     });
         }
     }
@@ -299,16 +297,19 @@ public class MainLayout extends AppLayout {
      * @param ui
      * @param messageListItem
      */
-    private void setSubscribers(final UI ui, final MessageListItem messageListItem) {
+    private void subscribe(final UI ui, final MessageListItem messageListItem) {
         try {
             ui.access(() -> {
                 System.out.println("MessageListItem listener " + messageListItem.getText());
                 messageListItemUnreadList.add(messageListItem);
                 messageListItemAllList.add(messageListItem);
                 this.messageListRead.setItems(messageListItemUnreadList);
+                this.inboxCounter.setText(String.valueOf(messageListItemUnreadList.size()));
                 this.messageListAll.setItems(messageListItemAllList);
+                this.inboxCounter.setVisible(true);
                 this.showsRedErrorInTheBell();
                 Animated.animate(spanCircleRed, Animated.Animation.FADE_IN);
+                Animated.animate(inboxCounter, Animated.Animation.FADE_IN);
                 if (this.contentUnread.getElement().getChildCount() == 0) {
                     bellIcon.getStyle().set("transform", "rotate(0deg)");
                     Animated.animate(bellIcon, Animated.Animation.FADE_IN);
@@ -318,6 +319,16 @@ public class MainLayout extends AppLayout {
             });
         } catch (UIDetachedException ex) {
             //Do nothing
+        }
+    }
+
+    /**
+     *
+     *  @param event a Popover.OpenedChangeEvent
+     */
+    public void rotateTheBellToZeroDegreesIfThePopoverIsNotOpen(Popover.OpenedChangeEvent event) {
+        if (!event.getSource().isOpened()) {
+            bellIcon.getStyle().set("transform", "rotate(0deg)");
         }
     }
 

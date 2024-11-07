@@ -13,6 +13,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 
 import java.io.BufferedInputStream;
@@ -42,6 +43,10 @@ public class DivFlashUploader extends Div {
     private final FileBuffer buffer = new FileBuffer();
     private final Upload upload = new Upload();
     private final UploadExamplesI18N uploadI18N = new UploadExamplesI18N();
+    /**
+     * Important, when the firmware is uploaded, we publish its name to the FlashEspView.
+     */
+    private final ApplicationEventPublisher publisher;
 
     @PostConstruct
     public void constructDiv() {
@@ -85,6 +90,7 @@ public class DivFlashUploader extends Div {
             long contentLength = event.getContentLength();
             String mimeType = event.getMIMEType();
 
+            publisher.publishEvent(event.getFileName());
             this.createUploadDir(buffer, event.getFileName());
 
         });

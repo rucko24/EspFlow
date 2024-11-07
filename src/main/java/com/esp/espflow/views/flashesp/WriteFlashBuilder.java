@@ -3,6 +3,7 @@ package com.esp.espflow.views.flashesp;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
+import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.util.CommandsOnFirstLine;
@@ -11,8 +12,12 @@ import com.esp.espflow.util.IBuilder;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import reactor.core.publisher.Sinks;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -120,7 +125,11 @@ public class WriteFlashBuilder {
      * 10
      */
     public interface EsptoolPathServiceStage {
-        Build withEsptoolPathService(EsptoolPathService esptoolPathService);
+        PublishMessageListItemStage withEsptoolPathService(EsptoolPathService esptoolPathService);
+    }
+
+    public interface PublishMessageListItemStage {
+        Build withPublisher(Sinks.Many<MessageListItem> publishMessageListItem);
     }
 
     /**
@@ -134,7 +143,7 @@ public class WriteFlashBuilder {
      */
     public static class InnerBuilder implements EsptoolServiceStage, ComboBoxSerialPortStage,
             BaudRateStage, FlashModeStage, FlashSizeStage, UIStage, EraseFlashStage,
-            FlashFileNameStage, OutPutConsoleStage, EsptoolPathServiceStage, Build {
+            FlashFileNameStage, OutPutConsoleStage, EsptoolPathServiceStage, PublishMessageListItemStage, Build {
 
         private EsptoolService esptoolService;
         private RadioButtonGroup<BaudRatesEnum> baudRate;
@@ -146,6 +155,7 @@ public class WriteFlashBuilder {
         private String flashSize;
         private String flashFileName;
         private EsptoolPathService esptoolPathService;
+        private Sinks.Many<MessageListItem> publishMessageListItem;
 
         @Override
         public ComboBoxSerialPortStage withEsptoolService(EsptoolService esptoolService) {
@@ -202,8 +212,14 @@ public class WriteFlashBuilder {
         }
 
         @Override
-        public Build withEsptoolPathService(EsptoolPathService esptoolPathService) {
+        public PublishMessageListItemStage withEsptoolPathService(EsptoolPathService esptoolPathService) {
             this.esptoolPathService = esptoolPathService;
+            return this;
+        }
+
+        @Override
+        public Build withPublisher(Sinks.Many<MessageListItem> publishMessageListItem) {
+            this.publishMessageListItem = publishMessageListItem;
             return this;
         }
 
@@ -248,6 +264,15 @@ public class WriteFlashBuilder {
                         .doOnTerminate(() -> {
                             ui.access(() -> {
                                 ConfirmDialogBuilder.showInformation("Flash writed successfully!!!");
+
+                                final String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(outPutConsole.scrollBarBuffer());
+
+                                final MessageListItem messageListItem = new MessageListItem(chipIs.concat(" Flash writed successfully!!!"),
+                                        LocalDateTime.now().toInstant(ZoneOffset.UTC),
+                                        serialPort.getValue());
+
+                                this.publishMessageListItem.tryEmitNext(messageListItem);
+
                                 this.outPutConsole.writePrompt();
                             });
                         })

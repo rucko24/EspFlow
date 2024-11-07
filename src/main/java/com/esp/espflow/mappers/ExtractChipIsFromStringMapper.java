@@ -1,5 +1,6 @@
 package com.esp.espflow.mappers;
 
+import com.helger.commons.annotation.Singleton;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
@@ -28,6 +29,6 @@ public class ExtractChipIsFromStringMapper {
             chipIs = matcher.group(1);
         }
         return Objects.equals(chipIs, StringUtils.EMPTY) ? "Can`t parsed this Chip" :
-                chipIs.split("Features:")[0].concat(" executed flash_id successfully");
+                chipIs.split("Features:")[0];
     }
 }

@@ -16,6 +16,7 @@ public interface ResponsiveHeaderDiv {
      * @param titulo, h2
      * @return Div con h2 centrado
      */
+    @SuppressWarnings("unused")
     default Div createDiv( final Component component, final String titulo ) {
         final Div div = new Div();
         div.addClassName("center-titulos");
@@ -31,6 +32,7 @@ public interface ResponsiveHeaderDiv {
      *
      * @return Div with space around
      */
+    @SuppressWarnings("unused")
     default Div createHeaderDivWithSpaceAround(final Component... components) {
         final Div mainDivWithSpaceAround = new Div();
         //Se aplicara estilo en 800px de ancho de pantalla
