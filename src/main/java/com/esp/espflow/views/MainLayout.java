@@ -302,7 +302,9 @@ public class MainLayout extends AppLayout {
             ui.access(() -> {
                 System.out.println("MessageListItem listener " + messageListItem.getText());
                 messageListItemUnreadList.add(messageListItem);
+                messageListItemAllList.add(messageListItem);
                 this.messageListRead.setItems(messageListItemUnreadList);
+                this.messageListAll.setItems(messageListItemAllList);
                 this.showsRedErrorInTheBell();
                 Animated.animate(spanCircleRed, Animated.Animation.FADE_IN);
                 if (this.contentUnread.getElement().getChildCount() == 0) {
@@ -317,10 +319,16 @@ public class MainLayout extends AppLayout {
         }
     }
 
+    /**
+     *
+     */
     public void showsRedErrorInTheBell() {
         spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
     }
 
+    /**
+     *
+     */
     public void removeRedCircleError() {
         spanCircleRed.getElement().removeAttribute("theme");
     }

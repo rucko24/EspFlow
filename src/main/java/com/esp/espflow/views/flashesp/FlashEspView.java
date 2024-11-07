@@ -3,10 +3,10 @@ package com.esp.espflow.views.flashesp;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
+import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.util.CommandsOnFirstLine;
-import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
@@ -40,15 +40,12 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
@@ -337,12 +334,12 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                 .doOnComplete(() -> {
                     ui.access(() -> {
                         this.outPutConsole.writePrompt();
-                        var chipIs = getChipIsFromThisString(this.outPutConsole.scrollBarBuffer());
+                        String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(this.outPutConsole.scrollBarBuffer());
+                        String port = commands[2];
 
-                        final MessageListItem messageListItem = new MessageListItem(
-                                chipIs.split("Features:")[0],
+                        final MessageListItem messageListItem = new MessageListItem(chipIs,
                                 LocalDateTime.now().toInstant(ZoneOffset.UTC),
-                                commands[2]);
+                                port);
 
                         messageListItem.setUserColorIndex(1);
                         log.info("Send post event {}", messageListItem.getText());
@@ -356,21 +353,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                         })
                 );
 
-    }
-
-    /**
-     * @param input
-     * @return A {@link String}
-     */
-    private String getChipIsFromThisString(String input) {
-        String chipRegex = "(?s)Chip is (\\S+).*?Features:";
-        Pattern pattern = Pattern.compile(chipRegex);
-        Matcher matcher = pattern.matcher(input);
-        String chipIs = StringUtils.EMPTY;
-        if (matcher.find()) {
-            chipIs = matcher.group(1);
-        }
-        return chipIs;
     }
 
     @Override
