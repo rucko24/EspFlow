@@ -106,8 +106,11 @@ public class MainLayout extends AppLayout {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
         final Span span = new Span(VaadinIcon.BELL.create());
+        spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.FIXED);
+        spanCircleRed.getStyle().set("margin-left","-10px");
+
+        span.add(spanCircleRed);
         div.add(span);
-        div.add(spanCircleRed);
 
         Tooltip.forComponent(div).setText("Notifications");
 
