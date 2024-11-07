@@ -84,6 +84,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final RadioButtonGroup<EraseFlashEnum> eraseRadioButtons = new RadioButtonGroup<>();
     private final Button flashButton = new Button(SvgFactory.createIconFromSvg(FLASH_OFF_SVG, SIZE_25_PX, null));
     private final VerticalLayout contentForPrimary = new VerticalLayout();
+    @SuppressWarnings("unuser here")
     private String flashFileName;
     /**
      * OutputConsole
@@ -249,7 +250,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         divButtonFlash.setSizeFull();
         divButtonFlash.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         flashButton.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        flashButton.setTooltipText("flash me!");
+        flashButton.setTooltipText("flash me! -> Execute write_flash");
 
         flashButton.addClickListener(event -> {
             this.outPutConsole.clear();

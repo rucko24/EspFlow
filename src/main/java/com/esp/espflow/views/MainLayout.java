@@ -125,6 +125,8 @@ public class MainLayout extends AppLayout {
         popover.addThemeVariants(PopoverVariant.ARROW, PopoverVariant.LUMO_NO_PADDING);
         popover.setPosition(PopoverPosition.BOTTOM);
         popover.setAriaLabelledBy("notifications-heading");
+        popover.setModal(true);
+        popover.setBackdropVisible(true);
         popover.addOpenedChangeListener(event -> {
             if (!event.getSource().isOpened()) {
                 bellIcon.getStyle().set("transform", "rotate(0deg)");
@@ -324,6 +326,7 @@ public class MainLayout extends AppLayout {
      */
     public void showsRedErrorInTheBell() {
         spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
+        //spanCircleRed.getElement().getThemeList().add("badge small primary dot primary");
     }
 
     /**
