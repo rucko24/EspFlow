@@ -6,6 +6,7 @@ import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
+import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -125,6 +126,7 @@ public class MainLayout extends AppLayout {
             spanCircleRed.getElement().removeAttribute("theme");
             messageListItemUnreadList.clear();
             contentUnread.removeAll();
+            Animated.removeAnimations(spanCircleRed);
         });
 
         var headerRow = new HorizontalLayout(new H4("Notifications"), buttonMarkAllRead);
@@ -292,7 +294,9 @@ public class MainLayout extends AppLayout {
                 messageListItemUnreadList.add(messageListItem);
                 this.messageListRead.setItems(messageListItemUnreadList);
                 spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
+                Animated.animate(spanCircleRed, Animated.Animation.FADE_IN);
                 if(this.contentUnread.getElement().getChildCount() == 0) {
+                    spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
                     contentUnread.add(messageListRead);
                 }
             });
