@@ -6,6 +6,7 @@ import com.esp.espflow.enums.FlashModeEnum;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.util.CommandsOnFirstLine;
+import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
@@ -18,6 +19,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -38,10 +40,15 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.context.event.EventListener;
+import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
@@ -88,6 +95,11 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
     private String[] commands;
 
+    /*
+     * Publisher for MessageListItem
+     */
+    private final Sinks.Many<MessageListItem> publisher;
+
     @PostConstruct
     public void init() {
         super.addClassNames(Display.FLEX, FlexDirection.ROW,
@@ -133,7 +145,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
 
-        outPutConsole.getStyle().set("overflow-x","hidden");
+        outPutConsole.getStyle().set("overflow-x", "hidden");
         outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
         outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
         outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
@@ -147,11 +159,11 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                 JustifyContent.END,
                 Overflow.HIDDEN);
 
-        divColumnItems.getStyle().set("margin-left","10px");
-        divColumnItems.getStyle().set("margin-right","10px");
-        divColumnItems.getStyle().set("margin-bottom","3px");
-        divColumnItems.getStyle().set("max-width","40px");
-        divColumnItems.getStyle().set("width","40px");
+        divColumnItems.getStyle().set("margin-left", "10px");
+        divColumnItems.getStyle().set("margin-right", "10px");
+        divColumnItems.getStyle().set("margin-bottom", "3px");
+        divColumnItems.getStyle().set("max-width", "40px");
+        divColumnItems.getStyle().set("width", "40px");
 
         divColumnItems.getStyle().set(OVERFLOW_Y, HIDDEN);
         divRowToSecondary.add(divColumnItems, outPutConsole);
@@ -163,9 +175,9 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         splitLayout.getPrimaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getSecondaryComponent().getElement().getStyle().set(OVERFLOW_X, HIDDEN);
         splitLayout.getPrimaryComponent().getElement().getStyle().set(
-                "border-bottom","1px solid var(--lumo-contrast-10pct)");
+                "border-bottom", "1px solid var(--lumo-contrast-10pct)");
         splitLayout.getSecondaryComponent().getElement().getStyle().set(
-                "background","linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
+                "background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
 
         splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-width", "thin");
         splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-color", "#3b3b3b #202020");
@@ -268,6 +280,23 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
      */
     private void outputConsole(final UI ui) {
 
+        this.divHeaderPorts.getComboBoxSerialPort().addValueChangeListener(event -> {
+            this.outPutConsole.clear();
+            final String valuePort = event.getValue();
+
+            if (Objects.nonNull(event.getValue())) {
+
+                this.commands = new String[]{
+                        esptoolPathService.esptoolPath(),
+                        PORT, valuePort,
+                        BAUD_RATE, String.valueOf(BaudRatesEnum.BAUD_RATE_115200.getBaudRate()),
+                        FLASH_ID
+                };
+
+                this.subscribeThis(this.esptoolService.readRawFlashIdFromPort(commands), ui);
+            }
+        });
+
         this.divHeaderPorts.getButtonExecuteFlashId().addClickListener(event -> {
             this.outPutConsole.clear();
             final String valuePort = this.divHeaderPorts.getComboBoxSerialPort().getValue();
@@ -305,8 +334,21 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                             this.outPutConsole.writeln(error.getMessage());
                         })
                 )
-                .doOnTerminate(() -> {
-                    ui.access(this.outPutConsole::writePrompt);
+                .doOnComplete(() -> {
+                    ui.access(() -> {
+                        this.outPutConsole.writePrompt();
+                        var chipIs = getChipIsFromThisString(this.outPutConsole.scrollBarBuffer());
+
+                        final MessageListItem messageListItem = new MessageListItem(
+                                chipIs.split("Features:")[0],
+                                LocalDateTime.now().toInstant(ZoneOffset.UTC),
+                                commands[2]);
+
+                        messageListItem.setUserColorIndex(1);
+                        log.info("Send post event {}", messageListItem.getText());
+                        publisher.tryEmitNext(messageListItem);
+
+                    });
                 })
                 .subscribe(line ->
                         ui.access(() -> {
@@ -314,7 +356,21 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                         })
                 );
 
+    }
 
+    /**
+     * @param input
+     * @return A {@link String}
+     */
+    private String getChipIsFromThisString(String input) {
+        String chipRegex = "(?s)Chip is (\\S+).*?Features:";
+        Pattern pattern = Pattern.compile(chipRegex);
+        Matcher matcher = pattern.matcher(input);
+        String chipIs = StringUtils.EMPTY;
+        if (matcher.find()) {
+            chipIs = matcher.group(1);
+        }
+        return chipIs;
     }
 
     @Override
@@ -329,11 +385,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
             final UI ui = attachEvent.getUI();
             this.outputConsole(ui);
         }
-    }
-
-    @EventListener
-    public void fileNameFlashListener(String flashFileName) {
-        this.flashFileName = flashFileName;
     }
 
 }

@@ -1,4 +1,5 @@
 @import url('./main-layout.css');
+@import url('./popover-notification-panel.css');
 @import url('components/vaadin-upload-file.css');
 @import url('./views/readflash/esp-device-info.css');
 @import url('./fonts/stylesheet.css');

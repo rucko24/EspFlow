@@ -6,33 +6,50 @@ import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.popover.Popover;
+import com.vaadin.flow.component.popover.PopoverPosition;
+import com.vaadin.flow.component.popover.PopoverVariant;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Flux;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
@@ -42,16 +59,30 @@ import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
 /**
  * The main view is a top-level placeholder for other views.
  */
+@Log4j2
 public class MainLayout extends AppLayout {
+
+    private final Popover popover = new Popover();
+    private final Div contentUnread = new Div();
+    private Span spanCircleRed = new Span();
+    private final Div contentAll = new Div();
+    private final MessageList messageListRead = new MessageList();
+    private final MessageList messageListAll = new MessageList();
+    private List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
+    private List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
+
 
     private H1 viewTitle;
 
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
+    private final Flux<MessageListItem> subscribers;
 
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker) {
+    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
+                      Flux<MessageListItem> subscribers) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
+        this.subscribers = subscribers;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -65,7 +96,58 @@ public class MainLayout extends AppLayout {
         viewTitle = new H1();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-        addToNavbar(true, toggle, viewTitle);
+        addToNavbar(true, toggle, this.row());
+    }
+
+    /**
+     * @return A {@link HorizontalLayout}
+     */
+    private HorizontalLayout row() {
+        final Div div = new Div();
+        div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
+        final Span span = new Span(VaadinIcon.BELL.create());
+        div.add(span);
+        div.add(spanCircleRed);
+
+        Tooltip.forComponent(div).setText("Notifications");
+
+        popover.setTarget(div);
+        popover.setWidth("300px");
+        popover.addThemeVariants(PopoverVariant.ARROW, PopoverVariant.LUMO_NO_PADDING);
+        popover.setPosition(PopoverPosition.BOTTOM);
+        popover.setAriaLabelledBy("notifications-heading");
+
+        final var buttonMarkAllRead = new Button("Marks all read");
+        buttonMarkAllRead.addClickListener(event -> {
+            spanCircleRed.getElement().removeAttribute("theme");
+            messageListItemUnreadList.clear();
+            contentUnread.removeAll();
+        });
+
+        var headerRow = new HorizontalLayout(new H4("Notifications"), buttonMarkAllRead);
+        headerRow.addClassNames(JustifyContent.AROUND, AlignItems.CENTER);
+        headerRow.getStyle().set("padding", "var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-xs)");
+        popover.add(headerRow);
+
+        final TabSheet tabSheet = new TabSheet();
+        tabSheet.addClassName("notifications");
+
+        messageListRead.setItems(messageListItemUnreadList);
+        contentUnread.add(messageListRead);
+        contentAll.add(messageListAll);
+
+        tabSheet.add("Unread", contentUnread);
+        tabSheet.add("All", contentAll);
+        popover.add(tabSheet);
+
+        final var row = new HorizontalLayout(viewTitle, div);
+        row.setWidthFull();
+        row.addClassNames(LumoUtility.Margin.Right.MEDIUM);
+        row.setAlignItems(FlexComponent.Alignment.CENTER);
+        row.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        row.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+
+        return row;
     }
 
     private void addDrawerContent() {
@@ -97,7 +179,7 @@ public class MainLayout extends AppLayout {
             addToDrawer(row);
         }
 
-        Scroller scroller = new Scroller(createNavigation());
+        final Scroller scroller = new Scroller(createNavigation());
         addToDrawer(scroller, createFooter());
 
     }
@@ -106,11 +188,20 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
 
         if (accessChecker.hasAccess(FlashEspView.class)) {
-            nav.addItem(new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null)));
+            var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null));
+            Span inboxCounter = new Span("12");
+            inboxCounter.getElement().getThemeList().add("badge contrast pill");
+            inboxCounter.getElement().setAttribute("aria-label",
+                    "12 unread messages");
+            itemFlash.setSuffixComponent(inboxCounter);
+            Tooltip.forComponent(itemFlash).setText("Flash Esp32-ESP8266, Execute flash_id and write flash");
+            nav.addItem(itemFlash);
         }
 
         if (accessChecker.hasAccess(ReadFlashView.class)) {
-            nav.addItem(new SideNavItem("Read flash/firmware", ReadFlashView.class, VaadinIcon.DOWNLOAD.create()));
+            var itemReadFlash = new SideNavItem("Read flash/firmware", ReadFlashView.class, VaadinIcon.DOWNLOAD.create());
+            Tooltip.forComponent(itemReadFlash).setText("All devices are read and displayed in a carousel");
+            nav.addItem(itemReadFlash);
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {
@@ -167,5 +258,43 @@ public class MainLayout extends AppLayout {
     private String getCurrentPageTitle() {
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (attachEvent.isInitialAttach()) {
+            final UI ui = attachEvent.getUI();
+            subscribers
+                    .subscribe(messageListItem -> {
+                       this.setSubscribers(ui, messageListItem);
+                    });
+        }
+    }
+
+    /**
+     *
+     * @param ui
+     * @param messageListItem
+     */
+    private void setSubscribers(final UI ui, final MessageListItem messageListItem) {
+        try {
+            ui.access(() -> {
+                System.out.println("MessageListItem listener " + messageListItem.getText());
+                messageListItemUnreadList.add(messageListItem);
+                this.messageListRead.setItems(messageListItemUnreadList);
+                spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
+                if(this.contentUnread.getElement().getChildCount() == 0) {
+                    contentUnread.add(messageListRead);
+                }
+            });
+        } catch (UIDetachedException ex) {
+            //Do nothing
+        }
     }
 }

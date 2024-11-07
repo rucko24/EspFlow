@@ -1,0 +1,12 @@
+/*brand logo*/
+[part="brand"] {
+    background-size: cover;
+    background-color: #cf2727;
+}
+
+/*bg image */
+[part="backdrop"] {
+    background-image: url("./images/login/background-esp01s.jpeg");
+    background-size: cover;
+    background-position: 50% 50%;
+}

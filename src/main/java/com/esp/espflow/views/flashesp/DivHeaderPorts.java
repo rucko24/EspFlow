@@ -21,7 +21,6 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -32,7 +31,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
@@ -188,7 +189,12 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      */
     private void showPortIsEsptoolVersionExists() {
         if(esptoolVersionCounter.get()) {
-            final List<String> ports = this.comPortService.getOnlyPortsList();
+
+            final List<String> ports = this.comPortService.getOnlyPortsList()
+                    .stream()
+                    .sorted(Comparator.comparing(Objects::toString))
+                    .toList();
+
             if (!ports.isEmpty()) {
                 if(GetOsName.getOsName() != GetOsName.WINDOWS) {
                     unlockPort.setEnabled(true);
@@ -198,7 +204,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     unlockPort.addClickListener(event -> {});
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
-                comboBoxSerialPort.setValue(ports.get(0));
                 ConfirmDialogBuilder.showInformation("Port found!");
                 this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg","30px",null));
                 buttonExecuteFlashId.setEnabled(true);

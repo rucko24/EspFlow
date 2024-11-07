@@ -11,7 +11,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <vaadin.version>24.4.4</vaadin.version>
+        <vaadin.version>24.5.1</vaadin.version>
     </properties>
 
     <parent>
@@ -141,11 +141,13 @@
             <version>2.0.2</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.flowingcode.addons/xterm-console -->
         <dependency>
             <groupId>com.flowingcode.addons</groupId>
             <artifactId>xterm-console</artifactId>
             <version>3.0.0</version>
         </dependency>
+
 
         <dependency>
             <groupId>com.vaadin.componentfactory</groupId>

@@ -5,7 +5,9 @@ import com.flowingcode.vaadin.addons.xterm.PreserveStateAddon;
 import com.flowingcode.vaadin.addons.xterm.XTerm;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -63,6 +65,16 @@ public class OutPutConsole extends Div {
         final H3 h3 = new H3("Console");
         h3.getStyle().set(Top.AUTO, AUTO);
 
+        final ContextMenu contextMenu = new ContextMenu();
+        contextMenu.setTarget(xterm.getXTerm());
+        final Div divWithIconAndText = new Div();
+        divWithIconAndText.addClassNames(Display.FLEX, FlexDirection.ROW, AlignItems.CENTER, JustifyContent.START);
+        final Text text = new Text("Clear All");
+        divWithIconAndText.add(VaadinIcon.TRASH.create(), text);
+        contextMenu.addItem(divWithIconAndText, menuItemClickEvent -> {
+           this.clear();
+        });
+
         xterm.getXTerm().setId("id-for-xterm");
         xterm.getXTerm().addClassName("xterm");
 //        preserveStateAddon.writeln("esptool terminal!");
@@ -115,6 +127,15 @@ public class OutPutConsole extends Div {
      */
     public void writeln(String line) {
         this.xterm.writeln(line);
+    }
+
+    /**
+     * Gets the text from the XTerm
+     *
+     * @return A {@link String}
+     */
+    public String scrollBarBuffer() {
+        return this.xterm.getScrollbackBuffer();
     }
 
     /**
