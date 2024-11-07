@@ -66,9 +66,8 @@ public class MainLayout extends AppLayout {
 
     private final Popover popover = new Popover();
     private final Div contentUnread = new Div();
-    private final SvgIcon bellIcon = SvgFactory.createIconFromSvg("bell.svg", "30px", null);
-    private final SvgIcon bellSideIcon = SvgFactory.createIconFromSvg("bell-side.svg","30px",null);
-    private final Span spanBell = new Span(bellIcon);
+    private final Div divBell = new Div();
+    private final SvgIcon bellIcon = SvgFactory.createIconFromSvg("bell.svg", "24px", null);
     private final Span spanCircleRed = new Span();
     private final Div contentAll = new Div();
     private final MessageList messageListRead = new MessageList();
@@ -100,36 +99,43 @@ public class MainLayout extends AppLayout {
         viewTitle = new H1();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-        addToNavbar(true, toggle, this.row());
+        addToNavbar(true, toggle, this.headerRow());
     }
 
     /**
      * @return A {@link HorizontalLayout}
      */
-    private HorizontalLayout row() {
-        final Div div = new Div();
-        div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
-        spanBell.addClickListener(event -> {
-            this.spanBell.removeAll();
-            this.spanBell.add(bellSideIcon, spanCircleRed);
+    private HorizontalLayout headerRow() {
+        Tooltip.forComponent(divBell).setText("Notifications");
+        divBell.add(bellIcon);
+        divBell.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
+
+        divBell.addClickListener(event -> {
+            bellIcon.getStyle().set("transform", "rotate(30deg)");
+            this.removeRedCircleError();
+            Animated.animate(bellIcon, Animated.Animation.FADE_IN);
         });
         spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.FIXED);
-        spanCircleRed.getStyle().set("margin-left","-10px");
-        spanBell.add(spanCircleRed);
-        div.add(spanBell);
+        spanCircleRed.getStyle().set("margin-left", "13px");
+        spanCircleRed.getStyle().set("top", "14px");
+        divBell.add(spanCircleRed);
 
-        Tooltip.forComponent(div).setText("Notifications");
-
-        popover.setTarget(div);
+        popover.setTarget(divBell);
         popover.setWidth("300px");
         popover.addThemeVariants(PopoverVariant.ARROW, PopoverVariant.LUMO_NO_PADDING);
         popover.setPosition(PopoverPosition.BOTTOM);
         popover.setAriaLabelledBy("notifications-heading");
+        popover.addOpenedChangeListener(event -> {
+            if (!event.getSource().isOpened()) {
+                bellIcon.getStyle().set("transform", "rotate(0deg)");
+            }
+        });
 
         final var buttonMarkAllRead = new Button("Marks all read");
         buttonMarkAllRead.addClickListener(event -> {
-            spanCircleRed.getElement().removeAttribute("theme");
+            this.removeRedCircleError();
             messageListItemUnreadList.clear();
+            bellIcon.getStyle().set("transform", "rotate(0deg)");
             contentUnread.removeAll();
             Animated.removeAnimations(spanCircleRed);
         });
@@ -150,7 +156,7 @@ public class MainLayout extends AppLayout {
         tabSheet.add("All", contentAll);
         popover.add(tabSheet);
 
-        final var row = new HorizontalLayout(viewTitle, div);
+        final var row = new HorizontalLayout(viewTitle, divBell);
         row.setWidthFull();
         row.addClassNames(LumoUtility.Margin.Right.MEDIUM);
         row.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -199,11 +205,11 @@ public class MainLayout extends AppLayout {
 
         if (accessChecker.hasAccess(FlashEspView.class)) {
             var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null));
-            Span inboxCounter = new Span("12");
-            inboxCounter.getElement().getThemeList().add("badge contrast pill");
-            inboxCounter.getElement().setAttribute("aria-label",
-                    "12 unread messages");
-            itemFlash.setSuffixComponent(inboxCounter);
+//            Span inboxCounter = new Span("12");
+//            inboxCounter.getElement().getThemeList().add("badge contrast pill");
+//            inboxCounter.getElement().setAttribute("aria-label",
+//                    "12 unread messages");
+//            itemFlash.setSuffixComponent(inboxCounter);
             Tooltip.forComponent(itemFlash).setText("Flash Esp32-ESP8266, Execute flash_id and write flash");
             nav.addItem(itemFlash);
         }
@@ -282,13 +288,12 @@ public class MainLayout extends AppLayout {
             final UI ui = attachEvent.getUI();
             subscribers
                     .subscribe(messageListItem -> {
-                       this.setSubscribers(ui, messageListItem);
+                        this.setSubscribers(ui, messageListItem);
                     });
         }
     }
 
     /**
-     *
      * @param ui
      * @param messageListItem
      */
@@ -298,17 +303,25 @@ public class MainLayout extends AppLayout {
                 System.out.println("MessageListItem listener " + messageListItem.getText());
                 messageListItemUnreadList.add(messageListItem);
                 this.messageListRead.setItems(messageListItemUnreadList);
-                spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
+                this.showsRedErrorInTheBell();
                 Animated.animate(spanCircleRed, Animated.Animation.FADE_IN);
-                if(this.contentUnread.getElement().getChildCount() == 0) {
-                    this.spanBell.remove(bellSideIcon);
-                    this.spanBell.addComponentAtIndex(0, bellIcon);
-                    spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
+                if (this.contentUnread.getElement().getChildCount() == 0) {
+                    bellIcon.getStyle().set("transform", "rotate(0deg)");
+                    Animated.animate(bellIcon, Animated.Animation.FADE_IN);
+                    this.showsRedErrorInTheBell();
                     contentUnread.add(messageListRead);
                 }
             });
         } catch (UIDetachedException ex) {
             //Do nothing
         }
+    }
+
+    public void showsRedErrorInTheBell() {
+        spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
+    }
+
+    public void removeRedCircleError() {
+        spanCircleRed.getElement().removeAttribute("theme");
     }
 }

@@ -1,0 +1,33 @@
+import '@vaadin/side-nav/src/vaadin-side-nav.js';
+import '@vaadin/polymer-legacy-adapter/style-modules.js';
+import '@vaadin/app-layout/src/vaadin-app-layout.js';
+import '@vaadin/tooltip/src/vaadin-tooltip.js';
+import '@vaadin/tabs/src/vaadin-tab.js';
+import '@vaadin/button/src/vaadin-button.js';
+import 'Frontend/generated/jar-resources/buttonFunctions.js';
+import 'Frontend/generated/jar-resources/menubarConnector.js';
+import '@vaadin/menu-bar/src/vaadin-menu-bar.js';
+import 'Frontend/generated/jar-resources/messageListConnector.js';
+import '@vaadin/message-list/src/vaadin-message-list.js';
+import '@vaadin/vertical-layout/src/vaadin-vertical-layout.js';
+import '@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/popover/src/vaadin-popover.js';
+import 'Frontend/generated/jar-resources/vaadin-popover/popover.ts';
+import '@vaadin/icon/src/vaadin-icon.js';
+import '@vaadin/side-nav/src/vaadin-side-nav-item.js';
+import '@vaadin/context-menu/src/vaadin-context-menu.js';
+import 'Frontend/generated/jar-resources/flow-component-renderer.js';
+import 'Frontend/generated/jar-resources/contextMenuConnector.js';
+import 'Frontend/generated/jar-resources/contextMenuTargetConnector.js';
+import '@vaadin/icons/vaadin-iconset.js';
+import '@vaadin/app-layout/src/vaadin-drawer-toggle.js';
+import '@vaadin/tabsheet/src/vaadin-tabsheet.js';
+import '@vaadin/tabs/src/vaadin-tabs.js';
+import '@vaadin/avatar/src/vaadin-avatar.js';
+import '@vaadin/scroller/src/vaadin-scroller.js';
+import { injectGlobalCss } from 'Frontend/generated/jar-resources/theme-util.js';
+
+import { css, unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin';
+import $cssFromFile_0 from 'Frontend/generated/jar-resources/animate.css?inline';
+
+injectGlobalCss($cssFromFile_0.toString(), 'CSSImport end', document);
