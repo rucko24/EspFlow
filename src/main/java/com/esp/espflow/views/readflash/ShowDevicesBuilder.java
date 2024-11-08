@@ -47,7 +47,9 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_CUSTOM;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
@@ -508,6 +510,7 @@ public class ShowDevicesBuilder {
             final Image image = new Image(FRONTEND_IMAGES_CUSTOM + "enable-toggle-button.png", "alt");
             image.setWidth("50%");
             image.setHeight("50%");
+            image.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
             final VerticalLayout content = new VerticalLayout(new com.vaadin.flow.component.Text(text));
 
