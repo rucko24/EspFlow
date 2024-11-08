@@ -4,6 +4,7 @@ import com.esp.espflow.entity.AddressRecordBinder;
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
+import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.downloader.FlashDownloadButtonService;
@@ -19,26 +20,41 @@ import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.IBuilder;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.flowingcode.vaadin.addons.carousel.Slide;
+import com.infraleap.animatecss.Animated;
 import com.vaadin.componentfactory.ToggleButton;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.binder.Binder;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Sinks;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_CUSTOM;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
 import static com.esp.espflow.util.EspFlowConstants.PORT;
 import static com.esp.espflow.util.EspFlowConstants.READ_FLASH;
 import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideContent;
+import static com.infraleap.animatecss.Animated.Modifier.INFINITE;
 
 /**
  * <p><strong>ShowDevices</strong>  this class serves as an aid to display in the <strong>ReadFirmwareView</strong> the microcontrollers available in the OS.</p>
@@ -59,6 +75,7 @@ import static com.esp.espflow.views.readflash.EspDevicesCarousel.createSlideCont
  *             .withBaudRatesComboBox(this.baudRatesComboBox)
  *             .withEsptoolPathService(this.esptoolPathService)
  *             .withFlashDownloadButton(this.flashButtonWrapperService)
+ *             .withPublisher(this.publishMessageListItem)
  *             .applyStrategiesWithCustomContentCreationPerSlide()
  *             .make();
  * </pre>
@@ -146,26 +163,36 @@ public class ShowDevicesBuilder {
      * 11
      */
     public interface FlashDownloadWrapperStage {
-        StrategiesPlusCustomContentCreationPerSlideStage withFlashDownloadButton(FlashDownloadButtonService flashDownloadButton);
+        PublishMessageListItemStage withFlashDownloadButton(FlashDownloadButtonService flashDownloadButton);
     }
 
     /**
      * 12
+     */
+    public interface PublishMessageListItemStage {
+        StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<MessageListItem> publishMessageListItem);
+    }
+
+    /**
+     * 13
      */
     public interface StrategiesPlusCustomContentCreationPerSlideStage {
         Build applyStrategiesWithCustomContentCreationPerSlide();
     }
 
     /**
-     * 13
+     * 14
      */
     public interface Build extends IBuilder<EspDevicesCarousel> {
     }
 
+    /**
+     * The InnerBuilder
+     */
     public static class InnerBuilder implements EspDeviceInfoStage, EspDevicesCarouselStage,
             EsptoolServiceStage, UIStage, ConsoleOutPutStage, StartAddressStage,
             EndAddressSizeStage, AllAddressSizeStage, BaudRateStage, EsptoolPathServiceStage, FlashDownloadWrapperStage,
-            StrategiesPlusCustomContentCreationPerSlideStage, Build {
+            PublishMessageListItemStage, StrategiesPlusCustomContentCreationPerSlideStage, Build {
 
         private EspDevicesCarousel espDevicesCarousel;
         private EsptoolService esptoolService;
@@ -178,6 +205,7 @@ public class ShowDevicesBuilder {
         private ComboBox<BaudRatesEnum> baudRatesComboBox;
         private EsptoolPathService esptoolPathService;
         private FlashDownloadButtonService flashDownloadButtonService;
+        private Sinks.Many<MessageListItem> publishMessageListItem;
 
         /**
          * To bind {@link AddressRecordBinder}
@@ -257,8 +285,14 @@ public class ShowDevicesBuilder {
         }
 
         @Override
-        public StrategiesPlusCustomContentCreationPerSlideStage withFlashDownloadButton(FlashDownloadButtonService flashDownloadButtonService) {
+        public PublishMessageListItemStage withFlashDownloadButton(FlashDownloadButtonService flashDownloadButtonService) {
             this.flashDownloadButtonService = flashDownloadButtonService;
+            return this;
+        }
+
+        @Override
+        public StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<MessageListItem> publishMessageListItem) {
+            this.publishMessageListItem = publishMessageListItem;
             return this;
         }
 
@@ -300,7 +334,7 @@ public class ShowDevicesBuilder {
 
                 espDevicesCarousel.addSlide(esp01sSlide);
             } else {
-                log.info("Cannot create the Slide from esp01s {}", espDeviceInfo);
+                //log.info("Cannot create the Slide from esp01s {}", espDeviceInfo);
             }
 
         }
@@ -324,7 +358,7 @@ public class ShowDevicesBuilder {
                 espDevicesCarousel.addSlide(esp8266Slide);
 
             } else {
-                log.info("Cannot create the Slide from esp8266-4MB {}", espDeviceInfo);
+                //log.info("Cannot create the Slide from esp8266-4MB {}", espDeviceInfo);
             }
 
         }
@@ -348,7 +382,7 @@ public class ShowDevicesBuilder {
                 espDevicesCarousel.addSlide(esp8266Slide);
 
             } else {
-                log.info("Cannot create the Slide from esp8266-cp201x AMICA {}", espDeviceInfo);
+                //log.info("Cannot create the Slide from esp8266-cp201x AMICA {}", espDeviceInfo);
             }
 
         }
@@ -372,7 +406,7 @@ public class ShowDevicesBuilder {
                 espDevicesCarousel.addSlide(esp8285H16Slide);
 
             } else {
-                log.info("Cannot create the Slide from esp8255 {}", espDeviceInfo);
+                //log.info("Cannot create the Slide from esp8255 {}", espDeviceInfo);
             }
 
         }
@@ -395,7 +429,7 @@ public class ShowDevicesBuilder {
 
                 espDevicesCarousel.addSlide(esp32s3Slide);
             } else {
-                log.info("Cannot create the Slide from ESP32-S3-DEVKITC-1-N8_SPL {}", espDeviceInfo);
+                //log.info("Cannot create the Slide from ESP32-S3-DEVKITC-1-N8_SPL {}", espDeviceInfo);
             }
 
         }
@@ -454,10 +488,41 @@ public class ShowDevicesBuilder {
                     this.readFlash(flashDownloadButtonWrapper, processAutoDetectFlashSize);
                 } else {
                     customSizeToRead.focus();
-                    ConfirmDialogBuilder.showWarning("Please set the custom size greater than zero, or enable the button for full readability.");
+                    final ToggleButton toggleButton = new ToggleButton();
+                    toggleButton.setValue(true);
+                    toggleButton.setDisabled(true);
+
+                    String text = "Please set the custom size greater than zero, or enable the toggle button for full readability.";
+                    ConfirmDialogBuilder.showWarning(text, showImageWithInformationAboutToggleButton(text));
                 }
 
             }
+        }
+
+        /**
+         * Displays an image with an arrow with HEART_BEAT, INFINITE effect, pointing to the toggle button
+         *
+         * @return A {@link Component} with information about the toggle button
+         */
+        private Component showImageWithInformationAboutToggleButton(String text) {
+            final Image image = new Image(FRONTEND_IMAGES_CUSTOM + "enable-toggle-button.png", "alt");
+            image.setWidth("50%");
+            image.setHeight("50%");
+
+            final VerticalLayout content = new VerticalLayout(new com.vaadin.flow.component.Text(text));
+
+            final Icon iconArrowRight = VaadinIcon.ARROW_RIGHT.create();
+            Tooltip.forComponent(iconArrowRight).setText("Enable the toggle button!!!");
+            iconArrowRight.setSize("30px");
+            Animated.animate(iconArrowRight, Animated.Animation.HEART_BEAT, INFINITE);
+
+            final HorizontalLayout row = new HorizontalLayout(iconArrowRight, image);
+            row.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+            row.setVerticalComponentAlignment(FlexComponent.Alignment.END, iconArrowRight);
+            content.add(row);
+            content.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, row);
+
+            return content;
         }
 
         /**
@@ -513,11 +578,11 @@ public class ShowDevicesBuilder {
 
             CommandsOnFirstLine.putCommansdOnFirstLine(commands, outPutConsole);
 
-            esptoolService.downloadFlash(commands)
+            this.esptoolService.readFlash(commands)
                     .doOnError(onError -> {
                         ui.access(() -> {
                             log.info("Error: {}", onError);
-                            ConfirmDialogBuilder.showWarning("Error al crear backup de esta flash " + onError);
+                            ConfirmDialogBuilder.showWarning("Error creating backup of this flash " + onError);
                         });
                     })
                     .doOnComplete(() -> {
@@ -527,6 +592,15 @@ public class ShowDevicesBuilder {
                                 log.info("Backup completed successfully! {}", "");
                                 ConfirmDialogBuilder.showInformation("Backup completed successfully!");
                                 flashDownloadButtonWrapper.enableAnchorForDownloadTheFirmware(writFileToTempDir);
+
+                                String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(outPutConsole.scrollBarBuffer());
+
+                                final MessageListItem messageListItem = new MessageListItem(chipIs.concat(" Flash successfully read!!!"),
+                                        LocalDateTime.now().toInstant(ZoneOffset.UTC),
+                                        espDeviceInfo.port());
+
+                                this.publishMessageListItem.tryEmitNext(messageListItem);
+
                             } else {
                                 ConfirmDialogBuilder.showWarning("The flash does not exist in the tmp " + writFileToTempDir);
                             }

@@ -1,6 +1,5 @@
 package com.esp.espflow.mappers;
 
-import com.helger.commons.annotation.Singleton;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;

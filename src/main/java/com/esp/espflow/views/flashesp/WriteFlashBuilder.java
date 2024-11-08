@@ -128,12 +128,15 @@ public class WriteFlashBuilder {
         PublishMessageListItemStage withEsptoolPathService(EsptoolPathService esptoolPathService);
     }
 
+    /**
+     * 11
+     */
     public interface PublishMessageListItemStage {
         Build withPublisher(Sinks.Many<MessageListItem> publishMessageListItem);
     }
 
     /**
-     * 11
+     * 12
      */
     public interface Build extends IBuilder<WriteFlashBuilder> {
     }

@@ -178,7 +178,7 @@ public class EsptoolService {
      * @param commands the commands to process
      * @return A {@link Flux<String>}
      */
-    public Flux<String> downloadFlash(String... commands) {
+    public Flux<String> readFlash(String... commands) {
         return commandService.processCommandsWithCustomCharset(commands)
                 .distinct(this::splitPercentaje);
     }

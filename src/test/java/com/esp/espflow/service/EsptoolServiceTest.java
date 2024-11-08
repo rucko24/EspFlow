@@ -256,14 +256,14 @@ class EsptoolServiceTest {
     @ArgumentsSource(EsptoolServiceReadFlashArgumentsProvider.class)
     @SetSystemProperty(key = "java.osname", value = "linux")
     @DisplayName("The entire flash of the device is read using the ALL parameter, the console will display the percentage in real time, on linux")
-    void downloadFlash(Flux<String> actualLines, String[] expectedLinesFromConsole) {
+    void readFlash(Flux<String> actualLines, String[] expectedLinesFromConsole) {
 
         String[] commands = {"esptool.py", "--port", "/dev/ttyUSB1", "--baud", "115200", "read_flash",
                 "0", "ALL", "esp8266-backupflash.bin"};
 
         when(commandService.processCommandsWithCustomCharset(commands)).thenReturn(actualLines);
 
-        StepVerifier.create(esptoolService.downloadFlash(commands))
+        StepVerifier.create(esptoolService.readFlash(commands))
                 .expectNext(expectedLinesFromConsole[0])
                 .expectNext(expectedLinesFromConsole[1])
                 .expectNext(expectedLinesFromConsole[2])

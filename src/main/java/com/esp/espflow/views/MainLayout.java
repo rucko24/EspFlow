@@ -73,8 +73,8 @@ public class MainLayout extends AppLayout {
     private final Div contentAll = new Div();
     private final MessageList messageListRead = new MessageList();
     private final MessageList messageListAll = new MessageList();
-    private List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
-    private List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
+    private final List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
+    private final List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
 
     private H1 viewTitle;
 
@@ -114,6 +114,7 @@ public class MainLayout extends AppLayout {
         divBell.addClickListener(event -> {
             bellIcon.getStyle().set("transform", "rotate(20deg)");
             this.removeRedCircleError();
+            Animated.removeAnimations(spanCircleRed);
             Animated.animate(bellIcon, Animated.Animation.FADE_IN);
         });
         spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.FIXED);
@@ -130,7 +131,7 @@ public class MainLayout extends AppLayout {
         popover.setBackdropVisible(true);
         popover.addOpenedChangeListener(this::rotateTheBellToZeroDegreesIfThePopoverIsNotOpen);
 
-        final var buttonMarkAllRead = new Button("Marks all read");
+        final Button buttonMarkAllRead = new Button("Marks all read");
         buttonMarkAllRead.addClickListener(event -> {
             this.removeRedCircleError();
             messageListItemUnreadList.clear();

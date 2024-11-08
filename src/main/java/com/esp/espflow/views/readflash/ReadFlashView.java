@@ -34,6 +34,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -65,7 +66,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
@@ -125,6 +131,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final Set<Span> spansList = new CopyOnWriteArraySet<>();
+
+    /*
+     * Publisher for MessageListItem
+     */
+    private final Sinks.Many<MessageListItem> publishMessageListItem;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @PostConstruct
     public void init() {
@@ -410,7 +422,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                             resultEspDevicesCarousel.showLoading(LOADING, true);
                         } else {
                             resultEspDevicesCarousel.createSlidesAndShow();
-                            log.info("subscribe {}", resultEspDevicesCarousel);
+                            log.info("Slides created {}", resultEspDevicesCarousel.getSlideList().size());
                         }
                     });
                 });
@@ -491,6 +503,10 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      *
      * <p>The ShowDevicesBuilder when it succeeds in creating a Slide correctly adds it right in the addSlide method, e.g. {@link ShowDevicesBuilder#make}
      *
+     * <p>Each Slide at the end of this reactive stream, will have a button in the upper right corner, which will allow to execute the <strong>read_flash<strong>
+     *     command and extract the firmware from the device.
+     * </p>
+     *
      * <ul>
      *     <li>showEsp01s();</li>
      *     <li>showEsp8266340G4MB();</li>
@@ -534,6 +550,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             //Do nothing
         }
 
+        try {
+            ui.access(() -> this.emitNextEvent(espDeviceWithTotalDevices.espDeviceInfo()));
+        } catch (UIDetachedException ex) {
+          // Do nothing
+        }
+
         var resultCarousel = ShowDevicesBuilder.builder()
                 .withEspDevicesCarousel(espDevicesCarousel)
                 .withEsptoolService(this.esptoolService)
@@ -546,6 +568,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 .withBaudRatesComboBox(this.baudRatesComboBox)
                 .withEsptoolPathService(this.esptoolPathService)
                 .withFlashDownloadButton(this.flashDownloadButtonService)
+                .withPublisher(this.publishMessageListItem)
                 .applyStrategiesWithCustomContentCreationPerSlide()
                 .make();
 
@@ -616,6 +639,37 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.divCarousel.add(resetEspDevicesCarousel);
     }
 
+    /**
+     *
+     * Emit event to bell
+     *
+     * @param espDeviceInfo
+     */
+    public void emitNextEvent(final EspDeviceInfo espDeviceInfo) {
+
+        final MessageListItem messageListItem = new MessageListItem(espDeviceInfo.chipIs().concat(" Executed flash_id successfully!!!"),
+                LocalDateTime.now().toInstant(ZoneOffset.UTC),
+                espDeviceInfo.port());
+
+        var colors = Arrays.asList(0,1,2,3,4,5,6);
+        messageListItem.setUserColorIndex(colors.get(SECURE_RANDOM.nextInt(colors.size())));
+
+        this.publishMessageListItem.tryEmitNext(messageListItem);
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        //Disabled event for buttonRefreshDevices while in use
+        this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value -> {
+            try {
+                event.getUI().access(() -> this.buttonRefreshDevices.setEnabled(value));
+            } catch (UIDetachedException ex) {
+                //Do nothing,  It is thrown when you attempt to access closed UI.
+                //https://stackoverflow.com/a/73885127/7267818
+            }
+        });
+    }
+
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
@@ -635,19 +689,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                     ui.access(() -> this.buttonRefreshDevices.setEnabled(value))
             );
         }
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        //Disabled event for buttonRefreshDevices while in use
-        this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value -> {
-            try {
-                event.getUI().access(() -> this.buttonRefreshDevices.setEnabled(value));
-            } catch (UIDetachedException ex) {
-                //Do nothing,  It is thrown when you attempt to access closed UI.
-                //https://stackoverflow.com/a/73885127/7267818
-            }
-        });
     }
 
 }
