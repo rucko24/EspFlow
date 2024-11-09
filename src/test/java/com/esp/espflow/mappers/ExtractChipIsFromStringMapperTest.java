@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("When extracting the 'Chip is ESP82XX' from the text processed in the Xterm, we check for possible " +
+@DisplayName("When extracting the Chip is like ESP82XX or ESP32 from the text processed in the Xterm, we check for possible " +
         "errors and then send the event correctly in the notification panel.")
 class ExtractChipIsFromStringMapperTest {
 
