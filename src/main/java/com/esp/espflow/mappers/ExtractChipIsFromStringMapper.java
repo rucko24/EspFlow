@@ -20,14 +20,16 @@ public class ExtractChipIsFromStringMapper {
      * @return A {@link String}
      */
     public String getChipIsFromThisString(String input) {
-        String chipRegex = "(?s)Chip is (\\S+).*?Features:";
-        Pattern pattern = Pattern.compile(chipRegex);
-        Matcher matcher = pattern.matcher(input);
+        final String notNullInput = Objects.isNull(input) ? StringUtils.EMPTY : input;
+        final String chipRegex = "(?s)Chip is (\\S+).*?Features:";
+        final Pattern pattern = Pattern.compile(chipRegex);
+        final Matcher matcher = pattern.matcher(notNullInput);
         String chipIs = StringUtils.EMPTY;
         if (matcher.find()) {
             chipIs = matcher.group(1);
         }
-        return Objects.equals(chipIs, StringUtils.EMPTY) ? "Can`t parsed this Chip" :
-                chipIs.split("Features:")[0];
+        return Objects.equals(chipIs, StringUtils.EMPTY)
+                ? "This chip cannot be parsed"
+                : chipIs.split("Features:")[0];
     }
 }
