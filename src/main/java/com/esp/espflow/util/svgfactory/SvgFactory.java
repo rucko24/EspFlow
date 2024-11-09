@@ -6,7 +6,12 @@ import com.vaadin.flow.server.StreamResource;
 
 import java.util.Objects;
 
+import static com.esp.espflow.util.EspFlowConstants.FREE_BSD_ICON;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_SVG_ICONS;
+import static com.esp.espflow.util.EspFlowConstants.LINUX_ICON;
+import static com.esp.espflow.util.EspFlowConstants.MACOS_ICON;
+import static com.esp.espflow.util.EspFlowConstants.NO_OS_ICON;
+import static com.esp.espflow.util.EspFlowConstants.WINDOWS_ICON;
 
 /**
  * @author rubn
@@ -72,15 +77,15 @@ public class SvgFactory {
     public static SvgIcon OsIcon(String size, String customHeight) {
         SvgIcon svgIcon;
         if (GetOsName.WINDOWS == GetOsName.getOsName()) {
-            svgIcon = SvgFactory.createIconFromSvg("window.svg", size, customHeight);
+            svgIcon = SvgFactory.createIconFromSvg(WINDOWS_ICON, size, customHeight);
         } else if (GetOsName.LINUX == GetOsName.getOsName()) {
-            svgIcon = SvgFactory.createIconFromSvg("linux.svg", size, customHeight);
+            svgIcon = SvgFactory.createIconFromSvg(LINUX_ICON, size, customHeight);
         } else if (GetOsName.MAC == GetOsName.getOsName()) {
-            svgIcon = SvgFactory.createIconFromSvg("mac.svg", size, customHeight);
+            svgIcon = SvgFactory.createIconFromSvg(MACOS_ICON, size, customHeight);
         } else if (GetOsName.FREEBSD == GetOsName.getOsName()) {
-            svgIcon = SvgFactory.createIconFromSvg("freebsd.svg", size, customHeight);
+            svgIcon = SvgFactory.createIconFromSvg(FREE_BSD_ICON, size, customHeight);
         } else {
-            svgIcon = SvgFactory.createIconFromSvg("no-os.svg", size, customHeight);
+            svgIcon = SvgFactory.createIconFromSvg(NO_OS_ICON, size, customHeight);
         }
         return svgIcon;
     }

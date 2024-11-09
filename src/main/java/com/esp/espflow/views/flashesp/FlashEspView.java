@@ -96,11 +96,14 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final OutPutConsole outPutConsole = new OutPutConsole();
 
     private String[] commands;
-
     /*
      * Publisher for MessageListItem
      */
     private final Sinks.Many<MessageListItem> publishMessageListItem;
+    /*
+     * Show initial information
+     */
+    private final InitialInformationFlashEspViewDialog initialInformationFlashEspViewDialog;
 
     @PostConstruct
     public void init() {
@@ -377,7 +380,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
             super.onAttach(attachEvent);
             final UI ui = attachEvent.getUI();
             this.outputConsole(ui);
+            super.add(initialInformationFlashEspViewDialog);
         }
     }
-
 }

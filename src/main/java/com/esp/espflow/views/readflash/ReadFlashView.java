@@ -131,12 +131,18 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final Set<Span> spansList = new CopyOnWriteArraySet<>();
-
     /*
      * Publisher for MessageListItem
      */
     private final Sinks.Many<MessageListItem> publishMessageListItem;
+    /*
+     * For Custom colors
+     */
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    /*
+     * Show initial information
+     */
+    private final InitialInformationReadFlashViewDialog initialInformationReadFlashViewDialog;
 
     @PostConstruct
     public void init() {
@@ -688,6 +694,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value ->
                     ui.access(() -> this.buttonRefreshDevices.setEnabled(value))
             );
+            super.add(this.initialInformationReadFlashViewDialog);
         }
     }
 

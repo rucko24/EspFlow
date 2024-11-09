@@ -83,4 +83,10 @@ public class EspFlowConstants {
     public static final String LOADING = "Loading...";
     public static final String CHANGE_SERIAL_PORT_PERMISSIONS = "Change serial port permissions!";
     public static final String PORT_FAILURE = "Port failure: ";
+
+    public static final String WINDOWS_ICON = "windows.svg";
+    public static final String LINUX_ICON = "linux.svg";
+    public static final String MACOS_ICON = "mac.svg";
+    public static final String FREE_BSD_ICON = "freebsd.svg";
+    public static final String NO_OS_ICON = "no-os.svg";
 }
