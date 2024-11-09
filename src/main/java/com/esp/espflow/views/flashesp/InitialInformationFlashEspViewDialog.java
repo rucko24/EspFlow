@@ -44,7 +44,6 @@ public class InitialInformationFlashEspViewDialog extends Dialog {
         super.setModal(true);
 
         content.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN);
-        //content.setHeight("300px");
         content.setWidth("500px");
 
         var paragraphOverView = paragraphOverView();
