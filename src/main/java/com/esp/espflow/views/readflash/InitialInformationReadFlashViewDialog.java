@@ -65,7 +65,7 @@ public class InitialInformationReadFlashViewDialog extends Dialog {
         paragraphOverView.getElement().setProperty(INNER_HTML, "In this view we can read all the devices present with " +
                 "the <strong>Refresh Devices button</strong>," +
                 " creating a Slide configured with device information read. <br> We can also read the firmware and save it, " +
-                "to read it we must specify the memory area or read it completely, all the reading process will be shown" +
+                "to read it we must specify the memory area or read it fully, all the reading process will be shown" +
                 " in the output console.");
         return paragraphOverView;
     }
