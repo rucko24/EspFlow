@@ -14,11 +14,13 @@ import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
+import com.esp.espflow.views.Sidebar;
 import com.esp.espflow.views.flashesp.ChangeSerialPortPermissionDialog;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Text;
@@ -28,6 +30,7 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -39,10 +42,13 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -51,6 +57,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignSelf;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -695,7 +702,47 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                     ui.access(() -> this.buttonRefreshDevices.setEnabled(value))
             );
             super.add(this.initialInformationReadFlashViewDialog);
+
+            RadioButtonGroup<String> mode = new RadioButtonGroup<>("Header theme");
+            mode.setItems("Light", "Dark");
+            mode.addValueChangeListener(e -> getChildren().forEach(component -> {
+                if (component instanceof Sidebar) {
+                    if (e.getValue().equals("Dark")) {
+                        ((Sidebar) component).addHeaderThemeName(Lumo.DARK);
+                    } else {
+                        ((Sidebar) component).removeHeaderThemeName(Lumo.DARK);
+                    }
+                }
+            }));
+            addComponentAsFirst(mode);
+
+            Sidebar sidebar = new Sidebar(
+                    "New event",
+                    "Fill in the blibber-blabber below to create a sensational event that will leave everyone flibber-gasted!",
+                    createForm()
+            );
+            add(sidebar);
+
         }
+
+    }
+
+    private Component[] createForm() {
+        TextField title = new TextField("Title");
+
+        TextArea description = new TextArea("Description");
+
+        MultiSelectComboBox<String> guests = new MultiSelectComboBox<>("Guests");
+        guests.setItems(
+                "JOHN_SMITH", "EMILY_JOHNSON", "MICHAEL_DAVIS", "SOPHIA_BROWN",
+                "DANIEL_WILSON", "OLIVIA_MARTINEZ", "DAVID_THOMPSON"
+        );
+
+        RadioButtonGroup<String> visibility = new RadioButtonGroup<>("Visibility");
+        visibility.setItems("Private", "Public");
+        visibility.setValue("Private");
+
+        return new Component[]{title, description, guests, visibility};
     }
 
 }

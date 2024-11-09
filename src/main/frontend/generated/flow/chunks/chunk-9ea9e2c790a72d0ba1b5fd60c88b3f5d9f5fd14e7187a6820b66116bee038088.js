@@ -39,6 +39,7 @@ import '@vaadin/multi-select-combo-box/theme/lumo/vaadin-multi-select-combo-box.
 import '@vaadin/text-field/theme/lumo/vaadin-text-field.js';
 import '@vaadin/icons/vaadin-iconset.js';
 import 'Frontend/generated/jar-resources/file-download-wrapper.js';
+import '@vaadin/text-area/theme/lumo/vaadin-text-area.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-drawer-toggle.js';
 import '@vaadin/tabsheet/theme/lumo/vaadin-tabsheet.js';
 import '@vaadin/tabs/theme/lumo/vaadin-tabs.js';
