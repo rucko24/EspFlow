@@ -6,9 +6,26 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Footer;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.theme.lumo.LumoUtility.*;
+import com.vaadin.flow.component.html.Section;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.Background;
+import com.vaadin.flow.theme.lumo.LumoUtility.Border;
+import com.vaadin.flow.theme.lumo.LumoUtility.BoxShadow;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.Flex;
+import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
+import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
+import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
+import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
+import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
+import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import com.vaadin.flow.theme.lumo.LumoUtility.Position;
+import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 public class Sidebar extends Section implements HasEnabled, HasTheme {
@@ -38,6 +55,10 @@ public class Sidebar extends Section implements HasEnabled, HasTheme {
         createFooter();
 
         close();
+    }
+
+    public Button getCancelButton() {
+        return cancel;
     }
 
     private void createHeader(String title, String description) {

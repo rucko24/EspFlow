@@ -1,4 +1,4 @@
-package com.esp.espflow.views;
+package com.esp.espflow.enums;
 
 import com.vaadin.flow.theme.lumo.LumoUtility;
 

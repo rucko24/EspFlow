@@ -1,5 +1,6 @@
 package com.esp.espflow.views;
 
+import com.esp.espflow.enums.Breakpoint;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.theme.lumo.LumoUtility;

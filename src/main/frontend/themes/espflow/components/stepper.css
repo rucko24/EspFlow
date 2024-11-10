@@ -1,0 +1,37 @@
+/* Numbered steps */
+
+nav.stepper ul {
+    counter-reset: step;
+}
+
+nav.stepper li {
+    counter-increment: step;
+}
+
+nav.stepper a > *:first-child:empty::before {
+    content: counter(step);
+}
+
+/* Connector lines */
+
+nav.stepper li::before {
+    border-inline-start: 1px solid var(--lumo-utility-border-color, var(--lumo-contrast-30pct));
+    content: "";
+    inset: calc(100% - var(--lumo-space-s)) auto calc(var(--lumo-space-s) / -1) calc((var(--lumo-size-m) + var(--lumo-space-m)) / 2);
+    position: absolute;
+}
+
+nav.stepper[theme~="small"] li::before {
+    inset: calc(100% - var(--lumo-space-s)) auto calc(var(--lumo-space-s) / -1) calc((var(--lumo-size-xs) + var(--lumo-space-m)) / 2);
+}
+
+nav.stepper li:last-child::before {
+    content: none;
+}
+
+@media (min-width: 1024px) {
+    nav.stepper[theme~="horizontal"] li::before {
+        border-block-end: 1px solid var(--lumo-utility-border-color, var(--lumo-contrast-30pct));
+        inset: 50% calc(var(--lumo-space-l) / -1) auto 100%;
+    }
+}

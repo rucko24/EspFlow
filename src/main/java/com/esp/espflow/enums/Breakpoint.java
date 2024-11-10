@@ -1,6 +1,4 @@
-package com.esp.espflow.views;
-
-import com.vaadin.flow.theme.lumo.LumoUtility;
+package com.esp.espflow.enums;
 
 public enum Breakpoint {
     SMALL("sm"),

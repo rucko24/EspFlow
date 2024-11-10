@@ -723,6 +723,16 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             );
             add(sidebar);
 
+            Button button = new Button("Open sidebar", e -> {
+                sidebar.open();
+                Animated.animate(sidebar, Animation.FADE_IN);
+            });
+            addComponentAtIndex(1, button);
+            sidebar.getCancelButton().addClickListener(event -> {
+               sidebar.close();
+               Animated.animate(sidebar, Animation.FADE_OUT);
+            });
+
         }
 
     }

@@ -6,6 +6,9 @@ import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
+import com.esp.espflow.views.settings.PublicInformationView;
+import com.esp.espflow.views.wizard.Step1View;
+import com.esp.espflow.views.wizard.WizardDiaglogLayout;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -22,6 +25,7 @@ import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -208,7 +212,7 @@ public class MainLayout extends AppLayout {
             var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null));
             inboxCounter.setVisible(false);
             inboxCounter.getElement().getThemeList().add("badge contrast pill");
-            inboxCounter.getElement().setAttribute("aria-label","12 unread messages");
+            inboxCounter.getElement().setAttribute("aria-label", "12 unread messages");
             Tooltip.forComponent(inboxCounter).setText("unread messages");
             itemFlash.setSuffixComponent(inboxCounter);
             Tooltip.forComponent(itemFlash).setText("Flash Esp32-ESP8266, Execute flash_id and write flash");
@@ -223,7 +227,14 @@ public class MainLayout extends AppLayout {
 
         if (accessChecker.hasAccess(AboutView.class)) {
             nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
+        }
 
+//        if (accessChecker.hasAccess(PublicInformationView.class)) {
+//            nav.addItem(new SideNavItem("Settings", PublicInformationView.class, VaadinIcon.COG.create()));
+//        }
+//
+        if (accessChecker.hasAccess(Step1View.class)) {
+            nav.addItem(new SideNavItem("Wizard", Step1View.class, VaadinIcon.STEP_FORWARD.create()));
         }
 
         return nav;
@@ -253,9 +264,16 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("align-items", "center");
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
+
+            //final WizardDiaglogLayout wizardDiaglogLayout = new WizardDiaglogLayout();
+
+//            userName.getSubMenu().addItem("Settings", e -> {
+//                wizardDiaglogLayout.open();
+//            }).addComponentAsFirst(wizardDiaglogLayout);
+            userName.getSubMenu().add(new Hr());
             userName.getSubMenu().addItem("Sign out", e -> {
                 authenticatedUser.logout();
-            });
+            }).addComponentAsFirst(VaadinIcon.SIGN_OUT.create());
 
             layout.add(userMenu);
         } else {
@@ -324,8 +342,7 @@ public class MainLayout extends AppLayout {
     }
 
     /**
-     *
-     *  @param event a Popover.OpenedChangeEvent
+     * @param event a Popover.OpenedChangeEvent
      */
     public void rotateTheBellToZeroDegreesIfThePopoverIsNotOpen(Popover.OpenedChangeEvent event) {
         if (!event.getSource().isOpened()) {
