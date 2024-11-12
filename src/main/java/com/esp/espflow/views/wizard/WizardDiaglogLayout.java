@@ -4,8 +4,11 @@ import com.esp.espflow.views.MainLayout;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.steppers.Step;
 import com.esp.espflow.views.steppers.Stepper;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.SvgIcon;
@@ -29,7 +32,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.security.RolesAllowed;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
-@PageTitle("Wizard")
+@PageTitle("Settings")
 @ParentLayout(MainLayout.class)
 @RoutePrefix(value = "wizard")
 @RolesAllowed("ADMIN")
@@ -43,8 +46,13 @@ public class WizardDiaglogLayout extends Dialog implements RouterLayout, AfterNa
 
     public WizardDiaglogLayout() {
         super.addClassNames(Display.FLEX, FlexDirection.COLUMN, Height.FULL);
+
+//        TestMainDialog testMainDialog = new TestMainDialog();
+//        testMainDialog.add(createStepper(), createContent());
+//        testMainDialog.open();
         super.add(createStepper(), createContent());
         super.open();
+
     }
 
     private Stepper createStepper() {
@@ -57,6 +65,7 @@ public class WizardDiaglogLayout extends Dialog implements RouterLayout, AfterNa
         this.stepper.addClassNames(BoxSizing.BORDER, MaxWidth.SCREEN_SMALL, Padding.MEDIUM);
         this.stepper.setOrientation(Stepper.Orientation.HORIZONTAL);
         this.stepper.setState(Step.State.ACTIVE, step1);
+
         return this.stepper;
     }
 
@@ -96,21 +105,36 @@ public class WizardDiaglogLayout extends Dialog implements RouterLayout, AfterNa
 
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
-//        if (event.getLocation().getPath().contains("wizard/1")) {
-//            this.previous.getElement().removeAttribute("href");
-//            this.next.setRoute(Step2View.class);
-//
-//        } else if (event.getLocation().getPath().contains("wizard/2")) {
-//            this.previous.setRoute(Step1View.class);
-//            this.next.setRoute(Step3View.class);
-//
-//        } else if (event.getLocation().getPath().contains("wizard/3")) {
-//            this.previous.setRoute(Step2View.class);
-//            this.next.setRoute(Step4View.class);
-//
-//        } else if (event.getLocation().getPath().contains("wizard/4")) {
-//            this.previous.setRoute(Step3View.class);
-//            this.next.setRoute(FlashEspView.class);
-//        }
+        if (event.getLocation().getPath().contains("wizard/1")) {
+
+            this.previous.getElement().removeAttribute("href");
+            this.next.setRoute(Step2View.class);
+
+        } else if (event.getLocation().getPath().contains("wizard/2")) {
+            this.previous.setRoute(Step1View.class);
+            this.next.setRoute(Step3View.class);
+
+        } else if (event.getLocation().getPath().contains("wizard/3")) {
+            this.previous.setRoute(Step2View.class);
+            this.next.setRoute(Step4View.class);
+
+        } else if (event.getLocation().getPath().contains("wizard/4")) {
+            this.previous.setRoute(Step3View.class);
+            this.next.setRoute(FlashEspView.class);
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (attachEvent.isInitialAttach()) {
+            final UI ui = attachEvent.getUI();
+            //ui.navigate(Step1View.class);
+        }
     }
 }

@@ -23,7 +23,7 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 @UIScope
 @SpringComponent
 @PageTitle("ContactInformationView")
-@Route(value = "contact-information", layout = SettingsDialogView.class)
+//@Route(value = "contact-information", layout = SettingsDialogView.class)
 @RolesAllowed("ADMIN")
 public class ContactInformationView extends Div {
 

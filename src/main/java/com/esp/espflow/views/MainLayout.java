@@ -6,8 +6,7 @@ import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
-import com.esp.espflow.views.settings.PublicInformationView;
-import com.esp.espflow.views.wizard.Step1View;
+import com.esp.espflow.views.settings.SettingsDialogView;
 import com.esp.espflow.views.wizard.WizardDiaglogLayout;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
@@ -44,6 +43,11 @@ import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -54,6 +58,7 @@ import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -66,7 +71,7 @@ import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
  * The main view is a top-level placeholder for other views.
  */
 @Log4j2
-public class MainLayout extends AppLayout {
+public class MainLayout extends AppLayout implements AfterNavigationObserver, HasUrlParameter<String> {
 
     private final Popover popover = new Popover();
     private final Div contentUnread = new Div();
@@ -85,6 +90,8 @@ public class MainLayout extends AppLayout {
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
     private final Flux<MessageListItem> subscribersMessageListItems;
+    private final SettingsDialogView settingsDialogView = new SettingsDialogView();
+    private Div divWizard = new Div(VaadinIcon.COG.create());
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
                       Flux<MessageListItem> subscribersMessageListItems) {
@@ -114,6 +121,7 @@ public class MainLayout extends AppLayout {
         Tooltip.forComponent(divBell).setText("Notifications");
         divBell.add(bellIcon);
         divBell.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
+        divBell.getStyle().setCursor("pointer");
 
         divBell.addClickListener(event -> {
             bellIcon.getStyle().set("transform", "rotate(20deg)");
@@ -233,8 +241,8 @@ public class MainLayout extends AppLayout {
 //            nav.addItem(new SideNavItem("Settings", PublicInformationView.class, VaadinIcon.COG.create()));
 //        }
 //
-        if (accessChecker.hasAccess(Step1View.class)) {
-            nav.addItem(new SideNavItem("Wizard", Step1View.class, VaadinIcon.STEP_FORWARD.create()));
+        if (accessChecker.hasAccess(WizardDiaglogLayout.class)) {
+            //nav.addItem(new SideNavItem("Wizard", Step1View.class, VaadinIcon.STEP_FORWARD.create()));
         }
 
         return nav;
@@ -264,12 +272,11 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("align-items", "center");
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
-
-            //final WizardDiaglogLayout wizardDiaglogLayout = new WizardDiaglogLayout();
-
-//            userName.getSubMenu().addItem("Settings", e -> {
-//                wizardDiaglogLayout.open();
-//            }).addComponentAsFirst(wizardDiaglogLayout);
+            userName.getSubMenu().addItem("Settings", e -> {
+                settingsDialogView.setId("settings-dialog");
+                settingsDialogView.open();
+                divWizard.add(settingsDialogView);
+            }).addComponentAsFirst(divWizard);
             userName.getSubMenu().add(new Hr());
             userName.getSubMenu().addItem("Sign out", e -> {
                 authenticatedUser.logout();
@@ -309,6 +316,7 @@ public class MainLayout extends AppLayout {
                     .subscribe(messageListItem -> {
                         this.subscribe(ui, messageListItem);
                     });
+
         }
     }
 
@@ -363,5 +371,59 @@ public class MainLayout extends AppLayout {
      */
     public void removeRedCircleError() {
         spanCircleRed.getElement().removeAttribute("theme");
+    }
+
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        if (Objects.nonNull(parameter)) {
+            System.out.println("setParameter MainLayout " + parameter);
+        }
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        String path = event.getLocation().getPath();
+
+        if (!(path.contains("read-flash")) && !(path.contains("flash-esp"))) {
+            UI.getCurrent().getPage().executeJs(
+                    "if (window.location.hash) { " +
+                            "  var hash = window.location.hash.substring(1); " +  // Elimina el carácter '#'
+                            "  return hash; " +
+                            "} else { " +
+                            "  return ''; " +  // Devuelve una cadena vacía si no hay fragmento
+                            "}"
+            ).then(String.class, hash -> {
+                System.out.println("Fragmento de URI MainLayout: " + hash);
+                System.out.println("Path de URI MainLayout: " + path);
+                // Aquí puedes usar el fragmento 'hash' según lo necesites
+
+                if (hash.contains("settings")) {
+                    //divWizard.add(settingsDialogView);
+                    final SettingsDialogView settingsDialogView1 = new SettingsDialogView();
+                    divWizard.removeAll();
+                    divWizard.add(settingsDialogView1);
+                    settingsDialogView1.open();
+                }
+//                case "public-information" -> {
+//                    this.mainLayout.removeAll();
+//                    this.mainLayout.add(createPublicInformation());
+//                }
+//                case "contact-information" -> {
+//                    this.mainLayout.removeAll();
+//                    this.mainLayout.add(createContactInformation());
+//                }
+//                case "password" -> {
+//                    this.mainLayout.removeAll();
+//                    this.mainLayout.add(createPassword());
+//                }
+//                case "notifications" -> {
+//                    this.mainLayout.removeAll();
+//                    this.mainLayout.add(createNotifications());
+//                }
+                //  }
+
+            });
+        }
+
     }
 }

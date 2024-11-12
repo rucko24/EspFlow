@@ -2,6 +2,7 @@ package com.esp.espflow.views.about;
 
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -9,6 +10,8 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
@@ -20,7 +23,7 @@ import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ABOUT;
 @PageTitle("About")
 @Route(value = "about", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
-public class AboutView extends VerticalLayout {
+public class AboutView extends VerticalLayout implements AfterNavigationObserver {
 
     private static final String TARGET_BLANK = "_blank";
     private static final String INNER_HTML = "innerHTML";
@@ -87,4 +90,20 @@ public class AboutView extends VerticalLayout {
         return div;
     }
 
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        UI.getCurrent().getPage().executeJs(
+                "if (window.location.hash) { " +
+                        "  var hash = window.location.hash.substring(1); " +  // Elimina el carácter '#'
+                        "  return hash; " +
+                        "} else { " +
+                        "  return ''; " +  // Devuelve una cadena vacía si no hay fragmento
+                        "}"
+        ).then(String.class, hash -> {
+            System.out.println("Fragmento de URI About: " + hash);
+            System.out.println("Path de URI About: " + event.getLocation().getPath());
+            // Aquí puedes usar el fragmento 'hash' según lo necesites
+
+        });
+    }
 }

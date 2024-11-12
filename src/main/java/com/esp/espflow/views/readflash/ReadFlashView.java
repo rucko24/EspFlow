@@ -703,35 +703,35 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             );
             super.add(this.initialInformationReadFlashViewDialog);
 
-            RadioButtonGroup<String> mode = new RadioButtonGroup<>("Header theme");
-            mode.setItems("Light", "Dark");
-            mode.addValueChangeListener(e -> getChildren().forEach(component -> {
-                if (component instanceof Sidebar) {
-                    if (e.getValue().equals("Dark")) {
-                        ((Sidebar) component).addHeaderThemeName(Lumo.DARK);
-                    } else {
-                        ((Sidebar) component).removeHeaderThemeName(Lumo.DARK);
-                    }
-                }
-            }));
-            addComponentAsFirst(mode);
+//            RadioButtonGroup<String> mode = new RadioButtonGroup<>("Header theme");
+//            mode.setItems("Light", "Dark");
+//            mode.addValueChangeListener(e -> getChildren().forEach(component -> {
+//                if (component instanceof Sidebar) {
+//                    if (e.getValue().equals("Dark")) {
+//                        ((Sidebar) component).addHeaderThemeName(Lumo.DARK);
+//                    } else {
+//                        ((Sidebar) component).removeHeaderThemeName(Lumo.DARK);
+//                    }
+//                }
+//            }));
+            //addComponentAsFirst(mode);
 
-            Sidebar sidebar = new Sidebar(
-                    "New event",
-                    "Fill in the blibber-blabber below to create a sensational event that will leave everyone flibber-gasted!",
-                    createForm()
-            );
-            add(sidebar);
+//            Sidebar sidebar = new Sidebar(
+//                    "New event",
+//                    "Fill in the blibber-blabber below to create a sensational event that will leave everyone flibber-gasted!",
+//                    createForm()
+//            );
+           // add(sidebar);
 
-            Button button = new Button("Open sidebar", e -> {
-                sidebar.open();
-                Animated.animate(sidebar, Animation.FADE_IN);
-            });
-            addComponentAtIndex(1, button);
-            sidebar.getCancelButton().addClickListener(event -> {
-               sidebar.close();
-               Animated.animate(sidebar, Animation.FADE_OUT);
-            });
+//            Button button = new Button("Open sidebar", e -> {
+//                sidebar.open();
+//                Animated.animate(sidebar, Animation.FADE_IN);
+//            });
+            //addComponentAtIndex(1, button);
+//            sidebar.getCancelButton().addClickListener(event -> {
+//               sidebar.close();
+//               Animated.animate(sidebar, Animation.FADE_OUT);
+//            });
 
         }
 

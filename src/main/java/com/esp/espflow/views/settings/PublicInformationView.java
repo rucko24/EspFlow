@@ -24,9 +24,11 @@ import lombok.extern.log4j.Log4j2;
 @UIScope
 @SpringComponent
 @PageTitle("PublicInformationView")
-@Route(value = "public-information", layout = SettingsDialogView.class)
+//@Route(value = "public-information", layout = SettingsDialogView.class)
 @RolesAllowed("ADMIN")
 public class PublicInformationView extends Div {
+
+
 
     public PublicInformationView() {
 //        addClassNames(Padding.Horizontal.LARGE, Padding.Vertical.MEDIUM);

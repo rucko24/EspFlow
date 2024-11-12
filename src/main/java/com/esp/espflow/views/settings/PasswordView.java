@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 @UIScope
 @SpringComponent
 @PageTitle("PasswordView")
-@Route(value = "password", layout = SettingsDialogView.class)
+//@Route(value = "password", layout = SettingsDialogView.class)
 @RolesAllowed("ADMIN")
 public class PasswordView extends Div {
 

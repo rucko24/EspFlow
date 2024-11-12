@@ -19,7 +19,7 @@ import lombok.extern.log4j.Log4j2;
 @UIScope
 @SpringComponent
 @PageTitle("NotificationsView")
-@Route(value = "notifications", layout = SettingsDialogView.class)
+//@Route(value = "notifications", layout = SettingsDialogView.class)
 @RolesAllowed("ADMIN")
 public class NotificationsView extends Div {
 

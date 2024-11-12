@@ -56,8 +56,6 @@ public class InitialInformationFlashEspViewDialog extends Dialog {
         buttonOk.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         super.getFooter().add(buttonOk);
-
-        super.open();
     }
 
     private Paragraph paragraphOverView() {
