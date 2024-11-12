@@ -43,11 +43,6 @@ import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -58,7 +53,6 @@ import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -71,7 +65,7 @@ import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
  * The main view is a top-level placeholder for other views.
  */
 @Log4j2
-public class MainLayout extends AppLayout implements AfterNavigationObserver, HasUrlParameter<String> {
+public class MainLayout extends AppLayout {
 
     private final Popover popover = new Popover();
     private final Div contentUnread = new Div();
@@ -90,8 +84,11 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver, Ha
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
     private final Flux<MessageListItem> subscribersMessageListItems;
+
+    /**
+     * Settings
+     */
     private final SettingsDialogView settingsDialogView = new SettingsDialogView();
-    private Div divWizard = new Div(VaadinIcon.COG.create());
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
                       Flux<MessageListItem> subscribersMessageListItems) {
@@ -262,8 +259,11 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver, Ha
 
             MenuBar userMenu = new MenuBar();
             userMenu.setThemeName("tertiary-inline contrast");
+            //userMenu.setThemeName("tertiary small contrast");
 
             MenuItem userName = userMenu.addItem("");
+
+            userName.getStyle().setCursor("pointer");
             Div div = new Div();
             div.add(avatar);
             div.add(user.getName());
@@ -275,14 +275,20 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver, Ha
             userName.getSubMenu().addItem("Settings", e -> {
                 settingsDialogView.setId("settings-dialog");
                 settingsDialogView.open();
-                divWizard.add(settingsDialogView);
-            }).addComponentAsFirst(divWizard);
+            }).addComponentAsFirst(VaadinIcon.COG.create());
             userName.getSubMenu().add(new Hr());
-            userName.getSubMenu().addItem("Sign out", e -> {
+            var sigOutItem = userName.getSubMenu().addItem("Sign out", e -> {
                 authenticatedUser.logout();
-            }).addComponentAsFirst(VaadinIcon.SIGN_OUT.create());
+            });
+            sigOutItem.addComponentAsFirst(SvgFactory.createIconFromSvg("signout.svg","20px",null));
 
-            layout.add(userMenu);
+            userName.getSubMenu().getItems().forEach(item -> {
+                item.getStyle().setCursor("pointer");
+                item.setCheckable(false);
+                item.setChecked(false);
+            });
+
+            layout.add(userMenu, settingsDialogView);
         } else {
             Anchor loginLink = new Anchor("login", "Sign in");
             layout.add(loginLink);
@@ -300,24 +306,6 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver, Ha
     private String getCurrentPageTitle() {
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
         return title == null ? "" : title.value();
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        if (attachEvent.isInitialAttach()) {
-            final UI ui = attachEvent.getUI();
-            subscribersMessageListItems
-                    .subscribe(messageListItem -> {
-                        this.subscribe(ui, messageListItem);
-                    });
-
-        }
     }
 
     /**
@@ -374,56 +362,23 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver, Ha
     }
 
     @Override
-    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
-        if (Objects.nonNull(parameter)) {
-            System.out.println("setParameter MainLayout " + parameter);
-        }
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        this.settingsDialogView.close();
     }
 
     @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        String path = event.getLocation().getPath();
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (attachEvent.isInitialAttach()) {
+            final UI ui = attachEvent.getUI();
+            subscribersMessageListItems
+                    .subscribe(messageListItem -> {
+                        this.subscribe(ui, messageListItem);
+                    });
 
-        if (!(path.contains("read-flash")) && !(path.contains("flash-esp"))) {
-            UI.getCurrent().getPage().executeJs(
-                    "if (window.location.hash) { " +
-                            "  var hash = window.location.hash.substring(1); " +  // Elimina el carácter '#'
-                            "  return hash; " +
-                            "} else { " +
-                            "  return ''; " +  // Devuelve una cadena vacía si no hay fragmento
-                            "}"
-            ).then(String.class, hash -> {
-                System.out.println("Fragmento de URI MainLayout: " + hash);
-                System.out.println("Path de URI MainLayout: " + path);
-                // Aquí puedes usar el fragmento 'hash' según lo necesites
-
-                if (hash.contains("settings")) {
-                    //divWizard.add(settingsDialogView);
-                    final SettingsDialogView settingsDialogView1 = new SettingsDialogView();
-                    divWizard.removeAll();
-                    divWizard.add(settingsDialogView1);
-                    settingsDialogView1.open();
-                }
-//                case "public-information" -> {
-//                    this.mainLayout.removeAll();
-//                    this.mainLayout.add(createPublicInformation());
-//                }
-//                case "contact-information" -> {
-//                    this.mainLayout.removeAll();
-//                    this.mainLayout.add(createContactInformation());
-//                }
-//                case "password" -> {
-//                    this.mainLayout.removeAll();
-//                    this.mainLayout.add(createPassword());
-//                }
-//                case "notifications" -> {
-//                    this.mainLayout.removeAll();
-//                    this.mainLayout.add(createNotifications());
-//                }
-                //  }
-
-            });
         }
 
     }
+
 }

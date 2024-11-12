@@ -152,7 +152,7 @@
         <dependency>
             <groupId>com.vaadin.componentfactory</groupId>
             <artifactId>togglebutton</artifactId>
-            <version>1.0.2</version>
+            <version>3.0.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->

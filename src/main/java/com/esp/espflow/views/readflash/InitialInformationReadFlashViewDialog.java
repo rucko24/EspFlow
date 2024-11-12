@@ -56,7 +56,6 @@ public class InitialInformationReadFlashViewDialog extends Dialog {
 
         super.getFooter().add(buttonOk);
 
-        super.open();
     }
 
     private Paragraph paragraphOverView() {

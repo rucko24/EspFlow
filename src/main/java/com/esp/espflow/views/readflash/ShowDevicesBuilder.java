@@ -490,10 +490,6 @@ public class ShowDevicesBuilder {
                     this.readFlash(flashDownloadButtonWrapper, processAutoDetectFlashSize);
                 } else {
                     customSizeToRead.focus();
-                    final ToggleButton toggleButton = new ToggleButton();
-                    toggleButton.setValue(true);
-                    toggleButton.setDisabled(true);
-
                     String text = "Please set the custom size greater than zero, or enable the toggle button for full readability.";
                     ConfirmDialogBuilder.showWarning(text, showImageWithInformationAboutToggleButton(text));
                 }

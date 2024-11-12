@@ -25,17 +25,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -83,7 +75,7 @@ import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class FlashEspView extends Div implements ResponsiveHeaderDiv, AfterNavigationObserver, BeforeEnterObserver {
+public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
     private final DivFlashUploader divFlashUploader;
     private final DivHeaderPorts divHeaderPorts;
@@ -394,16 +386,16 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, AfterNavig
 
         getUI().ifPresent(ui -> {
             ui.getPage().fetchCurrentURL(url -> {
-                if(Objects.nonNull(url)) {
+                if (Objects.nonNull(url)) {
                     String ref = url.getRef();
-                    if(Objects.isNull(ref)) {
+                    if (Objects.isNull(ref)) {
                         this.initialInformationFlashEspViewDialog.open();
                     }
                     if (url.toString().contains("setting")) {
-                        //this.initialInformationFlashEspViewDialog.open();
                         //Abrir los settings aqui
-                    } else {
-                        //this.initialInformationFlashEspViewDialog.open();
+                        final SettingsDialogView settingsDialogView = new SettingsDialogView();
+                        super.add(settingsDialogView);
+                        settingsDialogView.open();
                     }
                 }
             });
@@ -411,47 +403,4 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, AfterNavig
 
     }
 
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-
-        // flash-esp#settings/password
-        String path = event.getLocation().getPath();
-//        if (!path.contains("settings")) {
-//            this.initialInformationFlashEspViewDialog.open();
-//        }
-        UI.getCurrent().getPage().executeJs(
-                "if (window.location.hash) { " +
-                        "  var hash = window.location.hash.substring(1); " +  // Elimina el carácter '#'
-                        "  return hash; " +
-                        "} else { " +
-                        "  return ''; " +  // Devuelve una cadena vacía si no hay fragmento
-                        "}"
-        ).then(String.class, hash -> {
-            System.out.println("afterNavigation Fragmento de URI FlashEsView: " + hash);
-            System.out.println("afterNavigation Path de URI FlashEsView: " + path);
-            // Aquí puedes usar el fragmento 'hash' según lo necesites
-
-//            String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, hash);
-//            String urlWithParameters = "flash-esp" + baseUrl;
-//            getUI().ifPresent(ui -> {
-//                ui.getPage().getHistory().replaceState(null, urlWithParameters);
-//            });
-        });
-
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        final String path = event.getLocation().getPath();
-        if(Objects.nonNull(path)) {
-            System.out.println("beforeEnter FlashIdView path " + path);
-            System.out.println("beforeEnter FlashIdView path " + event.getLocation());
-
-            String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, "hellow");
-            String urlWithParameters = "flash-esp" + baseUrl;
-            getUI().ifPresent(ui -> {
-                ui.getPage().getHistory().replaceState(null, urlWithParameters);
-            });
-        }
-    }
 }

@@ -5,7 +5,6 @@
   "dependencies": {
     "@polymer/iron-a11y-keys-behavior": "3.0.1",
     "@polymer/polymer": "3.5.2",
-    "@vaadin-component-factory/vcf-toggle-button": "1.0.4",
     "@vaadin/bundles": "24.5.1",
     "@vaadin/common-frontend": "0.0.19",
     "@vaadin/polymer-legacy-adapter": "24.5.1",
@@ -52,7 +51,6 @@
     "dependencies": {
       "@polymer/iron-a11y-keys-behavior": "3.0.1",
       "@polymer/polymer": "3.5.2",
-      "@vaadin-component-factory/vcf-toggle-button": "1.0.4",
       "@vaadin/bundles": "24.5.1",
       "@vaadin/common-frontend": "0.0.19",
       "@vaadin/polymer-legacy-adapter": "24.5.1",
@@ -95,7 +93,7 @@
       "workbox-core": "7.1.0",
       "workbox-precaching": "7.1.0"
     },
-    "hash": "72305a5b1edc85031fc6b13615ca65f942822780f0e67512353ff00fdb2a0c6c"
+    "hash": "562fbabdd725bd0fd95e551a602a7b3dc4dde14a00e6f76a4415cf07dd6dc36a"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
@@ -115,7 +113,6 @@
     "xterm": "$xterm",
     "date-fns": "$date-fns",
     "proj4": "$proj4",
-    "@vaadin-component-factory/vcf-toggle-button": "$@vaadin-component-factory/vcf-toggle-button",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
     "xterm-addon-fit": "$xterm-addon-fit",
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",

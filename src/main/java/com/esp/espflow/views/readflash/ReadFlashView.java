@@ -14,8 +14,8 @@ import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
-import com.esp.espflow.views.Sidebar;
 import com.esp.espflow.views.flashesp.ChangeSerialPortPermissionDialog;
+import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.componentfactory.ToggleButton;
@@ -57,7 +57,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignSelf;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -260,7 +259,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             textField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
         });
         Tooltip.forComponent(autoDetectFlashSize).setText("Set custom flash size to ALL");
-        autoDetectFlashSize.setSizeUndefined();
         autoDetectFlashSize.addValueChangeListener(event -> {
             if (event.getValue()) {
                 endAddress.setValue(0);
@@ -347,6 +345,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         final Div divSpanTotalDevices = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
 
         this.divWithPortErrors.setVisible(false);
+        this.divWithPortErrors.getStyle().setCursor("pointer");
+        this.divWithPortErrors.addClickListener(event -> this.showErroneousPortsInDialog());
 
         final ContextMenu contextMenuDivPortError = new ContextMenu();
         contextMenuDivPortError.setTarget(divWithPortErrors);
@@ -355,16 +355,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         divWithIconAndText.addClassNames(Display.FLEX, FlexDirection.ROW, AlignItems.CENTER, JustifyContent.START);
         final Text text = new Text("Change port permissions");
         divWithIconAndText.add(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null), text);
-        contextMenuDivPortError.addItem(divWithIconAndText, event -> {
-            var spanListWithError = this.spansList.stream()
-                    .map(HasText::getText)
-                    .distinct()
-                    .toArray(String[]::new);
-            this.changeSerialPortPermissionDialog.setPortErrors(spanListWithError);
-            this.spansList.clear();
-        }).setCheckable(true);
+        contextMenuDivPortError.addItem(divWithIconAndText,
+                event -> this.showErroneousPortsInDialog()).setCheckable(true);
 
         spanPortFailure.addClassName(Left.SMALL);
+        spanPortFailure.getStyle().setCursor("pointer");
         this.divWithPortErrors.add(spanPortFailure);
         divWithPortErrors.getStyle().set("color", "red");
 
@@ -388,6 +383,17 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                     span.addClassName("row-span-flash-size-footer");
                 });
         return footer;
+    }
+
+    /**
+     * Construct a Span array with the erroneous ports and build a new stream array to pass to the Dialog.
+     */
+    private void showErroneousPortsInDialog() {
+        var spanListWithError = this.spansList.stream()
+                .map(HasText::getText)
+                .distinct()
+                .toArray(String[]::new);
+        this.changeSerialPortPermissionDialog.setPortErrors(spanListWithError);
     }
 
 
@@ -517,7 +523,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * <p>The ShowDevicesBuilder when it succeeds in creating a Slide correctly adds it right in the addSlide method, e.g. {@link ShowDevicesBuilder#make}
      *
      * <p>Each Slide at the end of this reactive stream, will have a button in the upper right corner, which will allow to execute the <strong>read_flash<strong>
-     *     command and extract the firmware from the device.
+     * command and extract the firmware from the device.
      * </p>
      *
      * <ul>
@@ -566,7 +572,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         try {
             ui.access(() -> this.emitNextEvent(espDeviceWithTotalDevices.espDeviceInfo()));
         } catch (UIDetachedException ex) {
-          // Do nothing
+            // Do nothing
         }
 
         var resultCarousel = ShowDevicesBuilder.builder()
@@ -653,7 +659,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     }
 
     /**
-     *
      * Emit event to bell
      *
      * @param espDeviceInfo
@@ -664,7 +669,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 LocalDateTime.now().toInstant(ZoneOffset.UTC),
                 espDeviceInfo.port());
 
-        var colors = Arrays.asList(0,1,2,3,4,5,6);
+        var colors = Arrays.asList(0, 1, 2, 3, 4, 5, 6);
         messageListItem.setUserColorIndex(colors.get(SECURE_RANDOM.nextInt(colors.size())));
 
         this.publishMessageListItem.tryEmitNext(messageListItem);
@@ -703,6 +708,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             );
             super.add(this.initialInformationReadFlashViewDialog);
 
+
 //            RadioButtonGroup<String> mode = new RadioButtonGroup<>("Header theme");
 //            mode.setItems("Light", "Dark");
 //            mode.addValueChangeListener(e -> getChildren().forEach(component -> {
@@ -721,7 +727,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 //                    "Fill in the blibber-blabber below to create a sensational event that will leave everyone flibber-gasted!",
 //                    createForm()
 //            );
-           // add(sidebar);
+            // add(sidebar);
 
 //            Button button = new Button("Open sidebar", e -> {
 //                sidebar.open();
@@ -734,6 +740,24 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 //            });
 
         }
+
+        getUI().ifPresent(ui -> {
+            ui.getPage().fetchCurrentURL(url -> {
+                if (Objects.nonNull(url)) {
+                    String ref = url.getRef();
+                    if (Objects.isNull(ref)) {
+                        this.initialInformationReadFlashViewDialog.open();
+                    }
+                    if (url.toString().contains("setting")) {
+                        //this.initialInformationFlashEspViewDialog.open();
+                        //Abrir los settings aqui
+                        final SettingsDialogView settingsDialogView = new SettingsDialogView();
+                        super.add(settingsDialogView);
+                        settingsDialogView.open();
+                    }
+                }
+            });
+        });
 
     }
 

@@ -27,10 +27,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
@@ -44,33 +40,33 @@ import com.vaadin.flow.theme.lumo.LumoUtility.MaxWidth;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.OK;
 
 /**
- * Crear navegacion con / sin el hash #, con las uri / en cada componente del layout no navega cuando entramos por F5 GET al Chrome
- * raro, pero si desde el SideNav
- * <p>
- * https://vaadin.com/docs/latest/flow/routing/updating-url-parameters
+ * @author rub'n
  */
 @Log4j2
-//@PageTitle("Settings")
 @Route(value = "", layout = MainLayout.class)
 @RoutePrefix(value = "#settings")
 @RolesAllowed("ADMIN")
-public class SettingsDialogView extends Dialog implements RouterLayout, AfterNavigationObserver, BeforeEnterObserver, HasUrlParameter<String> {
+public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlParameter<String> {
+
+    private static final String PASSWORD = "password";
+    private static final String CONTACT_INFORMATION = "contact-information";
+    private static final String PUBLIC_INFORMATION = "public-information";
+    private static final String NOTIFICATION = "notifications";
 
     private Layout mainLayout = new Layout();
 
     public SettingsDialogView() {
-        init();
-    }
-
-    private void init() {
-        this.setHeaderTitle("Settings");
+        super.setHeaderTitle("Settings");
+        super.setModal(true);
         final Button closeButton = new Button(new Icon("lumo", "cross"), (event) -> {
             super.close();
             getUI().ifPresent(ui -> {
@@ -106,7 +102,6 @@ public class SettingsDialogView extends Dialog implements RouterLayout, AfterNav
         super.add(main);
     }
 
-
     public Component createForm() {
         //Not the first time
         this.mainLayout.add(createPublicInformation());
@@ -114,13 +109,6 @@ public class SettingsDialogView extends Dialog implements RouterLayout, AfterNav
         this.mainLayout.setFlexDirection(Layout.FlexDirection.COLUMN);
         return mainLayout;
     }
-
-
-//    private Div createContent() {
-//        this.content = new Div();
-//        this.content.addClassNames("flex-1", LumoUtility.Overflow.AUTO);
-//        return this.content;
-//    }
 
     public Component createPublicInformation() {
         H2 title = new H2("Public information");
@@ -246,7 +234,7 @@ public class SettingsDialogView extends Dialog implements RouterLayout, AfterNav
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
 
-                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, "public-information");
+                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, PUBLIC_INFORMATION);
                     String urlWithParameters = url.getPath().concat(baseUrl);
 
                     ui.getPage().getHistory().replaceState(null, urlWithParameters);
@@ -266,7 +254,7 @@ public class SettingsDialogView extends Dialog implements RouterLayout, AfterNav
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
 
-                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, "contact");
+                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, CONTACT_INFORMATION);
                     String urlWithParameters = url.getPath().concat(baseUrl);
 
                     ui.getPage().getHistory().replaceState(null, urlWithParameters);
@@ -285,7 +273,7 @@ public class SettingsDialogView extends Dialog implements RouterLayout, AfterNav
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
 
-                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, "password");
+                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, PASSWORD);
                     String urlWithParameters = url.getPath().concat(baseUrl);
 
                     ui.getPage().getHistory().replaceState(null, urlWithParameters);
@@ -304,7 +292,7 @@ public class SettingsDialogView extends Dialog implements RouterLayout, AfterNav
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
 
-                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, "notifications");
+                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, NOTIFICATION);
                     String urlWithParameters = url.getPath().concat(baseUrl);
 
                     ui.getPage().getHistory().replaceState(null, urlWithParameters);
@@ -328,51 +316,14 @@ public class SettingsDialogView extends Dialog implements RouterLayout, AfterNav
 
     @Override
     public void showRouterLayoutContent(HasElement content) {
-        if (content != null) {
+        if (Objects.nonNull(content)) {
             this.mainLayout.removeAll();
             this.mainLayout.getElement().appendChild(content.getElement());
         }
     }
 
     @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        String path = event.getLocation().getPath();
-        if ((!path.contains("read-flash")) && (!path.contains("flash-esp")) && !(path.contains("about"))) {
-            UI.getCurrent().getPage().executeJs(
-                    "if (window.location.hash) { " +
-                            "  var hash = window.location.hash.substring(1); " +  // Elimina el carácter '#'
-                            "  return hash; " +
-                            "} else { " +
-                            "  return ''; " +  // Devuelve una cadena vacía si no hay fragmento
-                            "}"
-            ).then(String.class, hash -> {
-                System.out.println("Fragmento de URI SettingsDialogView: " + hash);
-                System.out.println("Path de URI SettingsDialogView: " + path);
-                // Aquí puedes usar el fragmento 'hash' según lo necesites
-
-                switch (hash) {
-                    case "public-information" -> {
-                        this.mainLayout.removeAll();
-                        this.mainLayout.add(createPublicInformation());
-                    }
-                    case "contact-information" -> {
-                        this.mainLayout.removeAll();
-                        this.mainLayout.add(createContactInformation());
-                    }
-                    case "password" -> {
-                        this.mainLayout.removeAll();
-                        this.mainLayout.add(createPassword());
-                    }
-                    case "notifications" -> {
-                        this.mainLayout.removeAll();
-                        this.mainLayout.add(createNotifications());
-                    }
-                }
-
-            });
-        }
-
-
+    public void setParameter(BeforeEvent event, String parameter) {
     }
 
     @Override
@@ -383,31 +334,54 @@ public class SettingsDialogView extends Dialog implements RouterLayout, AfterNav
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        //if (attachEvent.isInitialAttach()) {
         final UI ui = attachEvent.getUI();
-
         ui.getPage().fetchCurrentURL(url -> {
-            System.out.println("Current URL Setting Dialog SettingsDialog " + url);
+            log.info("Current URL Setting Dialog SettingsDialog {}", url);
 
-            String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, "")
-                    .replace("/","");
+            String baseUrl = RouteConfiguration.forSessionScope()
+                    .getUrl(SettingsDialogView.class, "").replace("/", "");
             String urlWithParameters = url.getPath().concat(baseUrl);
 
-            ui.getPage().getHistory().replaceState(null, urlWithParameters);
-
-            //super.open();
+            this.recreateContentAndUpdateUrl(ui, urlWithParameters, url.toString());
 
         });
 
     }
 
-    @Override
-    public void setParameter(BeforeEvent event, String parameter) {
-
+    private void recreateContentAndUpdateUrl(final UI ui, String urlWithParameters, String fetchUrl) {
+        String newLocation = StringUtils.EMPTY;
+        if (fetchUrl.contains("#")) {
+            try {
+                newLocation = fetchUrl.split("#")[1].split("/")[1];
+            } catch (Exception ex) {
+                log.info("fetchUrl error {} ", fetchUrl);
+            }
+        }
+        log.info("menuLabel {}", newLocation);
+        switch (newLocation) {
+            case PUBLIC_INFORMATION -> {
+                this.mainLayout.removeAll();
+                this.mainLayout.add(createPublicInformation());
+                ui.getPage().getHistory().replaceState(null, urlWithParameters.concat("/" + newLocation));
+            }
+            case CONTACT_INFORMATION -> {
+                this.mainLayout.removeAll();
+                this.mainLayout.add(createContactInformation());
+                ui.getPage().getHistory().replaceState(null, urlWithParameters.concat("/" + newLocation));
+            }
+            case PASSWORD -> {
+                this.mainLayout.removeAll();
+                this.mainLayout.add(createPassword());
+                ui.getPage().getHistory().replaceState(null, urlWithParameters.concat("/" + newLocation));
+            }
+            case NOTIFICATION -> {
+                this.mainLayout.removeAll();
+                this.mainLayout.add(createNotifications());
+                ui.getPage().getHistory().replaceState(null, urlWithParameters.concat("/" + newLocation));
+            }
+            default -> {
+            }
+        }
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        log.info("Before enter SettingsDialogs{} ", event.getLocation());
-    }
 }

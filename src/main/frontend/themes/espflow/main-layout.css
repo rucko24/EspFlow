@@ -18,3 +18,14 @@ vaadin-side-nav-item vaadin-icon {
 [slot="drawer"]:is(header, footer):is(:empty) {
   display: none;
 }
+
+vaadin-menu-bar-item::part(checkmark)::before {
+    display: none;
+}
+
+/* some indent for the content */
+vaadin-menu-bar-item {
+    padding-left: var(--lumo-space-s);
+    justify-content: flex-start;
+    width: 200px;
+}

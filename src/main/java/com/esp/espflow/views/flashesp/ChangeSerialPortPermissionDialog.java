@@ -134,7 +134,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
 
         writePasswordButton.addClickShortcut(Key.ENTER);
         writePasswordButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
-        writePasswordButton.setTooltipText("Write password!");
+        writePasswordButton.setTooltipText("Write password! - ENTER");
         writePasswordButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
         final Binder<ChangePasswordRecordBinder> binder = new Binder<>();
