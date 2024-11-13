@@ -20,12 +20,12 @@ vaadin-side-nav-item vaadin-icon {
 }
 
 vaadin-menu-bar-item::part(checkmark)::before {
-    display: none;
+  display: none;
 }
 
 /* some indent for the content */
 vaadin-menu-bar-item {
-    padding-left: var(--lumo-space-s);
-    justify-content: flex-start;
-    width: 200px;
+  padding-left: var(--lumo-space-s);
+  justify-content: flex-start;
+  width: 200px;
 }

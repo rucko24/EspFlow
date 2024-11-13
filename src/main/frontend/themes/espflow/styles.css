@@ -277,3 +277,9 @@ html {
 .xterm {
     height: 100%;
 }
+
+vaadin-button.settings-buttons::part(label) {
+   width: 100%;
+   text-align: left;
+   justify-content: flex-start;
+}

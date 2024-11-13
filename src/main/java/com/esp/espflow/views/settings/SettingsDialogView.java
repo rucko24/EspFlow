@@ -1,7 +1,7 @@
 package com.esp.espflow.views.settings;
 
 import com.esp.espflow.enums.Breakpoint;
-import com.esp.espflow.util.EspFlowConstants;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
 import com.esp.espflow.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
@@ -19,6 +19,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Paragraph;
@@ -99,7 +100,9 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         main.addClassNames(Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Height.FULL);
         main.add(createLinks(), createForm());
 
-        super.add(main);
+        final Hr hr = new Hr();
+        hr.setId("settings-hr-header-bottom");
+        super.add(hr, main);
     }
 
     public Component createForm() {
@@ -224,12 +227,18 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
     }
 
     public Component createLinks() {
+        final Button publicInformationButton = new Button("Public Information");
+        final Button contactInformationButton = new Button("Contact information");
+        final Button passwordButton = new Button("Password");
+        final Button notificationsButton = new Button("Notifications");
 
-        Button publicInformationButton = new Button("Public Information");
         publicInformationButton.setPrefixComponent(VaadinIcon.INFO.create());
         publicInformationButton.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createPublicInformation());
+
+            this.setBackGroundOnClick(publicInformationButton, contactInformationButton,
+                    passwordButton, notificationsButton);
 
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
@@ -245,11 +254,13 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
 
         });
 
-        Button contactInformationButton = new Button("Contact information");
         contactInformationButton.setPrefixComponent(VaadinIcon.ARCHIVE.create());
         contactInformationButton.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createContactInformation());
+
+            this.setBackGroundOnClick(contactInformationButton, publicInformationButton,
+                    passwordButton, notificationsButton);
 
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
@@ -264,11 +275,13 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
 
         });
 
-        Button passwordButton = new Button("Password");
         passwordButton.setPrefixComponent(VaadinIcon.PASSWORD.create());
         passwordButton.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createPassword());
+
+            this.setBackGroundOnClick(passwordButton, contactInformationButton, publicInformationButton,
+                    notificationsButton);
 
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
@@ -283,11 +296,14 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
 
         });
 
-        Button notificationsButton = new Button("Notifications");
-        notificationsButton.setPrefixComponent(VaadinIcon.BELL_SLASH_O.create());
+        notificationsButton.setPrefixComponent(SvgFactory
+                .createIconFromSvg("bell.svg", "16px", null));
+
         notificationsButton.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createNotifications());
+
+            this.setBackGroundOnClick(notificationsButton, contactInformationButton, passwordButton, publicInformationButton);
 
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
@@ -303,15 +319,38 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         });
 
         Stream.of(notificationsButton, passwordButton, publicInformationButton, contactInformationButton)
-                .forEach(button -> button.addClassNames(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON));
+                .forEach(button -> {
+                    button.getStyle().setCursor("pointer");
+                    //button.getStyle().setBorder("1px solid lightgray");
+                    //button.getStyle().setBorderRadius("10px");
+                    button.addClassNames("settings-buttons");
+                    button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+                });
 
         final Div div = new Div(publicInformationButton, contactInformationButton, passwordButton, notificationsButton);
-        div.addClassNames(Display.FLEX, LumoUtility.FlexDirection.COLUMN, LumoUtility.Margin.Vertical.XLARGE, Padding.Horizontal.LARGE);
+        div.addClassNames(Display.FLEX, LumoUtility.FlexDirection.COLUMN,
+                LumoUtility.Margin.Vertical.XLARGE, Padding.Horizontal.LARGE);
 
         final Nav nav = new Nav(div);
         nav.addClassNames(Display.HIDDEN, Display.Breakpoint.Small.FLEX, LumoUtility.FontSize.SMALL, LumoUtility.Position.STICKY, "top-0");
 
         return nav;
+    }
+
+    /**
+     * @param button
+     */
+    private void setBackGroundOnClick(Button button, Button... removeBackgroundColorForThisButtons) {
+        var backgroundColor = button.getStyle().get("background-color");
+        if (Objects.isNull(backgroundColor)) {
+            button.getStyle().setBackgroundColor("var(--lumo-primary-color-10pct)");
+        }
+
+        Stream.of(removeBackgroundColorForThisButtons)
+                .forEach(buttonItem -> {
+                    buttonItem.getStyle().remove("background-color");
+                });
+
     }
 
     @Override
@@ -357,7 +396,7 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
                 log.info("fetchUrl error {} ", fetchUrl);
             }
         }
-        log.info("menuLabel {}", newLocation);
+        log.info("newLocation {}", newLocation);
         switch (newLocation) {
             case PUBLIC_INFORMATION -> {
                 this.mainLayout.removeAll();

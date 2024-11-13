@@ -44,6 +44,7 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
@@ -85,11 +86,6 @@ public class MainLayout extends AppLayout {
     private final AccessAnnotationChecker accessChecker;
     private final Flux<MessageListItem> subscribersMessageListItems;
 
-    /**
-     * Settings
-     */
-    private final SettingsDialogView settingsDialogView = new SettingsDialogView();
-
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
                       Flux<MessageListItem> subscribersMessageListItems) {
         this.authenticatedUser = authenticatedUser;
@@ -122,7 +118,7 @@ public class MainLayout extends AppLayout {
 
         divBell.addClickListener(event -> {
             bellIcon.getStyle().set("transform", "rotate(20deg)");
-            this.removeRedCircleError();
+            this.removeRedCircleErrorInTheBell();
             Animated.removeAnimations(spanCircleRed);
             Animated.animate(bellIcon, Animated.Animation.FADE_IN);
         });
@@ -142,7 +138,7 @@ public class MainLayout extends AppLayout {
 
         final Button buttonMarkAllRead = new Button("Marks all read");
         buttonMarkAllRead.addClickListener(event -> {
-            this.removeRedCircleError();
+            this.removeRedCircleErrorInTheBell();
             messageListItemUnreadList.clear();
             bellIcon.getStyle().set("transform", "rotate(0deg)");
             contentUnread.removeAll();
@@ -272,9 +268,23 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("align-items", "center");
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
+
+            final SettingsDialogView settingsDialogView = new SettingsDialogView();
             userName.getSubMenu().addItem("Settings", e -> {
                 settingsDialogView.setId("settings-dialog");
                 settingsDialogView.open();
+                getUI().ifPresent(ui -> {
+                    ui.getPage().fetchCurrentURL(url -> {
+
+                        String baseUrl = RouteConfiguration.forSessionScope()
+                                .getUrl(SettingsDialogView.class, "").replace("/", "");
+
+                        String urlWithParameters = url.getPath().concat(baseUrl);
+
+                        ui.getPage().getHistory().replaceState(null, urlWithParameters);
+
+                    });
+                });
             }).addComponentAsFirst(VaadinIcon.COG.create());
             userName.getSubMenu().add(new Hr());
             var sigOutItem = userName.getSubMenu().addItem("Sign out", e -> {
@@ -357,14 +367,13 @@ public class MainLayout extends AppLayout {
     /**
      *
      */
-    public void removeRedCircleError() {
+    public void removeRedCircleErrorInTheBell() {
         spanCircleRed.getElement().removeAttribute("theme");
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        this.settingsDialogView.close();
     }
 
     @Override
