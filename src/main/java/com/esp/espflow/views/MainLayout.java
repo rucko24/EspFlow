@@ -57,10 +57,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
+import static com.esp.espflow.util.EspFlowConstants.ROTATE_0_DEGREE;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -114,13 +117,14 @@ public class MainLayout extends AppLayout {
         Tooltip.forComponent(divBell).setText("Notifications");
         divBell.add(bellIcon);
         divBell.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
-        divBell.getStyle().setCursor("pointer");
+        divBell.getStyle().setCursor(CURSOR_POINTER);
 
         divBell.addClickListener(event -> {
-            bellIcon.getStyle().set("transform", "rotate(20deg)");
+            Animated.animate(bellIcon, Animated.Animation.FADE_IN);
+            bellIcon.getStyle().set(TRANSFORM, "rotate(20deg)");
             this.removeRedCircleErrorInTheBell();
             Animated.removeAnimations(spanCircleRed);
-            Animated.animate(bellIcon, Animated.Animation.FADE_IN);
+            //Animated.removeAnimations(bellIcon);
         });
         spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.FIXED);
         spanCircleRed.getStyle().set("margin-left", "13px");
@@ -140,7 +144,7 @@ public class MainLayout extends AppLayout {
         buttonMarkAllRead.addClickListener(event -> {
             this.removeRedCircleErrorInTheBell();
             messageListItemUnreadList.clear();
-            bellIcon.getStyle().set("transform", "rotate(0deg)");
+            bellIcon.getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
             contentUnread.removeAll();
             this.inboxCounter.setVisible(false);
             Animated.removeAnimations(spanCircleRed);
@@ -176,7 +180,7 @@ public class MainLayout extends AppLayout {
         Span appName = new Span();
         final Image logo = new Image(FRONTEND_IMAGES_LOGO + "espflow_176px.png", "logo");
         Tooltip.forComponent(logo).setText("https://github.com/rucko24/EspFlow");
-        logo.getStyle().setCursor("pointer");
+        logo.getStyle().setCursor(CURSOR_POINTER);
         logo.setMaxWidth("75%");
         logo.setHeight("auto");
         logo.addClickListener(e -> {
@@ -259,7 +263,7 @@ public class MainLayout extends AppLayout {
 
             MenuItem userName = userMenu.addItem("");
 
-            userName.getStyle().setCursor("pointer");
+            userName.getStyle().setCursor(CURSOR_POINTER);
             Div div = new Div();
             div.add(avatar);
             div.add(user.getName());
@@ -270,7 +274,7 @@ public class MainLayout extends AppLayout {
             userName.add(div);
 
             final SettingsDialogView settingsDialogView = new SettingsDialogView();
-            userName.getSubMenu().addItem("Settings", e -> {
+            userName.getSubMenu().addItem("Settings...", e -> {
                 settingsDialogView.setId("settings-dialog");
                 settingsDialogView.open();
                 getUI().ifPresent(ui -> {
@@ -290,10 +294,10 @@ public class MainLayout extends AppLayout {
             var sigOutItem = userName.getSubMenu().addItem("Sign out", e -> {
                 authenticatedUser.logout();
             });
-            sigOutItem.addComponentAsFirst(SvgFactory.createIconFromSvg("signout.svg","20px",null));
+            sigOutItem.addComponentAsFirst(SvgFactory.createIconFromSvg("signout.svg", "20px", null));
 
             userName.getSubMenu().getItems().forEach(item -> {
-                item.getStyle().setCursor("pointer");
+                item.getStyle().setCursor(CURSOR_POINTER);
                 item.setCheckable(false);
                 item.setChecked(false);
             });
@@ -336,7 +340,7 @@ public class MainLayout extends AppLayout {
                 Animated.animate(spanCircleRed, Animated.Animation.FADE_IN);
                 Animated.animate(inboxCounter, Animated.Animation.FADE_IN);
                 if (this.contentUnread.getElement().getChildCount() == 0) {
-                    bellIcon.getStyle().set("transform", "rotate(0deg)");
+                    bellIcon.getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
                     Animated.animate(bellIcon, Animated.Animation.FADE_IN);
                     this.showsRedErrorInTheBell();
                     contentUnread.add(messageListRead);
@@ -352,7 +356,8 @@ public class MainLayout extends AppLayout {
      */
     public void rotateTheBellToZeroDegreesIfThePopoverIsNotOpen(Popover.OpenedChangeEvent event) {
         if (!event.getSource().isOpened()) {
-            bellIcon.getStyle().set("transform", "rotate(0deg)");
+            bellIcon.getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
+            Animated.removeAnimations(bellIcon);
         }
     }
 

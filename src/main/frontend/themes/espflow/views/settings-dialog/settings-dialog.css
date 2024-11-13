@@ -1,0 +1,17 @@
+vaadin-button.settings-buttons::part(label) {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+vaadin-dialog-overlay.settings-content-dialog::part(content) {
+  overflow: hidden;
+}
+
+.hr-header-settings {
+  width: 100%;
+  height: 3px;
+  background-image: linear-gradient(rgb(224, 38, 11), rgb(224, 38, 11)), linear-gradient(rgb(224, 38, 11), rgb(224, 38, 11));
+  background-size: 100% 3px, 100% 1px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}

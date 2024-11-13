@@ -6,6 +6,7 @@
 //@import url('components/border.css');*/
 @import url('components/layout.css');
 @import url('./views/readflash/esp-device-info.css');
+@import url('./views/settings-dialog/settings-dialog.css');
 @import url('./fonts/stylesheet.css');
 
 html {
@@ -276,10 +277,4 @@ html {
 
 .xterm {
     height: 100%;
-}
-
-vaadin-button.settings-buttons::part(label) {
-   width: 100%;
-   text-align: left;
-   justify-content: flex-start;
 }

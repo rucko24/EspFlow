@@ -74,6 +74,9 @@ public class EspFlowConstants {
     public static final String FLASH_ON_SVG = "flash-on.svg";
     public static final String FLASH_OFF_SVG = "flash-off.svg";
     public static final String SIZE_25_PX = "25px";
+    public static final String ROTATE_0_DEGREE = "rotate(0deg)";
+    public static final String TRANSFORM = "transform";
+    public static final String CURSOR_POINTER = "pointer";
 
     public static final String THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET = "This feature has not been implemented yet!";
 

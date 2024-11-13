@@ -4,6 +4,7 @@ import com.esp.espflow.enums.Breakpoint;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
 import com.esp.espflow.views.MainLayout;
+import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
@@ -23,11 +24,18 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.dom.Style.Overflow;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
@@ -47,8 +55,6 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.esp.espflow.util.EspFlowConstants.OK;
-
 /**
  * @author rub'n
  */
@@ -63,9 +69,12 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
     private static final String PUBLIC_INFORMATION = "public-information";
     private static final String NOTIFICATION = "notifications";
 
-    private Layout mainLayout = new Layout();
+    private final Layout mainLayout = new Layout();
 
     public SettingsDialogView() {
+        super.setMaxWidth("680px");
+        super.setMaxHeight("500px");
+        super.setHeight("500px");
         super.setHeaderTitle("Settings");
         super.setModal(true);
         final Button closeButton = new Button(new Icon("lumo", "cross"), (event) -> {
@@ -91,18 +100,19 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         });
 
         super.getHeader().add(closeButton);
-        final Button buttonOk = new Button(OK, (event -> super.close()));
-        buttonOk.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        super.getFooter().add(buttonOk);
         super.setCloseOnOutsideClick(true);
 
         final Main main = new Main();
+        main.setId("main-settings");
         main.addClassNames(Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Height.FULL);
-        main.add(createLinks(), createForm());
 
         final Hr hr = new Hr();
-        hr.setId("settings-hr-header-bottom");
+        hr.addClassName("hr-header-settings");
+
+        main.add(this.createLinks(), this.createForm());
+
         super.add(hr, main);
+        super.addClassName("settings-content-dialog");
     }
 
     public Component createForm() {
@@ -217,13 +227,33 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         emailNotifications.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         emailNotifications.setItems("Newsletters", "Promotional offers", "Account updates", "New messages or activities", "Events or upcoming appointments");
 
-        CheckboxGroup<String> pushNotifications = new CheckboxGroup<>("Push notifications");
-        pushNotifications.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-        pushNotifications.setItems("New messages", "Friend requests", "Activity updates", "Order status updates", "Reminders or alerts");
+        final Span pushNotifications = new Span("Push notifications");
+        //pushNotifications.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
-        Layout layout = new Layout(title, description, emailNotifications, pushNotifications);
+        final Paragraph spanEnableAllNotifications = new Paragraph("Enable all notifications");
+        spanEnableAllNotifications.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        final ToggleButton toggleButtonNotifications = new ToggleButton();
+        final HorizontalLayout row1 = new HorizontalLayout(spanEnableAllNotifications, toggleButtonNotifications);
+        row1.setWidthFull();
+        row1.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        row1.setAlignItems(Alignment.CENTER);
+
+        final Paragraph spanEnableInitialDialogs = new Paragraph("Enable initial dialogs");
+        spanEnableInitialDialogs.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        final ToggleButton toggleButtonEnableInitialDialogs = new ToggleButton();
+        final HorizontalLayout row2 = new HorizontalLayout(spanEnableInitialDialogs, toggleButtonEnableInitialDialogs);
+        row2.setWidthFull();
+        row2.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        row2.setAlignItems(Alignment.CENTER);
+
+        final VerticalLayout verticalLayout = new VerticalLayout(row1, new Hr(), row2);
+        verticalLayout.setPadding(false);
+        verticalLayout.setSpacing(false);
+        verticalLayout.getStyle().setOverflow(Overflow.HIDDEN);
+
+        final Layout layout = new Layout(title, description, pushNotifications, verticalLayout);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
-        return layout;
+        return new Scroller(layout);
     }
 
     public Component createLinks() {
@@ -301,7 +331,7 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
 
         notificationsButton.addClickListener(event -> {
             this.mainLayout.removeAll();
-            this.mainLayout.add(createNotifications());
+            this.mainLayout.add(new Scroller(createNotifications()));
 
             this.setBackGroundOnClick(notificationsButton, contactInformationButton, passwordButton, publicInformationButton);
 
