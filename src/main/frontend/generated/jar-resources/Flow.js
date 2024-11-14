@@ -201,6 +201,7 @@ export class Flow {
     async flowInit() {
         // Do not start flow twice
         if (!this.isFlowClientLoaded()) {
+            $wnd.Vaadin.Flow.nonce = this.findNonce();
             // show flow progress indicator
             this.loadingStarted();
             // Initialize server side UI
@@ -252,14 +253,33 @@ export class Flow {
             script.onload = () => resolve();
             script.onerror = reject;
             script.src = url;
+            const nonce = $wnd.Vaadin.Flow.nonce;
+            if (nonce !== undefined) {
+                script.setAttribute('nonce', nonce);
+            }
             document.body.appendChild(script);
         });
+    }
+    findNonce() {
+        let nonce;
+        const scriptTags = document.head.getElementsByTagName('script');
+        for (const scriptTag of scriptTags) {
+            if (scriptTag.nonce) {
+                nonce = scriptTag.nonce;
+                break;
+            }
+        }
+        return nonce;
     }
     injectAppIdScript(appId) {
         const appIdWithoutHashCode = appId.substring(0, appId.lastIndexOf('-'));
         const scriptAppId = document.createElement('script');
         scriptAppId.type = 'module';
         scriptAppId.setAttribute('data-app-id', appIdWithoutHashCode);
+        const nonce = $wnd.Vaadin.Flow.nonce;
+        if (nonce !== undefined) {
+            scriptAppId.setAttribute('nonce', nonce);
+        }
         document.body.append(scriptAppId);
     }
     // After the flow-client javascript module has been loaded, this initializes flow UI

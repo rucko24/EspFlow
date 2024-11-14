@@ -347,7 +347,11 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                         String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(this.outPutConsole.scrollBarBuffer());
                         String port = commands[2];
 
-                        final MessageListItem messageListItem = new MessageListItem(chipIs.concat(" executed flash_id successfully"),
+                        final String finalTextNotification = chipIs.contains("This chip cannot be parsed")
+                                ? "This chip cannot be parsed"
+                                : chipIs + " executed flash_id successfully";
+
+                        final MessageListItem messageListItem = new MessageListItem(finalTextNotification,
                                 LocalDateTime.now().toInstant(ZoneOffset.UTC),
                                 port);
 

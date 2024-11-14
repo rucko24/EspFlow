@@ -44,7 +44,7 @@ import static com.esp.espflow.util.EspFlowConstants.LOADING;
  */
 @Getter
 @Uses(Carousel.class)
-@CssImport(value = "./carousel-demo-styles.css", themeFor = "fc-l2t-paper-slider")
+@CssImport(value = "./styles/carousel-demo-styles.css", themeFor = "fc-l2t-paper-slider")
 public class EspDevicesCarousel extends Div {
 
     private final List<Slide> slideList = new CopyOnWriteArrayList<>();

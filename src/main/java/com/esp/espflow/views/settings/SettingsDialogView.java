@@ -17,6 +17,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -368,7 +369,9 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
     }
 
     /**
-     * @param button
+     *
+     * @param button that only the background will be set
+     * @param removeBackgroundColorForThisButtons to remove the background
      */
     private void setBackGroundOnClick(Button button, Button... removeBackgroundColorForThisButtons) {
         var backgroundColor = button.getStyle().get("background-color");
