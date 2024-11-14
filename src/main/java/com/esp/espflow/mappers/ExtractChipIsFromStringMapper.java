@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * @author rubn
  */
-public class ExtractChipIsFromStringMapper {
+public final class ExtractChipIsFromStringMapper {
 
     public static final ExtractChipIsFromStringMapper INSTANCE = new ExtractChipIsFromStringMapper();
 

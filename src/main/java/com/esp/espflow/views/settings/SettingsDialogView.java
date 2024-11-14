@@ -258,8 +258,9 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
     }
 
     public Component createLinks() {
-        final Button publicInformationButton = new Button("Public Information");
-        final Button contactInformationButton = new Button("Contact information");
+        final Button publicInformationButton = new Button("esptool.py home path");
+        final Button contactInformationButton = new Button("Manage settings...");
+        final Button updates = new Button("Check updates...");
         final Button passwordButton = new Button("Password");
         final Button notificationsButton = new Button("Notifications");
 
@@ -349,16 +350,14 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
 
         });
 
-        Stream.of(notificationsButton, passwordButton, publicInformationButton, contactInformationButton)
+        Stream.of(notificationsButton, passwordButton, publicInformationButton, contactInformationButton, updates)
                 .forEach(button -> {
                     button.getStyle().setCursor("pointer");
-                    //button.getStyle().setBorder("1px solid lightgray");
-                    //button.getStyle().setBorderRadius("10px");
                     button.addClassNames("settings-buttons");
                     button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 });
 
-        final Div div = new Div(publicInformationButton, contactInformationButton, passwordButton, notificationsButton);
+        final Div div = new Div(publicInformationButton, contactInformationButton, passwordButton, notificationsButton, updates);
         div.addClassNames(Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Margin.Vertical.XLARGE, Padding.Horizontal.LARGE);
 

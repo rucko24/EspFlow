@@ -124,7 +124,6 @@ public class MainLayout extends AppLayout {
             bellIcon.getStyle().set(TRANSFORM, "rotate(20deg)");
             this.removeRedCircleErrorInTheBell();
             Animated.removeAnimations(spanCircleRed);
-            //Animated.removeAnimations(bellIcon);
         });
         spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.FIXED);
         spanCircleRed.getStyle().set("margin-left", "13px");
@@ -219,7 +218,7 @@ public class MainLayout extends AppLayout {
             inboxCounter.getElement().getThemeList().add("badge contrast pill");
             inboxCounter.getElement().setAttribute("aria-label", "12 unread messages");
             Tooltip.forComponent(inboxCounter).setText("unread messages");
-            itemFlash.setSuffixComponent(inboxCounter);
+            //itemFlash.setSuffixComponent(inboxCounter);
             Tooltip.forComponent(itemFlash).setText("Flash Esp32-ESP8266, Execute flash_id and write flash");
             nav.addItem(itemFlash);
         }
@@ -352,6 +351,8 @@ public class MainLayout extends AppLayout {
     }
 
     /**
+     * We rotate the bell to zero if the notification panel is closed.
+     *
      * @param event a Popover.OpenedChangeEvent
      */
     public void rotateTheBellToZeroDegreesIfThePopoverIsNotOpen(Popover.OpenedChangeEvent event) {
@@ -362,15 +363,14 @@ public class MainLayout extends AppLayout {
     }
 
     /**
-     *
+     * When an event notification arrives, we paint a red circle on the bell.
      */
     public void showsRedErrorInTheBell() {
         spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
-        //spanCircleRed.getElement().getThemeList().add("badge small primary dot primary");
     }
 
     /**
-     *
+     * When the bell is clicked, and when we mark messages as read, we remove the style in the red circle, so that we can set it again to give the correct effect.
      */
     public void removeRedCircleErrorInTheBell() {
         spanCircleRed.getElement().removeAttribute("theme");
