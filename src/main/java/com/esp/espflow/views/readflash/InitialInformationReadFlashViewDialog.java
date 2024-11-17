@@ -19,6 +19,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import lombok.extern.log4j.Log4j2;
 
 import static com.esp.espflow.util.EspFlowConstants.FREE_BSD_ICON;
+import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 import static com.esp.espflow.util.EspFlowConstants.LINUX_ICON;
 import static com.esp.espflow.util.EspFlowConstants.MACOS_ICON;
 import static com.esp.espflow.util.EspFlowConstants.OK;
@@ -33,7 +34,6 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOWS_ICON;
 public class InitialInformationReadFlashViewDialog extends Dialog {
 
     private static final String TARGET_BLANK = "_blank";
-    private static final String INNER_HTML = "innerHTML";
 
     private final Div content = new Div();
     private final H3 overView = new H3("Overview");

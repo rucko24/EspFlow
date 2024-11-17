@@ -26,7 +26,7 @@ class ExtractChipIsFromStringMapperTest {
 
     @ParameterizedTest
     @ArgumentsSource(ExtractChipIsFromStringMapperFailureProvider.class)
-    @DisplayName("When the Chip cannot be parsed, cannot be matched because of lowercase f")
+    @DisplayName("When the Chip cannot be parsed, cannot be matched because of lowercase f like 'features: WiFi' ")
     void attemptToParseTheChip_Failure(final String inputLine) {
 
         final String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(inputLine);

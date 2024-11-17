@@ -6,6 +6,7 @@
 //@import url('components/border.css');*/
 @import url('components/layout.css');
 @import url('./views/readflash/esp-device-info.css');
+@import url('./views/flash-view/wizard-dialog/wizard-dialog.css');
 @import url('./views/settings-dialog/settings-dialog.css');
 @import url('./fonts/stylesheet.css');
 

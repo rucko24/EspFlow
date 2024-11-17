@@ -2,6 +2,7 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.flowingcode.vaadin.addons.carousel.Carousel;
 import com.flowingcode.vaadin.addons.carousel.Slide;
 import com.infraleap.animatecss.Animated;
@@ -12,8 +13,7 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -29,16 +29,14 @@ import java.util.stream.Stream;
 import static com.esp.espflow.util.EspFlowConstants.LOADING;
 
 /**
- *
  * <p>This carousel div in its first instance will be shown without units, and invisible by default, after the user refreshes
  * from the view we will show the devices scanned from the serial port, if the reactive stream ends without error we make it visible in the method {@link ReadFlashView#onComplete(List, EspDevicesCarousel)}
  * </p>
  *
  * <p>
- *  In case the units are not scanned we will display a notification to the user and a default
- *   message with the following text <strong>No devices shown!</strong>
+ * In case the units are not scanned we will display a notification to the user and a default
+ * message with the following text <strong>No devices shown!</strong>
  * </p>
- *
  *
  * @author rubn
  */
@@ -68,10 +66,9 @@ public class EspDevicesCarousel extends Div {
      * <p>We show by default the link icon, with the progress bar invisible.</p>
      *
      * <p>The progressBar will be displayed as undetermined in case the text is with <strong>Loading...</strong></p>
-     *
      */
     private void initialCenterLogo() {
-        final Icon icon = VaadinIcon.LINK.create();
+        final SvgIcon icon = SvgFactory.createIconFromSvg("broken-link.svg", "50px", null);
         this.h2.setText(titleForH2);
         divCenter.add(icon, h2, progressBar);
         //Set visibility
@@ -89,7 +86,7 @@ public class EspDevicesCarousel extends Div {
     /**
      * We show Loading when starting to search for devices {@link ReadFlashView#showDetectedDevices(UI, EspDevicesCarousel)}
      *
-     * @param title LOADING...
+     * @param title   LOADING...
      * @param visible to make visible the progressbar and h2
      */
     public void showLoading(String title, boolean visible) {
@@ -129,7 +126,6 @@ public class EspDevicesCarousel extends Div {
      * @param espDeviceInfo
      * @param downFlashButton
      * @param flashDownloadButtonWrapper
-     *
      * @return A {@link DeviceCardLayout}
      */
     public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton,

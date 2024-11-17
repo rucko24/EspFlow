@@ -23,6 +23,7 @@ import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -131,20 +132,20 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         comboBoxSerialPort.setWidthFull();
         comboBoxSerialPort.setPlaceholder("port");
         comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon("30px", null));
-        comboBoxSerialPort.setRenderer(new ComponentRenderer<>(this::getIconItemSubMenu));
+        comboBoxSerialPort.setRenderer(rendererIconUsbForEachItem());
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
 
-    private Div getIconItemSubMenu(String serialPortName) {
-        final Div div = new Div();
-        div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-        final SvgIcon icon = SvgFactory.OsIcon("25px", null);
-        final Span span = new Span(serialPortName);
-        span.addClassNames(LumoUtility.Padding.Left.SMALL);
-        div.add(icon, span);
-        return div;
+    private ComponentRenderer<Div, String> rendererIconUsbForEachItem() {
+        final SerializableBiConsumer<Div, String> serializableBiConsumer = (div, itemName) -> {
+            div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
+            final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", "25px", null);
+            final Span span = new Span(itemName);
+            span.addClassNames(LumoUtility.Padding.Left.SMALL);
+            div.add(icon, span);
+        };
+        return new ComponentRenderer<>(Div::new, serializableBiConsumer);
     }
-
 
     private Div createH3SerialPort() {
         final Div divH3 = new Div(new H3("Serial port"));

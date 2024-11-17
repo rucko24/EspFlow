@@ -1,7 +1,7 @@
 package com.esp.espflow.security;
 
 import com.esp.espflow.entity.User;
-import com.esp.espflow.service.UserRepository;
+import com.esp.espflow.service.respository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

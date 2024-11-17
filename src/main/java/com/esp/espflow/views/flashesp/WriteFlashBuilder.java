@@ -1,5 +1,6 @@
 package com.esp.espflow.views.flashesp;
 
+import com.esp.espflow.entity.event.EspMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
@@ -12,12 +13,9 @@ import com.esp.espflow.util.IBuilder;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import reactor.core.publisher.Sinks;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -132,7 +130,7 @@ public class WriteFlashBuilder {
      * 11
      */
     public interface PublishMessageListItemStage {
-        Build withPublisher(Sinks.Many<MessageListItem> publishMessageListItem);
+        Build withPublisher(Sinks.Many<EspMessageListItemEvent> publishMessageListItem);
     }
 
     /**
@@ -158,7 +156,7 @@ public class WriteFlashBuilder {
         private String flashSize;
         private String flashFileName;
         private EsptoolPathService esptoolPathService;
-        private Sinks.Many<MessageListItem> publishMessageListItem;
+        private Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
 
         @Override
         public ComboBoxSerialPortStage withEsptoolService(EsptoolService esptoolService) {
@@ -221,7 +219,7 @@ public class WriteFlashBuilder {
         }
 
         @Override
-        public Build withPublisher(Sinks.Many<MessageListItem> publishMessageListItem) {
+        public Build withPublisher(Sinks.Many<EspMessageListItemEvent> publishMessageListItem) {
             this.publishMessageListItem = publishMessageListItem;
             return this;
         }
@@ -270,11 +268,10 @@ public class WriteFlashBuilder {
 
                                 final String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(outPutConsole.scrollBarBuffer());
 
-                                final MessageListItem messageListItem = new MessageListItem(chipIs.concat(" Flash writed successfully!!!"),
-                                        LocalDateTime.now().toInstant(ZoneOffset.UTC),
+                                final EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(chipIs.concat(" Flash writed successfully!!!"),
                                         serialPort.getValue());
 
-                                this.publishMessageListItem.tryEmitNext(messageListItem);
+                                this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
 
                                 this.outPutConsole.writePrompt();
                             });

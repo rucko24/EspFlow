@@ -1,17 +1,18 @@
 package com.esp.espflow.views.flashesp;
 
+import com.esp.espflow.entity.event.EspMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.CommandsOnFirstLine;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
-import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.AttachEvent;
@@ -20,7 +21,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -41,12 +41,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
@@ -63,6 +62,7 @@ import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
 
 /**
  * @author rubn
@@ -100,11 +100,15 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     /*
      * Publisher for MessageListItem
      */
-    private final Sinks.Many<MessageListItem> publishMessageListItem;
+    private final Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
     /*
-     * Show initial information
+     * initial wizard
      */
-    private final InitialInformationFlashEspViewDialog initialInformationFlashEspViewDialog;
+    private final WizardFlashEspDialog wizardFlashEspDialog;
+    /*
+     *
+     */
+    private final WizardEspService wizardFlashEspRepository;
 
     @PostConstruct
     public void init() {
@@ -351,13 +355,10 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                                 ? "This chip cannot be parsed executed flash_id failed."
                                 : chipIs + " executed flash_id successfully.";
 
-                        final MessageListItem messageListItem = new MessageListItem(finalTextNotification,
-                                LocalDateTime.now().toInstant(ZoneOffset.UTC),
-                                port);
+                        final EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(finalTextNotification, port);
 
-                        messageListItem.setUserColorIndex(1);
-                        log.info("Send post event {}", messageListItem.getText());
-                        publishMessageListItem.tryEmitNext(messageListItem);
+                        log.info("Send post event {}", espMessageListItemEvent.getText());
+                        publishMessageListItem.tryEmitNext(espMessageListItemEvent);
 
                     });
                 })
@@ -385,25 +386,34 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
             super.onAttach(attachEvent);
             final UI ui = attachEvent.getUI();
             this.outputConsole(ui);
-            super.add(initialInformationFlashEspViewDialog);
         }
-
-        getUI().ifPresent(ui -> {
-            ui.getPage().fetchCurrentURL(url -> {
-                if (Objects.nonNull(url)) {
-                    String ref = url.getRef();
-                    if (Objects.isNull(ref)) {
-                        this.initialInformationFlashEspViewDialog.open();
+        final UI ui = attachEvent.getUI();
+        ui.getPage().executeJs(
+                "if (window.location.hash) { " +
+                        "  var hash = window.location.hash.substring(1); " + // Delete the '#'
+                        "  return hash; " +
+                        "}"
+        ).then(String.class, hash -> {
+            log.info("Fragmento de URI: {}", hash);
+            if (Objects.nonNull(hash) && !hash.contains("settings")) {
+                this.add(this.wizardFlashEspDialog);
+                this.wizardFlashEspDialog.open();
+            } else {
+                ui.getPage().fetchCurrentURL(url -> {
+                    final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
+                    if (!ref.contains("settings")) {
+                        this.add(this.wizardFlashEspDialog);
+                        this.wizardFlashEspRepository.findWizardFlashEsp(WIZARD_FLASHESP_VIEW)
+                                .ifPresent((hide) -> {
+                                    if (hide.isWizardEnabled()) {
+                                        this.wizardFlashEspDialog.open();
+                                    }
+                                });
                     }
-                    if (url.toString().contains("setting")) {
-                        //Abrir los settings aqui
-                        final SettingsDialogView settingsDialogView = new SettingsDialogView();
-                        super.add(settingsDialogView);
-                        settingsDialogView.open();
-                    }
-                }
-            });
+                });
+            }
         });
+
 
     }
 

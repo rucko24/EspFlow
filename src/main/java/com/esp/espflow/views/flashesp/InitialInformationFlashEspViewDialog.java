@@ -2,9 +2,6 @@ package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -14,48 +11,45 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import jakarta.annotation.security.RolesAllowed;
 import lombok.extern.log4j.Log4j2;
 
 import static com.esp.espflow.util.EspFlowConstants.FREE_BSD_ICON;
+import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 import static com.esp.espflow.util.EspFlowConstants.LINUX_ICON;
 import static com.esp.espflow.util.EspFlowConstants.MACOS_ICON;
-import static com.esp.espflow.util.EspFlowConstants.OK;
 import static com.esp.espflow.util.EspFlowConstants.WINDOWS_ICON;
 
 /**
  * @author rub`n
  */
 @Log4j2
-@UIScope
-@SpringComponent
-public class InitialInformationFlashEspViewDialog extends Dialog {
+@RolesAllowed("ADMIN")
+public class InitialInformationFlashEspViewDialog extends Div {
 
     private static final String TARGET_BLANK = "_blank";
-    private static final String INNER_HTML = "innerHTML";
-
     private final Div content = new Div();
-    private final H3 overView = new H3("Overview");
-    private final H3 someFeatures = new H3("Some of the features:");
+    private final H3 someFeatures = new H3("Some of the features in this view:");
 
     public InitialInformationFlashEspViewDialog() {
-        super.setModal(true);
 
         content.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN);
-        content.setWidth("500px");
 
         var paragraphOverView = paragraphOverView();
         var listItemsWithFeatures = createListItemsWithFeatures();
 
-        content.add(overView, paragraphOverView, someFeatures, listItemsWithFeatures);
+        content.add(this.welcomeToEspFlow(), paragraphOverView, someFeatures, listItemsWithFeatures);
         super.add(content);
+    }
 
-        final Button buttonOk = new Button(OK, (event -> super.close()));
-        buttonOk.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        super.getFooter().add(buttonOk);
+    private H3 welcomeToEspFlow() {
+        final H3 welcome = new H3("Welcome to ");
+        final Anchor welcomeAnchor = new Anchor("https://github.com/rucko24/EspFlow");
+        welcomeAnchor.getElement().setProperty(INNER_HTML, "<strong>EspFlow</strong>");
+        welcomeAnchor.setTarget(TARGET_BLANK);
+        welcome.add(welcomeAnchor);
+        return welcome;
     }
 
     private Paragraph paragraphOverView() {
@@ -64,6 +58,7 @@ public class InitialInformationFlashEspViewDialog extends Dialog {
                 " the system, see information of each <strong>esp8266</strong>, " +
                 "<strong>esp32</strong>, write the firmware in each one of them. " +
                 "Each command executed will write the result of the operation to the output console");
+        paragraphOverView.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         return paragraphOverView;
     }
 
@@ -73,7 +68,9 @@ public class InitialInformationFlashEspViewDialog extends Dialog {
         final ListItem flashIdItem = new ListItem(createFlashIdAnchor());
         final ListItem writeIdItem = new ListItem(createWriteFlashAnchor());
         final ListItem esptoolPyVersionItem = new ListItem("Show the version of esptool");
+        esptoolPyVersionItem.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         final ListItem changePermissionsOnPort = new ListItem(createChangePermissionsOnPortItem());
+        changePermissionsOnPort.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         changePermissionsOnPort.setWidthFull();
         unorderedList.add(flashIdItem, writeIdItem, esptoolPyVersionItem, changePermissionsOnPort);
 
@@ -99,8 +96,8 @@ public class InitialInformationFlashEspViewDialog extends Dialog {
     }
 
     private Component createChangePermissionsOnPortItem() {
-        final Span span = new Span("Change of permissions on the serial port");
-        Tooltip.forComponent(span).setText("Change of permissions on the serial port");
+        final Span span = new Span("Change of permissions on the serial port.");
+        Tooltip.forComponent(span).setText("Change of permissions on the serial port.");
 
         final Div divSpan = new Div(span);
         divSpan.addClassNames(LumoUtility.Display.INLINE_GRID,

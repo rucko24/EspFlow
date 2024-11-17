@@ -14,6 +14,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -21,8 +22,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +100,19 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         copyComboBox.setWidthFull();
         copyComboBox.setPrefixComponent(SvgFactory.OsIcon("30px", null));
         copyComboBox.setItems(comboBoxSerialPort.getListDataView().getItems().toList());
+        copyComboBox.setRenderer(rendererIconUsbForEachItem());
         return copyComboBox;
+    }
+
+    private ComponentRenderer<Div, String> rendererIconUsbForEachItem() {
+        final SerializableBiConsumer<Div, String> serializableBiConsumer = (div, itemName) -> {
+            div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
+            final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", "25px", null);
+            final Span span = new Span(itemName);
+            span.addClassNames(LumoUtility.Padding.Left.SMALL);
+            div.add(icon, span);
+        };
+        return new ComponentRenderer<>(Div::new, serializableBiConsumer);
     }
 
     /**

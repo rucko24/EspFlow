@@ -2,7 +2,7 @@ package com.esp.espflow.generator;
 
 import com.esp.espflow.entity.User;
 import com.esp.espflow.enums.Role;
-import com.esp.espflow.service.UserRepository;
+import com.esp.espflow.service.respository.UserRepository;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

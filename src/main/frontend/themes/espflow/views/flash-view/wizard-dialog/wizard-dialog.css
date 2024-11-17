@@ -1,0 +1,10 @@
+.avatar-step-inactive {
+    color: black;
+    border: 1px solid black;
+    background-color: white;
+}
+
+.avatar-step-active {
+    background: var(--lumo-primary-color);
+    color: var(--lumo-primary-contrast-color);
+}

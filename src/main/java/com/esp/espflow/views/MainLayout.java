@@ -1,13 +1,13 @@
 package com.esp.espflow.views;
 
 import com.esp.espflow.entity.User;
+import com.esp.espflow.entity.event.EspMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.esp.espflow.views.settings.SettingsDialogView;
-import com.esp.espflow.views.wizard.WizardDiaglogLayout;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -44,7 +44,6 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
@@ -58,6 +57,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
+import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
@@ -87,13 +87,16 @@ public class MainLayout extends AppLayout {
 
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
-    private final Flux<MessageListItem> subscribersMessageListItems;
+    private final Flux<EspMessageListItemEvent> subscribersMessageListItems;
+
+    private final SettingsDialogView settingsDialogView;
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
-                      Flux<MessageListItem> subscribersMessageListItems) {
+                      Flux<EspMessageListItemEvent> subscribersMessageListItems, SettingsDialogView settingsDialogView) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
         this.subscribersMessageListItems = subscribersMessageListItems;
+        this.settingsDialogView = settingsDialogView;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -178,12 +181,12 @@ public class MainLayout extends AppLayout {
     private void addDrawerContent() {
         Span appName = new Span();
         final Image logo = new Image(FRONTEND_IMAGES_LOGO + "espflow_176px.png", "logo");
-        Tooltip.forComponent(logo).setText("https://github.com/rucko24/EspFlow");
+        Tooltip.forComponent(logo).setText(ESPFLOW_SOURCE_CODE);
         logo.getStyle().setCursor(CURSOR_POINTER);
         logo.setMaxWidth("75%");
         logo.setHeight("auto");
         logo.addClickListener(e -> {
-            getUI().ifPresent(ui -> ui.getPage().open("https://github.com/rucko24/EspFlow"));
+            getUI().ifPresent(ui -> ui.getPage().open(ESPFLOW_SOURCE_CODE));
         });
         appName.add(logo);
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
@@ -233,14 +236,6 @@ public class MainLayout extends AppLayout {
             nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
         }
 
-//        if (accessChecker.hasAccess(PublicInformationView.class)) {
-//            nav.addItem(new SideNavItem("Settings", PublicInformationView.class, VaadinIcon.COG.create()));
-//        }
-//
-        if (accessChecker.hasAccess(WizardDiaglogLayout.class)) {
-            //nav.addItem(new SideNavItem("Wizard", Step1View.class, VaadinIcon.STEP_FORWARD.create()));
-        }
-
         return nav;
     }
 
@@ -258,8 +253,6 @@ public class MainLayout extends AppLayout {
 
             MenuBar userMenu = new MenuBar();
             userMenu.setThemeName("tertiary-inline contrast");
-            //userMenu.setThemeName("tertiary small contrast");
-
             MenuItem userName = userMenu.addItem("");
 
             userName.getStyle().setCursor(CURSOR_POINTER);
@@ -272,34 +265,23 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
 
-            final SettingsDialogView settingsDialogView = new SettingsDialogView();
-            userName.getSubMenu().addItem("Settings...", e -> {
-                settingsDialogView.setId("settings-dialog");
-                settingsDialogView.open();
+            userName.getSubMenu().addItem("Settings...", event -> {
                 getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
-
-                        String baseUrl = RouteConfiguration.forSessionScope()
-                                .getUrl(SettingsDialogView.class, "").replace("/", "");
-
-                        String urlWithParameters = url.getPath().concat(baseUrl);
-
+                        log.info("fetchCurrentURL {}", url);
+                        String urlWithParameters = url.getPath().concat("#settings");
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
-
+                        settingsDialogView.open();
+                        ui.setChildComponentModal(settingsDialogView, false);
                     });
                 });
             }).addComponentAsFirst(VaadinIcon.COG.create());
             userName.getSubMenu().add(new Hr());
+
             var sigOutItem = userName.getSubMenu().addItem("Sign out", e -> {
                 authenticatedUser.logout();
             });
             sigOutItem.addComponentAsFirst(SvgFactory.createIconFromSvg("signout.svg", "20px", null));
-
-            userName.getSubMenu().getItems().forEach(item -> {
-                item.getStyle().setCursor(CURSOR_POINTER);
-                item.setCheckable(false);
-                item.setChecked(false);
-            });
 
             layout.add(userMenu, settingsDialogView);
         } else {
@@ -328,7 +310,7 @@ public class MainLayout extends AppLayout {
     private void subscribe(final UI ui, final MessageListItem messageListItem) {
         try {
             ui.access(() -> {
-                System.out.println("MessageListItem listener " + messageListItem.getText());
+                log.info("MessageListItem listener {}", messageListItem.getText());
                 messageListItemUnreadList.add(messageListItem);
                 messageListItemAllList.add(messageListItem);
                 this.messageListRead.setItems(messageListItemUnreadList);
@@ -379,6 +361,7 @@ public class MainLayout extends AppLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
+        this.settingsDialogView.close();
     }
 
     @Override

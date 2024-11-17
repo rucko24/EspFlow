@@ -2,12 +2,14 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfo;
 import com.esp.espflow.entity.EspDeviceWithTotalDevices;
+import com.esp.espflow.entity.event.EspMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.downloader.FlashDownloadButtonService;
+import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
@@ -15,12 +17,10 @@ import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
 import com.esp.espflow.views.flashesp.ChangeSerialPortPermissionDialog;
-import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Text;
@@ -30,25 +30,20 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -74,10 +69,6 @@ import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
@@ -93,6 +84,7 @@ import static com.esp.espflow.util.EspFlowConstants.NO_DEVICES_SHOWN;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
 /**
  * @author rubn
@@ -140,15 +132,16 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     /*
      * Publisher for MessageListItem
      */
-    private final Sinks.Many<MessageListItem> publishMessageListItem;
-    /*
-     * For Custom colors
-     */
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private final Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
     /*
      * Show initial information
      */
     private final InitialInformationReadFlashViewDialog initialInformationReadFlashViewDialog;
+    private final WizardReadFlashView wizardReadFlashView;
+    /*
+     * To save the status of the wizards
+     */
+    private final WizardEspService wizardEspService;
 
     @PostConstruct
     public void init() {
@@ -665,14 +658,10 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     public void emitNextEvent(final EspDeviceInfo espDeviceInfo) {
 
-        final MessageListItem messageListItem = new MessageListItem(espDeviceInfo.chipIs().concat(" Executed flash_id successfully!!!"),
-                LocalDateTime.now().toInstant(ZoneOffset.UTC),
+        EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(espDeviceInfo.chipIs().concat(" Executed flash_id successfully!!!"),
                 espDeviceInfo.port());
 
-        var colors = Arrays.asList(0, 1, 2, 3, 4, 5, 6);
-        messageListItem.setUserColorIndex(colors.get(SECURE_RANDOM.nextInt(colors.size())));
-
-        this.publishMessageListItem.tryEmitNext(messageListItem);
+        this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
     }
 
     @Override
@@ -703,80 +692,40 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             final UI ui = attachEvent.getUI();
             this.refreshDevices(ui);
             //Disabled event for buttonRefreshDevices while in use
-            this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value ->
-                    ui.access(() -> this.buttonRefreshDevices.setEnabled(value))
-            );
-            super.add(this.initialInformationReadFlashViewDialog);
-
-
-//            RadioButtonGroup<String> mode = new RadioButtonGroup<>("Header theme");
-//            mode.setItems("Light", "Dark");
-//            mode.addValueChangeListener(e -> getChildren().forEach(component -> {
-//                if (component instanceof Sidebar) {
-//                    if (e.getValue().equals("Dark")) {
-//                        ((Sidebar) component).addHeaderThemeName(Lumo.DARK);
-//                    } else {
-//                        ((Sidebar) component).removeHeaderThemeName(Lumo.DARK);
-//                    }
-//                }
-//            }));
-            //addComponentAsFirst(mode);
-
-//            Sidebar sidebar = new Sidebar(
-//                    "New event",
-//                    "Fill in the blibber-blabber below to create a sensational event that will leave everyone flibber-gasted!",
-//                    createForm()
-//            );
-            // add(sidebar);
-
-//            Button button = new Button("Open sidebar", e -> {
-//                sidebar.open();
-//                Animated.animate(sidebar, Animation.FADE_IN);
-//            });
-            //addComponentAtIndex(1, button);
-//            sidebar.getCancelButton().addClickListener(event -> {
-//               sidebar.close();
-//               Animated.animate(sidebar, Animation.FADE_OUT);
-//            });
-
-        }
-
-        getUI().ifPresent(ui -> {
-            ui.getPage().fetchCurrentURL(url -> {
-                if (Objects.nonNull(url)) {
-                    String ref = url.getRef();
-                    if (Objects.isNull(ref)) {
-                        this.initialInformationReadFlashViewDialog.open();
-                    }
-                    if (url.toString().contains("setting")) {
-                        //this.initialInformationFlashEspViewDialog.open();
-                        //Abrir los settings aqui
-                        final SettingsDialogView settingsDialogView = new SettingsDialogView();
-                        super.add(settingsDialogView);
-                        settingsDialogView.open();
-                    }
+            this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value -> {
+                try {
+                    ui.access(() -> this.buttonRefreshDevices.setEnabled(value));
+                } catch (UIDetachedException ex) {
                 }
             });
+        }
+        final UI ui = attachEvent.getUI();
+        ui.getPage().executeJs(
+                "if (window.location.hash) { " +
+                        "  var hash = window.location.hash.substring(1); " + // Delete the '#'
+                        "  return hash; " +
+                        "}"
+        ).then(String.class, hash -> {
+            log.info("Fragmento de URI: {}", hash);
+            if (Objects.nonNull(hash) && !hash.contains("settings")) {
+                this.add(this.wizardReadFlashView);
+                this.wizardReadFlashView.open();
+            } else {
+                ui.getPage().fetchCurrentURL(url -> {
+                    final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
+                    if (!ref.contains("settings")) {
+                        this.add(this.wizardReadFlashView);
+                        this.wizardEspService.findWizardFlashEsp(WIZARD_READ_FLASH_ESP_VIEW)
+                                .ifPresent((hide) -> {
+                                    if (hide.isWizardEnabled()) {
+                                        this.wizardReadFlashView.open();
+                                    }
+                                });
+                    }
+                });
+            }
         });
 
-    }
-
-    private Component[] createForm() {
-        TextField title = new TextField("Title");
-
-        TextArea description = new TextArea("Description");
-
-        MultiSelectComboBox<String> guests = new MultiSelectComboBox<>("Guests");
-        guests.setItems(
-                "JOHN_SMITH", "EMILY_JOHNSON", "MICHAEL_DAVIS", "SOPHIA_BROWN",
-                "DANIEL_WILSON", "OLIVIA_MARTINEZ", "DAVID_THOMPSON"
-        );
-
-        RadioButtonGroup<String> visibility = new RadioButtonGroup<>("Visibility");
-        visibility.setItems("Private", "Public");
-        visibility.setValue("Private");
-
-        return new Component[]{title, description, guests, visibility};
     }
 
 }

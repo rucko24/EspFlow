@@ -1,6 +1,6 @@
 package com.esp.espflow.configuration;
 
-import com.vaadin.flow.component.messages.MessageListItem;
+import com.esp.espflow.entity.event.EspMessageListItemEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
@@ -17,7 +17,7 @@ import reactor.core.publisher.Sinks;
 public class EspMessageListItemReactivePublisher {
 
     @Bean(value = "publishMessageListItem")
-    public Sinks.Many<MessageListItem> publisher() {
+    public Sinks.Many<EspMessageListItemEvent> publisher() {
         return Sinks
                 .many()
                 .multicast()
@@ -25,7 +25,7 @@ public class EspMessageListItemReactivePublisher {
     }
 
     @Bean(value = "subscribersMessageListItems")
-    public Flux<MessageListItem> subscribers(Sinks.Many<MessageListItem> publisher) {
+    public Flux<EspMessageListItemEvent> subscribers(Sinks.Many<EspMessageListItemEvent> publisher) {
         return publisher
                 .asFlux();
     }

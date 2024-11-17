@@ -2,6 +2,7 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.AddressRecordBinder;
 import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.event.EspMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
@@ -29,7 +30,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -42,8 +42,6 @@ import reactor.core.publisher.Sinks;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
@@ -172,7 +170,7 @@ public class ShowDevicesBuilder {
      * 12
      */
     public interface PublishMessageListItemStage {
-        StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<MessageListItem> publishMessageListItem);
+        StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EspMessageListItemEvent> publishMessageListItem);
     }
 
     /**
@@ -207,7 +205,7 @@ public class ShowDevicesBuilder {
         private ComboBox<BaudRatesEnum> baudRatesComboBox;
         private EsptoolPathService esptoolPathService;
         private FlashDownloadButtonService flashDownloadButtonService;
-        private Sinks.Many<MessageListItem> publishMessageListItem;
+        private Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
 
         /**
          * To bind {@link AddressRecordBinder}
@@ -293,7 +291,7 @@ public class ShowDevicesBuilder {
         }
 
         @Override
-        public StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<MessageListItem> publishMessageListItem) {
+        public StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EspMessageListItemEvent> publishMessageListItem) {
             this.publishMessageListItem = publishMessageListItem;
             return this;
         }
@@ -594,11 +592,11 @@ public class ShowDevicesBuilder {
 
                                 String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(outPutConsole.scrollBarBuffer());
 
-                                final MessageListItem messageListItem = new MessageListItem(chipIs.concat(" Flash successfully read!!!"),
-                                        LocalDateTime.now().toInstant(ZoneOffset.UTC),
+                                EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(
+                                        chipIs.concat(" Flash successfully read!!!"),
                                         espDeviceInfo.port());
 
-                                this.publishMessageListItem.tryEmitNext(messageListItem);
+                                this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
 
                             } else {
                                 ConfirmDialogBuilder.showWarning("The flash does not exist in the tmp " + writFileToTempDir);

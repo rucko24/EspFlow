@@ -1,9 +1,7 @@
 package com.esp.espflow.views.about;
 
 import com.esp.espflow.views.MainLayout;
-import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -19,11 +17,12 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.Objects;
-
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
+import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ABOUT;
+import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 
 @Log4j2
 @UIScope
@@ -34,7 +33,6 @@ import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ABOUT;
 public class AboutView extends VerticalLayout {
 
     private static final String TARGET_BLANK = "_blank";
-    private static final String INNER_HTML = "innerHTML";
 
     public AboutView() {
         init();
@@ -46,12 +44,12 @@ public class AboutView extends VerticalLayout {
         final Image img = new Image(FRONTEND_IMAGES_ABOUT + "bran-espressif-box.png", "alt");
         var tooltip = Tooltip.forComponent(img);
         tooltip.setPosition(Tooltip.TooltipPosition.TOP);
-        tooltip.setText("https://github.com/rucko24/EspFlow");
+        tooltip.setText(ESPFLOW_SOURCE_CODE);
         img.setWidth("30%");
         img.addClickListener(e -> {
-            getUI().ifPresent(ui -> ui.getPage().open("https://github.com/rucko24/EspFlow"));
+            getUI().ifPresent(ui -> ui.getPage().open(ESPFLOW_SOURCE_CODE));
         });
-        img.getStyle().setCursor("pointer");
+        img.getStyle().setCursor(CURSOR_POINTER);
         img.getStyle().set("border-radius", "2em");
         img.getStyle().set("margin-bottom", "20px");
         img.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
@@ -107,19 +105,4 @@ public class AboutView extends VerticalLayout {
         super.onDetach(detachEvent);
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        getUI().ifPresent(ui -> {
-            ui.getPage().fetchCurrentURL(url -> {
-                if (Objects.nonNull(url)) {
-                    if (url.toString().contains("setting")) {
-                        final SettingsDialogView settingsDialogView = new SettingsDialogView();
-                        super.add(settingsDialogView);
-                        settingsDialogView.open();
-                    }
-                }
-            });
-        });
-    }
 }

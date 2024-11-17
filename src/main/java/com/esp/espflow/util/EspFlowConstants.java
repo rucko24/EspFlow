@@ -50,7 +50,7 @@ public class EspFlowConstants {
     public static final String DIALOG_DISABLED = "Hide";
     public static final String INFORMATION = "Information";
     public static final String WARNING = "Warning";
-
+    public static final String FRONTEND_ICON = "icons/icon.png";
     public static final String FRONTEND_IMAGES_ESPDEVICES = "frontend/images/espdevices/";
     public static final String FRONTEND_IMAGES_LOGO = "frontend/images/logo/";
     public static final String FRONTEND_IMAGES_AVATAR_USER = "frontend/images/avatar-user/";
@@ -92,4 +92,9 @@ public class EspFlowConstants {
     public static final String MACOS_ICON = "mac.svg";
     public static final String FREE_BSD_ICON = "freebsd.svg";
     public static final String NO_OS_ICON = "no-os.svg";
+    public static final String ESPFLOW_SOURCE_CODE = "https://github.com/rucko24/EspFlow";
+    public static final String WIZARD_FLASHESP_VIEW = "wizardFlashEspView";
+    public static final String WIZARD_READ_FLASH_ESP_VIEW = "wizardReadFlashEspView";
+    public static final String INNER_HTML = "innerHTML";
+
 }

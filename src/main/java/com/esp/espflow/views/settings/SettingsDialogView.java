@@ -1,14 +1,14 @@
 package com.esp.espflow.views.settings;
 
+import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.enums.Breakpoint;
+import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
-import com.esp.espflow.views.MainLayout;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
@@ -17,7 +17,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -37,47 +36,66 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.dom.Style.Overflow;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RoutePrefix;
-import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.BoxSizing;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.MaxWidth;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
 
 /**
  * @author rub'n
  */
+@UIScope
+@SpringComponent
 @Log4j2
-@Route(value = "", layout = MainLayout.class)
-@RoutePrefix(value = "#settings")
 @RolesAllowed("ADMIN")
-public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlParameter<String> {
+@RequiredArgsConstructor
+public class SettingsDialogView extends Dialog {
 
+    private static final String SETTINGS = "settings";
     private static final String PASSWORD = "password";
     private static final String CONTACT_INFORMATION = "contact-information";
     private static final String PUBLIC_INFORMATION = "public-information";
     private static final String NOTIFICATION = "notifications";
+    private static final String SIZE = "16px";
+
+    private final Button publicInformationButton = new Button("esptool.py home path");
+    private final Button contactInformationButton = new Button("Manage settings...");
+    private final Button updates = new Button("Check updates...");
+    private final Button passwordButton = new Button("Password");
+    private final Button notificationsButton = new Button("Notifications");
 
     private final Layout mainLayout = new Layout();
+    private final ToggleButton toggleButtonEnableInitialDialogs = new ToggleButton();
+    private final ToggleButton toggleButtonNotifications = new ToggleButton();
+    private final WizardEspService wizardFlashEspRepository;
 
-    public SettingsDialogView() {
+    @PostConstruct
+    public void init() {
+
+    }
+
+    private void initConfiguration(String ref) {
         super.setMaxWidth("680px");
         super.setMaxHeight("500px");
         super.setHeight("500px");
         super.setHeaderTitle("Settings");
-        super.setModal(true);
+        //super.setModal(true)
+        this.setBackGroundOnClick(publicInformationButton);
         final Button closeButton = new Button(new Icon("lumo", "cross"), (event) -> {
             super.close();
             getUI().ifPresent(ui -> {
@@ -88,7 +106,7 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         });
 
         /*
-         * Allows that when closing the dialog, we remove the portion of the uri after the and leaving the original path.
+         * Allows that when closing the dialog, we remove the portion aka fragment of the uri after the and leaving the original path.
          */
         super.addOpenedChangeListener(event -> {
             if (!event.getSource().isOpened()) {
@@ -110,15 +128,49 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         final Hr hr = new Hr();
         hr.addClassName("hr-header-settings");
 
-        main.add(this.createLinks(), this.createForm());
+        main.add(this.createLinks(), this.createForm(ref));
 
         super.add(hr, main);
         super.addClassName("settings-content-dialog");
     }
 
-    public Component createForm() {
-        //Not the first time
-        this.mainLayout.add(createPublicInformation());
+    public Component createForm(String ref) {
+
+        String newLocation = DialogUtilsReplaceUri.INSTANCE.parseUriToCreateTheContentForm(ref);
+
+        switch (newLocation) {
+            case PUBLIC_INFORMATION -> {
+                this.mainLayout.add(createPublicInformation());
+                super.open();
+            }
+            case CONTACT_INFORMATION -> {
+                this.mainLayout.add(createContactInformation());
+                this.setBackGroundOnClick(contactInformationButton);
+                super.open();
+            }
+            case PASSWORD -> {
+                this.mainLayout.add(createPassword());
+                this.setBackGroundOnClick(passwordButton);
+                super.open();
+            }
+            case NOTIFICATION -> {
+                this.mainLayout.add(createNotifications());
+                this.setBackGroundOnClick(notificationsButton);
+                super.open();
+            }
+            case SETTINGS -> {
+                this.mainLayout.add(createPublicInformation());
+                this.setBackGroundOnClick(publicInformationButton);
+                super.open();
+            }
+            case StringUtils.EMPTY -> {
+                this.mainLayout.add(createPublicInformation());
+                this.setBackGroundOnClick(publicInformationButton);
+            }
+            default -> {
+                //Do nothing
+            }
+        }
         this.mainLayout.addClassNames(BoxSizing.BORDER, MaxWidth.SCREEN_SMALL, Padding.LARGE);
         this.mainLayout.setFlexDirection(Layout.FlexDirection.COLUMN);
         return mainLayout;
@@ -229,11 +281,10 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         emailNotifications.setItems("Newsletters", "Promotional offers", "Account updates", "New messages or activities", "Events or upcoming appointments");
 
         final Span pushNotifications = new Span("Push notifications");
-        //pushNotifications.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
         final Paragraph spanEnableAllNotifications = new Paragraph("Enable all notifications");
         spanEnableAllNotifications.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-        final ToggleButton toggleButtonNotifications = new ToggleButton();
+
         final HorizontalLayout row1 = new HorizontalLayout(spanEnableAllNotifications, toggleButtonNotifications);
         row1.setWidthFull();
         row1.setJustifyContentMode(JustifyContentMode.BETWEEN);
@@ -241,11 +292,24 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
 
         final Paragraph spanEnableInitialDialogs = new Paragraph("Enable initial dialogs");
         spanEnableInitialDialogs.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-        final ToggleButton toggleButtonEnableInitialDialogs = new ToggleButton();
+
         final HorizontalLayout row2 = new HorizontalLayout(spanEnableInitialDialogs, toggleButtonEnableInitialDialogs);
         row2.setWidthFull();
         row2.setJustifyContentMode(JustifyContentMode.BETWEEN);
         row2.setAlignItems(Alignment.CENTER);
+
+        this.toggleButtonEnableInitialDialogs.addValueChangeListener(event -> {
+           if(event.getValue()) {
+               this.saveStatus(event.getValue());
+           } else {
+               this.saveStatus(event.getValue());
+           }
+        });
+
+        this.wizardFlashEspRepository.findWizardFlashEsp(WIZARD_FLASHESP_VIEW)
+                .ifPresent(hideButtom -> {
+                    toggleButtonEnableInitialDialogs.setValue(hideButtom.isWizardEnabled());
+                });
 
         final VerticalLayout verticalLayout = new VerticalLayout(row1, new Hr(), row2);
         verticalLayout.setPadding(false);
@@ -257,32 +321,33 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         return new Scroller(layout);
     }
 
-    public Component createLinks() {
-        final Button publicInformationButton = new Button("esptool.py home path");
-        final Button contactInformationButton = new Button("Manage settings...");
-        final Button updates = new Button("Check updates...");
-        final Button passwordButton = new Button("Password");
-        final Button notificationsButton = new Button("Notifications");
+    private void saveStatus(final boolean value) {
+        final WizardEspDto wizardEspDto = WizardEspDto.builder()
+                .name(WIZARD_FLASHESP_VIEW)
+                .isWizardEnabled(value)
+                .build();
+        this.wizardFlashEspRepository.save(wizardEspDto);
+    }
 
+    public Component createLinks() {
         publicInformationButton.setPrefixComponent(VaadinIcon.INFO.create());
         publicInformationButton.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createPublicInformation());
 
-            this.setBackGroundOnClick(publicInformationButton, contactInformationButton,
-                    passwordButton, notificationsButton);
+            this.setBackGroundOnClick(publicInformationButton);
 
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
 
-                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, PUBLIC_INFORMATION);
-                    String urlWithParameters = url.getPath().concat(baseUrl);
+                    String ref = StringUtils.defaultString(url.getRef());
 
-                    ui.getPage().getHistory().replaceState(null, urlWithParameters);
+                    final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, PUBLIC_INFORMATION);
+
+                    ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
 
                 });
             });
-
 
         });
 
@@ -291,16 +356,16 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
             this.mainLayout.removeAll();
             this.mainLayout.add(createContactInformation());
 
-            this.setBackGroundOnClick(contactInformationButton, publicInformationButton,
-                    passwordButton, notificationsButton);
+            this.setBackGroundOnClick(contactInformationButton);
 
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
 
-                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, CONTACT_INFORMATION);
-                    String urlWithParameters = url.getPath().concat(baseUrl);
+                    String ref = StringUtils.defaultString(url.getRef());
 
-                    ui.getPage().getHistory().replaceState(null, urlWithParameters);
+                    final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, CONTACT_INFORMATION);
+
+                    ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
 
                 });
             });
@@ -312,16 +377,16 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
             this.mainLayout.removeAll();
             this.mainLayout.add(createPassword());
 
-            this.setBackGroundOnClick(passwordButton, contactInformationButton, publicInformationButton,
-                    notificationsButton);
+            this.setBackGroundOnClick(passwordButton);
 
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
 
-                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, PASSWORD);
-                    String urlWithParameters = url.getPath().concat(baseUrl);
+                    String ref = StringUtils.defaultString(url.getRef());
 
-                    ui.getPage().getHistory().replaceState(null, urlWithParameters);
+                    final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, PASSWORD);
+
+                    ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
 
                 });
             });
@@ -329,21 +394,22 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
         });
 
         notificationsButton.setPrefixComponent(SvgFactory
-                .createIconFromSvg("bell.svg", "16px", null));
+                .createIconFromSvg("bell.svg", SIZE, null));
 
         notificationsButton.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(new Scroller(createNotifications()));
 
-            this.setBackGroundOnClick(notificationsButton, contactInformationButton, passwordButton, publicInformationButton);
+            this.setBackGroundOnClick(notificationsButton);
 
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
 
-                    String baseUrl = RouteConfiguration.forSessionScope().getUrl(SettingsDialogView.class, NOTIFICATION);
-                    String urlWithParameters = url.getPath().concat(baseUrl);
+                    String ref = StringUtils.defaultString(url.getRef());
 
-                    ui.getPage().getHistory().replaceState(null, urlWithParameters);
+                    final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, NOTIFICATION);
+
+                    ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
 
                 });
             });
@@ -368,33 +434,23 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
     }
 
     /**
-     *
-     * @param button that only the background will be set
-     * @param removeBackgroundColorForThisButtons to remove the background
+     * @param buttonToChange that only the background will be set
      */
-    private void setBackGroundOnClick(Button button, Button... removeBackgroundColorForThisButtons) {
-        var backgroundColor = button.getStyle().get("background-color");
+    private void setBackGroundOnClick(Button buttonToChange) {
+        final String backgroundColorStyle = "background-color";
+
+        String backgroundColor = buttonToChange.getStyle().get(backgroundColorStyle);
+
         if (Objects.isNull(backgroundColor)) {
-            button.getStyle().setBackgroundColor("var(--lumo-primary-color-10pct)");
+            buttonToChange.getStyle().setBackgroundColor("var(--lumo-primary-color-10pct)");
         }
 
-        Stream.of(removeBackgroundColorForThisButtons)
-                .forEach(buttonItem -> {
-                    buttonItem.getStyle().remove("background-color");
-                });
+        final Predicate<Button> ignoreTheParameterButtonSoAsNotToChangeItsStyle = buttonItem -> !buttonItem.equals(buttonToChange);
 
-    }
+        Stream.of(passwordButton, notificationsButton, contactInformationButton, publicInformationButton)
+                .filter(ignoreTheParameterButtonSoAsNotToChangeItsStyle)
+                .forEach(buttonItem -> buttonItem.getStyle().remove(backgroundColorStyle));
 
-    @Override
-    public void showRouterLayoutContent(HasElement content) {
-        if (Objects.nonNull(content)) {
-            this.mainLayout.removeAll();
-            this.mainLayout.getElement().appendChild(content.getElement());
-        }
-    }
-
-    @Override
-    public void setParameter(BeforeEvent event, String parameter) {
     }
 
     @Override
@@ -405,53 +461,13 @@ public class SettingsDialogView extends Dialog implements RouterLayout, HasUrlPa
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        final UI ui = attachEvent.getUI();
-        ui.getPage().fetchCurrentURL(url -> {
-            log.info("Current URL Setting Dialog SettingsDialog {}", url);
-
-            String baseUrl = RouteConfiguration.forSessionScope()
-                    .getUrl(SettingsDialogView.class, "").replace("/", "");
-            String urlWithParameters = url.getPath().concat(baseUrl);
-
-            this.recreateContentAndUpdateUrl(ui, urlWithParameters, url.toString());
-
-        });
-
-    }
-
-    private void recreateContentAndUpdateUrl(final UI ui, String urlWithParameters, String fetchUrl) {
-        String newLocation = StringUtils.EMPTY;
-        if (fetchUrl.contains("#")) {
-            try {
-                newLocation = fetchUrl.split("#")[1].split("/")[1];
-            } catch (Exception ex) {
-                log.info("fetchUrl error {} ", fetchUrl);
-            }
-        }
-        log.info("newLocation {}", newLocation);
-        switch (newLocation) {
-            case PUBLIC_INFORMATION -> {
-                this.mainLayout.removeAll();
-                this.mainLayout.add(createPublicInformation());
-                ui.getPage().getHistory().replaceState(null, urlWithParameters.concat("/" + newLocation));
-            }
-            case CONTACT_INFORMATION -> {
-                this.mainLayout.removeAll();
-                this.mainLayout.add(createContactInformation());
-                ui.getPage().getHistory().replaceState(null, urlWithParameters.concat("/" + newLocation));
-            }
-            case PASSWORD -> {
-                this.mainLayout.removeAll();
-                this.mainLayout.add(createPassword());
-                ui.getPage().getHistory().replaceState(null, urlWithParameters.concat("/" + newLocation));
-            }
-            case NOTIFICATION -> {
-                this.mainLayout.removeAll();
-                this.mainLayout.add(createNotifications());
-                ui.getPage().getHistory().replaceState(null, urlWithParameters.concat("/" + newLocation));
-            }
-            default -> {
-            }
+        if (attachEvent.isInitialAttach()) {
+            final UI ui = attachEvent.getUI();
+            ui.getPage().fetchCurrentURL(url -> {
+                log.info("onAttach {}", url.getPath());
+                String ref = url.getRef();
+                this.initConfiguration(ref);
+            });
         }
     }
 

@@ -1,7 +1,7 @@
 package com.esp.espflow.security;
 
 import com.esp.espflow.entity.User;
-import com.esp.espflow.service.UserRepository;
+import com.esp.espflow.service.respository.UserRepository;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
