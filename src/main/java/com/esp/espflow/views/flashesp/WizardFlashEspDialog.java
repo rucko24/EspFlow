@@ -2,16 +2,13 @@ package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.service.respository.impl.WizardEspService;
-import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.infraleap.animatecss.Animated.Modifier;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
@@ -22,9 +19,11 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -32,6 +31,8 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.Style.AlignSelf;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -49,19 +50,20 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_ACTIVE;
+import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_INACTIVE;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_ICON;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_CUSTOM;
 import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
+import static com.esp.espflow.util.EspFlowConstants.STEP1;
+import static com.esp.espflow.util.EspFlowConstants.STEP2;
+import static com.esp.espflow.util.EspFlowConstants.STEP3;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
 
 /**
@@ -74,7 +76,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
 @Log4j2
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class WizardFlashEspDialog extends Dialog {
+public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver {
 
     private HorizontalLayout step1 = new HorizontalLayout();
     private HorizontalLayout step2 = new HorizontalLayout();
@@ -95,8 +97,10 @@ public class WizardFlashEspDialog extends Dialog {
      * The repository to save the status of this dialog when hiding it
      */
     private final WizardEspService wizardEspService;
-
-    private String sNext = "step1";
+    /**
+     * This variable will be updated with each next or previous step.
+     */
+    private String sNext = STEP1;
 
     @PostConstruct
     public void init() {
@@ -104,6 +108,9 @@ public class WizardFlashEspDialog extends Dialog {
         this.initConfiguration();
     }
 
+    /**
+     * We load the initial configuration of the Wizard
+     */
     private void initConfiguration() {
         super.setMaxWidth("680px");
         super.setMaxHeight("500px");
@@ -147,37 +154,41 @@ public class WizardFlashEspDialog extends Dialog {
                 Width.FULL, LumoUtility.JustifyContent.CENTER, Top.MEDIUM);
 
         step1.addClickListener(event -> {
-            sNext = "step1";
-            next.setText("Next");
+            this.sNext = STEP1;
+            this.next.setText("Next");
+            this.previous.setVisible(false);
             this.mainContent.removeAll();
             this.mainContent.add(createNavWithEspLogoWelcome(), createWelcomeContent());
-            avatar2.removeClassNames("avatar-step-active");
-            avatar2.addClassName("avatar-step-inactive");
-            avatar3.removeClassNames("avatar-step-active");
-            avatar3.addClassName("avatar-step-inactive");
+            avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
+            avatar2.addClassName(AVATAR_STEP_INACTIVE);
+            avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
+            avatar3.addClassName(AVATAR_STEP_INACTIVE);
         });
 
         step2.addClickListener(event -> {
-            sNext = "step2";
-            next.setText("Next");
+            this.sNext = STEP2;
+            this.previous.setVisible(true);
+            this.next.setText("Next");
             this.mainContent.removeAll();
             this.mainContent.add(createFlashIdContent());
-            avatar2.removeClassNames("avatar-step-inactive");
-            avatar2.addClassName("avatar-step-active");
-            avatar3.removeClassNames("avatar-step-active");
-            avatar3.addClassName("avatar-step-inactive");
+            avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
+            avatar2.addClassName(AVATAR_STEP_ACTIVE);
+            avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
+            avatar3.addClassName(AVATAR_STEP_INACTIVE);
         });
 
         step3.addClickListener(event -> {
-            next.setText("Continue...");
+            this.sNext = STEP3;
+            this.next.setText("Continue...");
+            this.previous.setVisible(true);
             this.mainContent.removeAll();
             this.mainContent.add(createWriteFlashContent());
-            avatar1.removeClassNames("avatar-step-inactive");
-            avatar1.addClassName("avatar-step-active");
-            avatar2.removeClassNames("avatar-step-inactive");
-            avatar2.addClassName("avatar-step-active");
-            avatar3.removeClassNames("avatar-step-inactive");
-            avatar3.addClassName("avatar-step-active");
+            avatar1.removeClassNames(AVATAR_STEP_INACTIVE);
+            avatar1.addClassName(AVATAR_STEP_ACTIVE);
+            avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
+            avatar2.addClassName(AVATAR_STEP_ACTIVE);
+            avatar3.removeClassNames(AVATAR_STEP_INACTIVE);
+            avatar3.addClassName(AVATAR_STEP_ACTIVE);
         });
 
         super.getHeader().add(divHeader);
@@ -195,52 +206,31 @@ public class WizardFlashEspDialog extends Dialog {
                     ui.getPage().getHistory().replaceState(null, url.getPath());
                 });
             });
-
-            if (sNext.equals("step1")) {
-                sNext = "step2";
+            if (sNext.equals(STEP1)) {
+                sNext = STEP2;
                 next.setText("Next");
                 this.mainContent.removeAll();
                 this.mainContent.add(createFlashIdContent());
-                avatar2.removeClassNames("avatar-step-inactive");
-                avatar2.addClassName("avatar-step-active");
-                avatar3.removeClassNames("avatar-step-active");
-                avatar3.addClassName("avatar-step-inactive");
+                avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
+                avatar2.addClassName(AVATAR_STEP_ACTIVE);
+                avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
+                avatar3.addClassName(AVATAR_STEP_INACTIVE);
                 previous.setVisible(true);
                 Animated.animate(previous, Animation.FADE_IN);
-            } else if (sNext.equals("step2")) {
+            } else if (sNext.equals(STEP2)) {
                 this.mainContent.removeAll();
                 this.mainContent.add(createWriteFlashContent());
                 previous.setVisible(true);
-                avatar2.removeClassNames("avatar-step-inactive");
-                avatar2.addClassName("avatar-step-active");
-                avatar3.removeClassNames("avatar-step-inactive");
-                avatar3.addClassName("avatar-step-active");
+                avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
+                avatar2.addClassName(AVATAR_STEP_ACTIVE);
+                avatar3.removeClassNames(AVATAR_STEP_INACTIVE);
+                avatar3.addClassName(AVATAR_STEP_ACTIVE);
                 Animated.removeAnimations(previous);
+                sNext = STEP3;
                 next.setText("Continue...");
-                sNext = "step3";
             } else if (sNext.equals("step3")) {
-                sNext = "step1";
-                //FIXME probar en beforeEnter
-                Mono.just(mainContent)
-                        .delayElement(Duration.ofMillis(1500))
-                        .doOnTerminate(() -> {
-                            log.info("Updated completed Wizard {}", mainContent);
-
-                        })
-                        .subscribe(mainC -> {
-                            getUI().ifPresent(ui -> {
-                                ui.access(() -> {
-                                    mainC.removeAll();
-                                    mainC.add(this.createNavWithEspLogoWelcome(), this.createWelcomeContent());
-                                    avatar2.removeClassNames("avatar-step-active");
-                                    avatar2.addClassName("avatar-step-inactive");
-                                    avatar3.removeClassNames("avatar-step-active");
-                                    avatar3.addClassName("avatar-step-inactive");
-                                    super.close();
-                                });
-                            });
-                        });
-
+                sNext = STEP1;
+                super.close();
             }
         });
         next.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -251,20 +241,31 @@ public class WizardFlashEspDialog extends Dialog {
                     ui.getPage().getHistory().replaceState(null, url.getPath());
                 });
             });
-            if (sNext.equals("step1")) {
-                sNext = "step2";
-                previous.setVisible(true);
+            if (sNext.equals(STEP2)) {
+                sNext = STEP1;
+                this.mainContent.removeAll();
+                this.mainContent.add(this.createNavWithEspLogoWelcome(), this.createWelcomeContent());
+                avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
+                avatar2.addClassName(AVATAR_STEP_INACTIVE);
+                avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
+                avatar3.addClassName(AVATAR_STEP_INACTIVE);
+                previous.setVisible(false);
                 Animated.animate(previous, Animation.FADE_IN);
-            } else if (sNext.equals("step2")) {
-                sNext = "step3";
-                previous.setVisible(true);
-                Animated.animate(previous, Animation.FADE_IN);
-            } else if (sNext.equals("step3")) {
+            } else if (sNext.equals(STEP3)) {
+                sNext = STEP2;
                 this.mainContent.removeAll();
                 this.mainContent.add(createFlashIdContent());
-                previous.setVisible(false);
+                previous.setVisible(true);
+                Animated.animate(previous, Animation.FADE_IN);
+                avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
+                avatar2.addClassName(AVATAR_STEP_ACTIVE);
+                avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
+                avatar3.addClassName(AVATAR_STEP_INACTIVE);
                 Animated.removeAnimations(previous);
-                ConfirmDialogBuilder.showInformation("No more steps");
+                next.setText("Next");
+            } else if (sNext.equals(STEP1)) {
+                sNext = STEP1;
+                previous.setVisible(false);
             }
         });
         hideButton.setTooltipText("Hide this dialog");
@@ -303,7 +304,7 @@ public class WizardFlashEspDialog extends Dialog {
         avatar.setThemeName(AvatarVariant.LUMO_SMALL.getVariantName());
         avatar.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         if (numberStep.equals("2") || numberStep.equals("3")) {
-            avatar.addClassName("avatar-step-inactive");
+            avatar.addClassName(AVATAR_STEP_INACTIVE);
         } else {
             avatar.getStyle().set("background", "var(--lumo-primary-color)");
             avatar.getStyle().set("color", "var(--lumo-primary-contrast-color)");
@@ -398,10 +399,12 @@ public class WizardFlashEspDialog extends Dialog {
         titlePortScanning.setId(titlePortScanning.getText().replace(" ", "-").toLowerCase());
 
         final Button scanButton = new Button(VaadinIcon.REFRESH.create());
+        scanButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+        scanButton.setTooltipText("Shortcut is ENTER");
         var rowScanningPort = new HorizontalLayout(scanButton, titlePortScanning);
 
         final Paragraph descriptionComboSelectionPort = new Paragraph();
-        descriptionComboSelectionPort.getElement().setProperty(INNER_HTML, "To run the port scan, first we use the refresh button, it will search the system ports, and when selecting a port the <strong>flash_id</strong> command is executed.");
+        descriptionComboSelectionPort.getElement().setProperty(INNER_HTML, "To run the port scan, first we use the refresh button (the shortcut is <strong>ENTER</strong>), it will search the system serial ports, and when selecting a port the <strong>flash_id</strong> command is executed.");
         descriptionComboSelectionPort.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
         final Image comboImage = new Image(FRONTEND_IMAGES_CUSTOM + "using-combo.gif", "combo");
@@ -413,6 +416,7 @@ public class WizardFlashEspDialog extends Dialog {
         titlePlayButton.setId(titlePlayButton.getText().replace(" ", "-").toLowerCase());
 
         final Button playButton = new Button(VaadinIcon.PLAY.create());
+        playButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         var rowPlayButtonTitle = new HorizontalLayout(playButton, titlePlayButton);
 
         final Paragraph descriptionButtonPlay = new Paragraph();
@@ -425,18 +429,26 @@ public class WizardFlashEspDialog extends Dialog {
 
         final Hr separator = this.createSeparator();
 
-        final H2 titlePermissionDenied = new H2("Permission denied: '/dev/ttyUSB2'");
+        final H2 titlePermissionDenied = new H2("Permission denied E.g. port: '/dev/ttyUSB2'");
         titlePermissionDenied.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
         titlePermissionDenied.setId(titlePermissionDenied.getText().replace(" ", "-").toLowerCase());
         final Button writePasswordButton = new Button(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
+        writePasswordButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+        writePasswordButton.setTooltipText("Shortcut is SPACE");
         var rowPermisson = new HorizontalLayout(writePasswordButton, titlePermissionDenied);
 
         final Hr separatorChangePermissions = this.createSeparator();
 
         final Paragraph descriptionPermissionDeniedPort = new Paragraph();
-        descriptionPermissionDeniedPort.getElement().setProperty(INNER_HTML, "If when executing the <strong>flash_id</strong> we have permissions problems, we can execute the lock button to enter the user credentials, <strong>no password will be saved or sent anywhere<strong>.");
+        descriptionPermissionDeniedPort.getElement().setProperty(INNER_HTML, "If when executing the <strong>flash_id</strong> we have permissions problems, we can execute the lock button (the shortcut is SPACE) to enter the user credentials, <strong>no password will be saved or sent anywhere<strong>.");
         descriptionPermissionDeniedPort.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
+        final UnorderedList unorderedListPorts = new UnorderedList();
+        final ListItem flashIdItem = new ListItem("FreeBSD E.g. port /dev/cuaU0");
+        final ListItem writeIdItem = new ListItem("MacOs E.g. port /dev/tty.usbserial-0001");
+        unorderedListPorts.add(flashIdItem, writeIdItem);
+        unorderedListPorts.addClassNames(Top.SMALL, Bottom.LARGE, LumoUtility.FontSize.SMALL,
+                LumoUtility.TextColor.SECONDARY);
 
         final Image changePermissionsImage = new Image(FRONTEND_IMAGES_CUSTOM + "change-permissions.png", "change-permissions");
         changePermissionsImage.setWidth("80%");
@@ -446,7 +458,7 @@ public class WizardFlashEspDialog extends Dialog {
         Stream.of(comboImage, playButtonImage, changePermissionsImage)
                 .forEach(image -> image.getStyle().setAlignSelf(AlignSelf.CENTER));
 
-        final Layout layout = new Layout(rowScanningPort, descriptionComboSelectionPort, comboImage, separator, rowPlayButtonTitle, descriptionButtonPlay, playButtonImage, separatorChangePermissions, rowPermisson, descriptionPermissionDeniedPort, changePermissionsImage);
+        final Layout layout = new Layout(rowScanningPort, descriptionComboSelectionPort, comboImage, separator, rowPlayButtonTitle, descriptionButtonPlay, playButtonImage, separatorChangePermissions, rowPermisson, descriptionPermissionDeniedPort, unorderedListPorts, changePermissionsImage);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
         layout.setColumnGap(Layout.Gap.MEDIUM);
         layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, rowScanningPort, rowPlayButtonTitle, separator,
@@ -458,6 +470,11 @@ public class WizardFlashEspDialog extends Dialog {
         return scroller;
     }
 
+    /**
+     * Separator for sections in step2 and step3
+     *
+     * @return A {@link Hr}
+     */
     private Hr createSeparator() {
         final Hr separator = new Hr();
         separator.setWidthFull();
@@ -496,34 +513,17 @@ public class WizardFlashEspDialog extends Dialog {
         return scroller;
     }
 
-    /**
-     * @param avatarToChange that only the background will be set
-     */
-    private void setAvatarBackGroundOnClick(Avatar avatarToChange) {
-        final String backgroundColorStyle = "background-color";
-
-        String backgroundColor = avatarToChange.getStyle().get(backgroundColorStyle);
-
-        if (Objects.isNull(backgroundColor)) {
-            avatarToChange.getStyle().setBackgroundColor("var(--lumo-primary-color-10pct)");
-        }
-
-        final Predicate<Avatar> ignoreTheParameterButtonSoAsNotToChangeItsStyle = buttonItem -> !buttonItem.equals(avatarToChange);
-
-//        Stream.of(passwordButton, notificationsButton, contactInformationButton, publicInformationButton)
-//                .filter(ignoreTheParameterButtonSoAsNotToChangeItsStyle)
-//                .forEach(buttonItem -> buttonItem.getStyle().remove(backgroundColorStyle));
-
-    }
-
     @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
+    public void beforeEnter(BeforeEnterEvent event) {
+        sNext = "step1";
+        next.setText("Next");
+        this.previous.setVisible(false);
+        this.mainContent.removeAll();
+        this.mainContent.add(createNavWithEspLogoWelcome(), createWelcomeContent());
+        avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
+        avatar2.addClassName(AVATAR_STEP_INACTIVE);
+        avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
+        avatar3.addClassName(AVATAR_STEP_INACTIVE);
     }
 
 }

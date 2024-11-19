@@ -45,7 +45,6 @@ public class EspFlowConstants {
     public static final String DETECTED_FLASH_SIZE = "Detected flash size";
     public static final String CRYSTAL_IS = "Crystal is";
 
-
     public static final String OK = "OK";
     public static final String DIALOG_DISABLED = "Hide";
     public static final String INFORMATION = "Information";
@@ -93,8 +92,16 @@ public class EspFlowConstants {
     public static final String FREE_BSD_ICON = "freebsd.svg";
     public static final String NO_OS_ICON = "no-os.svg";
     public static final String ESPFLOW_SOURCE_CODE = "https://github.com/rucko24/EspFlow";
+    /*
+     * for wizard
+     */
     public static final String WIZARD_FLASHESP_VIEW = "wizardFlashEspView";
     public static final String WIZARD_READ_FLASH_ESP_VIEW = "wizardReadFlashEspView";
     public static final String INNER_HTML = "innerHTML";
+    public static final String AVATAR_STEP_ACTIVE = "avatar-step-active";
+    public static final String AVATAR_STEP_INACTIVE = "avatar-step-inactive";
+    public static final String STEP1 = "step1";
+    public static final String STEP2 = "step2";
+    public static final String STEP3 = "step3";
 
 }

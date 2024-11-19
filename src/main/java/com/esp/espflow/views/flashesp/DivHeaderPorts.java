@@ -11,6 +11,7 @@ import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -75,10 +76,12 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final var divh3SerialPort = this.createH3SerialPort();
         final var divCombo = this.createDivComboBox();
 
-        scanPort.setTooltipText("Refresh/Scan ports!");
+        scanPort.setTooltipText("Refresh/Scan ports! - ENTER");
         scanPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        scanPort.addClickShortcut(Key.ENTER);
         unlockPort.setEnabled(false);
-        unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS);
+        unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS.concat(" - SPACE"));
+        unlockPort.addClickShortcut(Key.SPACE);
         unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setEnabled(false);
         buttonExecuteFlashId.addClassName(BOX_SHADOW_VAADIN_BUTTON);

@@ -22,6 +22,8 @@ public class WizardEspService {
     private final WizardEspRepository wizardEspRepository;
 
     /**
+     * Saves the wizar entity or updates it if it exists
+     *
      * @param wizardEspDto
      */
     public void save(WizardEspDto wizardEspDto) {

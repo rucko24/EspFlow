@@ -321,6 +321,10 @@ public class SettingsDialogView extends Dialog {
         return new Scroller(layout);
     }
 
+    /**
+     *
+     * @param value status of the wizard
+     */
     private void saveStatus(final boolean value) {
         final WizardEspDto wizardEspDto = WizardEspDto.builder()
                 .name(WIZARD_FLASHESP_VIEW)
