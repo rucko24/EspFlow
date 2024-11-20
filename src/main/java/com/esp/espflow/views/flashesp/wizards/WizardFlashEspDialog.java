@@ -1,4 +1,4 @@
-package com.esp.espflow.views.flashesp;
+package com.esp.espflow.views.flashesp.wizards;
 
 import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.service.respository.impl.WizardEspService;
@@ -466,6 +466,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
 
         final Scroller scroller = new Scroller(layout);
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
+        scroller.getStyle().set("scrollbar-width", "thin");
 
         return scroller;
     }
@@ -509,6 +510,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
 
         final Scroller scroller = new Scroller(layout);
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
+        scroller.getStyle().set("scrollbar-width", "thin");
 
         return scroller;
     }

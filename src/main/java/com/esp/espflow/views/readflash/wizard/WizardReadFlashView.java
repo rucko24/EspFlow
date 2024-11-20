@@ -1,15 +1,14 @@
-package com.esp.espflow.views.readflash;
+package com.esp.espflow.views.readflash.wizard;
 
 import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.EspFlowConstants;
-import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
-import com.esp.espflow.views.flashesp.InitialInformationFlashEspViewDialog;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.infraleap.animatecss.Animated.Modifier;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
@@ -22,14 +21,16 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Main;
-import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.UnorderedList;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.Style.AlignSelf;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -38,14 +39,10 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.BorderRadius;
-import com.vaadin.flow.theme.lumo.LumoUtility.BoxSizing;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Bottom;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Top;
-import com.vaadin.flow.theme.lumo.LumoUtility.MaxWidth;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
@@ -58,14 +55,13 @@ import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_ACTIVE;
 import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_INACTIVE;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
-import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
-import static com.esp.espflow.util.EspFlowConstants.FRONTEND_ICON;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_CUSTOM;
 import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 import static com.esp.espflow.util.EspFlowConstants.STEP1;
 import static com.esp.espflow.util.EspFlowConstants.STEP2;
 import static com.esp.espflow.util.EspFlowConstants.STEP3;
-import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
+import static com.infraleap.animatecss.Animated.Modifier.INFINITE;
 
 /**
  * No modal
@@ -113,7 +109,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      * We load the initial configuration of the Wizard
      */
     private void initConfiguration() {
-        super.setMaxWidth("680px");
+        super.setMaxWidth("740px");
         super.setMaxHeight("500px");
         super.setHeight("500px");
 
@@ -137,7 +133,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         final Hr hr = new Hr();
         hr.addClassName("hr-header-settings");
 
-        super.add(hr, this.createWelcomeLayout());
+        super.add(hr, this.createReadFlashDevices());
         super.addClassName("settings-content-dialog");
     }
 
@@ -146,9 +142,12 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      */
     private void configureHeader() {
         this.step1 = this.rowStepAvatar(avatar1, "1", "1", new H4("Welcome"));
-        this.step2 = this.rowStepAvatar(avatar2, "2", "2", new H4("Execute flash_id"));
-        this.step3 = this.rowStepAvatar(avatar3, "3", "3", new H4("Execute write_flash"));
+        this.step2 = this.rowStepAvatar(avatar2, "2", "2", new H4("Refresh devices"));
+        this.step3 = this.rowStepAvatar(avatar3, "3", "3", new H4("Read and Download flash"));
         step3.remove(step3.getComponentAt(2));
+
+        Stream.of(step1, step2, step3, avatar1, avatar2, avatar3)
+                .forEach(items -> items.getStyle().setCursor("pointer"));
 
         final Div divHeader = new Div(step1, step2, step3);
         divHeader.addClassNames(Display.FLEX, LumoUtility.FlexDirection.ROW,
@@ -159,7 +158,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             this.next.setText("Next");
             this.previous.setVisible(false);
             this.mainContent.removeAll();
-            this.mainContent.add(createNavWithEspLogoWelcome(), createWelcomeContent());
+            this.mainContent.add(refreshDevices());
             avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
             avatar2.addClassName(AVATAR_STEP_INACTIVE);
             avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -171,7 +170,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             this.previous.setVisible(true);
             this.next.setText("Next");
             this.mainContent.removeAll();
-            this.mainContent.add(createFlashIdContent());
+            this.mainContent.add(incorrectFlashSize());
             avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
             avatar2.addClassName(AVATAR_STEP_ACTIVE);
             avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -183,7 +182,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             this.next.setText("Continue...");
             this.previous.setVisible(true);
             this.mainContent.removeAll();
-            this.mainContent.add(createWriteFlashContent());
+            this.mainContent.add(createDownloadFlashContent());
             avatar1.removeClassNames(AVATAR_STEP_INACTIVE);
             avatar1.addClassName(AVATAR_STEP_ACTIVE);
             avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
@@ -211,7 +210,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                 sNext = STEP2;
                 next.setText("Next");
                 this.mainContent.removeAll();
-                this.mainContent.add(createFlashIdContent());
+                this.mainContent.add(incorrectFlashSize());
                 avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
                 avatar2.addClassName(AVATAR_STEP_ACTIVE);
                 avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -220,7 +219,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                 Animated.animate(previous, Animation.FADE_IN);
             } else if (sNext.equals(STEP2)) {
                 this.mainContent.removeAll();
-                this.mainContent.add(createWriteFlashContent());
+                this.mainContent.add(createDownloadFlashContent());
                 previous.setVisible(true);
                 avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
                 avatar2.addClassName(AVATAR_STEP_ACTIVE);
@@ -245,7 +244,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             if (sNext.equals(STEP2)) {
                 sNext = STEP1;
                 this.mainContent.removeAll();
-                this.mainContent.add(this.createNavWithEspLogoWelcome(), this.createWelcomeContent());
+                this.mainContent.add(this.refreshDevices());
                 avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
                 avatar2.addClassName(AVATAR_STEP_INACTIVE);
                 avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -255,7 +254,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             } else if (sNext.equals(STEP3)) {
                 sNext = STEP2;
                 this.mainContent.removeAll();
-                this.mainContent.add(createFlashIdContent());
+                this.mainContent.add(incorrectFlashSize());
                 previous.setVisible(true);
                 Animated.animate(previous, Animation.FADE_IN);
                 avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
@@ -275,7 +274,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         hideButton.addClickListener(event -> {
             final WizardEspDto wizardEspDto = WizardEspDto.builder()
                     .isWizardEnabled(false)
-                    .name(WIZARD_FLASHESP_VIEW)
+                    .name(WIZARD_READ_FLASH_ESP_VIEW)
                     .build();
             this.wizardEspService.save(wizardEspDto);
             super.close();
@@ -326,147 +325,111 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      *
      * @return A {@link Component}
      */
-    private Main createWelcomeLayout() {
+    private Main createReadFlashDevices() {
         mainContent.addClassNames(Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Height.FULL);
-        mainContent.add(this.createNavWithEspLogoWelcome(), this.createWelcomeContent());
+        mainContent.add(this.refreshDevices());
         return mainContent;
     }
 
-    /**
-     * The nav with the logo for the first welcome step
-     *
-     * @return A {@link Component}
-     */
-    private Component createNavWithEspLogoWelcome() {
-
-        Stream.of(step1, step2, step3, avatar1, avatar2, avatar3)
-                .forEach(items -> items.getStyle().setCursor("pointer"));
-
-        final Image image = new Image(FRONTEND_ICON, "icon");
-        image.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
-        image.getStyle().setCursor(EspFlowConstants.CURSOR_POINTER);
-        image.addClassName(BorderRadius.LARGE);
-        image.setWidth("180px");
-        image.setHeight("200px");
-        var tooltip = Tooltip.forComponent(image);
-        tooltip.setPosition(Tooltip.TooltipPosition.TOP);
-        tooltip.setText(ESPFLOW_SOURCE_CODE);
-        image.addClickListener(e -> getUI().ifPresent(ui -> ui.getPage().open(ESPFLOW_SOURCE_CODE)));
-        Animated.animate(image, Animation.FADE_IN, Modifier.SLOW);
-
-        final Div div = new Div(image);
-        div.addClassNames(Display.FLEX, LumoUtility.FlexDirection.COLUMN,
-                LumoUtility.Margin.Vertical.XLARGE, Padding.Horizontal.LARGE);
-
-        final Nav nav = new Nav(div);
-        nav.addClassNames(Display.HIDDEN, Display.Breakpoint.Small.FLEX, LumoUtility.FontSize.SMALL, LumoUtility.Position.STICKY, "top-0");
-
-        return nav;
-    }
 
     /**
      * The welcome content
      *
      * @return A {@link Component}
      */
-    private Component createWelcomeContent() {
-
-        final InitialInformationFlashEspViewDialog welcome = new InitialInformationFlashEspViewDialog();
-
-        final Layout layout = new Layout(welcome);
-        layout.setId("welcome-id");
-        // Viewport < 1024px
+    private Component refreshDevices() {
+        final StepRefreshDevicesContent stepRefreshDevices = new StepRefreshDevicesContent();
+        final Layout layout = new Layout(stepRefreshDevices);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
-        // Viewport > 1024px
-        layout.setColumns(Layout.GridColumns.COLUMNS_2);
         layout.setColumnGap(Layout.Gap.MEDIUM);
-        layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL);
-
-        final Layout layoutResult = new Layout(layout);
-        layout.addClassNames(BoxSizing.BORDER, MaxWidth.SCREEN_SMALL, Padding.LARGE);
-        layout.setFlexDirection(Layout.FlexDirection.COLUMN);
-
-        return layoutResult;
+        layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, stepRefreshDevices);
+        return layout;
     }
 
     /**
-     * The content for flash_id step
+     * The content for step 2
      *
      * @return A {@link Component}
      */
-    private Component createFlashIdContent() {
-        final H2 titlePortScanning = new H2("Port scanning");
-        titlePortScanning.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
-        titlePortScanning.setId(titlePortScanning.getText().replace(" ", "-").toLowerCase());
+    private Component incorrectFlashSize() {
+        final H2 titleIncorrectSizeAddress = new H2("Incorrect size address");
+        titleIncorrectSizeAddress.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
+        titleIncorrectSizeAddress.setId(titleIncorrectSizeAddress.getText().replace(" ", "-").toLowerCase());
 
-        final Button scanButton = new Button(VaadinIcon.REFRESH.create());
-        scanButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
-        scanButton.setTooltipText("Shortcut is ENTER");
-        var rowScanningPort = new HorizontalLayout(scanButton, titlePortScanning);
-
-        final Paragraph descriptionComboSelectionPort = new Paragraph();
-        descriptionComboSelectionPort.getElement().setProperty(INNER_HTML, "To run the port scan, first we use the refresh button (the shortcut is <strong>ENTER</strong>), it will search the system serial ports, and when selecting a port the <strong>flash_id</strong> command is executed.");
-        descriptionComboSelectionPort.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-
-        final Image comboImage = new Image(FRONTEND_IMAGES_CUSTOM + "using-combo.gif", "combo");
-        comboImage.setWidth("80%");
-        comboImage.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
-
-        final H2 titlePlayButton = new H2("Using the play button");
-        titlePlayButton.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
-        titlePlayButton.setId(titlePlayButton.getText().replace(" ", "-").toLowerCase());
-
-        final Button playButton = new Button(VaadinIcon.PLAY.create());
-        playButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
-        var rowPlayButtonTitle = new HorizontalLayout(playButton, titlePlayButton);
-
-        final Paragraph descriptionButtonPlay = new Paragraph();
-        descriptionButtonPlay.getElement().setProperty(INNER_HTML, "The play button will be used to scan the previous port, without the need to use the drop-down, executing the <strong>flash_id</strong> command as well.");
-        descriptionButtonPlay.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-
-        final Image playButtonImage = new Image(FRONTEND_IMAGES_CUSTOM + "play-button.gif", "play");
-        playButtonImage.setWidth("80%");
-        playButtonImage.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+        final Component descriptionIncorrectFinalFlashSize = showImageWithInformationAboutToggleButton();
 
         final Hr separator = this.createSeparator();
 
-        final H2 titlePermissionDenied = new H2("Permission denied: E.g. port: '/dev/ttyUSB2'");
+        final H2 titlePermissionDenied = new H2("Port failure: E.g. '/dev/ttyUSB2'");
         titlePermissionDenied.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
         titlePermissionDenied.setId(titlePermissionDenied.getText().replace(" ", "-").toLowerCase());
-        final Button writePasswordButton = new Button(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
-        writePasswordButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
-        writePasswordButton.setTooltipText("Shortcut is SPACE");
-        var rowPermisson = new HorizontalLayout(writePasswordButton, titlePermissionDenied);
 
-        final Hr separatorChangePermissions = this.createSeparator();
+        final Div divPortFailure = new Div("Port failure: /dev/ttyUSB2");
+        divPortFailure.setHeight("25px");
+        divPortFailure.getStyle().set("color", "red");
+        divPortFailure.getElement().setAttribute("theme", "badge");
+        divPortFailure.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+
+        final HorizontalLayout rowPermisson = new HorizontalLayout(divPortFailure, titlePermissionDenied);
+        rowPermisson.setVerticalComponentAlignment(Alignment.CENTER, divPortFailure);
 
         final Paragraph descriptionPermissionDeniedPort = new Paragraph();
-        descriptionPermissionDeniedPort.getElement().setProperty(INNER_HTML, "If when executing the <strong>flash_id</strong> we have permissions problems, we can execute the lock button (the shortcut is SPACE) to enter the user credentials, <strong>no password will be saved or sent anywhere<strong>.");
+        descriptionPermissionDeniedPort.getElement().setProperty(INNER_HTML, "If when executing the <strong>Refresh device button</strong> we have permissions problems, in the bottom bar we will have in red the ports with error, we can use <strong>right click</strong> and give the necessary permissions, <strong>no password will be saved or sent anywhere<strong>.");
         descriptionPermissionDeniedPort.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
         final UnorderedList unorderedListPorts = new UnorderedList();
-        final ListItem flashIdItem = new ListItem("FreeBSD /dev/cuaU0");
-        final ListItem writeIdItem = new ListItem("macOs /dev/tty.usbserial-0001");
+        final ListItem flashIdItem = new ListItem("FreeBSD E.g. port /dev/cuaU0");
+        final ListItem writeIdItem = new ListItem("MacOs E.g. port /dev/tty.usbserial-0001");
         unorderedListPorts.add(flashIdItem, writeIdItem);
+        unorderedListPorts.addClassNames(Top.SMALL, Bottom.LARGE, LumoUtility.FontSize.SMALL,
+                LumoUtility.TextColor.SECONDARY);
 
-        final Image changePermissionsImage = new Image(FRONTEND_IMAGES_CUSTOM + "change-permissions.png", "change-permissions");
+        final Image changePermissionsImage = new Image(FRONTEND_IMAGES_CUSTOM + "read-flash-permissions.gif", "read-flash-permissions");
         changePermissionsImage.setWidth("80%");
         changePermissionsImage.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
-        Animated.animate(comboImage, Animation.FADE_IN, Modifier.SLOW);
-        Stream.of(comboImage, playButtonImage, changePermissionsImage)
+        Stream.of(changePermissionsImage)
                 .forEach(image -> image.getStyle().setAlignSelf(AlignSelf.CENTER));
 
-        final Layout layout = new Layout(rowScanningPort, descriptionComboSelectionPort, comboImage, separator, rowPlayButtonTitle, descriptionButtonPlay, playButtonImage, separatorChangePermissions, rowPermisson, descriptionPermissionDeniedPort, unorderedListPorts, changePermissionsImage);
+        final Layout layout = new Layout(titleIncorrectSizeAddress, descriptionIncorrectFinalFlashSize, separator, rowPermisson, descriptionPermissionDeniedPort, unorderedListPorts, changePermissionsImage);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
         layout.setColumnGap(Layout.Gap.MEDIUM);
-        layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, rowScanningPort, rowPlayButtonTitle, separator,
-                descriptionComboSelectionPort, comboImage, descriptionButtonPlay, playButtonImage, separatorChangePermissions, changePermissionsImage, rowPermisson, descriptionPermissionDeniedPort);
+        layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, titleIncorrectSizeAddress, descriptionIncorrectFinalFlashSize, separator, changePermissionsImage, descriptionPermissionDeniedPort);
 
         final Scroller scroller = new Scroller(layout);
+        scroller.getStyle().set("scrollbar-width", "thin");
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
 
         return scroller;
+    }
+
+    /**
+     * Displays an image with an arrow with HEART_BEAT, INFINITE effect, pointing to the toggle button
+     *
+     * @return A {@link Component} with information about the toggle button
+     */
+    private Component showImageWithInformationAboutToggleButton() {
+        final Image image = new Image(FRONTEND_IMAGES_CUSTOM + "enable-toggle-button.png", "alt");
+        image.setWidth("70%");
+        image.setHeight("70%");
+        image.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+
+        final VerticalLayout content = new VerticalLayout(new Text("Please set the custom size greater than zero, or enable the toggle button for full readability."));
+        content.setPadding(false);
+        content.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+
+        final Icon iconArrowRight = VaadinIcon.ARROW_RIGHT.create();
+        Tooltip.forComponent(iconArrowRight).setText("Enable the toggle button!!!");
+        iconArrowRight.setSize("30px");
+        Animated.animate(iconArrowRight, Animated.Animation.HEART_BEAT, INFINITE);
+
+        final HorizontalLayout row = new HorizontalLayout(iconArrowRight, image);
+        row.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        row.setVerticalComponentAlignment(FlexComponent.Alignment.END, iconArrowRight);
+        content.add(row);
+        content.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, row);
+
+        return content;
     }
 
     /**
@@ -486,28 +449,43 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      *
      * @return A {@link Component}
      */
-    private Component createWriteFlashContent() {
-        final H2 selectingTheFirmwareTitle = new H2("Selecting the firmware");
+    private Component createDownloadFlashContent() {
+        final H2 selectingTheFirmwareTitle = new H2("Read flash and Download flash backup");
         selectingTheFirmwareTitle.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
         selectingTheFirmwareTitle.setId(selectingTheFirmwareTitle.getText().replace(" ", "-").toLowerCase());
 
+        final Button readFlashButton = new Button("Read flash");
+        readFlashButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+
         final Paragraph description = new Paragraph();
-        description.getElement().setProperty(INNER_HTML, "Here we must select the firmware, as in the following animation, the port must be <strong>selected</strong> with permissions, and the <strong>firmware.</strong>");
+        description.getElement().setProperty(INNER_HTML, "Here the read flash will be available for download in the folder of your choice.");
         description.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
-        final Image writeFlashImage = new Image(FRONTEND_IMAGES_CUSTOM + "write_flash.gif", "combo");
+        final Button downloadFlashBackUpButton = new Button(VaadinIcon.DOWNLOAD.create());
+        downloadFlashBackUpButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+
+        final Paragraph descriptionDownloadFlashButton = new Paragraph();
+        descriptionDownloadFlashButton.getElement().setProperty(INNER_HTML, "The download button will be available if the download is completed successfully.");
+        descriptionDownloadFlashButton.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+
+        final HorizontalLayout rowDownloadFlash = new HorizontalLayout(downloadFlashBackUpButton, descriptionDownloadFlashButton);
+
+        final Image writeFlashImage = new Image(FRONTEND_IMAGES_CUSTOM + "read-flash-and-download-button.png", "read_flash");
         writeFlashImage.setWidth("90%");
+        writeFlashImage.addClassName(Top.LARGE);
         writeFlashImage.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
         Animated.animate(writeFlashImage, Animation.FADE_IN, Modifier.SLOW);
 
         Stream.of(writeFlashImage)
                 .forEach(image -> image.getStyle().setAlignSelf(AlignSelf.CENTER));
 
-        final Layout layout = new Layout(selectingTheFirmwareTitle, description, writeFlashImage);
+        final Layout layout = new Layout(selectingTheFirmwareTitle, description, rowDownloadFlash, writeFlashImage);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
 
         final Scroller scroller = new Scroller(layout);
+        scroller.setWidthFull();
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
+        scroller.getStyle().set("scrollbar-width", "thin");
 
         return scroller;
     }
@@ -518,7 +496,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         next.setText("Next");
         this.previous.setVisible(false);
         this.mainContent.removeAll();
-        this.mainContent.add(createNavWithEspLogoWelcome(), createWelcomeContent());
+        this.mainContent.add(refreshDevices());
         avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
         avatar2.addClassName(AVATAR_STEP_INACTIVE);
         avatar3.removeClassNames(AVATAR_STEP_ACTIVE);

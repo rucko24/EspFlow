@@ -55,6 +55,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
 /**
  * @author rub'n
@@ -290,7 +291,7 @@ public class SettingsDialogView extends Dialog {
         row1.setJustifyContentMode(JustifyContentMode.BETWEEN);
         row1.setAlignItems(Alignment.CENTER);
 
-        final Paragraph spanEnableInitialDialogs = new Paragraph("Enable initial dialogs");
+        final Paragraph spanEnableInitialDialogs = new Paragraph("Enable all wizards dialogs");
         spanEnableInitialDialogs.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
         final HorizontalLayout row2 = new HorizontalLayout(spanEnableInitialDialogs, toggleButtonEnableInitialDialogs);
@@ -326,11 +327,16 @@ public class SettingsDialogView extends Dialog {
      * @param value status of the wizard
      */
     private void saveStatus(final boolean value) {
-        final WizardEspDto wizardEspDto = WizardEspDto.builder()
+        final WizardEspDto wizardFlashEsp = WizardEspDto.builder()
                 .name(WIZARD_FLASHESP_VIEW)
                 .isWizardEnabled(value)
                 .build();
-        this.wizardFlashEspRepository.save(wizardEspDto);
+        this.wizardFlashEspRepository.save(wizardFlashEsp);
+        final WizardEspDto wizardReadFlash = WizardEspDto.builder()
+                .name(WIZARD_READ_FLASH_ESP_VIEW)
+                .isWizardEnabled(value)
+                .build();
+        this.wizardFlashEspRepository.save(wizardReadFlash);
     }
 
     public Component createLinks() {

@@ -16,7 +16,8 @@ import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
-import com.esp.espflow.views.flashesp.ChangeSerialPortPermissionDialog;
+import com.esp.espflow.views.dialog.ChangeSerialPortPermissionDialog;
+import com.esp.espflow.views.readflash.wizard.WizardReadFlashView;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.componentfactory.ToggleButton;
@@ -134,9 +135,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     private final Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
     /*
-     * Show initial information
+     * Show initial wizard
      */
-    private final InitialInformationReadFlashViewDialog initialInformationReadFlashViewDialog;
     private final WizardReadFlashView wizardReadFlashView;
     /*
      * To save the status of the wizards
@@ -359,7 +359,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         Stream.of(divSpanTotalDevices, divWithPortErrors)
                 .forEach(div -> {
                     div.addClassNames(Right.MEDIUM, BOX_SHADOW_VAADIN_BUTTON);
-                    div.getElement().setAttribute("theme", "badge");
+                        div.getElement().setAttribute("theme", "badge");
                 });
 
         final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);

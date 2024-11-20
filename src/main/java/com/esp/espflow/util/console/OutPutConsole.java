@@ -77,9 +77,8 @@ public class OutPutConsole extends Div {
 
         xterm.getXTerm().setId("id-for-xterm");
         xterm.getXTerm().addClassName("xterm");
-//        preserveStateAddon.writeln("esptool terminal!");
-//        preserveStateAddon.setPrompt("root@esptool $ ");
-//        preserveStateAddon.writePrompt();
+        getStyle().set("scrollbar-width", "thin");
+
         xterm.setPrompt("root@esptool $ ");
         xterm.writePrompt();
         xterm.getXTerm().getElement().setProperty("readonly", Boolean.TRUE);
@@ -88,14 +87,9 @@ public class OutPutConsole extends Div {
         xterm.getXTerm().setCopySelection(true);
 
         xterm.setCursorStyle(ITerminalOptions.CursorStyle.UNDERLINE);
-        //xterm.setUseSystemClipboard(UseSystemClipboard.READWRITE);
 
-        //xterm.addThemeVariants(TextAreaVariant.LUMO_SMALL);
-
-        //xterm.getStyle().set(OVERFLOW_Y, AUTO);
         xterm.getXTerm().getElement().setAttribute("title", "output");
         xterm.getXTerm().getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
-        //xterm.addClassName("child-text-area-console");
         xterm.focus();
         xterm.getXTerm().fit();
 
@@ -106,7 +100,7 @@ public class OutPutConsole extends Div {
 
         super.add(divTextArea);
         super.setWidthFull();
-        //TODO FIXME esto afecta al la consola en la parte de Read Flash
+
         super.addClassNames(Display.FLEX, Left.SMALL, Bottom.SMALL);
         super.getStyle().set(OVERFLOW_Y, HIDDEN);
         super.addClassName("h3-text-area-div");

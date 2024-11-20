@@ -11,6 +11,9 @@ import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -282,6 +285,16 @@ public class MainLayout extends AppLayout {
                 authenticatedUser.logout();
             });
             sigOutItem.addComponentAsFirst(SvgFactory.createIconFromSvg("signout.svg", "20px", null));
+
+            Shortcuts.addShortcutListener(userName, e -> {
+                settingsDialogView.open();
+                getUI().ifPresent(ui -> {
+                    ui.access(() -> {
+                        ui.setChildComponentModal(settingsDialogView, false);
+                    });
+                });
+            }, Key.KEY_S, KeyModifier.CONTROL, KeyModifier.ALT);
+
 
             layout.add(userMenu, settingsDialogView);
         } else {

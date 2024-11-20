@@ -1,4 +1,4 @@
-package com.esp.espflow.views.flashesp;
+package com.esp.espflow.views.flashesp.wizards;
 
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.Component;

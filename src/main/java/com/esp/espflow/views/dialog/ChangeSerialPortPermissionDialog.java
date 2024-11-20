@@ -1,4 +1,4 @@
-package com.esp.espflow.views.flashesp;
+package com.esp.espflow.views.dialog;
 
 import com.esp.espflow.entity.ChangePasswordRecordBinder;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
@@ -7,6 +7,7 @@ import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.ProcessCommandsInternals;
 import com.esp.espflow.util.svgfactory.SvgFactory;
+import com.esp.espflow.views.flashesp.DivHeaderPorts;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -155,7 +156,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
 
         final Binder<ChangePasswordRecordBinder> binder = new Binder<>();
         binder.forField(copyComboBox)
-                        .withValidator(item -> item != null && !item.isEmpty(), "Invalid port")
+                .withValidator(item -> item != null && !item.isEmpty(), "Invalid port")
                 .bind(ChangePasswordRecordBinder::port, (key, value) -> {});
         binder.forField(passwordField)
                 .withValidator(item -> item != null && !item.isEmpty(), "Invalid password")
