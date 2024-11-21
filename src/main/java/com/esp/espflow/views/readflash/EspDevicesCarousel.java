@@ -101,6 +101,7 @@ public class EspDevicesCarousel extends Div {
      * @param slide
      */
     public void addSlide(Slide slide) {
+        slide.getStyle().set("scrollbar-width","thin");
         this.slideList.add(slide);
     }
 

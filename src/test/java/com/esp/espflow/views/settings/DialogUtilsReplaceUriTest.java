@@ -52,6 +52,17 @@ class DialogUtilsReplaceUriTest {
     }
 
     @Test
+    @DisplayName("Parse uri like /#settings/notifications to create form content")
+    void parseUriToCreateTheContentFormForNotifications() {
+
+        String settings = "/#settings/notifications";
+
+        final String actual = DialogUtilsReplaceUri.INSTANCE.parseUriToCreateTheContentForm(settings);
+
+        assertThat(actual).isEqualTo("notifications");
+    }
+
+    @Test
     @DisplayName("Parseo de uri cuando es settings solo, para crear el contenido del form")
     void parseUriToCreateTheContentForm_settings_without_path() {
 

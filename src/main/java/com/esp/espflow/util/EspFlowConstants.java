@@ -103,5 +103,7 @@ public class EspFlowConstants {
     public static final String STEP1 = "step1";
     public static final String STEP2 = "step2";
     public static final String STEP3 = "step3";
+    public static final String SETTINGS = "settings";
+
 
 }

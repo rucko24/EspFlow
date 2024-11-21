@@ -17,7 +17,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Bottom;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Top;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -77,7 +76,6 @@ public class OutPutConsole extends Div {
 
         xterm.getXTerm().setId("id-for-xterm");
         xterm.getXTerm().addClassName("xterm");
-        getStyle().set("scrollbar-width", "thin");
 
         xterm.setPrompt("root@esptool $ ");
         xterm.writePrompt();
@@ -96,7 +94,7 @@ public class OutPutConsole extends Div {
         divTextArea.add(xterm.getXTerm());
         divTextArea.setId("divXterm");
         divTextArea.setSizeFull();
-        divTextArea.addClassNames(Left.LARGE, Right.LARGE, "text-area-console-div");
+        //divTextArea.addClassNames(Left.LARGE, Right.LARGE, "text-area-console-div");
 
         super.add(divTextArea);
         super.setWidthFull();

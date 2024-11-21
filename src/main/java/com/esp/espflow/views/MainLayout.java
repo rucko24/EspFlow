@@ -20,6 +20,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -50,6 +51,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import lombok.extern.log4j.Log4j2;
@@ -65,6 +68,7 @@ import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
 import static com.esp.espflow.util.EspFlowConstants.ROTATE_0_DEGREE;
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
 import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
 
@@ -137,7 +141,7 @@ public class MainLayout extends AppLayout {
         divBell.add(spanCircleRed);
 
         popover.setTarget(divBell);
-        popover.setWidth("300px");
+        popover.setWidth("340px");
         popover.addThemeVariants(PopoverVariant.ARROW, PopoverVariant.LUMO_NO_PADDING);
         popover.setPosition(PopoverPosition.BOTTOM);
         popover.setAriaLabelledBy("notifications-heading");
@@ -155,7 +159,22 @@ public class MainLayout extends AppLayout {
             Animated.removeAnimations(spanCircleRed);
         });
 
-        var headerRow = new HorizontalLayout(new H4("Notifications"), buttonMarkAllRead);
+        final Button buttonSettings = new Button(VaadinIcon.COG.create());
+        buttonSettings.setTooltipText("Open notifications settings - Ctrl+Alt+S");
+        buttonSettings.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        buttonSettings.addClickListener(event -> {
+            getUI().ifPresent(ui -> {
+                ui.getPage().fetchCurrentURL(url -> {
+                    log.info("fetchCurrentURL {}", url);
+                    String urlWithParameters = url.getPath().concat("#settings/notifications");
+                    ui.getPage().getHistory().replaceState(null, urlWithParameters);
+                    settingsDialogView.open("settings/notifications");
+                    ui.setChildComponentModal(settingsDialogView, false);
+                });
+            });
+        });
+
+        var headerRow = new HorizontalLayout(new H4("Notifications"), buttonMarkAllRead, buttonSettings);
         headerRow.addClassNames(JustifyContent.AROUND, AlignItems.CENTER);
         headerRow.getStyle().set("padding", "var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-xs)");
         popover.add(headerRow);
@@ -268,13 +287,21 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
 
-            userName.getSubMenu().addItem("Settings...", event -> {
+            final HorizontalLayout divSettings = new HorizontalLayout();
+            divSettings.setWidthFull();
+            divSettings.addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.BETWEEN);
+            final Span span = new Span("Settings...");
+            final Span shorcutSettings = new Span("Ctrl+Alt+S");
+            shorcutSettings.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+            divSettings.add(span, shorcutSettings);
+
+            userName.getSubMenu().addItem(divSettings, event -> {
                 getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
                         log.info("fetchCurrentURL {}", url);
                         String urlWithParameters = url.getPath().concat("#settings");
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
-                        settingsDialogView.open();
+                        settingsDialogView.open(SETTINGS);
                         ui.setChildComponentModal(settingsDialogView, false);
                     });
                 });
@@ -287,9 +314,12 @@ public class MainLayout extends AppLayout {
             sigOutItem.addComponentAsFirst(SvgFactory.createIconFromSvg("signout.svg", "20px", null));
 
             Shortcuts.addShortcutListener(userName, e -> {
-                settingsDialogView.open();
                 getUI().ifPresent(ui -> {
-                    ui.access(() -> {
+                    ui.getPage().fetchCurrentURL(url -> {
+                        log.info("fetchCurrentURL from shortcut {}", url);
+                        String urlWithParameters = url.getPath().concat("#settings");
+                        ui.getPage().getHistory().replaceState(null, urlWithParameters);
+                        settingsDialogView.open(SETTINGS);
                         ui.setChildComponentModal(settingsDialogView, false);
                     });
                 });

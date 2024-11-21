@@ -26,15 +26,15 @@ public class EspMessageListItemEvent extends MessageListItem {
         super.setText(operation);
         super.setTime(LocalDateTime.now().toInstant(ZoneOffset.UTC));
         super.setUserName(port);
-        this.setCustomImage();
+        super.setUserImageResource(setCustomImage());
         var colors = Arrays.asList(0, 1, 2, 3, 4, 5, 6);
         super.setUserColorIndex(colors.get(SECURE_RANDOM.nextInt(colors.size())));
     }
 
-    private void setCustomImage() {
-        final StreamResource resource = new StreamResource("usb-port-black.svg",
+    private static StreamResource setCustomImage() {
+        return new StreamResource("usb-port-black.svg",
                 () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + "usb-port-black.svg"));
-        super.setUserImageResource(resource);
+
     }
 
 }

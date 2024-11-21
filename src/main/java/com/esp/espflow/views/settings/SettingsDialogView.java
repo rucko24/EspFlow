@@ -54,6 +54,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
@@ -67,7 +68,6 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 @RequiredArgsConstructor
 public class SettingsDialogView extends Dialog {
 
-    private static final String SETTINGS = "settings";
     private static final String PASSWORD = "password";
     private static final String CONTACT_INFORMATION = "contact-information";
     private static final String PUBLIC_INFORMATION = "public-information";
@@ -90,12 +90,21 @@ public class SettingsDialogView extends Dialog {
 
     }
 
+    /**
+     *
+     * @param ref
+     */
+    public void open(final String ref) {
+        this.removeAll();
+        this.mainLayout.removeAll();
+        this.initConfiguration(ref);
+    }
+
     private void initConfiguration(String ref) {
         super.setMaxWidth("680px");
         super.setMaxHeight("500px");
         super.setHeight("500px");
         super.setHeaderTitle("Settings");
-        //super.setModal(true)
         this.setBackGroundOnClick(publicInformationButton);
         final Button closeButton = new Button(new Icon("lumo", "cross"), (event) -> {
             super.close();
@@ -119,6 +128,7 @@ public class SettingsDialogView extends Dialog {
             }
         });
 
+        super.getHeader().removeAll();
         super.getHeader().add(closeButton);
         super.setCloseOnOutsideClick(true);
 

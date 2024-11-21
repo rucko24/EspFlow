@@ -24,17 +24,15 @@ import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
-import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -210,20 +208,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         return horizontalLayoutForPrimarySection;
     }
 
-    @SuppressWarnings("unused")
-    private HorizontalLayout rowStepAvatar(final String numberStep,
-                                           final String tooltip, final H3 header) {
-        final Avatar avatar = new Avatar(numberStep);
-        Tooltip.forComponent(avatar).setText(tooltip);
-        avatar.setThemeName(AvatarVariant.LUMO_LARGE.getVariantName());
-        avatar.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        avatar.getStyle().set("background", "var(--lumo-primary-color)");
-        avatar.getStyle().set("color", "var(--lumo-primary-contrast-color)");
-        final var row = new HorizontalLayout(avatar, header);
-        row.addClassNames(AlignItems.START, JustifyContent.START);
-        return row;
-    }
-
     /**
      * This part contains the form for entering the memory addresses to be read.
      *
@@ -339,6 +323,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
         this.divWithPortErrors.setVisible(false);
         this.divWithPortErrors.getStyle().setCursor("pointer");
+        Tooltip.forComponent(divWithPortErrors).setText("Change port permissions - SPACE");
+        this.divWithPortErrors.addClickShortcut(Key.SPACE);
         this.divWithPortErrors.addClickListener(event -> this.showErroneousPortsInDialog());
 
         final ContextMenu contextMenuDivPortError = new ContextMenu();
@@ -359,7 +345,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         Stream.of(divSpanTotalDevices, divWithPortErrors)
                 .forEach(div -> {
                     div.addClassNames(Right.MEDIUM, BOX_SHADOW_VAADIN_BUTTON);
-                        div.getElement().setAttribute("theme", "badge");
+                    div.getElement().setAttribute("theme", "badge");
                 });
 
         final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);
@@ -563,7 +549,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         }
 
         try {
-            ui.access(() -> this.emitNextEvent(espDeviceWithTotalDevices.espDeviceInfo()));
+            ui.access(() -> this.emitNextEvent(espDeviceWithTotalDevices.espDeviceInfo()
+                    , " Executed flash_id successfully!!!"));
         } catch (UIDetachedException ex) {
             // Do nothing
         }
@@ -589,8 +576,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     }
 
     /**
-     * En caso de no poder leer ningun puerto serie, es decir el dispositivo no esta conectado, se deberia
-     * revisar la conexion con el puerto USB
+     * If no serial port can be read, i.e. the device is not connected, the connection to the USB port should be checked.
      *
      * <p>new CanNotBeReadDeviceException("Possibly empty ports")</`p>
      *
@@ -630,11 +616,25 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 this.divWithPortErrors.setVisible(false);
                 this.divWithPortErrors.removeAll();
             } else {
-                ConfirmDialogBuilder.showWarning("Port`s with error: " +
-                        spanErrorPortList.stream()
-                                .map(HasText::getText)
-                                .distinct()
-                                .collect(Collectors.joining(",")));
+
+                final String errorPorts = spanErrorPortList.stream()
+                        .map(HasText::getText)
+                        .distinct()
+                        .collect(Collectors.joining(","));
+
+                ConfirmDialogBuilder.showWarning("Port`s with error: " + errorPorts);
+
+                spanErrorPortList
+                        .stream()
+                        .map(HasText::getText)
+                        .forEach(port -> {
+
+                            final EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(
+                                    "This chip cannot be parsed executed flash_id failed.", port);
+                            this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
+
+                        });
+
             }
             if (paramEspDevicesCarousel.getSlideList().isEmpty()) {
                 this.setDivCarouselNoDevicesShown();
@@ -656,9 +656,10 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      *
      * @param espDeviceInfo
      */
-    public void emitNextEvent(final EspDeviceInfo espDeviceInfo) {
+    public void emitNextEvent(final EspDeviceInfo espDeviceInfo, String concatResultMessage) {
 
-        EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(espDeviceInfo.chipIs().concat(" Executed flash_id successfully!!!"),
+        EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(espDeviceInfo.chipIs()
+                .concat(concatResultMessage),
                 espDeviceInfo.port());
 
         this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);

@@ -1,8 +1,10 @@
 package com.esp.espflow.generator;
 
 import com.esp.espflow.entity.User;
+import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.enums.Role;
 import com.esp.espflow.service.respository.UserRepository;
+import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,12 +14,35 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_AVATAR_USER;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
 @SpringComponent
 public class DataGenerator {
+
+    @Bean
+    public CommandLineRunner loadSettings(final WizardEspService service) {
+        return (arg) -> {
+
+            var wizardReadFlashView = WizardEspDto.builder()
+                    .name(WIZARD_READ_FLASH_ESP_VIEW)
+                    .isWizardEnabled(true)
+                    .build();
+
+            var wizardFlashView = WizardEspDto.builder()
+                    .name(WIZARD_FLASHESP_VIEW)
+                    .isWizardEnabled(true)
+                    .build();
+
+            service.saveAll(List.of(wizardReadFlashView, wizardFlashView));
+
+        };
+    }
+
 
     @Bean
     public CommandLineRunner loadData(PasswordEncoder passwordEncoder, UserRepository userRepository,

@@ -27,5 +27,5 @@ vaadin-menu-bar-item::part(checkmark)::before {
 vaadin-menu-bar-item {
   padding-left: var(--lumo-space-s);
   justify-content: flex-start;
-  width: 200px;
+  width: 240px;
 }

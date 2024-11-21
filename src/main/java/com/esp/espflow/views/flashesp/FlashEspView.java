@@ -76,6 +76,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
+//@PreserveOnRefresh
 public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
     private final DivFlashUploader divFlashUploader;
