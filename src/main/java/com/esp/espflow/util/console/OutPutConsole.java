@@ -46,7 +46,6 @@ public class OutPutConsole extends Div {
     public OutPutConsole() {
 
         this.createDivLeftMenuItems();
-        this.getConsole();
 
     }
 
@@ -88,7 +87,6 @@ public class OutPutConsole extends Div {
 
         xterm.getXTerm().getElement().setAttribute("title", "output");
         xterm.getXTerm().getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
-        xterm.focus();
         xterm.getXTerm().fit();
 
         divTextArea.add(xterm.getXTerm());
@@ -198,8 +196,7 @@ public class OutPutConsole extends Div {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
-            this.xterm.getXTerm().fit();
-            this.xterm.focus();
+            this.getConsole();
         }
     }
 }
