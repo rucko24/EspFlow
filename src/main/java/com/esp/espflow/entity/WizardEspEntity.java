@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "wizard_flashesp")
+@Table(name = "wizards_dialogs")
 public class WizardEspEntity {
 
     @Id
@@ -17,6 +17,7 @@ public class WizardEspEntity {
     private Long id;
 
     private boolean isWizardEnabled;
+
     private String name;
 
 }

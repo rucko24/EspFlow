@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * @author rub'n
@@ -23,27 +25,30 @@ public class WizardEspService {
     private final WizardEspRepository wizardEspRepository;
 
     /**
-     *
      * From the initial configuration
      *
      * @param wizardEspDto list
      */
     public void saveAll(List<WizardEspDto> wizardEspDto) {
-        wizardEspDto.forEach(this::save);
+        Stream.of(wizardEspDto)
+                .flatMap(Collection::stream)
+                .map(WizardEspMapper.INSTANCE::dtoToEntity)
+                .peek(entity -> log.info("initial load entity saved {}", entity))
+                .forEach(this.wizardEspRepository::save);
     }
 
     /**
-     * Saves the wizar entity or updates it if it exists
+     * Saves the wizard entity or updates it if it exists
      *
      * @param wizardEspDto
      */
     public void save(WizardEspDto wizardEspDto) {
         var entity = WizardEspMapper.INSTANCE.dtoToEntity(wizardEspDto);
-        this.wizardEspRepository.findByName(entity.getName())
-                .ifPresentOrElse(currentEntity -> {
-                    currentEntity.setWizardEnabled(entity.isWizardEnabled());
-                    wizardEspRepository.save(currentEntity);
-                    log.info("Entity updated {}", currentEntity);
+        this.wizardEspRepository.findById(entity.getId())
+                .ifPresentOrElse(entityIfPresent -> {
+                    entityIfPresent.setWizardEnabled(entity.isWizardEnabled());
+                    wizardEspRepository.save(entityIfPresent);
+                    log.info("Entity updated {}", entityIfPresent);
                 }, () -> {
                     wizardEspRepository.save(entity);
                     log.info("Entity saved {}", entity);
@@ -51,15 +56,22 @@ public class WizardEspService {
     }
 
     /**
-     *
      * @param name of this Wizard
-     *
-     * @return A {@link Optional< WizardEspEntity >}
+     * @return A {@link WizardEspEntity}
      */
     @Transactional
-    public Optional<WizardEspDto> findWizardFlashEsp(String name) {
+    public Optional<WizardEspDto> findByName(String name) {
         return this.wizardEspRepository.findByName(name)
                 .map(WizardEspMapper.INSTANCE::entityToDto);
+    }
+
+    /**
+     * Count the wizards with the isWizardEnabled field to true
+     *
+     * @return A {boolean}
+     */
+    public boolean areAllWizardsEnabled() {
+        return this.wizardEspRepository.areAllWizardsEnabled() == this.wizardEspRepository.count();
     }
 
 }

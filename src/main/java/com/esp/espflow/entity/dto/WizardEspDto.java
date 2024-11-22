@@ -6,4 +6,4 @@ import lombok.Builder;
  * @author rub'n
  */
 @Builder
-public record WizardEspDto(boolean isWizardEnabled, String name) {}
+public record WizardEspDto(Long id, boolean isWizardEnabled, String name) {}

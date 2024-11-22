@@ -23,7 +23,6 @@ html {
     --lumo-space-xs: 0.1875rem;
     --lumo-body-text-color: hsla(214, 0%, 0%, 0.94);
     --lumo-font-family: 'Arimo', sans-serif;
-    scrollbar-width: thin;
 }
 
 [theme~="dark"] {
@@ -280,3 +279,4 @@ html {
 .xterm {
     height: 100%;
 }
+

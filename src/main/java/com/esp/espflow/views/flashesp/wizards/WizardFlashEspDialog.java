@@ -64,7 +64,7 @@ import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 import static com.esp.espflow.util.EspFlowConstants.STEP1;
 import static com.esp.espflow.util.EspFlowConstants.STEP2;
 import static com.esp.espflow.util.EspFlowConstants.STEP3;
-import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 
 /**
  * Wizard to show the steps for flash_id and write_flash process
@@ -272,11 +272,15 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
         hideButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         hideButton.getStyle().set("margin-right", "auto");
         hideButton.addClickListener(event -> {
-            final WizardEspDto wizardEspDto = WizardEspDto.builder()
-                    .isWizardEnabled(false)
-                    .name(WIZARD_FLASHESP_VIEW)
-                    .build();
-            this.wizardEspService.save(wizardEspDto);
+            this.wizardEspService.findByName(WIZARD_FLASH_ESP_VIEW)
+                    .ifPresent(entityPresent -> {
+                        final WizardEspDto wizardEspDto = WizardEspDto.builder()
+                                .id(entityPresent.id())
+                                .isWizardEnabled(false)
+                                .name(WIZARD_FLASH_ESP_VIEW)
+                                .build();
+                        this.wizardEspService.save(wizardEspDto);
+                    });
             super.close();
         });
         super.getFooter().add(hideButton);

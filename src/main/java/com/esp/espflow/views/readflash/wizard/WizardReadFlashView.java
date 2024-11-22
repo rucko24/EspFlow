@@ -272,11 +272,15 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         hideButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         hideButton.getStyle().set("margin-right", "auto");
         hideButton.addClickListener(event -> {
-            final WizardEspDto wizardEspDto = WizardEspDto.builder()
-                    .isWizardEnabled(false)
-                    .name(WIZARD_READ_FLASH_ESP_VIEW)
-                    .build();
-            this.wizardEspService.save(wizardEspDto);
+            this.wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
+                    .ifPresent(entityPresent -> {
+                        final WizardEspDto wizardEspDto = WizardEspDto.builder()
+                                .id(entityPresent.id())
+                                .isWizardEnabled(false)
+                                .name(WIZARD_READ_FLASH_ESP_VIEW)
+                                .build();
+                        this.wizardEspService.save(wizardEspDto);
+                    });
             super.close();
         });
         super.getFooter().add(hideButton);

@@ -62,8 +62,9 @@ import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT;
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
-import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 
 /**
  * @author rubn
@@ -398,16 +399,16 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                         "}"
         ).then(String.class, hash -> {
             log.info("Fragmento de URI: {}", hash);
-            if (Objects.nonNull(hash) && !hash.contains("settings")) {
+            if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
                 this.add(this.wizardFlashEspDialog);
                 this.wizardFlashEspDialog.open();
             } else {
                 ui.getPage().fetchCurrentURL(url -> {
                     final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
-                    if (!ref.contains("settings")) {
+                    if (!ref.contains(SETTINGS)) {
                         this.add(this.wizardFlashEspDialog);
-                        this.wizardFlashEspRepository.findWizardFlashEsp(WIZARD_FLASHESP_VIEW)
-                                .ifPresent((hide) -> {
+                        this.wizardFlashEspRepository.findByName(WIZARD_FLASH_ESP_VIEW)
+                                .ifPresent(hide -> {
                                     if (hide.isWizardEnabled()) {
                                         this.wizardFlashEspDialog.open();
                                     }

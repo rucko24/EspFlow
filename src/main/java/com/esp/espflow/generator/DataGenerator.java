@@ -18,23 +18,28 @@ import java.util.List;
 import java.util.Set;
 
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_AVATAR_USER;
-import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
+/**
+ * initial configuration
+ */
 @SpringComponent
 public class DataGenerator {
 
     @Bean
     public CommandLineRunner loadSettings(final WizardEspService service) {
-        return (arg) -> {
+        return args -> {
 
             var wizardReadFlashView = WizardEspDto.builder()
+                    .id(1L)
                     .name(WIZARD_READ_FLASH_ESP_VIEW)
                     .isWizardEnabled(true)
                     .build();
 
             var wizardFlashView = WizardEspDto.builder()
-                    .name(WIZARD_FLASHESP_VIEW)
+                    .id(2L)
+                    .name(WIZARD_FLASH_ESP_VIEW)
                     .isWizardEnabled(true)
                     .build();
 

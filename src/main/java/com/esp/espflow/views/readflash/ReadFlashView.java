@@ -77,12 +77,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.HIDDEN;
 import static com.esp.espflow.util.EspFlowConstants.LOADING;
 import static com.esp.espflow.util.EspFlowConstants.NO_DEVICES_SHOWN;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
 /**
@@ -322,7 +324,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         final Div divSpanTotalDevices = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
 
         this.divWithPortErrors.setVisible(false);
-        this.divWithPortErrors.getStyle().setCursor("pointer");
+        this.divWithPortErrors.getStyle().setCursor(CURSOR_POINTER);
         Tooltip.forComponent(divWithPortErrors).setText("Change port permissions - SPACE");
         this.divWithPortErrors.addClickShortcut(Key.SPACE);
         this.divWithPortErrors.addClickListener(event -> this.showErroneousPortsInDialog());
@@ -338,7 +340,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 event -> this.showErroneousPortsInDialog()).setCheckable(true);
 
         spanPortFailure.addClassName(Left.SMALL);
-        spanPortFailure.getStyle().setCursor("pointer");
+        spanPortFailure.getStyle().setCursor(CURSOR_POINTER);
         this.divWithPortErrors.add(spanPortFailure);
         divWithPortErrors.getStyle().set("color", "red");
 
@@ -687,7 +689,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             super.onAttach(attachEvent);
             final UI ui = attachEvent.getUI();
@@ -708,16 +709,16 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                         "}"
         ).then(String.class, hash -> {
             log.info("Fragmento de URI: {}", hash);
-            if (Objects.nonNull(hash) && !hash.contains("settings")) {
+            if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
                 this.add(this.wizardReadFlashView);
                 this.wizardReadFlashView.open();
             } else {
                 ui.getPage().fetchCurrentURL(url -> {
                     final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
-                    if (!ref.contains("settings")) {
+                    if (!ref.contains(SETTINGS)) {
                         this.add(this.wizardReadFlashView);
-                        this.wizardEspService.findWizardFlashEsp(WIZARD_READ_FLASH_ESP_VIEW)
-                                .ifPresent((hide) -> {
+                        this.wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
+                                .ifPresent(hide -> {
                                     if (hide.isWizardEnabled()) {
                                         this.wizardReadFlashView.open();
                                     }

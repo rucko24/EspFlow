@@ -95,7 +95,7 @@ public class EspFlowConstants {
     /*
      * for wizard
      */
-    public static final String WIZARD_FLASHESP_VIEW = "wizardFlashEspView";
+    public static final String WIZARD_FLASH_ESP_VIEW = "wizardFlashEspView";
     public static final String WIZARD_READ_FLASH_ESP_VIEW = "wizardReadFlashEspView";
     public static final String INNER_HTML = "innerHTML";
     public static final String AVATAR_STEP_ACTIVE = "avatar-step-active";

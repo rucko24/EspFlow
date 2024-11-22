@@ -10,11 +10,11 @@ public class WizardEspMapper {
 
     public static final WizardEspMapper INSTANCE = new WizardEspMapper();
 
-    private WizardEspMapper() {
-    }
+    private WizardEspMapper() {}
 
     public WizardEspEntity dtoToEntity(final WizardEspDto dto) {
         final WizardEspEntity entity = new WizardEspEntity();
+        entity.setId(dto.id());
         entity.setName(dto.name());
         entity.setWizardEnabled(dto.isWizardEnabled());
         return entity;
@@ -22,6 +22,7 @@ public class WizardEspMapper {
 
     public WizardEspDto entityToDto(final WizardEspEntity entity) {
         return WizardEspDto.builder()
+                .id(entity.getId())
                 .name(entity.getName())
                 .isWizardEnabled(entity.isWizardEnabled())
                 .build();

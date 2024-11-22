@@ -3,6 +3,7 @@ package com.esp.espflow.views.settings;
 import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.enums.Breakpoint;
 import com.esp.espflow.service.respository.impl.WizardEspService;
+import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
 import com.vaadin.componentfactory.ToggleButton;
@@ -55,7 +56,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
-import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASHESP_VIEW;
+import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
 /**
@@ -81,8 +82,6 @@ public class SettingsDialogView extends Dialog {
     private final Button notificationsButton = new Button("Notifications");
 
     private final Layout mainLayout = new Layout();
-    private final ToggleButton toggleButtonEnableInitialDialogs = new ToggleButton();
-    private final ToggleButton toggleButtonNotifications = new ToggleButton();
     private final WizardEspService wizardFlashEspRepository;
 
     @PostConstruct
@@ -91,7 +90,50 @@ public class SettingsDialogView extends Dialog {
     }
 
     /**
-     *
+     * We invoke them within the onAttach, to correctly create the component.
+     */
+    private void initListeners() {
+        notificationsButton.setPrefixComponent(SvgFactory.createIconFromSvg("bell.svg", SIZE, null));
+        notificationsButton.addClickListener(event -> {
+            this.mainLayout.removeAll();
+            this.mainLayout.add(this.createNotifications());
+            this.setBackGroundOnClick(notificationsButton);
+            this.updateFragment(NOTIFICATION);
+        });
+        publicInformationButton.setPrefixComponent(VaadinIcon.INFO.create());
+        publicInformationButton.addClickListener(event -> {
+            this.mainLayout.removeAll();
+            this.mainLayout.add(createPublicInformation());
+            this.setBackGroundOnClick(publicInformationButton);
+            this.updateFragment(PUBLIC_INFORMATION);
+        });
+        contactInformationButton.setPrefixComponent(VaadinIcon.ARCHIVE.create());
+        contactInformationButton.addClickListener(event -> {
+            this.mainLayout.removeAll();
+            this.mainLayout.add(createContactInformation());
+            this.setBackGroundOnClick(contactInformationButton);
+            this.updateFragment(CONTACT_INFORMATION);
+        });
+        passwordButton.setPrefixComponent(VaadinIcon.PASSWORD.create());
+        passwordButton.addClickListener(event -> {
+            this.mainLayout.removeAll();
+            this.mainLayout.add(createPassword());
+            this.setBackGroundOnClick(passwordButton);
+            this.updateFragment(PASSWORD);
+        });
+    }
+
+    private void updateFragment(String contentName) {
+        getUI().ifPresent(ui -> {
+            ui.getPage().fetchCurrentURL(url -> {
+                String ref = StringUtils.defaultString(url.getRef());
+                final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, contentName);
+                ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
+            });
+        });
+    }
+
+    /**
      * @param ref
      */
     public void open(final String ref) {
@@ -293,152 +335,144 @@ public class SettingsDialogView extends Dialog {
 
         final Span pushNotifications = new Span("Push notifications");
 
-        final Paragraph spanEnableAllNotifications = new Paragraph("Enable all notifications");
-        spanEnableAllNotifications.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        final Paragraph paragraphEnableAllNotifications = new Paragraph("Enable notifications in bell");
 
-        final HorizontalLayout row1 = new HorizontalLayout(spanEnableAllNotifications, toggleButtonNotifications);
+        paragraphEnableAllNotifications.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        final ToggleButton toggleButtonNotifications = new ToggleButton();
+        final HorizontalLayout row1 = new HorizontalLayout(paragraphEnableAllNotifications, toggleButtonNotifications);
         row1.setWidthFull();
         row1.setJustifyContentMode(JustifyContentMode.BETWEEN);
         row1.setAlignItems(Alignment.CENTER);
 
-        final Paragraph spanEnableInitialDialogs = new Paragraph("Enable all wizards dialogs");
-        spanEnableInitialDialogs.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        final Paragraph paragraphEnableAllWizards = new Paragraph("Enable all wizards dialogs");
+        paragraphEnableAllWizards.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
-        final HorizontalLayout row2 = new HorizontalLayout(spanEnableInitialDialogs, toggleButtonEnableInitialDialogs);
-        row2.setWidthFull();
-        row2.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        row2.setAlignItems(Alignment.CENTER);
+        final ToggleButton toggleButtonEnableAllWizards = new ToggleButton();
+        final ToggleButton toggleButtonFlashEsp = new ToggleButton();
+        final ToggleButton toggleButtonReadFlashEsp = new ToggleButton();
 
-        this.toggleButtonEnableInitialDialogs.addValueChangeListener(event -> {
-           if(event.getValue()) {
-               this.saveStatus(event.getValue());
-           } else {
-               this.saveStatus(event.getValue());
-           }
+        toggleButtonEnableAllWizards.addValueChangeListener(event -> {
+            if (event.getValue()) {
+                this.updateAllWizardStatus(event.getValue());
+                toggleButtonFlashEsp.setValue(true);
+                toggleButtonReadFlashEsp.setValue(true);
+            } else {
+                this.updateAllWizardStatus(event.getValue());
+                toggleButtonFlashEsp.setValue(false);
+                toggleButtonReadFlashEsp.setValue(false);
+            }
+        });
+        final HorizontalLayout rowEnableInitialWizardsDialogs = new HorizontalLayout(paragraphEnableAllWizards, toggleButtonEnableAllWizards);
+        rowEnableInitialWizardsDialogs.setWidthFull();
+        rowEnableInitialWizardsDialogs.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        rowEnableInitialWizardsDialogs.setAlignItems(Alignment.CENTER);
+
+        final Paragraph spanEnableWizardFlashEsp = new Paragraph("Enable wizard Flash Esp32-ESP8266 view");
+        spanEnableWizardFlashEsp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        toggleButtonFlashEsp.addValueChangeListener(event -> {
+            if(event.getValue()) {
+                updateWizardView(WIZARD_FLASH_ESP_VIEW, true);
+            } else {
+                updateWizardView(WIZARD_FLASH_ESP_VIEW, false);
+            }
+        });
+        final Paragraph spanEnableWizardReadFlashEsp = new Paragraph("Enable wizard Read flash/firmware view");
+        spanEnableWizardReadFlashEsp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        toggleButtonReadFlashEsp.addValueChangeListener(event -> {
+            if(event.getValue()) {
+                updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, true);
+            } else {
+                updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, false);
+            }
         });
 
-        this.wizardFlashEspRepository.findWizardFlashEsp(WIZARD_FLASHESP_VIEW)
-                .ifPresent(hideButtom -> {
-                    toggleButtonEnableInitialDialogs.setValue(hideButtom.isWizardEnabled());
-                });
+        final HorizontalLayout rowWizardFlashView = new HorizontalLayout(spanEnableWizardFlashEsp, toggleButtonFlashEsp);
+        rowWizardFlashView.setWidthFull();
+        rowWizardFlashView.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        rowWizardFlashView.setAlignItems(Alignment.CENTER);
 
-        final VerticalLayout verticalLayout = new VerticalLayout(row1, new Hr(), row2);
+        final HorizontalLayout rowWizardReadFlashView = new HorizontalLayout(spanEnableWizardReadFlashEsp, toggleButtonReadFlashEsp);
+        rowWizardReadFlashView.setWidthFull();
+        rowWizardReadFlashView.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        rowWizardReadFlashView.setAlignItems(Alignment.CENTER);
+
+        final VerticalLayout verticalLayout = new VerticalLayout(row1, new Hr(), rowEnableInitialWizardsDialogs,
+                new Hr(), rowWizardFlashView, new Hr(), rowWizardReadFlashView);
         verticalLayout.setPadding(false);
         verticalLayout.setSpacing(false);
         verticalLayout.getStyle().setOverflow(Overflow.HIDDEN);
 
         final Layout layout = new Layout(title, description, pushNotifications, verticalLayout);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
-        return new Scroller(layout);
+
+        if(this.wizardFlashEspRepository.areAllWizardsEnabled()) {
+            log.info("Count all wizard enable {}", this.wizardFlashEspRepository.areAllWizardsEnabled());
+            toggleButtonEnableAllWizards.setValue(true);
+            toggleButtonFlashEsp.setValue(true);
+            toggleButtonReadFlashEsp.setValue(true);
+        }
+
+        this.wizardFlashEspRepository.findByName(WIZARD_FLASH_ESP_VIEW)
+                .ifPresent(entityIfPresent -> {
+                    log.info("wizardFlashEspView {}", entityIfPresent);
+                    toggleButtonFlashEsp.setValue(entityIfPresent.isWizardEnabled());
+                });
+
+        this.wizardFlashEspRepository.findByName(WIZARD_READ_FLASH_ESP_VIEW)
+                .ifPresent(entityIfPresent -> {
+                    log.info("wizardReadFlashEspView {}", entityIfPresent);
+                    toggleButtonReadFlashEsp.setValue(entityIfPresent.isWizardEnabled());
+                });
+
+        final Scroller scroller = new Scroller(layout);
+        scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
+        scroller.getStyle().set("scrollbar-width", "thin");
+        return scroller;
     }
 
     /**
-     *
      * @param value status of the wizard
      */
-    private void saveStatus(final boolean value) {
-        final WizardEspDto wizardFlashEsp = WizardEspDto.builder()
-                .name(WIZARD_FLASHESP_VIEW)
-                .isWizardEnabled(value)
-                .build();
-        this.wizardFlashEspRepository.save(wizardFlashEsp);
-        final WizardEspDto wizardReadFlash = WizardEspDto.builder()
-                .name(WIZARD_READ_FLASH_ESP_VIEW)
-                .isWizardEnabled(value)
-                .build();
-        this.wizardFlashEspRepository.save(wizardReadFlash);
+    private void updateAllWizardStatus(final boolean value) {
+
+        this.wizardFlashEspRepository.findByName(WIZARD_FLASH_ESP_VIEW)
+                .ifPresent(entityIfPresent -> {
+                    final WizardEspDto wizardFlashEsp = WizardEspDto.builder()
+                            .id(entityIfPresent.id())
+                            .name(WIZARD_FLASH_ESP_VIEW)
+                            .isWizardEnabled(value)
+                            .build();
+                    this.wizardFlashEspRepository.save(wizardFlashEsp);
+                });
+
+        this.wizardFlashEspRepository.findByName(WIZARD_READ_FLASH_ESP_VIEW)
+                .ifPresent(entityIfPresent -> {
+                    final WizardEspDto wizardReadFlash = WizardEspDto.builder()
+                            .id(entityIfPresent.id())
+                            .name(WIZARD_READ_FLASH_ESP_VIEW)
+                            .isWizardEnabled(value)
+                            .build();
+                    this.wizardFlashEspRepository.save(wizardReadFlash);
+                });
+    }
+
+    private void updateWizardView(final String viewName, final boolean value) {
+        this.wizardFlashEspRepository.findByName(viewName)
+                .ifPresent(entityIfPresent -> {
+                    final WizardEspDto wizardFlashEsp = WizardEspDto.builder()
+                            .id(entityIfPresent.id())
+                            .name(viewName)
+                            .isWizardEnabled(value)
+                            .build();
+                    this.wizardFlashEspRepository.save(wizardFlashEsp);
+                });
     }
 
     public Component createLinks() {
-        publicInformationButton.setPrefixComponent(VaadinIcon.INFO.create());
-        publicInformationButton.addClickListener(event -> {
-            this.mainLayout.removeAll();
-            this.mainLayout.add(createPublicInformation());
-
-            this.setBackGroundOnClick(publicInformationButton);
-
-            getUI().ifPresent(ui -> {
-                ui.getPage().fetchCurrentURL(url -> {
-
-                    String ref = StringUtils.defaultString(url.getRef());
-
-                    final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, PUBLIC_INFORMATION);
-
-                    ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
-
-                });
-            });
-
-        });
-
-        contactInformationButton.setPrefixComponent(VaadinIcon.ARCHIVE.create());
-        contactInformationButton.addClickListener(event -> {
-            this.mainLayout.removeAll();
-            this.mainLayout.add(createContactInformation());
-
-            this.setBackGroundOnClick(contactInformationButton);
-
-            getUI().ifPresent(ui -> {
-                ui.getPage().fetchCurrentURL(url -> {
-
-                    String ref = StringUtils.defaultString(url.getRef());
-
-                    final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, CONTACT_INFORMATION);
-
-                    ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
-
-                });
-            });
-
-        });
-
-        passwordButton.setPrefixComponent(VaadinIcon.PASSWORD.create());
-        passwordButton.addClickListener(event -> {
-            this.mainLayout.removeAll();
-            this.mainLayout.add(createPassword());
-
-            this.setBackGroundOnClick(passwordButton);
-
-            getUI().ifPresent(ui -> {
-                ui.getPage().fetchCurrentURL(url -> {
-
-                    String ref = StringUtils.defaultString(url.getRef());
-
-                    final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, PASSWORD);
-
-                    ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
-
-                });
-            });
-
-        });
-
-        notificationsButton.setPrefixComponent(SvgFactory
-                .createIconFromSvg("bell.svg", SIZE, null));
-
-        notificationsButton.addClickListener(event -> {
-            this.mainLayout.removeAll();
-            this.mainLayout.add(new Scroller(createNotifications()));
-
-            this.setBackGroundOnClick(notificationsButton);
-
-            getUI().ifPresent(ui -> {
-                ui.getPage().fetchCurrentURL(url -> {
-
-                    String ref = StringUtils.defaultString(url.getRef());
-
-                    final String pathWithUrlParameters = DialogUtilsReplaceUri.INSTANCE.replaceOrConcatFragment(url.getPath(), ref, NOTIFICATION);
-
-                    ui.getPage().getHistory().replaceState(null, pathWithUrlParameters);
-
-                });
-            });
-
-        });
 
         Stream.of(notificationsButton, passwordButton, publicInformationButton, contactInformationButton, updates)
                 .forEach(button -> {
-                    button.getStyle().setCursor("pointer");
+                    button.getStyle().setCursor(EspFlowConstants.CURSOR_POINTER);
                     button.addClassNames("settings-buttons");
                     button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 });
@@ -487,6 +521,7 @@ public class SettingsDialogView extends Dialog {
                 log.info("onAttach {}", url.getPath());
                 String ref = url.getRef();
                 this.initConfiguration(ref);
+                this.initListeners();
             });
         }
     }
