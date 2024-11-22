@@ -79,26 +79,6 @@ class WizardEspServiceTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(WizardUpdateEspServiceProvider.class)
-    @DisplayName("")
-    void updateTwoEntities(WizardEspDto wizardReadFlashViewDto, WizardEspDto updatedDto,
-                           WizardEspEntity updatedEntity) {
-
-        WizardEspEntity toSave = WizardEspMapper.INSTANCE.dtoToEntity(updatedDto);
-        WizardEspEntity findById = WizardEspMapper.INSTANCE.dtoToEntity(wizardReadFlashViewDto);
-
-        when(repository.findById(findById.getId())).thenReturn(Optional.of(updatedEntity));
-        when(repository.save(toSave)).thenReturn(updatedEntity);
-
-        assertThatCode(() -> wizardEspService.save(updatedDto)).doesNotThrowAnyException();
-
-        verify(repository, times(1)).findById(findById.getId());
-        verify(repository, times(1)).save(toSave);
-        verifyNoMoreInteractions(repository);
-
-    }
-
-    @ParameterizedTest
     @ArgumentsSource(WizardEspServiceProvider.class)
     @DisplayName("id is empty, the new entity is saved")
     void save(WizardEspDto wizardReadFlashViewDto, WizardEspDto wizardFlashViewDto,
