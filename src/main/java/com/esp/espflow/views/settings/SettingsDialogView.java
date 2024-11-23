@@ -193,31 +193,32 @@ public class SettingsDialogView extends Dialog {
 
         switch (newLocation) {
             case PUBLIC_INFORMATION -> {
-                this.mainLayout.add(createPublicInformation());
+                this.mainLayout.add(this.createPublicInformation());
+                this.setBackGroundOnClick(publicInformationButton);
                 super.open();
             }
             case CONTACT_INFORMATION -> {
-                this.mainLayout.add(createContactInformation());
+                this.mainLayout.add(this.createContactInformation());
                 this.setBackGroundOnClick(contactInformationButton);
                 super.open();
             }
             case PASSWORD -> {
-                this.mainLayout.add(createPassword());
+                this.mainLayout.add(this.createPassword());
                 this.setBackGroundOnClick(passwordButton);
                 super.open();
             }
             case NOTIFICATION -> {
-                this.mainLayout.add(createNotifications());
+                this.mainLayout.add(this.createNotifications());
                 this.setBackGroundOnClick(notificationsButton);
                 super.open();
             }
             case SETTINGS -> {
-                this.mainLayout.add(createPublicInformation());
+                this.mainLayout.add(this.createPublicInformation());
                 this.setBackGroundOnClick(publicInformationButton);
                 super.open();
             }
             case StringUtils.EMPTY -> {
-                this.mainLayout.add(createPublicInformation());
+                this.mainLayout.add(this.createPublicInformation());
                 this.setBackGroundOnClick(publicInformationButton);
             }
             default -> {
@@ -326,23 +327,24 @@ public class SettingsDialogView extends Dialog {
         title.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
         title.setId(title.getText().replace(" ", "-").toLowerCase());
 
-        Paragraph description = new Paragraph("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+        Paragraph description = new Paragraph("Enable and disable push notifications to the top right panel, as well as the wizards.");
         description.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
         CheckboxGroup<String> emailNotifications = new CheckboxGroup<>("Email notifications");
         emailNotifications.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
         emailNotifications.setItems("Newsletters", "Promotional offers", "Account updates", "New messages or activities", "Events or upcoming appointments");
 
-        final Span pushNotifications = new Span("Push notifications");
+        final Span spanWizardsNotifications = new Span("Wizards notifications");
 
         final Paragraph paragraphEnableAllNotifications = new Paragraph("Enable notifications in bell");
 
         paragraphEnableAllNotifications.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         final ToggleButton toggleButtonNotifications = new ToggleButton();
-        final HorizontalLayout row1 = new HorizontalLayout(paragraphEnableAllNotifications, toggleButtonNotifications);
-        row1.setWidthFull();
-        row1.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        row1.setAlignItems(Alignment.CENTER);
+        final HorizontalLayout rowPushNotificationsBell = new HorizontalLayout(paragraphEnableAllNotifications, toggleButtonNotifications);
+        rowPushNotificationsBell.setWidthFull();
+        rowPushNotificationsBell.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        rowPushNotificationsBell.setAlignItems(Alignment.CENTER);
+        rowPushNotificationsBell.setVisible(false);
 
         final Paragraph paragraphEnableAllWizards = new Paragraph("Enable all wizards dialogs");
         paragraphEnableAllWizards.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
@@ -396,13 +398,13 @@ public class SettingsDialogView extends Dialog {
         rowWizardReadFlashView.setJustifyContentMode(JustifyContentMode.BETWEEN);
         rowWizardReadFlashView.setAlignItems(Alignment.CENTER);
 
-        final VerticalLayout verticalLayout = new VerticalLayout(row1, new Hr(), rowEnableInitialWizardsDialogs,
+        final VerticalLayout verticalLayout = new VerticalLayout(rowPushNotificationsBell, new Hr(), rowEnableInitialWizardsDialogs,
                 new Hr(), rowWizardFlashView, new Hr(), rowWizardReadFlashView);
         verticalLayout.setPadding(false);
         verticalLayout.setSpacing(false);
         verticalLayout.getStyle().setOverflow(Overflow.HIDDEN);
 
-        final Layout layout = new Layout(title, description, pushNotifications, verticalLayout);
+        final Layout layout = new Layout(title, description, spanWizardsNotifications, verticalLayout);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
 
         if(this.wizardFlashEspRepository.areAllWizardsEnabled()) {
@@ -425,6 +427,7 @@ public class SettingsDialogView extends Dialog {
                 });
 
         final Scroller scroller = new Scroller(layout);
+        scroller.setWidthFull();
         scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
         scroller.getStyle().set("scrollbar-width", "thin");
         return scroller;

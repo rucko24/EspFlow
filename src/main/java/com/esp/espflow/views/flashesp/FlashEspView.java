@@ -150,7 +150,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                 divRowFlashMode, divRowEraseFlash, divRowUploaderFlash,
                 buttonFlash);
         contentForPrimary.addClassName("vertical-parent");
-        contentForPrimary.getStyle().set("scrollbar-width","thin");
         splitLayout.addToPrimary(contentForPrimary);
         /*
          * Secondary section
@@ -193,8 +192,9 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         splitLayout.getSecondaryComponent().getElement().getStyle().set(
                 "background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
 
-        splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-width", "thin");
         splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-color", "#3b3b3b #202020");
+
+        splitLayout.addClickListener(event -> this.outPutConsole.fit());
 
         return splitLayout;
     }

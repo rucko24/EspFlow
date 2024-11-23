@@ -280,3 +280,15 @@ html {
     height: 100%;
 }
 
+.xterm .xterm-viewport {
+    scrollbar-width: thin;
+}
+
+vaadin-split-layout > [slot="primary"] {
+    scrollbar-width: thin;
+}
+
+vaadin-split-layout > [slot="secondary"] {
+    scrollbar-width: thin;
+}
+

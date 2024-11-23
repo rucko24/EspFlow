@@ -13,9 +13,10 @@ spring:
     restart:
       poll-interval: 2s
       quiet-period: 1s
-  h2:
-    console:
-      enabled: true
+  #h2:
+  #  console:
+  #    enabled: true
+  #    path: /h2-console
 #
 vaadin:
   # To improve the performance during development.
@@ -25,6 +26,8 @@ vaadin:
   launch-browser: true
   frontend:
     hotdeploy: true
+  copilot:
+    enable: false
 
 login:
   access-name: ${ADMIN_ESPFLOW_USER}
