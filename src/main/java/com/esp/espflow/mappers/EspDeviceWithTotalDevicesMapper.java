@@ -1,7 +1,7 @@
 package com.esp.espflow.mappers;
 
-import com.esp.espflow.entity.EspDeviceInfo;
-import com.esp.espflow.entity.EspDeviceWithTotalDevices;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
+import com.esp.espflow.entity.EspDeviceWithTotalDevicesRecord;
 
 /**
  * @author rubn
@@ -14,15 +14,15 @@ public final class EspDeviceWithTotalDevicesMapper {
 
     /**
      *
-     * @param espDeviceInfo
+     * @param espDeviceInfoRecord
      * @param totalDevices
      *
-     * @return A record {@link EspDeviceWithTotalDevices}
+     * @return A record {@link EspDeviceWithTotalDevicesRecord}
      */
-    public EspDeviceWithTotalDevices espDeviceWithTotalDevices(EspDeviceInfo espDeviceInfo, Long totalDevices) {
-        return EspDeviceWithTotalDevices.builder()
+    public EspDeviceWithTotalDevicesRecord espDeviceWithTotalDevices(EspDeviceInfoRecord espDeviceInfoRecord, Long totalDevices) {
+        return EspDeviceWithTotalDevicesRecord.builder()
                 .totalDevices(totalDevices)
-                .espDeviceInfo(espDeviceInfo)
+                .espDeviceInfoRecord(espDeviceInfoRecord)
                 .build();
     }
 }

@@ -55,7 +55,7 @@ public class SvgFactory {
      * @return {@link SvgIcon}
      */
     public static SvgIcon createIconFromSvg(String fileName, String size, String customHeight) {
-        //
+        Objects.requireNonNull(fileName, "fileName is null, we must put it in the svg-icons folder");
         final StreamResource iconResource = new StreamResource(fileName,
                 () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + fileName));
         var icon = new SvgIcon(iconResource);

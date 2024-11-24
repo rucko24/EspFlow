@@ -1,7 +1,7 @@
 package com.esp.espflow.mappers.provider;
 
-import com.esp.espflow.entity.EspDeviceInfo;
-import com.esp.espflow.entity.EspDeviceWithTotalDevices;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
+import com.esp.espflow.entity.EspDeviceWithTotalDevicesRecord;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -15,7 +15,7 @@ public class EspDeviceWithTotalDevicesMapperProvider implements ArgumentsProvide
 
         long totalDevices = 3L;
 
-        EspDeviceInfo actualEspDeviceInfo = EspDeviceInfo.builder()
+        EspDeviceInfoRecord actualEspDeviceInfoRecord = EspDeviceInfoRecord.builder()
                 .port("/dev/ttyUSB0")
                 .descriptivePortName("/dev/ttyUSB0")
                 .chipType("ESP8266")
@@ -27,12 +27,12 @@ public class EspDeviceWithTotalDevicesMapperProvider implements ArgumentsProvide
                 .detectedFlashSize("2MB")
                 .build();
 
-        EspDeviceWithTotalDevices expectedEspDeviceWithTotalDevices = EspDeviceWithTotalDevices.builder()
-                .espDeviceInfo(actualEspDeviceInfo)
+        EspDeviceWithTotalDevicesRecord expectedEspDeviceWithTotalDevicesRecord = EspDeviceWithTotalDevicesRecord.builder()
+                .espDeviceInfoRecord(actualEspDeviceInfoRecord)
                 .totalDevices(totalDevices)
                 .build();
 
-        return Stream.of(Arguments.of(actualEspDeviceInfo, expectedEspDeviceWithTotalDevices, totalDevices));
+        return Stream.of(Arguments.of(actualEspDeviceInfoRecord, expectedEspDeviceWithTotalDevicesRecord, totalDevices));
 
     }
 }

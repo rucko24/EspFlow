@@ -1,6 +1,6 @@
 package com.esp.espflow.mappers;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -88,7 +88,7 @@ public final class EspDeviceInfoMapper {
      *
      * @return A {@link Mono} with EspDeviceInfo
      */
-    public Mono<EspDeviceInfo> mapToEspDeviceInfo(Map<String, String> map, String descriptivePortName) {
+    public Mono<EspDeviceInfoRecord> mapToEspDeviceInfo(Map<String, String> map, String descriptivePortName) {
         var serialPort = map.get(SERIAL_PORT);
         var flashSize = map.get(DETECTED_FLASH_SIZE);
 
@@ -103,7 +103,7 @@ public final class EspDeviceInfoMapper {
         var decimal = parseDecimal(flashSize);
         var hex = parseHexDecimal(decimal);
 
-        return Mono.just(EspDeviceInfo.builder()
+        return Mono.just(EspDeviceInfoRecord.builder()
                 .port(serialPort)
                 .descriptivePortName(descriptivePortName)
                 .detectedFlashSize(flashSize)

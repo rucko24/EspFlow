@@ -1,7 +1,7 @@
 package com.esp.espflow.views.readflash;
 
-import com.esp.espflow.entity.EspDeviceInfo;
-import com.esp.espflow.entity.EspDeviceWithTotalDevices;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
+import com.esp.espflow.entity.EspDeviceWithTotalDevicesRecord;
 import com.esp.espflow.entity.event.EspMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.RefreshDevicesEvent;
@@ -435,7 +435,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      *
      * @return A {@link Function} <EspDeviceInfo, Mono<EspDeviceWithTotalDevices>>}
      */
-    private Function<EspDeviceInfo, Mono<EspDeviceWithTotalDevices>> countAllDevices() {
+    private Function<EspDeviceInfoRecord, Mono<EspDeviceWithTotalDevicesRecord>> countAllDevices() {
 
         return item -> this.esptoolService.countAllDevices()
                 .map(count ->
@@ -451,11 +451,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * @param spansList               a Set of Span
      * @return A {@link Function}
      */
-    private Function<EspDeviceWithTotalDevices, Mono<EspDevicesCarousel>> configureSlides(
+    private Function<EspDeviceWithTotalDevicesRecord, Mono<EspDevicesCarousel>> configureSlides(
             UI ui, EspDevicesCarousel paramEspDevicesCarousel, Set<Span> spansList) {
 
-        return espDeviceWithTotalDevices ->
-                this.configureSlides(spansList, espDeviceWithTotalDevices, paramEspDevicesCarousel, ui)
+        return espDeviceWithTotalDevicesRecord ->
+                this.configureSlides(spansList, espDeviceWithTotalDevicesRecord, paramEspDevicesCarousel, ui)
                         .switchIfEmpty(Mono.defer(() -> this.fallback(ui, paramEspDevicesCarousel, spansList)));
     }
 
@@ -520,18 +520,18 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * </p>
      *
      * @param spansList
-     * @param espDeviceWithTotalDevices
+     * @param espDeviceWithTotalDevicesRecord
      * @param espDevicesCarousel
      * @param ui                        the UI
      * @return A {@link Mono} with EspDevicesCarousel with more configuration
      */
     private Mono<EspDevicesCarousel> configureSlides(final Set<Span> spansList,
-                                                     EspDeviceWithTotalDevices espDeviceWithTotalDevices,
+                                                     EspDeviceWithTotalDevicesRecord espDeviceWithTotalDevicesRecord,
                                                      EspDevicesCarousel espDevicesCarousel,
                                                      final UI ui) {
 
-        final var mac = espDeviceWithTotalDevices.espDeviceInfo().macAddress();
-        var espDeviceInfo = espDeviceWithTotalDevices.espDeviceInfo();
+        final var mac = espDeviceWithTotalDevicesRecord.espDeviceInfoRecord().macAddress();
+        var espDeviceInfo = espDeviceWithTotalDevicesRecord.espDeviceInfoRecord();
 
         if (Objects.isNull(mac)) {
             ui.access(() -> {
@@ -546,13 +546,13 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
         //Fixme ? update using onComplete ?
         try {
-            ui.access(() -> this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevices.totalDevices()));
+            ui.access(() -> this.spanTotalDevicesValue.setText("  " + espDeviceWithTotalDevicesRecord.totalDevices()));
         } catch (UIDetachedException ex) {
             //Do nothing
         }
 
         try {
-            ui.access(() -> this.emitNextEvent(espDeviceWithTotalDevices.espDeviceInfo()
+            ui.access(() -> this.emitNextEvent(espDeviceWithTotalDevicesRecord.espDeviceInfoRecord()
                     , " Executed flash_id successfully!!!"));
         } catch (UIDetachedException ex) {
             // Do nothing
@@ -657,13 +657,13 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     /**
      * Emit event to bell
      *
-     * @param espDeviceInfo
+     * @param espDeviceInfoRecord
      */
-    public void emitNextEvent(final EspDeviceInfo espDeviceInfo, String concatResultMessage) {
+    public void emitNextEvent(final EspDeviceInfoRecord espDeviceInfoRecord, String concatResultMessage) {
 
-        EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(espDeviceInfo.chipIs()
+        EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(espDeviceInfoRecord.chipIs()
                 .concat(concatResultMessage),
-                espDeviceInfo.port());
+                espDeviceInfoRecord.port());
 
         this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
     }

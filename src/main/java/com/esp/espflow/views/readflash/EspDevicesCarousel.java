@@ -1,6 +1,6 @@
 package com.esp.espflow.views.readflash;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.flowingcode.vaadin.addons.carousel.Carousel;
@@ -124,14 +124,14 @@ public class EspDevicesCarousel extends Div {
      * Create a DeviceCardLayout div
      *
      * @param image
-     * @param espDeviceInfo
+     * @param espDeviceInfoRecord
      * @param downFlashButton
      * @param flashDownloadButtonWrapper
      * @return A {@link DeviceCardLayout}
      */
-    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfo espDeviceInfo, final Button downFlashButton,
+    public static DeviceCardLayout createSlideContent(String image, EspDeviceInfoRecord espDeviceInfoRecord, final Button downFlashButton,
                                                       FlashDownloadButtonWrapper flashDownloadButtonWrapper) {
-        return DeviceCardLayout.of(image, espDeviceInfo, downFlashButton, flashDownloadButtonWrapper);
+        return DeviceCardLayout.of(image, espDeviceInfoRecord, downFlashButton, flashDownloadButtonWrapper);
     }
 
 }

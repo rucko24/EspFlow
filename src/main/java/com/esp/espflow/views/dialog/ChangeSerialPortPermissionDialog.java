@@ -1,6 +1,6 @@
 package com.esp.espflow.views.dialog;
 
-import com.esp.espflow.entity.ChangePasswordRecordBinder;
+import com.esp.espflow.entity.ChangePasswordBinderRecord;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.EspFlowConstants;
@@ -154,17 +154,17 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         writePasswordButton.setTooltipText("Write password! - ENTER");
         writePasswordButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
-        final Binder<ChangePasswordRecordBinder> binder = new Binder<>();
+        final Binder<ChangePasswordBinderRecord> binder = new Binder<>();
         binder.forField(copyComboBox)
                 .withValidator(item -> item != null && !item.isEmpty(), "Invalid port")
-                .bind(ChangePasswordRecordBinder::port, (key, value) -> {});
+                .bind(ChangePasswordBinderRecord::port, (key, value) -> {});
         binder.forField(passwordField)
                 .withValidator(item -> item != null && !item.isEmpty(), "Invalid password")
-                .bind(ChangePasswordRecordBinder::password, (key, value) -> {});
+                .bind(ChangePasswordBinderRecord::password, (key, value) -> {});
 
         writePasswordButton.addClickListener(event -> {
 
-            var changePasswordRecord = new ChangePasswordRecordBinder(copyComboBox.getValue(), passwordField.getValue());
+            var changePasswordRecord = new ChangePasswordBinderRecord(copyComboBox.getValue(), passwordField.getValue());
 
             if(binder.writeBeanIfValid(changePasswordRecord)) {
                 this.changeSerialPortPermissionsTo666();

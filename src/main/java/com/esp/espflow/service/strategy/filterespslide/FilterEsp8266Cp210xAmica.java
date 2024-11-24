@@ -1,6 +1,6 @@
 package com.esp.espflow.service.strategy.filterespslide;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.util.GetOsName;
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,11 +25,11 @@ public class FilterEsp8266Cp210xAmica implements FilterEspDeviceStrategy {
      *     </li>
      * </ul>
      *
-     * @param espDeviceInfo
+     * @param espDeviceInfoRecord
      * @return boolean
      */
     @Override
-    public boolean filter(EspDeviceInfo espDeviceInfo) {
+    public boolean filter(EspDeviceInfoRecord espDeviceInfoRecord) {
 
         String usbSerial = StringUtils.EMPTY;
         String chipIs = StringUtils.EMPTY;
@@ -47,8 +47,8 @@ public class FilterEsp8266Cp210xAmica implements FilterEspDeviceStrategy {
             //Do nothing
         }
 
-        return espDeviceInfo.chipType().endsWith("8266")
-                && espDeviceInfo.detectedFlashSize().equals("4MB")
-                && espDeviceInfo.descriptivePortName().contains(usbSerial);
+        return espDeviceInfoRecord.chipType().endsWith("8266")
+                && espDeviceInfoRecord.detectedFlashSize().equals("4MB")
+                && espDeviceInfoRecord.descriptivePortName().contains(usbSerial);
     }
 }

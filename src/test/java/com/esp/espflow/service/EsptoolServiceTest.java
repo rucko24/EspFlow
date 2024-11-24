@@ -1,6 +1,6 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.service.provider.EsptoolServiceArgumentsProvider;
@@ -78,7 +78,7 @@ class EsptoolServiceTest {
     @SetSystemProperty(key = "os.name", value = "linux")
     @DisplayName("we read all the devices, the reading is completely correct, execute flash_id command")
     void readAllDevices(Flux<String> actualLinesFlashId,
-                        Set<String> actualSerialPortWithFriendlyName, EspDeviceInfo expectedEspDeviceInfo) {
+                        Set<String> actualSerialPortWithFriendlyName, EspDeviceInfoRecord expectedEspDeviceInfoRecord) {
 
         when(comPortService.getPortsListWithFriendlyName()).thenReturn(actualSerialPortWithFriendlyName);
 
@@ -96,10 +96,10 @@ class EsptoolServiceTest {
         when(esptoolPathService.esptoolPath())
                 .thenReturn("/tmp/esptool-bundle-dir/esptool-linux-amd64/esptool");
 
-        Flux<EspDeviceInfo> actualEspDeviceInfo = esptoolService.readAllDevices();
+        Flux<EspDeviceInfoRecord> actualEspDeviceInfo = esptoolService.readAllDevices();
 
         StepVerifier.create(actualEspDeviceInfo)
-                .expectNext(expectedEspDeviceInfo)
+                .expectNext(expectedEspDeviceInfoRecord)
                 .verifyComplete();
 
         verify(esptoolFallbackService, times(0)).fallback("/dev/ttyUSB1");
@@ -135,7 +135,7 @@ class EsptoolServiceTest {
     @DisplayName("esptool.py --port /dev/ttyACM0 --baud 115200 flash_id, the port will come with the friendlyName")
     void readFlashIdWithCustomPort(String portForInputStream,
                                    String portWithFriendlyName,
-                                   Flux<String> actualLines, EspDeviceInfo expectedLines) {
+                                   Flux<String> actualLines, EspDeviceInfoRecord expectedLines) {
 
         //The method processIntputStreamLineByLine should receive the parsed port without the vendor
         String[] commands = {"esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id"};
@@ -162,7 +162,7 @@ class EsptoolServiceTest {
             "indicates that the response of the console is incomplete and the microcontroller reading was not correct")
     void flashSizeIsNullFromInputWhenMapping(String portForInputStream,
                                              String portWithFriendlyName,
-                                             Flux<String> actualLines, EspDeviceInfo expectedLines) {
+                                             Flux<String> actualLines, EspDeviceInfoRecord expectedLines) {
 
         //The method processInputStreamLineByLine should receive the parsed port without the vendor
         String[] commands = {"esptool.py", "--port", portForInputStream, "--baud", "115200", "flash_id"};

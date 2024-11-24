@@ -11,8 +11,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.avatar.AvatarVariant;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -35,7 +33,6 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.dom.Style.Overflow;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -60,6 +57,8 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
 /**
+ * https://github.com/vaadin/web-components/issues/7778#issuecomment-2334597476
+ *
  * @author rub'n
  */
 @UIScope
@@ -71,54 +70,103 @@ public class SettingsDialogView extends Dialog {
 
     private static final String PASSWORD = "password";
     private static final String CONTACT_INFORMATION = "contact-information";
-    private static final String PUBLIC_INFORMATION = "public-information";
+    private static final String ESPTOOL_HOMEPATH = "esptool-homepath";
     private static final String NOTIFICATION = "notifications";
-    private static final String SIZE = "16px";
+    private static final String ITEM_ICON_SIZE = "25px";
 
-    private final Button publicInformationButton = new Button("esptool.py home path");
-    private final Button contactInformationButton = new Button("Manage settings...");
-    private final Button updates = new Button("Check updates...");
-    private final Button passwordButton = new Button("Password");
-    private final Button notificationsButton = new Button("Notifications");
+    private final Button buttonEsptoolHomePath = new Button("esptool.py home path");
+    private final Button buttonContactInformation = new Button("Manage settings...");
+    private final Button buttonPassword = new Button("Password");
+    private final Button buttonNotifications = new Button("Notifications");
+    private final Button buttonCheckUpdates = new Button("Check updates...");
 
     private final Layout mainLayout = new Layout();
     private final WizardEspService wizardFlashEspRepository;
+    private final EsptoolHomePath esptoolHomePath;
 
     @PostConstruct
     public void init() {
+        //Do nothing
+    }
 
+    private void configureDialog(String ref) {
+        super.setCloseOnOutsideClick(true);
+        super.setMaxWidth("700px");
+        super.setWidth("700px");
+        super.setMaxHeight("500px");
+        super.setHeight("500px");
+        super.setHeaderTitle("Settings");
+        this.setBackGroundOnClick(buttonEsptoolHomePath);
+
+        final Button closeButton = new Button(new Icon("lumo", "cross"));
+        closeButton.addClickListener(event -> {
+           closeButton.getUI().ifPresent(ui -> {
+                ui.getPage().fetchCurrentURL(url -> {
+                    ui.getPage().getHistory().replaceState(null, url.getPath());
+                });
+            });
+            super.close();
+        });
+        /*
+         * Allows that when closing the dialog, we remove the portion aka fragment of the uri after the and leaving the original path.
+         */
+        super.addOpenedChangeListener(event -> {
+            if (!event.getSource().isOpened()) {
+                getUI().ifPresent(ui -> {
+                    ui.getPage().fetchCurrentURL(url -> {
+                        ui.getPage().getHistory().replaceState(null, url.getPath());
+                    });
+                });
+            }
+        });
+
+        super.getHeader().removeAll();
+        super.getHeader().add(closeButton);
+
+        final Main main = new Main();
+        main.setId("main-settings");
+        main.addClassNames(Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Height.FULL);
+
+        final Hr hr = new Hr();
+        hr.addClassName("hr-header-settings");
+
+        main.add(this.createButtonsItemsMenu(), this.createForm(ref));
+
+        super.add(hr, main);
+        super.addClassName("settings-content-dialog");
     }
 
     /**
      * We invoke them within the onAttach, to correctly create the component.
      */
     private void initListeners() {
-        notificationsButton.setPrefixComponent(SvgFactory.createIconFromSvg("bell.svg", SIZE, null));
-        notificationsButton.addClickListener(event -> {
+        buttonNotifications.setPrefixComponent(SvgFactory.createIconFromSvg("bell.svg", ITEM_ICON_SIZE, null));
+        buttonNotifications.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(this.createNotifications());
-            this.setBackGroundOnClick(notificationsButton);
+            this.setBackGroundOnClick(buttonNotifications);
             this.updateFragment(NOTIFICATION);
         });
-        publicInformationButton.setPrefixComponent(VaadinIcon.INFO.create());
-        publicInformationButton.addClickListener(event -> {
+
+        buttonEsptoolHomePath.setPrefixComponent(SvgFactory.createIconFromSvg("espressif-logo.svg", ITEM_ICON_SIZE, null));
+        buttonEsptoolHomePath.addClickListener(event -> {
             this.mainLayout.removeAll();
-            this.mainLayout.add(createPublicInformation());
-            this.setBackGroundOnClick(publicInformationButton);
-            this.updateFragment(PUBLIC_INFORMATION);
+            this.mainLayout.add(createEsptoolHomePathContent());
+            this.setBackGroundOnClick(buttonEsptoolHomePath);
+            this.updateFragment(ESPTOOL_HOMEPATH);
         });
-        contactInformationButton.setPrefixComponent(VaadinIcon.ARCHIVE.create());
-        contactInformationButton.addClickListener(event -> {
+        buttonContactInformation.setPrefixComponent(VaadinIcon.ARCHIVE.create());
+        buttonContactInformation.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createContactInformation());
-            this.setBackGroundOnClick(contactInformationButton);
+            this.setBackGroundOnClick(buttonContactInformation);
             this.updateFragment(CONTACT_INFORMATION);
         });
-        passwordButton.setPrefixComponent(VaadinIcon.PASSWORD.create());
-        passwordButton.addClickListener(event -> {
+        buttonPassword.setPrefixComponent(VaadinIcon.PASSWORD.create());
+        buttonPassword.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createPassword());
-            this.setBackGroundOnClick(passwordButton);
+            this.setBackGroundOnClick(buttonPassword);
             this.updateFragment(PASSWORD);
         });
     }
@@ -139,52 +187,7 @@ public class SettingsDialogView extends Dialog {
     public void open(final String ref) {
         this.removeAll();
         this.mainLayout.removeAll();
-        this.initConfiguration(ref);
-    }
-
-    private void initConfiguration(String ref) {
-        super.setMaxWidth("680px");
-        super.setMaxHeight("500px");
-        super.setHeight("500px");
-        super.setHeaderTitle("Settings");
-        this.setBackGroundOnClick(publicInformationButton);
-        final Button closeButton = new Button(new Icon("lumo", "cross"), (event) -> {
-            super.close();
-            getUI().ifPresent(ui -> {
-                ui.getPage().fetchCurrentURL(url -> {
-                    ui.getPage().getHistory().replaceState(null, url.getPath());
-                });
-            });
-        });
-
-        /*
-         * Allows that when closing the dialog, we remove the portion aka fragment of the uri after the and leaving the original path.
-         */
-        super.addOpenedChangeListener(event -> {
-            if (!event.getSource().isOpened()) {
-                getUI().ifPresent(ui -> {
-                    ui.getPage().fetchCurrentURL(url -> {
-                        ui.getPage().getHistory().replaceState(null, url.getPath());
-                    });
-                });
-            }
-        });
-
-        super.getHeader().removeAll();
-        super.getHeader().add(closeButton);
-        super.setCloseOnOutsideClick(true);
-
-        final Main main = new Main();
-        main.setId("main-settings");
-        main.addClassNames(Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Height.FULL);
-
-        final Hr hr = new Hr();
-        hr.addClassName("hr-header-settings");
-
-        main.add(this.createLinks(), this.createForm(ref));
-
-        super.add(hr, main);
-        super.addClassName("settings-content-dialog");
+        this.configureDialog(ref);
     }
 
     public Component createForm(String ref) {
@@ -192,34 +195,29 @@ public class SettingsDialogView extends Dialog {
         String newLocation = DialogUtilsReplaceUri.INSTANCE.parseUriToCreateTheContentForm(ref);
 
         switch (newLocation) {
-            case PUBLIC_INFORMATION -> {
-                this.mainLayout.add(this.createPublicInformation());
-                this.setBackGroundOnClick(publicInformationButton);
+            case ESPTOOL_HOMEPATH, SETTINGS -> {
+                this.mainLayout.add(this.createEsptoolHomePathContent());
+                this.setBackGroundOnClick(buttonEsptoolHomePath);
                 super.open();
             }
             case CONTACT_INFORMATION -> {
                 this.mainLayout.add(this.createContactInformation());
-                this.setBackGroundOnClick(contactInformationButton);
+                this.setBackGroundOnClick(buttonContactInformation);
                 super.open();
             }
             case PASSWORD -> {
                 this.mainLayout.add(this.createPassword());
-                this.setBackGroundOnClick(passwordButton);
+                this.setBackGroundOnClick(buttonPassword);
                 super.open();
             }
             case NOTIFICATION -> {
                 this.mainLayout.add(this.createNotifications());
-                this.setBackGroundOnClick(notificationsButton);
-                super.open();
-            }
-            case SETTINGS -> {
-                this.mainLayout.add(this.createPublicInformation());
-                this.setBackGroundOnClick(publicInformationButton);
+                this.setBackGroundOnClick(buttonNotifications);
                 super.open();
             }
             case StringUtils.EMPTY -> {
-                this.mainLayout.add(this.createPublicInformation());
-                this.setBackGroundOnClick(publicInformationButton);
+                this.mainLayout.add(this.createEsptoolHomePathContent());
+                this.setBackGroundOnClick(buttonEsptoolHomePath);
             }
             default -> {
                 //Do nothing
@@ -230,47 +228,8 @@ public class SettingsDialogView extends Dialog {
         return mainLayout;
     }
 
-    public Component createPublicInformation() {
-        H2 title = new H2("Public information");
-        title.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
-        title.setId(title.getText().replace(" ", "-").toLowerCase());
-
-        Paragraph description = new Paragraph("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-        description.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-
-        Avatar avatar = new Avatar("Emily Johnson");
-        avatar.addThemeVariants(AvatarVariant.LUMO_XLARGE);
-        avatar.setImage("https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80");
-
-        Button uploadButton = new Button("Upload");
-        uploadButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
-        Upload upload = new Upload();
-        upload.setDropAllowed(false);
-        upload.setMaxFiles(1);
-        upload.setUploadButton(uploadButton);
-
-        Button delete = new Button("Delete");
-        delete.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-
-        Layout avatarLayout = new Layout(avatar, upload, delete);
-        avatarLayout.addClassNames(LumoUtility.Margin.Bottom.XSMALL, LumoUtility.Margin.Top.MEDIUM);
-        avatarLayout.setAlignItems(Layout.AlignItems.CENTER);
-        avatarLayout.setGap(Layout.Gap.LARGE);
-
-        TextField username = new TextField("Username");
-        TextField firstName = new TextField("First name");
-        TextField lastName = new TextField("Last name");
-
-        Layout layout = new Layout(title, description, avatarLayout, username, firstName, lastName);
-        // Viewport < 1024px
-        layout.setFlexDirection(Layout.FlexDirection.COLUMN);
-        // Viewport > 1024px
-        layout.setDisplay(Breakpoint.LARGE, Layout.Display.GRID);
-        layout.setColumns(Layout.GridColumns.COLUMNS_2);
-        layout.setColumnGap(Layout.Gap.MEDIUM);
-        layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, title, description, avatarLayout, username);
-        return layout;
+    public Component createEsptoolHomePathContent() {
+        return esptoolHomePath.createEsptoolHomePathContent();
     }
 
     public Component createContactInformation() {
@@ -471,16 +430,17 @@ public class SettingsDialogView extends Dialog {
                 });
     }
 
-    public Component createLinks() {
+    public Component createButtonsItemsMenu() {
 
-        Stream.of(notificationsButton, passwordButton, publicInformationButton, contactInformationButton, updates)
+        Stream.of(buttonNotifications, buttonPassword, buttonEsptoolHomePath, buttonContactInformation, buttonCheckUpdates)
                 .forEach(button -> {
                     button.getStyle().setCursor(EspFlowConstants.CURSOR_POINTER);
                     button.addClassNames("settings-buttons");
                     button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 });
 
-        final Div div = new Div(publicInformationButton, contactInformationButton, passwordButton, notificationsButton, updates);
+        final Div div = new Div(buttonEsptoolHomePath, buttonContactInformation, buttonPassword, buttonNotifications, buttonCheckUpdates);
+        div.setId("div-item-container");
         div.addClassNames(Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Margin.Vertical.XLARGE, Padding.Horizontal.LARGE);
 
@@ -504,7 +464,7 @@ public class SettingsDialogView extends Dialog {
 
         final Predicate<Button> ignoreTheParameterButtonSoAsNotToChangeItsStyle = buttonItem -> !buttonItem.equals(buttonToChange);
 
-        Stream.of(passwordButton, notificationsButton, contactInformationButton, publicInformationButton)
+        Stream.of(buttonPassword, buttonNotifications, buttonContactInformation, buttonEsptoolHomePath)
                 .filter(ignoreTheParameterButtonSoAsNotToChangeItsStyle)
                 .forEach(buttonItem -> buttonItem.getStyle().remove(backgroundColorStyle));
 
@@ -523,7 +483,7 @@ public class SettingsDialogView extends Dialog {
             ui.getPage().fetchCurrentURL(url -> {
                 log.info("onAttach {}", url.getPath());
                 String ref = url.getRef();
-                this.initConfiguration(ref);
+                this.configureDialog(ref);
                 this.initListeners();
             });
         }

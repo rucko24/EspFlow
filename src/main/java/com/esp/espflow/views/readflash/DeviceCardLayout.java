@@ -1,6 +1,6 @@
 package com.esp.espflow.views.readflash;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
 import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.svgfactory.SvgFactory;
@@ -83,30 +83,30 @@ public final class DeviceCardLayout extends Div {
     private FlashDownloadButtonWrapper flashDownloadButtonWrapper;
 
     private String image;
-    private EspDeviceInfo espDeviceInfo;
+    private EspDeviceInfoRecord espDeviceInfoRecord;
 
     /**
      * Create a DeviceCardLayout div
      *
      * @param image
-     * @param espDeviceInfo
+     * @param espDeviceInfoRecord
      * @param downloadFlashButton
      * @param flashDownloadButtonWrapper
      *
      * @return A {@link DeviceCardLayout}
      */
-    public static DeviceCardLayout of(final String image, final EspDeviceInfo espDeviceInfo,
+    public static DeviceCardLayout of(final String image, final EspDeviceInfoRecord espDeviceInfoRecord,
                             final Button downloadFlashButton,
                             final FlashDownloadButtonWrapper flashDownloadButtonWrapper) {
-       return new DeviceCardLayout(image, espDeviceInfo, downloadFlashButton, flashDownloadButtonWrapper);
+       return new DeviceCardLayout(image, espDeviceInfoRecord, downloadFlashButton, flashDownloadButtonWrapper);
     }
 
-    private DeviceCardLayout(final String image, final EspDeviceInfo espDeviceInfo,
+    private DeviceCardLayout(final String image, final EspDeviceInfoRecord espDeviceInfoRecord,
                             final Button downloadFlashButton,
                             final FlashDownloadButtonWrapper flashDownloadButtonWrapper) {
         super.addClassName("card-container");
         this.image = image;
-        this.espDeviceInfo = espDeviceInfo;
+        this.espDeviceInfoRecord = espDeviceInfoRecord;
         this.downloadFlashButton = downloadFlashButton;
         this.flashDownloadButtonWrapper = flashDownloadButtonWrapper;
 
@@ -169,7 +169,7 @@ public final class DeviceCardLayout extends Div {
     }
 
     private Div createDivLeftContentInside1() {
-        spanDeviceName.setText(espDeviceInfo.chipType());
+        spanDeviceName.setText(espDeviceInfoRecord.chipType());
         divLeftContentInside1.add(spanDeviceName);
         divLeftContentInside1.addClassName("div-left-content-inside-title1");
         return divLeftContentInside1;
@@ -183,14 +183,14 @@ public final class DeviceCardLayout extends Div {
         icon.getStyle().set("color","blue");
         icon.addClassName(Left.SMALL);
         spanState.add(icon);
-        spanPort.setText(espDeviceInfo.port());
+        spanPort.setText(espDeviceInfoRecord.port());
         var usbIcon = SvgFactory.createUsbIconFromSvg();
         usbIcon.addClassName(Left.SMALL);
         spanPort.add(usbIcon);
         //Filter the Silicon Labs CP210x UART Bridge, QinHeng Electronics CH340 serial converter
         //Silicon Labs CP210x USB to UART Bridge windows
         //Serial Port FreeBSD
-        String descriptivePortName = espDeviceInfo.descriptivePortName();
+        String descriptivePortName = espDeviceInfoRecord.descriptivePortName();
         if(descriptivePortName.contains("CP21")) {
             int index = descriptivePortName.toUpperCase().indexOf("CP");
             int lastIndexOf = descriptivePortName.lastIndexOf("x");
@@ -246,49 +246,49 @@ public final class DeviceCardLayout extends Div {
     private Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
         Stream.of(chipType, detectedFlashSize, crystal, chipIs, spanMadAddress).forEach(span -> span.getStyle().set("font-weight", "bold"));
-        chipTypeValue.setText(":  " + espDeviceInfo.chipType());
-        chipIsValue.setText(":  " + espDeviceInfo.chipIs());
+        chipTypeValue.setText(":  " + espDeviceInfoRecord.chipType());
+        chipIsValue.setText(":  " + espDeviceInfoRecord.chipIs());
 
-        detectedFlashSizeValue.setText(":  " + espDeviceInfo.detectedFlashSize());
-        spanMadAddressValue.setText(": " + espDeviceInfo.macAddress());
-        crystalValue.setText(":  " + espDeviceInfo.crystalIs());
+        detectedFlashSizeValue.setText(":  " + espDeviceInfoRecord.detectedFlashSize());
+        spanMadAddressValue.setText(": " + espDeviceInfoRecord.macAddress());
+        crystalValue.setText(":  " + espDeviceInfoRecord.crystalIs());
 
         /*
          * Detecting chip type
          */
-        var copyChipType = createDivWithCopyButton(chipType, chipTypeValue, espDeviceInfo.chipType(), "Copy chip type");
+        var copyChipType = createDivWithCopyButton(chipType, chipTypeValue, espDeviceInfoRecord.chipType(), "Copy chip type");
 
         /*
          * Chip is, // if you exceed a length of 13, it shows 12 characters more ... with the copy button
          **/
         Div divChipIsAndValue = null;
         if (chipIsValue.getText().length() > 13) {
-            final String newString = espDeviceInfo.chipIs().substring(0, 12).trim().concat("...");
+            final String newString = espDeviceInfoRecord.chipIs().substring(0, 12).trim().concat("...");
             chipIsValue.setText("");
             chipIsValue.setText(": " + newString);
             chipIsValue.addClassName(Right.SMALL);
-            divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue, espDeviceInfo.chipIs(), "Copy chip is");
+            divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue, espDeviceInfoRecord.chipIs(), "Copy chip is");
         } else {
-            divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue, espDeviceInfo.chipIs(), "Copy chip is");
+            divChipIsAndValue = createDivWithCopyButton(chipIs, chipIsValue, espDeviceInfoRecord.chipIs(), "Copy chip is");
         }
 
         /*
          * Flash size
          *
          * */
-        var copyFlashSize = createDivWithCopyButton(detectedFlashSize, detectedFlashSizeValue, espDeviceInfo.detectedFlashSize(), "Copy flash size");
+        var copyFlashSize = createDivWithCopyButton(detectedFlashSize, detectedFlashSizeValue, espDeviceInfoRecord.detectedFlashSize(), "Copy flash size");
 
         /*
          * Crystal
          *
          * */
-        var copyCrystal = createDivWithCopyButton(crystal, crystalValue, espDeviceInfo.crystalIs(), "Copy crystal");
+        var copyCrystal = createDivWithCopyButton(crystal, crystalValue, espDeviceInfoRecord.crystalIs(), "Copy crystal");
 
         /*
          *  MAC
          *
          * */
-        var copyMac = createDivWithCopyButton(spanMadAddress, spanMadAddressValue, espDeviceInfo.macAddress(), "Copy MAC");
+        var copyMac = createDivWithCopyButton(spanMadAddress, spanMadAddressValue, espDeviceInfoRecord.macAddress(), "Copy MAC");
 
         divRightContentText.add(copyChipType, hr1, divChipIsAndValue, hr2, copyFlashSize, hr3, copyCrystal, hr4, copyMac, hr5);
 

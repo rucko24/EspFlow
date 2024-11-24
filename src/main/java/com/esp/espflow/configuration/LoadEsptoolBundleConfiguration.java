@@ -47,7 +47,7 @@ import static com.esp.espflow.util.EspFlowConstants.SLASH;
  */
 @Log4j2
 @Configuration
-public class EsptoolLoadBundleConfiguration {
+public class LoadEsptoolBundleConfiguration {
 
     /**
      * Move the esptool executable to the system's temporary directory in runtime

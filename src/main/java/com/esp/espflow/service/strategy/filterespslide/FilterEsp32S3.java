@@ -1,6 +1,6 @@
 package com.esp.espflow.service.strategy.filterespslide;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.util.GetOsName;
 
 /**
@@ -24,11 +24,11 @@ public class FilterEsp32S3 implements FilterEspDeviceStrategy {
      *     </li>
      * </ul>
      *
-     * @param espDeviceInfo
+     * @param espDeviceInfoRecord
      * @return boolean
      */
     @Override
-    public boolean filter(EspDeviceInfo espDeviceInfo) {
+    public boolean filter(EspDeviceInfoRecord espDeviceInfoRecord) {
 
         String descriptivePortName = "";
         String chipIs = "";
@@ -45,8 +45,8 @@ public class FilterEsp32S3 implements FilterEspDeviceStrategy {
             chipIs = "ESP32-S3";
         }
 
-        return espDeviceInfo.chipType().endsWith("-S3")
-                && espDeviceInfo.descriptivePortName().contains(descriptivePortName)
-                && espDeviceInfo.chipIs().contains(chipIs);
+        return espDeviceInfoRecord.chipType().endsWith("-S3")
+                && espDeviceInfoRecord.descriptivePortName().contains(descriptivePortName)
+                && espDeviceInfoRecord.chipIs().contains(chipIs);
     }
 }

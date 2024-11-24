@@ -270,7 +270,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         });
         hideButton.setTooltipText("Hide this dialog");
         hideButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        hideButton.getStyle().set("margin-right", "auto");
+        hideButton.addClassName(Right.AUTO);
         hideButton.addClickListener(event -> {
             this.wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
                     .ifPresent(entityPresent -> {

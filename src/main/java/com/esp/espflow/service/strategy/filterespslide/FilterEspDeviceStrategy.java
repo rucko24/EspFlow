@@ -1,12 +1,12 @@
 package com.esp.espflow.service.strategy.filterespslide;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 
 /**
  * The FilterDeviceStrategy
  */
 public interface FilterEspDeviceStrategy {
-    boolean filter(EspDeviceInfo espDeviceInfo);
+    boolean filter(EspDeviceInfoRecord espDeviceInfoRecord);
 }
 
 

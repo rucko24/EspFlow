@@ -1,6 +1,6 @@
 package com.esp.espflow.service.provider;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -24,7 +24,7 @@ public class EsptoolServiceReadAllDevicesArgumentsProvider implements ArgumentsP
 
         Set<String> actualSerialPortWithFriendlyName = Set.of("/dev/ttyUSB1@Serial-1");
 
-        EspDeviceInfo expectedEspDeviceInfo = EspDeviceInfo.builder()
+        EspDeviceInfoRecord expectedEspDeviceInfoRecord = EspDeviceInfoRecord.builder()
                 .port("/dev/ttyUSB1")
                 .descriptivePortName("Serial-1")
                 .chipType("ESP32-S3")
@@ -37,7 +37,7 @@ public class EsptoolServiceReadAllDevicesArgumentsProvider implements ArgumentsP
                 .build();
 
         return Stream.of(
-                Arguments.of(actualLinesFlashId, actualSerialPortWithFriendlyName, expectedEspDeviceInfo)
+                Arguments.of(actualLinesFlashId, actualSerialPortWithFriendlyName, expectedEspDeviceInfoRecord)
         );
     }
 }

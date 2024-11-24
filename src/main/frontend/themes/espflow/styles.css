@@ -8,6 +8,7 @@
 @import url('./views/readflash/esp-device-info.css');
 @import url('./views/flash-view/wizard-dialog/wizard-dialog.css');
 @import url('./views/settings-dialog/settings-dialog.css');
+@import url('./views/settings-dialog/esptool-homepath-upload.css');
 @import url('./fonts/stylesheet.css');
 
 html {
@@ -291,4 +292,3 @@ vaadin-split-layout > [slot="primary"] {
 vaadin-split-layout > [slot="secondary"] {
     scrollbar-width: thin;
 }
-

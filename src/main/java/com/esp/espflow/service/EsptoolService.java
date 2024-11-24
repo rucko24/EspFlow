@@ -1,6 +1,6 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.mappers.EspDeviceInfoMapper;
@@ -56,9 +56,9 @@ public class EsptoolService {
     /**
      * This returns all existing esp32-based microcontrollers in the current system.
      *
-     * @return A {@link Flux} with the {@link EspDeviceInfo}`s corresponding to each <strong>esp32+</strong> microcontrollers
+     * @return A {@link Flux} with the {@link EspDeviceInfoRecord}`s corresponding to each <strong>esp32+</strong> microcontrollers
      */
-    public Flux<EspDeviceInfo> readAllDevices() {
+    public Flux<EspDeviceInfoRecord> readAllDevices() {
         return Flux.fromIterable(comPortService.getPortsListWithFriendlyName())
                 .switchIfEmpty(Mono.defer(this.esptoolFallBackService::fallbackEmptyPorts))
                 .flatMap(this::readFlashIdFromPort)
@@ -95,9 +95,9 @@ public class EsptoolService {
      * </blockquote>
      *
      * @param port the microcontroller port to be scanned
-     * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
+     * @return A {@link Mono} with the {@link EspDeviceInfoRecord} configured with each line of the inputstream
      */
-    public Mono<EspDeviceInfo> readFlashIdFromPort(String port) {
+    public Mono<EspDeviceInfoRecord> readFlashIdFromPort(String port) {
         final String parsedPort = port.split("@")[0];
         final String descriptivePortName = port.split("@")[1];
 

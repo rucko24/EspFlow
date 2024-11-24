@@ -1,6 +1,6 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class EsptoolFallBackServiceTest {
     @DisplayName("An EspDeviceInfo is returned with the port only, no exception is returned.")
     void fallback() {
 
-        var espDeviceInfo = EspDeviceInfo.builder()
+        var espDeviceInfo = EspDeviceInfoRecord.builder()
                 .port("COM3")
                 .build();
 

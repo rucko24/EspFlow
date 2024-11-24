@@ -1,6 +1,6 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.mappers.EspDeviceInfoMapper;
 import org.springframework.stereotype.Service;
@@ -22,10 +22,10 @@ public class EsptoolFallBackService {
      *
      * @see EspDeviceInfoMapper#mapToEspDeviceInfo(Map, String)
      *
-     * @return A {@link Mono} with the {@link EspDeviceInfo} configured with each line of the inputstream
+     * @return A {@link Mono} with the {@link EspDeviceInfoRecord} configured with each line of the inputstream
      */
-    public Mono<EspDeviceInfo> fallback(String parsedPort) {
-        return Mono.just(EspDeviceInfo.builder()
+    public Mono<EspDeviceInfoRecord> fallback(String parsedPort) {
+        return Mono.just(EspDeviceInfoRecord.builder()
                 .port(parsedPort)
                 .build());
     }

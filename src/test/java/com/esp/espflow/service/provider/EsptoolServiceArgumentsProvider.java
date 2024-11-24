@@ -1,6 +1,6 @@
 package com.esp.espflow.service.provider;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -22,7 +22,7 @@ public class EsptoolServiceArgumentsProvider implements ArgumentsProvider {
                 "Chip is ESP32-S3 (QFN56) (revision v0.0)",
                 "Detected flash size: 8MB");
 
-        var expectedLines = EspDeviceInfo.builder()
+        var expectedLines = EspDeviceInfoRecord.builder()
                 .descriptivePortName("Silicon Labs CP210x USB to UART Bridge (COM3)")
                 .detectedFlashSize("8MB")
                 .decimal("8388608")

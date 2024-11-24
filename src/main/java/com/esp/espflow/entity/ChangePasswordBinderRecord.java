@@ -8,5 +8,5 @@ package com.esp.espflow.entity;
  * @author rubn
  *
  */
-public record ChangePasswordRecordBinder(String port, String password){
+public record ChangePasswordBinderRecord(String port, String password){
 }

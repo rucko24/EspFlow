@@ -3,7 +3,7 @@ package com.esp.espflow.entity;
 import lombok.Builder;
 
 @Builder
-public record EspDeviceInfo(
+public record EspDeviceInfoRecord(
         String port,
         String descriptivePortName,
         String name,

@@ -1,6 +1,6 @@
 package com.esp.espflow.service.strategy.filterespslide;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.util.GetOsName;
 
 /**
@@ -24,11 +24,11 @@ public class FilterEsp8266CH340G implements FilterEspDeviceStrategy {
      *     </li>
      * </ul>
      *
-     * @param espDeviceInfo
+     * @param espDeviceInfoRecord
      * @return boolean
      */
     @Override
-    public boolean filter(EspDeviceInfo espDeviceInfo) {
+    public boolean filter(EspDeviceInfoRecord espDeviceInfoRecord) {
         String usbSerial = "";
 
         if (GetOsName.getOsName() == GetOsName.WINDOWS) {
@@ -41,8 +41,8 @@ public class FilterEsp8266CH340G implements FilterEspDeviceStrategy {
             //FreeBSD or other
         }
 
-        return espDeviceInfo.chipType().endsWith("8266")
-                && espDeviceInfo.detectedFlashSize().equals("4MB")
-                && espDeviceInfo.descriptivePortName().startsWith(usbSerial);
+        return espDeviceInfoRecord.chipType().endsWith("8266")
+                && espDeviceInfoRecord.detectedFlashSize().equals("4MB")
+                && espDeviceInfoRecord.descriptivePortName().startsWith(usbSerial);
     }
 }

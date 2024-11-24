@@ -1,6 +1,6 @@
 package com.esp.espflow.service.strategy.filterespslide;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -11,7 +11,7 @@ public class FilterEspDeviceContext {
 
     private final FilterEspDeviceStrategy filterEspDeviceStrategy;
 
-    public boolean filter(EspDeviceInfo espDeviceInfo) {
-        return filterEspDeviceStrategy.filter(espDeviceInfo);
+    public boolean filter(EspDeviceInfoRecord espDeviceInfoRecord) {
+        return filterEspDeviceStrategy.filter(espDeviceInfoRecord);
     }
 }

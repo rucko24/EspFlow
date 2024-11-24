@@ -1,6 +1,6 @@
 package com.esp.espflow.mappers;
 
-import com.esp.espflow.entity.EspDeviceInfo;
+import com.esp.espflow.entity.EspDeviceInfoRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author rubn
  */
-class EspDeviceInfoMapperTest {
+class EspDeviceInfoRecordMapperTest {
 
 
     @Test
@@ -87,7 +87,7 @@ class EspDeviceInfoMapperTest {
 
         final Map<String, String> mapWithLines = new ConcurrentHashMap<>();
 
-        Mono<EspDeviceInfo> espDeviceInfo = EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(mapWithLines, null);
+        Mono<EspDeviceInfoRecord> espDeviceInfo = EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(mapWithLines, null);
 
         StepVerifier.create(espDeviceInfo)
                 .verifyComplete();
@@ -106,9 +106,9 @@ class EspDeviceInfoMapperTest {
         mapWithLines.put(CHIP_TYPE, "ESP8266");
         mapWithLines.put(CHIP_IS, "ESP8266EX");
 
-        Mono<EspDeviceInfo> espDeviceInfo = EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(mapWithLines, "/dev/ttyUSB0");
+        Mono<EspDeviceInfoRecord> espDeviceInfo = EspDeviceInfoMapper.INSTANCE.mapToEspDeviceInfo(mapWithLines, "/dev/ttyUSB0");
 
-        EspDeviceInfo expectedEspDeviceInfo = EspDeviceInfo.builder()
+        EspDeviceInfoRecord expectedEspDeviceInfoRecord = EspDeviceInfoRecord.builder()
                 .port("/dev/ttyUSB0")
                 .descriptivePortName("/dev/ttyUSB0")
                 .chipType("ESP8266")
@@ -121,7 +121,7 @@ class EspDeviceInfoMapperTest {
                 .build();
 
         StepVerifier.create(espDeviceInfo)
-                .expectNext(expectedEspDeviceInfo)
+                .expectNext(expectedEspDeviceInfoRecord)
                 .verifyComplete();
 
     }
