@@ -84,9 +84,9 @@ public class LoadEsptoolBundleConfiguration {
         if (!Files.exists(pathTempDir)) {
             try {
                 Files.createDirectories(pathTempDir);
-                log.debug("Directory created successfully {}", pathTempDir.toString());
+                log.info("Directory created successfully {}", pathTempDir.toString());
             } catch (IOException ex) {
-                log.error("Error when creating the directory {}", ex.getMessage());
+                log.info("Error when creating the directory {}", ex.getMessage());
             }
         }
 
@@ -115,7 +115,7 @@ public class LoadEsptoolBundleConfiguration {
             inputStream.transferTo(bufferedOutputStream);
 
         } catch (IOException ex) {
-            log.error("Error by copying the esptool executable to the temporary directory {}", ex.getMessage());
+            log.info("Error by copying the esptool executable to the temporary directory {}", ex.getMessage());
         }
     }
 
@@ -130,13 +130,13 @@ public class LoadEsptoolBundleConfiguration {
             Files.setPosixFilePermissions(esptoolPath, permissions);
 
             if (Files.isExecutable(esptoolPath.toAbsolutePath())) {
-                log.debug("esptool bundle is executable");
+                log.info("esptool bundle is executable");
             } else {
-                log.error("Error when setting permissions in the esptool executable {}", esptoolPath);
+                log.info("Error when setting permissions in the esptool executable {}", esptoolPath);
             }
 
         } catch (IOException ex) {
-            log.error("Error makeTheBundleExecutable() {}", ex.getMessage());
+            log.info("Error makeTheBundleExecutable() {}", ex.getMessage());
         }
     }
 

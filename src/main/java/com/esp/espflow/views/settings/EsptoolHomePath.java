@@ -1,7 +1,9 @@
 package com.esp.espflow.views.settings;
 
+import com.esp.espflow.entity.dto.EsptoolBundleDto;
 import com.esp.espflow.enums.Breakpoint;
 import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.service.respository.impl.EsptoolBundleService;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
 import com.vaadin.flow.component.button.Button;
@@ -30,9 +32,16 @@ import java.time.Duration;
 import java.util.Arrays;
 
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 
 /**
+ *
+ * - Cambiar textfield por combo
+ * - Crear entidad para guardar estados del combo box y llenarlo desde el repositorio
+ * - Crear el helpertext
+ * - Crear evento para usar el esptool.py customizado
+ *
  * @author rub'n
  */
 @Log4j2
@@ -41,7 +50,10 @@ import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 @RequiredArgsConstructor
 public class EsptoolHomePath {
 
+
     private final EsptoolService esptoolService;
+    private final EsptoolBundleService esptoolBundleService;
+
     private final Layout esptoolLayout = new Layout();
     private final Upload upload = new Upload();
     private final TextField textfieldEsptoolHome = new TextField();
@@ -61,6 +73,18 @@ public class EsptoolHomePath {
             final String esptoolCustomPath = Path.of(event.getFileName()).toAbsolutePath().toString();
             log.info("Esptool custom path addStartedListener {}", esptoolCustomPath);
             textfieldEsptoolHome.setValue(esptoolCustomPath);
+
+            this.esptoolBundleService.findByIsInBundleMode(true)
+                    .ifPresent(entityPresent -> {
+                        var esptoolBundleDto = EsptoolBundleDto.builder()
+                                .id(entityPresent.id())
+                                .name(ESPTOOL)
+                                .absolutePathEsptool(esptoolCustomPath)
+                                .isBundle(false)
+                                .build();
+                        this.esptoolBundleService.save(esptoolBundleDto);
+                    });
+
             this.clipboardHelper.setContent(textfieldEsptoolHome.getValue());
             this.copyButton.setTooltipText(textfieldEsptoolHome.getValue());
             this.upload.clearFileList();

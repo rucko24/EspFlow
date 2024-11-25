@@ -33,7 +33,7 @@ public class WizardEspService {
         Stream.of(wizardEspDto)
                 .flatMap(Collection::stream)
                 .map(WizardEspMapper.INSTANCE::dtoToEntity)
-                .peek(entity -> log.info("initial load entity saved {}", entity))
+                .peek(entity -> log.info("Initial load, WizardEspEntity saved  {}", entity))
                 .forEach(this.wizardEspRepository::save);
     }
 

@@ -374,7 +374,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
      */
     private Component createWelcomeContent() {
 
-        final InitialInformationFlashEspViewDialog welcome = new InitialInformationFlashEspViewDialog();
+        final InitialInformationFlashEspView welcome = new InitialInformationFlashEspView();
 
         final Layout layout = new Layout(welcome);
         layout.setId("welcome-id");

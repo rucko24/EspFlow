@@ -1,11 +1,14 @@
 package com.esp.espflow.generator;
 
 import com.esp.espflow.entity.User;
+import com.esp.espflow.entity.dto.EsptoolBundleDto;
 import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.enums.Role;
 import com.esp.espflow.service.respository.UserRepository;
+import com.esp.espflow.service.respository.impl.EsptoolBundleService;
 import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.vaadin.flow.spring.annotation.SpringComponent;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static com.esp.espflow.util.EspFlowConstants.ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_AVATAR_USER;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
@@ -28,7 +32,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 public class DataGenerator {
 
     @Bean
-    public CommandLineRunner loadSettings(final WizardEspService service) {
+    public CommandLineRunner loadSettings(final WizardEspService service, final EsptoolBundleService esptoolBundleService) {
         return args -> {
 
             var wizardReadFlashView = WizardEspDto.builder()
@@ -44,6 +48,15 @@ public class DataGenerator {
                     .build();
 
             service.saveAll(List.of(wizardReadFlashView, wizardFlashView));
+
+            var esptoolBundleDto = EsptoolBundleDto.builder()
+                    .id(1L)
+                    .name(ESPTOOL)
+                    .absolutePathEsptool(StringUtils.EMPTY)
+                    .isBundle(true)
+                    .build();
+
+            esptoolBundleService.save(esptoolBundleDto);
 
         };
     }

@@ -27,6 +27,7 @@ public class EspFlowConstants {
     public static final String MARGIN_10_PX = "10px";
     public static final String AUTO = "auto";
     public static final String DISPLAY = "display";
+    public static final String ESPTOOL = "esptool";
     public static final String ESPTOOL_PY_NOT_FOUND = "esptool.py not found!";
     public static final String[] ESPTOOL_PY_VERSION = new String[]{"esptool.py","version"};
     public static final String VERSION = "version";

@@ -12,7 +12,6 @@ import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import jakarta.annotation.security.RolesAllowed;
 import lombok.extern.log4j.Log4j2;
 
 import static com.esp.espflow.util.EspFlowConstants.FREE_BSD_ICON;
@@ -25,14 +24,13 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOWS_ICON;
  * @author rub`n
  */
 @Log4j2
-@RolesAllowed("ADMIN")
-public class InitialInformationFlashEspViewDialog extends Div {
+public class InitialInformationFlashEspView extends Div {
 
     private static final String TARGET_BLANK = "_blank";
     private final Div content = new Div();
     private final H3 someFeatures = new H3("Some of the features in this view:");
 
-    public InitialInformationFlashEspViewDialog() {
+    public InitialInformationFlashEspView() {
 
         content.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN);
 
