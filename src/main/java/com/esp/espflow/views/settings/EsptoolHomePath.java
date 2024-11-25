@@ -15,6 +15,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -43,17 +44,46 @@ public class EsptoolHomePath {
     private final EsptoolService esptoolService;
     private final Layout esptoolLayout = new Layout();
     private final Upload upload = new Upload();
-    private final TextField currentTextField = new TextField();
+    private final TextField textfieldEsptoolHome = new TextField();
+    private final Button copyButton = new Button();
+    private final SvgIcon copySvgButton = SvgFactory.createCopyButtonFromSvg();
+    private final ClipboardHelper clipboardHelper = new ClipboardHelper();
 
     @PostConstruct
     public void init() {
         this.esptoolLayout.removeAll();
         //Add the listener only once
+        this.initListeners();
+    }
+
+    private void initListeners() {
         this.upload.addStartedListener(event -> {
             final String esptoolCustomPath = Path.of(event.getFileName()).toAbsolutePath().toString();
             log.info("Esptool custom path addStartedListener {}", esptoolCustomPath);
-            currentTextField.setValue(esptoolCustomPath);
+            textfieldEsptoolHome.setValue(esptoolCustomPath);
+            this.clipboardHelper.setContent(textfieldEsptoolHome.getValue());
+            this.copyButton.setTooltipText(textfieldEsptoolHome.getValue());
+            this.upload.clearFileList();
         });
+
+        this.clipboardHelper.wrap(this.copyButton);
+        this.copyButton.setIcon(this.copySvgButton);
+        this.copyButton.addClickListener(event -> {
+            Notification.show("Copied " + this.textfieldEsptoolHome.getValue(), 2500, Notification.Position.MIDDLE);
+            this.copyButton.setIcon(VaadinIcon.CHECK.create());
+            this.upload.clearFileList();
+            Mono.just(this.copyButton)
+                    .delayElement(Duration.ofMillis(1500))
+                    .subscribe(subscribeButton -> {
+                        subscribeButton.getUI().ifPresent(ui -> ui.access(() -> {
+                            subscribeButton.setIcon(this.copySvgButton);
+                            this.clipboardHelper.setContent(this.textfieldEsptoolHome.getValue());
+                        }));
+                    });
+        });
+        this.textfieldEsptoolHome.setValueChangeMode(ValueChangeMode.EAGER);
+        this.textfieldEsptoolHome.addValueChangeListener(event -> this.upload.clearFileList());
+
     }
 
     public Layout createEsptoolHomePathContent() {
@@ -65,14 +95,14 @@ public class EsptoolHomePath {
         Paragraph description = new Paragraph("By default it uses a version of esptool.py from the system's temporary directory, we can establish one by selecting it from here");
         description.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
-        this.currentTextField.addValueChangeListener(event -> this.upload.clearFileList());
         this.configureTextField();
         this.configureUploadButton();
-        this.setEsptoolPyVersion(currentTextField);
+        this.setEsptoolPyVersion(textfieldEsptoolHome);
 
-        this.esptoolLayout.add(currentTextField, upload);
+        this.esptoolLayout.add(textfieldEsptoolHome, upload);
         this.esptoolLayout.addClassNames(LumoUtility.Margin.Bottom.XSMALL, LumoUtility.Margin.Top.MEDIUM);
-        this.esptoolLayout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, currentTextField);
+        this.esptoolLayout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, textfieldEsptoolHome);
+        this.esptoolLayout.setAlignItems(Layout.AlignItems.CENTER);
         this.esptoolLayout.setGap(Layout.Gap.SMALL);
 
         final Layout layout = new Layout(title, description, esptoolLayout);
@@ -86,30 +116,20 @@ public class EsptoolHomePath {
         return layout;
     }
 
+    /**
+     *
+     */
     private void configureTextField() {
-        this.currentTextField.setWidthFull();
-        this.currentTextField.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-        final SvgIcon copyButton = SvgFactory.createCopyButtonFromSvg();
-        final Button button = new Button(copyButton);
-        button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        button.addClickListener(event -> {
-            Notification.show("Copied " + currentTextField.getValue(), 2500, Notification.Position.MIDDLE);
-            button.setIcon(VaadinIcon.CHECK.create());
-            Mono.just(button)
-                    .delayElement(Duration.ofMillis(1500))
-                    .subscribe(btn -> {
-                        btn.getUI().ifPresent(ui -> ui.access(() -> {
-                            btn.setIcon(copyButton);
-                        }));
-                    });
-        });
-        button.setTooltipText(currentTextField.getValue());
-        final ClipboardHelper clipboardHelper = new ClipboardHelper(currentTextField.getValue(), button);
+        this.textfieldEsptoolHome.setWidthFull();
+        this.textfieldEsptoolHome.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        this.copyButton.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         //Tooltip.forComponent(spanValue).setText(value.trim());
-        this.currentTextField.setSuffixComponent(clipboardHelper);
-
+        this.textfieldEsptoolHome.setSuffixComponent(clipboardHelper);
     }
 
+    /**
+     *
+     */
     public void configureUploadButton() {
         final FileBuffer buffer = new FileBuffer();
         upload.setDropAllowed(false);
@@ -117,7 +137,6 @@ public class EsptoolHomePath {
         upload.setReceiver(buffer);
         upload.addClassName("esptool-homepath-upload");
         this.i18N(upload);
-
     }
 
     /**
@@ -133,8 +152,8 @@ public class EsptoolHomePath {
                 .doOnError(error -> {
                     textField.getUI().ifPresent(ui -> {
                         ui.access(() -> {
-                            log.info("doOnError: {}", error.getMessage());
-                            textField.setPlaceholder(ESPTOOL_PY_NOT_FOUND);
+                            //log.info("doOnError: {}", error.getMessage());
+                            textField.setValue(ESPTOOL_PY_NOT_FOUND);
                             progressBar.setVisible(false);
                         });
                     });
@@ -143,14 +162,15 @@ public class EsptoolHomePath {
                 .doOnTerminate(() -> {
                     textField.getUI().ifPresent(ui -> ui.access(() -> {
                         progressBar.setVisible(false);
-                        log.info("doOnComplete: {}", textField);
+                        //log.info("doOnComplete: {}", textField);
                     }));
                 })
                 .subscribe(espToolVersion -> {
                     textField.getUI().ifPresent(ui -> {
                         ui.access(() -> {
-                            textField.setPlaceholder("Bundle ".concat(espToolVersion));
-                            log.info("subscribe: espToolVersion {} {}", espToolVersion, textField);
+                            String result = "Bundle ".concat(espToolVersion);
+                            textField.setValue(result);
+                            //log.info("subscribe: espToolVersion {} {}", espToolVersion, textField);
                         });
                     });
                 });
