@@ -2,9 +2,14 @@ package com.esp.espflow.views.settings;
 
 import com.esp.espflow.enums.Breakpoint;
 import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
@@ -13,8 +18,11 @@ import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.vaadin.olli.ClipboardHelper;
+import reactor.core.publisher.Mono;
 
 import java.nio.file.Path;
 import java.time.Duration;
@@ -34,7 +42,19 @@ public class EsptoolHomePath {
 
     private final EsptoolService esptoolService;
     private final Layout esptoolLayout = new Layout();
-    private Upload upload;
+    private final Upload upload = new Upload();
+    private final TextField currentTextField = new TextField();
+
+    @PostConstruct
+    public void init() {
+        this.esptoolLayout.removeAll();
+        //Add the listener only once
+        this.upload.addStartedListener(event -> {
+            final String esptoolCustomPath = Path.of(event.getFileName()).toAbsolutePath().toString();
+            log.info("Esptool custom path addStartedListener {}", esptoolCustomPath);
+            currentTextField.setValue(esptoolCustomPath);
+        });
+    }
 
     public Layout createEsptoolHomePathContent() {
         esptoolLayout.removeAll();
@@ -45,29 +65,17 @@ public class EsptoolHomePath {
         Paragraph description = new Paragraph("By default it uses a version of esptool.py from the system's temporary directory, we can establish one by selecting it from here");
         description.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
-        final TextField currentTextField = createTextField();
-        this.upload = this.configureUploadButton(currentTextField);
+        this.currentTextField.addValueChangeListener(event -> this.upload.clearFileList());
+        this.configureTextField();
+        this.configureUploadButton();
         this.setEsptoolPyVersion(currentTextField);
+
         this.esptoolLayout.add(currentTextField, upload);
         this.esptoolLayout.addClassNames(LumoUtility.Margin.Bottom.XSMALL, LumoUtility.Margin.Top.MEDIUM);
         this.esptoolLayout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, currentTextField);
         this.esptoolLayout.setGap(Layout.Gap.SMALL);
 
         final Layout layout = new Layout(title, description, esptoolLayout);
-
-        layout.addClickListener(event -> {
-            this.esptoolLayout.removeAll();
-            layout.remove(esptoolLayout);
-            final TextField newTextField = this.createTextField();
-            this.upload = this.configureUploadButton(newTextField);
-            this.esptoolLayout.add(newTextField, upload);
-            this.esptoolLayout.addClassNames(LumoUtility.Margin.Bottom.XSMALL, LumoUtility.Margin.Top.MEDIUM);
-            this.esptoolLayout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, currentTextField);
-            this.esptoolLayout.setGap(Layout.Gap.SMALL);
-            layout.add(esptoolLayout);
-            this.setEsptoolPyVersion(newTextField);
-        });
-
         // Viewport < 1024px
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
         // Viewport > 1024px
@@ -75,19 +83,34 @@ public class EsptoolHomePath {
         layout.setColumns(Layout.GridColumns.COLUMNS_2);
         layout.setColumnGap(Layout.Gap.MEDIUM);
         layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, title, description, esptoolLayout);
-
         return layout;
     }
 
-    private TextField createTextField() {
-        final TextField textFieldEsptoolBundle = new TextField();
-        textFieldEsptoolBundle.setWidthFull();
-        textFieldEsptoolBundle.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-        return textFieldEsptoolBundle;
+    private void configureTextField() {
+        this.currentTextField.setWidthFull();
+        this.currentTextField.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        final SvgIcon copyButton = SvgFactory.createCopyButtonFromSvg();
+        final Button button = new Button(copyButton);
+        button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        button.addClickListener(event -> {
+            Notification.show("Copied " + currentTextField.getValue(), 2500, Notification.Position.MIDDLE);
+            button.setIcon(VaadinIcon.CHECK.create());
+            Mono.just(button)
+                    .delayElement(Duration.ofMillis(1500))
+                    .subscribe(btn -> {
+                        btn.getUI().ifPresent(ui -> ui.access(() -> {
+                            btn.setIcon(copyButton);
+                        }));
+                    });
+        });
+        button.setTooltipText(currentTextField.getValue());
+        final ClipboardHelper clipboardHelper = new ClipboardHelper(currentTextField.getValue(), button);
+        //Tooltip.forComponent(spanValue).setText(value.trim());
+        this.currentTextField.setSuffixComponent(clipboardHelper);
+
     }
 
-    public Upload configureUploadButton(TextField textFieldEsptoolBundle) {
-        final Upload upload = new Upload();
+    public void configureUploadButton() {
         final FileBuffer buffer = new FileBuffer();
         upload.setDropAllowed(false);
         upload.setMaxFiles(10);
@@ -95,19 +118,6 @@ public class EsptoolHomePath {
         upload.addClassName("esptool-homepath-upload");
         this.i18N(upload);
 
-        upload.addStartedListener(event -> {
-            final String esptoolCustomPath = Path.of(event.getFileName()).toAbsolutePath().toString();
-            log.info("Esptool custom path {}", esptoolCustomPath);
-            textFieldEsptoolBundle.setValue(esptoolCustomPath);
-        });
-
-        upload.addSucceededListener(event -> {
-            final String esptoolCustomPath = Path.of(event.getFileName()).toAbsolutePath().toString();
-            log.info("Esptool custom path addSucceededListener {}", esptoolCustomPath);
-            textFieldEsptoolBundle.setValue(esptoolCustomPath);
-        });
-
-        return upload;
     }
 
     /**
@@ -115,9 +125,9 @@ public class EsptoolHomePath {
      */
     private void setEsptoolPyVersion(TextField textField) {
         final ProgressBar progressBar = new ProgressBar();
-        progressBar.setWidthFull();
-        progressBar.setVisible(true);
-        progressBar.setIndeterminate(true);
+        //progressBar.setWidthFull();
+        progressBar.setVisible(false);
+        //progressBar.setIndeterminate(true);
         textField.setPrefixComponent(progressBar);
         this.esptoolService.showEsptoolVersion()
                 .doOnError(error -> {
@@ -125,6 +135,7 @@ public class EsptoolHomePath {
                         ui.access(() -> {
                             log.info("doOnError: {}", error.getMessage());
                             textField.setPlaceholder(ESPTOOL_PY_NOT_FOUND);
+                            progressBar.setVisible(false);
                         });
                     });
                 })
@@ -139,6 +150,7 @@ public class EsptoolHomePath {
                     textField.getUI().ifPresent(ui -> {
                         ui.access(() -> {
                             textField.setPlaceholder("Bundle ".concat(espToolVersion));
+                            log.info("subscribe: espToolVersion {} {}", espToolVersion, textField);
                         });
                     });
                 });

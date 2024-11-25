@@ -72,7 +72,7 @@ public class SettingsDialogView extends Dialog {
     private static final String CONTACT_INFORMATION = "contact-information";
     private static final String ESPTOOL_HOMEPATH = "esptool-homepath";
     private static final String NOTIFICATION = "notifications";
-    private static final String ITEM_ICON_SIZE = "25px";
+    private static final String ITEM_ICON_SIZE = "24px";
 
     private final Button buttonEsptoolHomePath = new Button("esptool.py home path");
     private final Button buttonContactInformation = new Button("Manage settings...");
@@ -148,7 +148,7 @@ public class SettingsDialogView extends Dialog {
             this.updateFragment(NOTIFICATION);
         });
 
-        buttonEsptoolHomePath.setPrefixComponent(SvgFactory.createIconFromSvg("espressif-logo.svg", ITEM_ICON_SIZE, null));
+        buttonEsptoolHomePath.setPrefixComponent(SvgFactory.createIconFromSvg("espressif-logo.svg", "26px", null));
         buttonEsptoolHomePath.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createEsptoolHomePathContent());

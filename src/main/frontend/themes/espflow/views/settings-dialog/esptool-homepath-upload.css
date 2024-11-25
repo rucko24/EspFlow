@@ -1,4 +1,3 @@
 vaadin-upload.esptool-homepath-upload vaadin-upload-file::part(row) {
-  //display: none;
-  border: 1px solid red;
+  display: none;
 }
