@@ -1,5 +1,6 @@
 package com.esp.espflow.service.respository.impl;
 
+import com.esp.espflow.entity.EsptoolExecutableEntity;
 import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.mappers.EsptoolBundleMapper;
 import com.esp.espflow.service.respository.EsptoolExecutableRepository;
@@ -26,14 +27,20 @@ public class EsptoolExecutableServiceImpl {
      *
      * @param esptoolExecutableDto to save
      */
-    public void save(EsptoolExecutableDto esptoolExecutableDto) {
+    public EsptoolExecutableDto save(EsptoolExecutableDto esptoolExecutableDto) {
         var mappedEntity = EsptoolBundleMapper.INSTANCE.dtoToEntity(esptoolExecutableDto);
-        this.esptoolExecutableRepository.save(mappedEntity);
-        log.info("Entity saved EsptoolExecutableEntity: {}", mappedEntity);
+        EsptoolExecutableEntity entitySaved = this.esptoolExecutableRepository.save(mappedEntity);
+        log.info("Entity saved EsptoolExecutableEntity: {}", entitySaved);
+        return EsptoolBundleMapper.INSTANCE.entityToDto(entitySaved);
     }
 
     public Optional<EsptoolExecutableDto> findById(Long id) {
         return this.esptoolExecutableRepository.findById(id)
+                .map(EsptoolBundleMapper.INSTANCE::entityToDto);
+    }
+
+    public Optional<EsptoolExecutableDto> findByEsptoolVersionWithBundle(String esptoolVersion, boolean isBundle) {
+        return this.esptoolExecutableRepository.findByEsptoolVersionWithBundle(esptoolVersion, isBundle)
                 .map(EsptoolBundleMapper.INSTANCE::entityToDto);
     }
 
@@ -47,8 +54,12 @@ public class EsptoolExecutableServiceImpl {
                 .map(EsptoolBundleMapper.INSTANCE::entityToDto);
     }
 
-    public Optional<EsptoolExecutableDto> findByAbsolutePathEsptoolAndEsptoolVersion(String absolutePathEsptool, String esptoolVersion) {
-        return this.esptoolExecutableRepository.findByAbsolutePathEsptoolAndEsptoolVersion(absolutePathEsptool, esptoolVersion)
+    public void deleteById(final long id) {
+        this.esptoolExecutableRepository.deleteById(id);
+    }
+
+    public Optional<EsptoolExecutableDto> findByAbsolutePathEsptoolAndIsBundle(String absolutePathEsptool, boolean isBundle) {
+        return this.esptoolExecutableRepository.findByAbsolutePathEsptoolAndIsBundle(absolutePathEsptool, isBundle)
                 .map(EsptoolBundleMapper.INSTANCE::entityToDto);
     }
 

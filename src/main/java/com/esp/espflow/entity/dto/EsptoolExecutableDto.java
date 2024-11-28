@@ -57,6 +57,8 @@ public record EsptoolExecutableDto(
         if(dtoParam.absolutePathEsptool.startsWith("/tmp")) {
             data.append("Bundled ".concat(dtoParam.absolutePathEsptool));
         } else {
+            data.append(dtoParam.esptoolVersion);
+            data.append(" ");
             data.append(dtoParam.absolutePathEsptool);
         }
         return data.toString();

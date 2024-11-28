@@ -49,6 +49,33 @@ public class EsptoolPathService implements MakeExecutable {
         return esptoolPath;
     }
 
+    /**
+     *
+     * @param isBundle or custom executable esptool
+     * @param absolutePath
+     *
+     * @return A {@link String} with esptool bundle path
+     *
+     */
+    public String esptoolPath(final String absolutePath, boolean isBundle) {
+        this.esptoolExecutableServiceImpl.findByAbsolutePathEsptoolAndIsBundle(absolutePath, isBundle)
+                .ifPresentOrElse(esptoolBundleDto -> {
+                    if (esptoolBundleDto.isBundle()) {
+                        this.esptoolPath = this.bundlePath();
+                        log.info("Loaded esptool.py bundle {}", esptoolPath);
+                    } else {
+                        this.esptoolPath = esptoolBundleDto.absolutePathEsptool();
+                        this.makeExecutable(esptoolPath);
+                        log.info("Loaded custom esptool.py from {}", esptoolBundleDto.absolutePathEsptool());
+                    }
+                }, () -> {
+                    this.esptoolPath = this.bundlePath();
+                    log.info("Entity is not present, Loaded esptool.py bundle {}", esptoolPath);
+                });
+
+        return esptoolPath;
+    }
+
     private String bundlePath() {
         this.esptoolPath = JAVA_IO_TEMPORAL_DIR_OS.concat(ESPTOOL_BUNDLE_DIR);
         switch (GetOsName.getOsName()) {

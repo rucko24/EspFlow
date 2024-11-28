@@ -153,6 +153,21 @@ public class EsptoolService {
     }
 
     /**
+     * Check if esptool is installed by executing the command esptool.py version for the current system.
+     *
+     * @param absolutePath
+     * @param isBundle or custom executable esptool
+     *
+     * @return A {@link Flux<String> }
+     */
+    public Flux<String> showEsptoolVersion(String absolutePath, boolean isBundle) {
+        final String[] commands = {esptoolPathService.esptoolPath(absolutePath, isBundle), VERSION};
+        return this.commandService.processInputStreamLineByLine(commands)
+                .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
+                .map(this::processLineEsptoolVersion);
+    }
+
+    /**
      * This processes the line that has the <strong>esptool.py v</strong> and thus validates that the <strong>esptool.py</strong> is correctly installed.
      *
      * @param rawLine from console

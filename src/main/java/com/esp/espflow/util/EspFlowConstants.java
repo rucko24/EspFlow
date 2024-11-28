@@ -108,6 +108,7 @@ public class EspFlowConstants {
     public static final String STEP2 = "step2";
     public static final String STEP3 = "step3";
     public static final String SETTINGS = "settings";
+    public static final String VAR_LUMO_PRIMARY_COLOR_10_PCT = "var(--lumo-primary-color-10pct)";
 
 
 }

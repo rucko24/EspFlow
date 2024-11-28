@@ -25,14 +25,11 @@ public interface MakeExecutable {
             Files.setPosixFilePermissions(esptoolPath, permissions);
 
             if (Files.isExecutable(esptoolPath.toAbsolutePath())) {
-                //log.info("esptool bundle is executable");
                 return true;
             } else {
-                //log.info("Error when setting permissions in the esptool executable {}", esptoolPath);
                 return false;
             }
         } catch (IOException ex) {
-            //log.info("Error makeTheBundleExecutable() {}", ex.getMessage());
             return false;
         }
     }
