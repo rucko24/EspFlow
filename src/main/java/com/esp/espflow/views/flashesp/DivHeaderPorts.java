@@ -1,5 +1,6 @@
 package com.esp.espflow.views.flashesp;
 
+import com.esp.espflow.entity.event.EsptoolVersionEvent;
 import com.esp.espflow.service.ComPortService;
 import com.esp.espflow.service.CommandService;
 import com.esp.espflow.service.EsptoolService;
@@ -14,6 +15,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -33,6 +35,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Flux;
 
 import java.util.Comparator;
 import java.util.List;
@@ -59,7 +62,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
     private final Button unlockPort = new Button(
-            SvgFactory.createIconFromSvg("unlock-gray.svg","30px",null));
+            SvgFactory.createIconFromSvg("unlock-gray.svg", "30px", null));
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
     private final TextField inputCommand = new TextField();
     private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
@@ -70,6 +73,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final H2 h2EsptoolVersion = new H2();
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
+    private final Flux<EsptoolVersionEvent> esptoolVersionEvent;
 
     @PostConstruct
     public void constructDiv() {
@@ -105,7 +109,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final Div divReadCommand = this.createDiv(buttonExecuteFlashId, MARGIN, MARGIN_10_PX);
         final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
 
-        divHeader.add(divReadCommand,divScanPort, divUnlockPort);
+        divHeader.add(divReadCommand, divScanPort, divUnlockPort);
 
         final Hr hr = new Hr();
         hr.setHeight("6px");
@@ -172,7 +176,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     h2EsptoolVersion.setText(ESPTOOL_PY_NOT_FOUND);
                 }))
                 .subscribe(espToolVersion -> ui.access(() -> {
-                    if(espToolVersion.contains("esptool.py v")) {
+                    if (espToolVersion.contains("esptool.py v")) {
                         esptoolVersionCounter.set(true);
                     }
                     h2EsptoolVersion.setText(espToolVersion);
@@ -180,7 +184,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     *
      * Listener for scanPort and unlockPort
      */
     private void initListeners() {
@@ -193,7 +196,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      * {@link com.fazecast.jSerialComm.SerialPort}
      */
     private void showPortIsEsptoolVersionExists() {
-        if(esptoolVersionCounter.get()) {
+        if (esptoolVersionCounter.get()) {
 
             final List<String> ports = this.comPortService.getOnlyPortsList()
                     .stream()
@@ -201,16 +204,17 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     .toList();
 
             if (!ports.isEmpty()) {
-                if(GetOsName.getOsName() != GetOsName.WINDOWS) {
+                if (GetOsName.getOsName() != GetOsName.WINDOWS) {
                     unlockPort.setEnabled(true);
                 } else {
                     unlockPort.setTooltipText("Not available for Windows");
                     //Tooltip.forComponent(unlockPort).setText("Not available for Windows");
-                    unlockPort.addClickListener(event -> {});
+                    unlockPort.addClickListener(event -> {
+                    });
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 ConfirmDialogBuilder.showInformation("Port found!");
-                this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg","30px",null));
+                this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
                 buttonExecuteFlashId.setEnabled(true);
                 Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
                 Animated.animate(unlockPort, Animation.FADE_IN);
@@ -236,7 +240,17 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
             final UI ui = attachEvent.getUI();
             this.initListeners();
             this.getEspToolVersion(ui);
+            this.esptoolVersionEvent
+                    .subscribe(event -> {
+                        try {
+                            ui.access(() -> {
+                                h2EsptoolVersion.setText(event.esptoolVersion());
+                                log.info("Updated h2EsptoolVersion {}", event.esptoolVersion());
+                            });
+                        } catch (UIDetachedException ex) {}
+                    });
         }
+
     }
 
 }

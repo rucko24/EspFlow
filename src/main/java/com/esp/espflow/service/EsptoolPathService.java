@@ -1,11 +1,14 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.service.respository.impl.EsptoolBundleService;
+import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
 import com.esp.espflow.util.GetOsName;
+import com.esp.espflow.util.MakeExecutable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.nio.file.Path;
 
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_BUNDLE_DIR;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
@@ -16,10 +19,9 @@ import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class EsptoolPathService {
+public class EsptoolPathService implements MakeExecutable {
 
-    //Se esta ejecutado el orElse
-    private final EsptoolBundleService esptoolBundleService;
+    private final EsptoolExecutableServiceImpl esptoolExecutableServiceImpl;
     private String esptoolPath = StringUtils.EMPTY;
 
     /**
@@ -29,13 +31,14 @@ public class EsptoolPathService {
      */
     public String esptoolPath() {
 
-        this.esptoolBundleService.findByIsInBundleMode(true)
+        this.esptoolExecutableServiceImpl.findByIsSelectedToTrue()
                 .ifPresentOrElse(esptoolBundleDto -> {
-                    if(esptoolBundleDto.isBundle()) {
+                    if (esptoolBundleDto.isBundle()) {
                         this.esptoolPath = this.bundlePath();
                         log.info("Loaded esptool.py bundle {}", esptoolPath);
                     } else {
                         this.esptoolPath = esptoolBundleDto.absolutePathEsptool();
+                        this.makeExecutable(esptoolPath);
                         log.info("Loaded custom esptool.py from {}", esptoolBundleDto.absolutePathEsptool());
                     }
                 }, () -> {
@@ -65,6 +68,19 @@ public class EsptoolPathService {
             default -> {
                 log.info("SO not found! {}");
                 return StringUtils.EMPTY;
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    private void makeExecutable(String esptoolPath) {
+        if (GetOsName.getOsName() == GetOsName.LINUX) {
+            if (this.makeExecutable(Path.of(esptoolPath))) {
+                log.info("esptool is executable");
+            } else {
+                log.info("Error when setting permissions in the esptool executable {}", esptoolPath);
             }
         }
     }

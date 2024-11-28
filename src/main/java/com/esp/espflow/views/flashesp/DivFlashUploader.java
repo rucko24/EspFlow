@@ -1,6 +1,7 @@
 package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.util.ConfirmDialogBuilder;
+import com.esp.espflow.util.CreateCustomDirectory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
@@ -16,11 +17,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
@@ -38,7 +34,7 @@ import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 @Log4j2
 @SpringComponent
 @RequiredArgsConstructor
-public class DivFlashUploader extends Div {
+public class DivFlashUploader extends Div implements CreateCustomDirectory {
 
     private final FileBuffer buffer = new FileBuffer();
     private final Upload upload = new Upload();
@@ -116,25 +112,7 @@ public class DivFlashUploader extends Div {
      *
      */
     private void createUploadDir(FileBuffer buffer, String fileName) {
-        final var flashesDir = Path.of(JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"));
-        if (!Files.exists(flashesDir)) {
-            try {
-                Files.createDirectory(flashesDir);
-            } catch (IOException ex) {
-                log.debug("Error when creating temporary directory {} {}", flashesDir, ex.getMessage());
-            }
-        }
-        // Get information about the uploaded file
-        final Path fileNameResult = flashesDir.resolve(Path.of(fileName));
-        try (var input = new BufferedInputStream(buffer.getInputStream());
-             var outPut = new BufferedOutputStream(Files.newOutputStream(fileNameResult))) {
-
-            input.transferTo(outPut);
-
-        } catch (IOException ex) {
-            log.debug("Error when writing flash to temporary directory {} {}", flashesDir, ex.getMessage());
-        }
-
+        this.createCustomDirectory(buffer, JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"), fileName);
     }
 
     private void uploadStyles() {

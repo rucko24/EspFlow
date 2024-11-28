@@ -82,7 +82,7 @@ public class SettingsDialogView extends Dialog {
 
     private final Layout mainLayout = new Layout();
     private final WizardEspService wizardFlashEspRepository;
-    private final EsptoolHomePath esptoolHomePath;
+    private final SettingsEsptoolHomePathContent settingsEsptoolHomePathContent;
 
     @PostConstruct
     public void init() {
@@ -229,7 +229,7 @@ public class SettingsDialogView extends Dialog {
     }
 
     public Component createEsptoolHomePathContent() {
-        return esptoolHomePath.createEsptoolHomePathContent();
+        return settingsEsptoolHomePathContent.createEsptoolHomePathContent();
     }
 
     public Component createContactInformation() {

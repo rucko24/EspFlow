@@ -5,6 +5,7 @@ import com.esp.espflow.entity.event.EspMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
+import com.esp.espflow.views.about.Test;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.esp.espflow.views.settings.SettingsDialogView;
@@ -236,7 +237,6 @@ public class MainLayout extends AppLayout {
 
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
-
         if (accessChecker.hasAccess(FlashEspView.class)) {
             var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null));
             inboxCounter.setVisible(false);
@@ -256,6 +256,11 @@ public class MainLayout extends AppLayout {
 
         if (accessChecker.hasAccess(AboutView.class)) {
             nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
+        }
+
+        if(accessChecker.hasAccess(Test.class)) {
+            nav.addItem(new SideNavItem("Test", Test.class, VaadinIcon.HAMMER.create()));
+
         }
 
         return nav;

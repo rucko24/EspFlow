@@ -16,7 +16,7 @@ import reactor.core.publisher.Sinks;
 @Configuration
 public class EspMessageListItemReactivePublisher {
 
-    @Bean(value = "publishMessageListItem")
+    @Bean(value = "publishMessageListItemEvent")
     public Sinks.Many<EspMessageListItemEvent> publisher() {
         return Sinks
                 .many()
@@ -24,7 +24,7 @@ public class EspMessageListItemReactivePublisher {
                 .onBackpressureBuffer();
     }
 
-    @Bean(value = "subscribersMessageListItems")
+    @Bean(value = "subscribersMessageListItemsEvent")
     public Flux<EspMessageListItemEvent> subscribers(Sinks.Many<EspMessageListItemEvent> publisher) {
         return publisher
                 .asFlux();

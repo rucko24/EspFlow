@@ -59,6 +59,7 @@ public class EspFlowConstants {
     public static final String FRONTEND_IMAGES_SVG_ICONS = "/META-INF/resources/frontend/images/svg-icons/";
     public static final String META_INF_RESOURCES_ESPTOOL_BUNDLE = "/META-INF/resources/esptool-bundle/";
     public static final String ESPTOOL_BUNDLE_DIR = "/esptool-bundle-dir/";
+    public static final String EXECUTABLE_ICON_SVG = "executable-icon.svg";
     public static final String SLASH = "/";
     public static final String SET_CHMOD_X = "rwx--x--x";
     public static final String PORT = "--port";
@@ -81,6 +82,8 @@ public class EspFlowConstants {
     public static final String THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET = "This feature has not been implemented yet!";
 
     public static final String JAVA_IO_TEMPORAL_DIR_OS = System.getProperty("java.io.tmpdir");
+    public static final String JAVA_IO_USER_HOME_DIR_OS = System.getProperty("user.home");
+    public static final String CUSTOM_ESPTOOL = "/.custom-esptool/";
 
     public static final String NO_DEVICES_SHOWN = "No devices shown!";
     public static final String LOADING = "Loading...";
