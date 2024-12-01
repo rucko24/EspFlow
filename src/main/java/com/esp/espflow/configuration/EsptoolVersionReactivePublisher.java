@@ -1,6 +1,6 @@
 package com.esp.espflow.configuration;
 
-import com.esp.espflow.entity.event.EsptoolVersionEvent;
+import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.views.flashesp.DivHeaderPorts;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ import reactor.core.publisher.Sinks;
 public class EsptoolVersionReactivePublisher {
 
     @Bean(value = "publishEsptoolVersionEvent")
-    public Sinks.Many<EsptoolVersionEvent> publisher() {
+    public Sinks.Many<EsptoolVersionMessageListItemEvent> publisher() {
         return Sinks
                 .many()
                 .multicast()
@@ -24,7 +24,7 @@ public class EsptoolVersionReactivePublisher {
     }
 
     @Bean(value = "subscribersEsptoolVersionEvent")
-    public Flux<EsptoolVersionEvent> subscribers(Sinks.Many<EsptoolVersionEvent> publisher) {
+    public Flux<EsptoolVersionMessageListItemEvent> subscribers(Sinks.Many<EsptoolVersionMessageListItemEvent> publisher) {
         return publisher
                 .asFlux();
     }

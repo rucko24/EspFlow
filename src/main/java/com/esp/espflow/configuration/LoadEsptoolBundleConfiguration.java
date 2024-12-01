@@ -70,7 +70,7 @@ public class LoadEsptoolBundleConfiguration implements MakeExecutable {
                                         .name(ESPTOOL)
                                         .esptoolVersion(esptoolVersion)
                                         .absolutePathEsptool(outFileName)
-                                        .isBundle(true)
+                                        .isBundled(true)
                                         .isSelected(true)
                                         .build();
                                 esptoolExecutableService.save(esptoolExecutableDto);

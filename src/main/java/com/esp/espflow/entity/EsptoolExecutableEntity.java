@@ -31,8 +31,8 @@ public class EsptoolExecutableEntity {
     @Column(name = "absolute_path_esptool")
     private String absolutePathEsptool;
 
-    @Column(name = "is_bundle")
-    private boolean isBundle;
+    @Column(name = "is_bundled")
+    private boolean isBundled;
 
     @Column(name = "esptool_version")
     private String esptoolVersion;
@@ -46,7 +46,7 @@ public class EsptoolExecutableEntity {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", absolutePathEsptool='" + absolutePathEsptool + '\'' +
-                ", isBundle=" + isBundle +
+                ", isBundled=" + isBundled +
                 ", esptoolVersion='" + esptoolVersion + '\'' +
                 ", isSelected=" + isSelected +
                 '}';

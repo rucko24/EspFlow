@@ -1,6 +1,6 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.entity.event.EspMessageListItemEvent;
+import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
@@ -103,7 +103,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     /*
      * Publisher for MessageListItem
      */
-    private final Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
+    private final Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem;
     /*
      * initial wizard
      */
@@ -359,11 +359,9 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                                 ? "This chip cannot be parsed executed flash_id failed."
                                 : chipIs + " executed flash_id successfully.";
 
-                        final EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(finalTextNotification, port);
-
-                        log.info("Send post event {}", espMessageListItemEvent.getText());
-                        publishMessageListItem.tryEmitNext(espMessageListItemEvent);
-
+                        final EsptoolFRWMessageListItemEvent esptoolFRWMessageListItemEvent = new EsptoolFRWMessageListItemEvent(finalTextNotification, port);
+                        publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
+                        log.info("publish event {}", esptoolFRWMessageListItemEvent.getText());
                     });
                 })
                 .subscribe(line ->
@@ -398,7 +396,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
                         "  return hash; " +
                         "}"
         ).then(String.class, hash -> {
-            log.info("Fragmento de URI: {}", hash);
+            //log.info("Fragmento de URI: {}", hash);
             if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
                 this.add(this.wizardFlashEspDialog);
                 this.wizardFlashEspDialog.open();

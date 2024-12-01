@@ -23,23 +23,23 @@ public interface CreateCustomDirectory {
      * @param fileName the filename
      */
     default void createCustomDirectory(FileBuffer buffer, String fixedDir, String fileName) {
-        final var flashesDir = Path.of(fixedDir);
-        if (!Files.exists(flashesDir)) {
+        final var targetDir = Path.of(fixedDir);
+        if (!Files.exists(targetDir)) {
             try {
-                Files.createDirectory(flashesDir);
+                Files.createDirectories(targetDir);
             } catch (IOException ex) {
-                log.info(() -> "Error when creating temporary directory " + flashesDir + " " + ex.getMessage());
+                log.info(() -> "Error when creating directory " + targetDir + " " + ex.getMessage());
             }
         }
         // Get information about the uploaded file
-        final Path fileNameResult = flashesDir.resolve(Path.of(fileName));
+        final Path fileNameResult = targetDir.resolve(Path.of(fileName));
         try (var input = new BufferedInputStream(buffer.getInputStream());
              var outPut = new BufferedOutputStream(Files.newOutputStream(fileNameResult))) {
 
             input.transferTo(outPut);
 
         } catch (IOException ex) {
-            log.info("Error when writing flash to temporary directory " + flashesDir + " " + ex.getMessage());
+            log.info("Error when writing flash to temporary directory " + targetDir + " " + ex.getMessage());
         }
     }
 }

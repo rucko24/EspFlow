@@ -33,13 +33,13 @@ public class EsptoolPathService implements MakeExecutable {
 
         this.esptoolExecutableServiceImpl.findByIsSelectedToTrue()
                 .ifPresentOrElse(esptoolBundleDto -> {
-                    if (esptoolBundleDto.isBundle()) {
+                    if (esptoolBundleDto.isBundled()) {
                         this.esptoolPath = this.bundlePath();
-                        log.info("Loaded esptool.py bundle {}", esptoolPath);
+                        log.info("Loaded esptoolPath() esptool.py bundled {}", esptoolPath);
                     } else {
                         this.esptoolPath = esptoolBundleDto.absolutePathEsptool();
                         this.makeExecutable(esptoolPath);
-                        log.info("Loaded custom esptool.py from {}", esptoolBundleDto.absolutePathEsptool());
+                        log.info("Loaded esptoolPath() custom esptool.py from {}", esptoolBundleDto.absolutePathEsptool());
                     }
                 }, () -> {
                     this.esptoolPath = this.bundlePath();
@@ -60,9 +60,9 @@ public class EsptoolPathService implements MakeExecutable {
     public String esptoolPath(final String absolutePath, boolean isBundle) {
         this.esptoolExecutableServiceImpl.findByAbsolutePathEsptoolAndIsBundle(absolutePath, isBundle)
                 .ifPresentOrElse(esptoolBundleDto -> {
-                    if (esptoolBundleDto.isBundle()) {
+                    if (esptoolBundleDto.isBundled()) {
                         this.esptoolPath = this.bundlePath();
-                        log.info("Loaded esptool.py bundle {}", esptoolPath);
+                        log.info("Loaded esptool.py bundled {}", esptoolPath);
                     } else {
                         this.esptoolPath = esptoolBundleDto.absolutePathEsptool();
                         this.makeExecutable(esptoolPath);
@@ -105,7 +105,7 @@ public class EsptoolPathService implements MakeExecutable {
     private void makeExecutable(String esptoolPath) {
         if (GetOsName.getOsName() == GetOsName.LINUX) {
             if (this.makeExecutable(Path.of(esptoolPath))) {
-                log.info("esptool is executable");
+                //log.info("esptool is executable");
             } else {
                 log.info("Error when setting permissions in the esptool executable {}", esptoolPath);
             }

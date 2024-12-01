@@ -1,11 +1,11 @@
 package com.esp.espflow.views;
 
 import com.esp.espflow.entity.User;
-import com.esp.espflow.entity.event.EspMessageListItemEvent;
+import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
+import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
-import com.esp.espflow.views.about.Test;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.esp.espflow.views.settings.SettingsDialogView;
@@ -95,16 +95,18 @@ public class MainLayout extends AppLayout {
 
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
-    private final Flux<EspMessageListItemEvent> subscribersMessageListItems;
-
+    private final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems;
+    private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
     private final SettingsDialogView settingsDialogView;
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
-                      Flux<EspMessageListItemEvent> subscribersMessageListItems, SettingsDialogView settingsDialogView) {
+                      Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems, SettingsDialogView settingsDialogView,
+                      Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
         this.subscribersMessageListItems = subscribersMessageListItems;
         this.settingsDialogView = settingsDialogView;
+        this.subscribersEsptoolVersionMessageListItems = subscribersEsptoolVersionMessageListItems;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -258,11 +260,6 @@ public class MainLayout extends AppLayout {
             nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));
         }
 
-        if(accessChecker.hasAccess(Test.class)) {
-            nav.addItem(new SideNavItem("Test", Test.class, VaadinIcon.HAMMER.create()));
-
-        }
-
         return nav;
     }
 
@@ -313,25 +310,23 @@ public class MainLayout extends AppLayout {
             }).addComponentAsFirst(VaadinIcon.COG.create());
             userName.getSubMenu().add(new Hr());
 
-            var sigOutItem = userName.getSubMenu().addItem("Sign out", e -> {
-                authenticatedUser.logout();
-            });
+            final MenuItem sigOutItem = userName.getSubMenu().addItem("Sign out", e -> authenticatedUser.logout());
             sigOutItem.addComponentAsFirst(SvgFactory.createIconFromSvg("signout.svg", "20px", null));
 
             Shortcuts.addShortcutListener(userName, e -> {
                 getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
-                        log.info("fetchCurrentURL from shortcut {}", url);
                         String urlWithParameters = url.getPath().concat("#settings");
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
                         settingsDialogView.open(SETTINGS);
                         ui.setChildComponentModal(settingsDialogView, false);
+                        log.info("fetchCurrentURL from shortcut {}{}", url, "#settings");
                     });
                 });
             }, Key.KEY_S, KeyModifier.CONTROL, KeyModifier.ALT);
 
-
-            layout.add(userMenu, settingsDialogView);
+            UI.getCurrent().add(settingsDialogView);
+            layout.add(userMenu);
         } else {
             Anchor loginLink = new Anchor("login", "Sign in");
             layout.add(loginLink);
@@ -417,11 +412,16 @@ public class MainLayout extends AppLayout {
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
-            subscribersMessageListItems
+            //Subscription to flash_id, read_flash, write_flash events
+            this.subscribersMessageListItems
                     .subscribe(messageListItem -> {
                         this.subscribe(ui, messageListItem);
                     });
-
+            //Subscription to esptool version events
+            this.subscribersEsptoolVersionMessageListItems
+                    .subscribe(esptoolVersionMessageListItemEvent -> {
+                        this.subscribe(ui, esptoolVersionMessageListItemEvent);
+                    });
         }
 
     }

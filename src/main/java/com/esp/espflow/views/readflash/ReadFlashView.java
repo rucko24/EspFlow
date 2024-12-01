@@ -2,7 +2,7 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.entity.EspDeviceWithTotalDevicesRecord;
-import com.esp.espflow.entity.event.EspMessageListItemEvent;
+import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
@@ -133,7 +133,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     /*
      * Publisher for MessageListItem
      */
-    private final Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
+    private final Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem;
     /*
      * Show initial wizard
      */
@@ -239,6 +239,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             textField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
         });
         Tooltip.forComponent(autoDetectFlashSize).setText("Set custom flash size to ALL");
+        autoDetectFlashSize.getStyle().set("--_checkbox-size", "18px");
         autoDetectFlashSize.addValueChangeListener(event -> {
             if (event.getValue()) {
                 endAddress.setValue(0);
@@ -632,9 +633,9 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                         .map(HasText::getText)
                         .forEach(port -> {
 
-                            final EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(
+                            final EsptoolFRWMessageListItemEvent esptoolFRWMessageListItemEvent = new EsptoolFRWMessageListItemEvent(
                                     "This chip cannot be parsed executed flash_id failed.", port);
-                            this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
+                            this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
 
                         });
 
@@ -661,11 +662,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     public void emitNextEvent(final EspDeviceInfoRecord espDeviceInfoRecord, String concatResultMessage) {
 
-        EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(espDeviceInfoRecord.chipIs()
+        EsptoolFRWMessageListItemEvent esptoolFRWMessageListItemEvent = new EsptoolFRWMessageListItemEvent(espDeviceInfoRecord.chipIs()
                 .concat(concatResultMessage),
                 espDeviceInfoRecord.port());
 
-        this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
+        this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
     }
 
     @Override
@@ -709,7 +710,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                         "  return hash; " +
                         "}"
         ).then(String.class, hash -> {
-            log.info("Fragmento de URI: {}", hash);
+            log.info("Urifragment hash={}", hash);
             if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
                 this.add(this.wizardReadFlashView);
                 this.wizardReadFlashView.open();

@@ -1,6 +1,6 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.entity.event.EsptoolVersionEvent;
+import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.service.ComPortService;
 import com.esp.espflow.service.CommandService;
 import com.esp.espflow.service.EsptoolService;
@@ -36,6 +36,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import java.util.Comparator;
 import java.util.List;
@@ -49,6 +50,7 @@ import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
+import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_V;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_10_PX;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
@@ -73,7 +75,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final H2 h2EsptoolVersion = new H2();
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
-    private final Flux<EsptoolVersionEvent> esptoolVersionEvent;
+    private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
+    private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
 
     @PostConstruct
     public void constructDiv() {
@@ -105,9 +108,9 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
         final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
         final Div divUnlockPort = this.createDiv(unlockPort, MARGIN, MARGIN_10_PX);
-        final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
+        //final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
         final Div divReadCommand = this.createDiv(buttonExecuteFlashId, MARGIN, MARGIN_10_PX);
-        final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
+        //final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
 
         divHeader.add(divReadCommand, divScanPort, divUnlockPort);
 
@@ -163,11 +166,11 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     * Check if there is a version of esptool.py y la muestra en el H2
+     * <p>Check if there is a version of <strong>esptool.py</strong> to show it in an H2</p>
      *
-     * @param ui
+     * @param ui which comes from onAttach
      */
-    public void getEspToolVersion(final UI ui) {
+    public void updateH2WithEsptoolVersion(final UI ui) {
         h2EsptoolVersion.addClassName("pulse");
 
         this.esptoolService.showEsptoolVersion()
@@ -176,10 +179,15 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     h2EsptoolVersion.setText(ESPTOOL_PY_NOT_FOUND);
                 }))
                 .subscribe(espToolVersion -> ui.access(() -> {
-                    if (espToolVersion.contains("esptool.py v")) {
+                    if (espToolVersion.contains(ESPTOOL_PY_V)) {
                         esptoolVersionCounter.set(true);
                     }
                     h2EsptoolVersion.setText(espToolVersion);
+
+                    //final EsptoolVersionMessageListItemEvent esptoolVersionMessageListItemEvent = new EsptoolVersionMessageListItemEvent(EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED,espToolVersion,"/tmp");
+                    //publishEstoolVersionEvent.tryEmitNext(esptoolVersionMessageListItemEvent);
+                    //log.info("Publish EsptoolVersionEvent {} {}", esptoolVersionMessageListItemEvent.getEsptoolVersion(), esptoolVersionMessageListItemEvent.getAbsolutePathEsptool());
+
                 }));
     }
 
@@ -239,13 +247,13 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             this.initListeners();
-            this.getEspToolVersion(ui);
-            this.esptoolVersionEvent
-                    .subscribe(event -> {
+            this.updateH2WithEsptoolVersion(ui);
+            this.subscriberEsptoolVersionEvent
+                    .subscribe(esptoolVersionMessageListItemEvent -> {
                         try {
                             ui.access(() -> {
-                                h2EsptoolVersion.setText(event.esptoolVersion());
-                                log.info("Updated h2EsptoolVersion {}", event.esptoolVersion());
+                                h2EsptoolVersion.setText(esptoolVersionMessageListItemEvent.getEsptoolVersion());
+                                log.info("Subscribe EsptoolVersionEvent: {}", esptoolVersionMessageListItemEvent.getEsptoolVersion());
                             });
                         } catch (UIDetachedException ex) {}
                     });

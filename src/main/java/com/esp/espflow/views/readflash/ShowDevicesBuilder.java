@@ -2,7 +2,7 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.AddressRecord;
 import com.esp.espflow.entity.EspDeviceInfoRecord;
-import com.esp.espflow.entity.event.EspMessageListItemEvent;
+import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
@@ -170,7 +170,7 @@ public class ShowDevicesBuilder {
      * 12
      */
     public interface PublishMessageListItemStage {
-        StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EspMessageListItemEvent> publishMessageListItem);
+        StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem);
     }
 
     /**
@@ -205,7 +205,7 @@ public class ShowDevicesBuilder {
         private ComboBox<BaudRatesEnum> baudRatesComboBox;
         private EsptoolPathService esptoolPathService;
         private FlashDownloadButtonService flashDownloadButtonService;
-        private Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
+        private Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem;
 
         /**
          * To bind {@link AddressRecord}
@@ -291,7 +291,7 @@ public class ShowDevicesBuilder {
         }
 
         @Override
-        public StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EspMessageListItemEvent> publishMessageListItem) {
+        public StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem) {
             this.publishMessageListItem = publishMessageListItem;
             return this;
         }
@@ -592,11 +592,11 @@ public class ShowDevicesBuilder {
 
                                 String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(outPutConsole.scrollBarBuffer());
 
-                                EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(
+                                EsptoolFRWMessageListItemEvent esptoolFRWMessageListItemEvent = new EsptoolFRWMessageListItemEvent(
                                         chipIs.concat(" Flash successfully read!!!"),
                                         espDeviceInfoRecord.port());
 
-                                this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
+                                this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
 
                             } else {
                                 ConfirmDialogBuilder.showWarning("The flash does not exist in the tmp " + writFileToTempDir);

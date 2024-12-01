@@ -67,7 +67,7 @@ public class EsptoolExecutableServiceImpl {
         return this.esptoolExecutableRepository.findAll()
                 .stream()
                 .map(EsptoolBundleMapper.INSTANCE::entityToDto)
-                .peek(dto -> log.info("Dto {}", dto))
+                //.peek(dto -> log.info("Dto {}", dto))
                 .toList();
     }
 

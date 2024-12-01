@@ -1,6 +1,6 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.entity.event.EspMessageListItemEvent;
+import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
@@ -130,7 +130,7 @@ public class WriteFlashBuilder {
      * 11
      */
     public interface PublishMessageListItemStage {
-        Build withPublisher(Sinks.Many<EspMessageListItemEvent> publishMessageListItem);
+        Build withPublisher(Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem);
     }
 
     /**
@@ -156,7 +156,7 @@ public class WriteFlashBuilder {
         private String flashSize;
         private String flashFileName;
         private EsptoolPathService esptoolPathService;
-        private Sinks.Many<EspMessageListItemEvent> publishMessageListItem;
+        private Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem;
 
         @Override
         public ComboBoxSerialPortStage withEsptoolService(EsptoolService esptoolService) {
@@ -219,7 +219,7 @@ public class WriteFlashBuilder {
         }
 
         @Override
-        public Build withPublisher(Sinks.Many<EspMessageListItemEvent> publishMessageListItem) {
+        public Build withPublisher(Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem) {
             this.publishMessageListItem = publishMessageListItem;
             return this;
         }
@@ -268,10 +268,10 @@ public class WriteFlashBuilder {
 
                                 final String chipIs = ExtractChipIsFromStringMapper.INSTANCE.getChipIsFromThisString(outPutConsole.scrollBarBuffer());
 
-                                final EspMessageListItemEvent espMessageListItemEvent = new EspMessageListItemEvent(chipIs.concat(" Flash writed successfully!!!"),
+                                final EsptoolFRWMessageListItemEvent esptoolFRWMessageListItemEvent = new EsptoolFRWMessageListItemEvent(chipIs.concat(" Flash writed successfully!!!"),
                                         serialPort.getValue());
 
-                                this.publishMessageListItem.tryEmitNext(espMessageListItemEvent);
+                                this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
 
                                 this.outPutConsole.writePrompt();
                             });

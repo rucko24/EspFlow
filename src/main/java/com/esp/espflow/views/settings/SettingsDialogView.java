@@ -100,7 +100,7 @@ public class SettingsDialogView extends Dialog {
 
         final Button closeButton = new Button(new Icon("lumo", "cross"));
         closeButton.addClickListener(event -> {
-           closeButton.getUI().ifPresent(ui -> {
+            closeButton.getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
                     ui.getPage().getHistory().replaceState(null, url.getPath());
                 });
@@ -331,7 +331,7 @@ public class SettingsDialogView extends Dialog {
         final Paragraph spanEnableWizardFlashEsp = new Paragraph("Enable wizard Flash Esp32-ESP8266 view");
         spanEnableWizardFlashEsp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         toggleButtonFlashEsp.addValueChangeListener(event -> {
-            if(event.getValue()) {
+            if (event.getValue()) {
                 updateWizardView(WIZARD_FLASH_ESP_VIEW, true);
             } else {
                 updateWizardView(WIZARD_FLASH_ESP_VIEW, false);
@@ -340,7 +340,7 @@ public class SettingsDialogView extends Dialog {
         final Paragraph spanEnableWizardReadFlashEsp = new Paragraph("Enable wizard Read flash/firmware view");
         spanEnableWizardReadFlashEsp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         toggleButtonReadFlashEsp.addValueChangeListener(event -> {
-            if(event.getValue()) {
+            if (event.getValue()) {
                 updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, true);
             } else {
                 updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, false);
@@ -363,10 +363,13 @@ public class SettingsDialogView extends Dialog {
         verticalLayout.setSpacing(false);
         verticalLayout.getStyle().setOverflow(Overflow.HIDDEN);
 
+        Stream.of(toggleButtonReadFlashEsp, toggleButtonFlashEsp, toggleButtonEnableAllWizards)
+                .forEach(combo -> combo.getStyle().set("--_checkbox-size", "18px"));
+
         final Layout layout = new Layout(title, description, spanWizardsNotifications, verticalLayout);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
 
-        if(this.wizardFlashEspRepository.areAllWizardsEnabled()) {
+        if (this.wizardFlashEspRepository.areAllWizardsEnabled()) {
             log.info("Count all wizard enable {}", this.wizardFlashEspRepository.areAllWizardsEnabled());
             toggleButtonEnableAllWizards.setValue(true);
             toggleButtonFlashEsp.setValue(true);
@@ -481,7 +484,7 @@ public class SettingsDialogView extends Dialog {
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             ui.getPage().fetchCurrentURL(url -> {
-                log.info("onAttach {}", url.getPath());
+                //log.info("onAttach {}", url.getPath());
                 String ref = url.getRef();
                 this.configureDialog(ref);
                 this.initListeners();

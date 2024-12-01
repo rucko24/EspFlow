@@ -1,29 +1,33 @@
 package com.esp.espflow.views.settings;
 
 import com.esp.espflow.entity.dto.EsptoolExecutableDto;
-import com.esp.espflow.entity.event.EsptoolVersionEvent;
+import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.enums.Breakpoint;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.CreateCustomDirectory;
+import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
+import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.icon.SvgIcon;
-import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.component.upload.SucceededEvent;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -33,21 +37,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.olli.ClipboardHelper;
-import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Objects;
 
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CUSTOM_ESPTOOL;
+import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
-import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON_SVG;
+import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_USER_HOME_DIR_OS;
 
 /**
@@ -69,10 +73,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     private final Upload upload = new Upload();
     private final FileBuffer buffer = new FileBuffer();
     private final ComboBox<EsptoolExecutableDto> comboBoxEsptoolHome = new ComboBox<>();
-    private final Button copyButton = new Button();
-    private final SvgIcon copySvgButton = SvgFactory.createCopyButtonFromSvg();
-    private final ClipboardHelper clipboardHelper = new ClipboardHelper();
-    private final Sinks.Many<EsptoolVersionEvent> publishEsptoolVersionEvent;
+    private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEsptoolVersionEvent;
     private String overlay;
 
     @PostConstruct
@@ -88,17 +89,22 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     private void initListeners() {
         this.upload.addSucceededListener(event -> {
             this.upload.clearFileList();
-            final String fileName = JAVA_IO_USER_HOME_DIR_OS.concat(CUSTOM_ESPTOOL).concat(event.getFileName());
-            this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(CUSTOM_ESPTOOL), event.getFileName());
+            final String fileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL).concat(event.getFileName());
+            // FIXME Sacar version del esptool.py aqui mismo antes de guardar en db, comprobar hash de version ?
+            // Para diferenciar de un ejecutable malo
+            // Textfield con hash del executable y que compare con la version online ?
+            this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL), event.getFileName());
             log.info("Esptool custom path addSucceededListener {}", fileName);
+
             final EsptoolExecutableDto esptoolBundleDto = EsptoolExecutableDto.builder()
                     .name(ESPTOOL)
                     .absolutePathEsptool(fileName)
-                    .isBundle(false)
+                    .isBundled(false)
                     .esptoolVersion(StringUtils.EMPTY)
                     .isSelected(false)
                     .build();
-            EsptoolExecutableDto savedEsptoolBundleDto = this.esptoolExecutableServiceImpl.save(esptoolBundleDto);
+
+            final EsptoolExecutableDto savedEsptoolBundleDto = this.esptoolExecutableServiceImpl.save(esptoolBundleDto);
             this.esptoolService.showEsptoolVersion(fileName, false)
                     .subscribe(esptoolVersion -> {
                         if (!esptoolVersion.contains(ESPTOOL_PY_NOT_FOUND)) {
@@ -108,22 +114,8 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                                             ConfirmDialogBuilder.showInformation("The version " + esptoolVersion + " exists");
                                         });
                                     }, () -> {
-                                        this.executeCommandFromCombo(() -> {
-                                            final EsptoolExecutableDto entityToUpdate = EsptoolExecutableDto.builder()
-                                                    .id(savedEsptoolBundleDto.id())
-                                                    .name(ESPTOOL)
-                                                    .absolutePathEsptool(esptoolBundleDto.absolutePathEsptool())
-                                                    .isBundle(false)
-                                                    .esptoolVersion(esptoolVersion)
-                                                    .isSelected(false)
-                                                    .build();
-                                            this.esptoolExecutableServiceImpl.save(entityToUpdate);
-                                            this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
-                                            int overlayLength = esptoolVersion.concat(esptoolBundleDto.absolutePathEsptool()).length();
-                                            this.overlay = overlayLength + "px";
-                                            //FIXME recalculate the width more precisely
-                                            this.comboBoxEsptoolHome.getStyle().set("--vaadin-combo-box-overlay-width", "400px");
-                                        });
+                                        this.configureDirectoryForTheNewUploadedExecutable(esptoolVersion, fileName,
+                                                event, savedEsptoolBundleDto);
                                     });
                         } else {
                             this.executeCommandFromCombo(() -> {
@@ -133,73 +125,136 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                                 try {
                                     Files.deleteIfExists(Path.of(savedEsptoolBundleDto.absolutePathEsptool()));
                                 } catch (IOException e) {
-                                    throw new RuntimeException(e);
+                                    throw new RuntimeException("No se puede borrar el directorio custom del esptool.py");
                                 }
                             });
                         }
 
                     });
-            //this.clipboardHelper.setContent(comboBoxEsptoolHome.getValue());
-            //this.copyButton.setTooltipText(comboBoxEsptoolHome.getValue());
         });
-        this.clipboardHelper.wrap(this.copyButton);
-        this.copyButton.setIcon(this.copySvgButton);
-        this.copyButton.addClickListener(event -> {
-            this.upload.clearFileList();
-            Notification.show("Copied " + this.comboBoxEsptoolHome.getValue(), 2500, Notification.Position.MIDDLE);
-            this.copyButton.setIcon(VaadinIcon.CHECK.create());
-            Mono.just(this.copyButton)
-                    .delayElement(Duration.ofMillis(1500))
-                    .subscribe(subscribeButton -> {
-                        subscribeButton.getUI().ifPresent(ui -> ui.access(() -> {
-                            subscribeButton.setIcon(this.copySvgButton);
-                            //this.clipboardHelper.setContent(this.comboBoxEsptoolHome.getValue());
-                        }));
-                    });
-        });
-        this.comboBoxEsptoolHome.setPrefixComponent(SvgFactory.createIconFromSvg(EXECUTABLE_ICON_SVG, "20px", null));
+
+        this.comboBoxEsptoolHome.setPrefixComponent(SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", null));
         this.comboBoxEsptoolHome.setItemLabelGenerator(EsptoolExecutableDto::displayAbsoluteEsptoolPathForCombo);
         this.comboBoxEsptoolHome.setRenderer(EsptoolExecutableDto.rendererExecutableIcon());
+        //this.comboBoxEsptoolHome.getStyle().set("--vaadin-combo-box-overlay-width", "500px");
         //this.comboBoxEsptoolHome.getStyle().set("--vaadin-input-field-border-width", "1px");
         //this.comboBoxEsptoolHome.getStyle().set("--vaadin-input-field-border-color", VAR_LUMO_PRIMARY_COLOR_10_PCT);
-        this.comboBoxEsptoolHome.addValueChangeListener(esptoolDtoItem -> {
-            if (Objects.nonNull(esptoolDtoItem.getValue())) {
-                final EsptoolExecutableDto item = esptoolDtoItem.getValue();
-                this.esptoolExecutableServiceImpl.findById(item.id())
-                        .ifPresent(entityPresent -> {
-                            final EsptoolExecutableDto updatedEntity = EsptoolExecutableDto.builder()
-                                    .id(entityPresent.id())
-                                    .name(ESPTOOL)
-                                    .esptoolVersion(item.esptoolVersion())
-                                    .absolutePathEsptool(item.absolutePathEsptool())
-                                    .isBundle(item.isBundle())
-                                    .isSelected(true)
-                                    .build();
+        this.comboBoxEsptoolHome.addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                final EsptoolExecutableDto esptoolExecutableDtoItem = event.getValue();
+                if (Objects.nonNull(esptoolExecutableDtoItem)) {
+                    //Hace falta tirar esta puta query ? o si lo es para poder hacer el setValue correctamente ?
+                    final EsptoolExecutableDto updatedEntity = EsptoolExecutableDto.builder()
+                            .id(esptoolExecutableDtoItem.id())
+                            .name(ESPTOOL)
+                            .esptoolVersion(esptoolExecutableDtoItem.esptoolVersion())
+                            .absolutePathEsptool(esptoolExecutableDtoItem.absolutePathEsptool())
+                            .isBundled(esptoolExecutableDtoItem.isBundled())
+                            .isSelected(true)
+                            .build();
 
-                            this.esptoolExecutableServiceImpl.save(updatedEntity);
-                            this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(updatedEntity.id());
+                    this.esptoolExecutableServiceImpl.save(updatedEntity);
+                    this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(esptoolExecutableDtoItem.id());
 
-                            //Ya estamos con el select a true y los demas  false, entonces sacamos la version
-                            // y volvemos a actualizar
-                            this.esptoolService.showEsptoolVersion()
-                                    .subscribe(esptoolVersion -> {
-                                        final EsptoolExecutableDto updatedEntityAgain = EsptoolExecutableDto.builder()
-                                                .id(entityPresent.id())
-                                                .name(ESPTOOL)
-                                                .esptoolVersion(esptoolVersion)
-                                                .absolutePathEsptool(item.absolutePathEsptool())
-                                                .isBundle(item.isBundle())
-                                                .isSelected(true)
-                                                .build();
-                                        this.esptoolExecutableServiceImpl.save(updatedEntity);
-                                        this.publishEsptoolVersionEvent.tryEmitNext(new EsptoolVersionEvent(updatedEntityAgain.esptoolVersion()));
-                                        this.executeCommandFromCombo(() -> {
-                                            this.comboBoxEsptoolHome.setHelperText(updatedEntityAgain.esptoolVersion());
-                                        });
-                                    });
-                        });
+                    //Ya estamos con el select a true y los demas  false, entonces sacamos la version
+                    this.esptoolService.showEsptoolVersion()
+                            .subscribe(esptoolVersion -> {
+                                this.executeCommandFromCombo(() -> {
+                                    this.publishEventAndRefreshHelperText(esptoolExecutableDtoItem);
+                                });
+                            });
+                }
+            } else {
+                Notification.show("Not from client()");
+            }
+
+        });
+
+    }
+
+    /**
+     *
+     */
+    private void configureDirectoryForTheNewUploadedExecutable(final String esptoolVersion, final String fileName,
+                                                               final SucceededEvent event,
+                                                               final EsptoolExecutableDto savedEsptoolBundleDto) {
+        this.executeCommandFromCombo(() -> {
+            try {
+                final String version = esptoolVersion.split(" ")[1];
+                // home/user/.espflow/1.0.0/esptool/v4.x.x/esptool
+                final Path newEsptoolVersionDir = Path.of(JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR)
+                        .concat(CUSTOM_ESPTOOL) + version + "/" + event.getFileName());
+                Files.createDirectories(newEsptoolVersionDir.getParent());
+                // target /home/rubn/.espflow/1.0.0/esptool/esptool
+                Files.move(Path.of(fileName), newEsptoolVersionDir, StandardCopyOption.REPLACE_EXISTING);
+
+                final EsptoolExecutableDto entityToUpdate = EsptoolExecutableDto.builder()
+                        .id(savedEsptoolBundleDto.id())
+                        .name(ESPTOOL)
+                        .absolutePathEsptool(newEsptoolVersionDir.toAbsolutePath().toString())
+                        .isBundled(false)
+                        .esptoolVersion(esptoolVersion)
+                        .isSelected(false)
+                        .build();
+
+                this.esptoolExecutableServiceImpl.save(entityToUpdate);
+                this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
+                this.comboBoxEsptoolHome.setValue(entityToUpdate);
+                int overlayLength = esptoolVersion.concat(fileName).length();
+                this.overlay = (overlayLength * 9) + "px";
+                //TODO recalculate the width more precisely
+                this.comboBoxEsptoolHome.getStyle().set("--vaadin-combo-box-overlay-width", overlay);
+
+                this.publishEventAndRefreshHelperText(entityToUpdate);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Error al crear o mover el directorio custom del esptool");
             }
         });
+    }
+
+    /**
+     * @param textEsptoolVersion
+     * @param textAbsolutePathEsptool
+     * @return A {@link Component}
+     */
+    private Component createHelperText(final String textEsptoolVersion, final String textAbsolutePathEsptool) {
+        final Span estoolVersionSpan = new Span(textEsptoolVersion);
+        estoolVersionSpan.addClickListener(event -> Notification.show("Copied " + textEsptoolVersion, 2000, Notification.Position.MIDDLE));
+        Tooltip.forComponent(estoolVersionSpan).setText(textEsptoolVersion);
+        final ClipboardHelper clipboard1 = new ClipboardHelper(textEsptoolVersion, estoolVersionSpan);
+        final Div div1 = new Div(clipboard1);
+        div1.getElement().getThemeList().add("badge pill");
+
+        final Span estoolAbsolutePathSpan = new Span(textAbsolutePathEsptool);
+        estoolAbsolutePathSpan.setWidth("200px");
+        estoolAbsolutePathSpan.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
+        estoolAbsolutePathSpan.addClassNames(
+                LumoUtility.TextOverflow.ELLIPSIS,
+                LumoUtility.Whitespace.NOWRAP,
+                LumoUtility.Overflow.HIDDEN);
+
+        estoolAbsolutePathSpan.addClickListener(event -> Notification.show("Copied " + textAbsolutePathEsptool, 2000, Notification.Position.MIDDLE));
+        Tooltip.forComponent(estoolAbsolutePathSpan).setText(textAbsolutePathEsptool);
+
+        final ClipboardHelper clipboard2 = new ClipboardHelper(textAbsolutePathEsptool, estoolAbsolutePathSpan);
+
+        clipboard2.getStyle().setWidth("200px");
+        clipboard2.addClassNames(LumoUtility.Display.INLINE_BLOCK,
+                LumoUtility.TextOverflow.ELLIPSIS,
+                LumoUtility.Whitespace.NOWRAP,
+                LumoUtility.Overflow.HIDDEN);
+
+        final Div div2 = new Div(clipboard2);
+        div2.getElement().getThemeList().add("badge pill");
+
+        final HorizontalLayout row = new HorizontalLayout(div1, div2);
+        row.setWidthFull();
+        row.getStyle().setCursor(EspFlowConstants.CURSOR_POINTER);
+        row.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        Animated.animate(row, Animated.Animation.FADE_IN);
+
+        return row;
     }
 
     /**
@@ -226,7 +281,11 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         Paragraph description = new Paragraph("By default it uses a version of esptool.py from the system's temporary directory, we can establish one by selecting it from here");
         description.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
-        this.configureComboBox();
+        this.comboBoxEsptoolHome.setWidthFull();
+        this.comboBoxEsptoolHome.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+        this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
+        this.setValueForCombo();
+
         this.configureUploadButton();
 
         final Div divCombo = new Div(comboBoxEsptoolHome, upload);
@@ -252,16 +311,19 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     *
+     * Sets the value of the combo if previously selected to true, initially the default is bundled to true.
      */
-    private void configureComboBox() {
-        this.comboBoxEsptoolHome.setWidthFull();
-        this.comboBoxEsptoolHome.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-        this.copyButton.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+    private void setValueForCombo() {
+        this.esptoolExecutableServiceImpl.findByIsSelectedToTrue()
+                .ifPresent(esptoolExecutableDto -> {
+                    this.comboBoxEsptoolHome.setValue(esptoolExecutableDto);
+                    this.comboBoxEsptoolHome.setHelperComponent(createHelperText(esptoolExecutableDto.esptoolVersion(),
+                            esptoolExecutableDto.absolutePathEsptool()));
+                });
     }
 
     /**
-     * configuration for upload
+     * Configuration for upload
      */
     public void configureUploadButton() {
         upload.setDropAllowed(false);
@@ -273,9 +335,38 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
+     * @param esptoolExecutableDto
+     */
+    private void publishEventAndRefreshHelperText(EsptoolExecutableDto esptoolExecutableDto) {
+        if (esptoolExecutableDto.isBundled()) {
+
+            this.publishEsptoolVersionEvent.tryEmitNext(new EsptoolVersionMessageListItemEvent(
+                    EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED
+                    , esptoolExecutableDto.esptoolVersion(),
+                    esptoolExecutableDto.absolutePathEsptool()));
+
+            log.info("publish bundled esptool event {}", esptoolExecutableDto);
+
+        } else {
+
+            this.publishEsptoolVersionEvent.tryEmitNext(new EsptoolVersionMessageListItemEvent(
+                    EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.CUSTOM
+                    , esptoolExecutableDto.esptoolVersion(),
+                    esptoolExecutableDto.absolutePathEsptool()));
+
+            log.info("publish custom esptool event {}", esptoolExecutableDto);
+
+        }
+
+        this.comboBoxEsptoolHome.setHelperComponent(createHelperText(
+                esptoolExecutableDto.esptoolVersion(), esptoolExecutableDto.absolutePathEsptool()));
+
+    }
+
+    /**
      * @param comboBoxEsptoolPath
      */
-    private void setEsptoolPyVersion(UI ui, ComboBox<EsptoolExecutableDto> comboBoxEsptoolPath) {
+    private void fillComboBox(UI ui, ComboBox<EsptoolExecutableDto> comboBoxEsptoolPath) {
         this.esptoolService.showEsptoolVersion()
                 .doOnError(error -> {
                     //ESPTOOL_PY_NOT_FOUND
@@ -289,25 +380,18 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                 })
                 .doOnTerminate(() -> {
                     ui.access(() -> {
-
                     });
                 })
                 .subscribe(espToolVersion -> {
                     ui.access(() -> {
-                        publishEsptoolVersionEvent.tryEmitNext(new EsptoolVersionEvent(espToolVersion));
-                        this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
-                        this.comboBoxEsptoolHome.getStyle().set("--vaadin-combo-box-overlay-width", overlay);
-                        this.esptoolExecutableServiceImpl.findByIsSelectedToTrue()
-                                .ifPresent(dtoIfPresent -> {
-                                    comboBoxEsptoolPath.setValue(dtoIfPresent);
-                                    log.info("Dto if Present {} ", dtoIfPresent);
-                                });
+                        comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
+                        this.setValueForCombo();
                     });
                 });
     }
 
     /**
-     * @param upload
+     * @param upload to configure
      */
     private void i18N(final Upload upload) {
         final UploadExamplesI18N uploadI18N = new UploadExamplesI18N();
@@ -361,7 +445,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         super.onAttach(attachEvent);
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
-            this.setEsptoolPyVersion(ui, comboBoxEsptoolHome);
+            this.fillComboBox(ui, comboBoxEsptoolHome);
         }
     }
 }

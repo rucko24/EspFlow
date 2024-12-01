@@ -9,7 +9,7 @@ import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import lombok.Builder;
 
-import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON_SVG;
+import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
 
 /**
  *
@@ -17,7 +17,7 @@ import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON_SVG;
  *
  * @param id
  * @param name
- * @param isBundle
+ * @param isBundled
  * @param absolutePathEsptool
  * @param esptoolVersion
  * @param isSelected
@@ -26,7 +26,7 @@ import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON_SVG;
 public record EsptoolExecutableDto(
         Long id,
         String name,
-        boolean isBundle,
+        boolean isBundled,
         String absolutePathEsptool,
         String esptoolVersion,
         boolean isSelected) {
@@ -38,7 +38,7 @@ public record EsptoolExecutableDto(
     public static ComponentRenderer<Div, EsptoolExecutableDto> rendererExecutableIcon() {
         final SerializableBiConsumer<Div, EsptoolExecutableDto> serializableBiConsumer = (div, esptoolBundleDto) -> {
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-            final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON_SVG, "16px", null);
+            final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", "20px");
             final Span span = new Span(displayAbsoluteEsptoolPathForCombo(esptoolBundleDto));
             span.addClassNames(LumoUtility.Padding.Left.SMALL);
             div.add(icon, span);
@@ -53,7 +53,7 @@ public record EsptoolExecutableDto(
      * @return A {@link String}
      */
     public static String displayAbsoluteEsptoolPathForCombo(final EsptoolExecutableDto dtoParam) {
-        StringBuilder data = new StringBuilder();
+        final StringBuilder data = new StringBuilder();
         if(dtoParam.absolutePathEsptool.startsWith("/tmp")) {
             data.append("Bundled ".concat(dtoParam.absolutePathEsptool));
         } else {
@@ -69,7 +69,7 @@ public record EsptoolExecutableDto(
         return "{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", isBundle=" + isBundle +
+                ", isBundled=" + isBundled +
                 ", absolutePathEsptool='" + absolutePathEsptool + '\'' +
                 ", esptoolVersion='" + esptoolVersion + '\'' +
                 ", isSelected=" + isSelected +

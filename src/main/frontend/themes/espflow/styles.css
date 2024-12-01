@@ -285,6 +285,16 @@ html {
     scrollbar-width: thin;
 }
 
+vaadin-context-menu-item.context-menu-item-xterm::part(checkmark)::before {
+  display: none;
+}
+
+/* some indent for the content */
+vaadin-context-menu-item.context-menu-item-xterm {
+  padding-left: var(--lumo-space-s);
+  justify-content: flex-start;
+}
+
 vaadin-split-layout > [slot="primary"] {
     scrollbar-width: thin;
 }

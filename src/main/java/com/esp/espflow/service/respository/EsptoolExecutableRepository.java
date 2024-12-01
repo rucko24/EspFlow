@@ -15,17 +15,17 @@ public interface EsptoolExecutableRepository extends JpaRepository<EsptoolExecut
     @Query("SELECT entity " +
             "FROM EsptoolExecutableEntity entity " +
             "WHERE entity.esptoolVersion = :esptoolVersion " +
-            "AND entity.isBundle = :isBundle")
+            "AND entity.isBundled = :isBundled")
     Optional<EsptoolExecutableEntity> findByEsptoolVersionWithBundle(@Param("esptoolVersion")String esptoolVersion,
-                                                                     @Param("isBundle") boolean isBundle);
+                                                                     @Param("isBundled") boolean isBundle);
 
     @Query("SELECT entity " +
             "FROM EsptoolExecutableEntity entity " +
             "WHERE entity.absolutePathEsptool = :absolutePathEsptool " +
-            "AND entity.isBundle = :isBundle " +
+            "AND entity.isBundled = :isBundled " +
             "AND entity.esptoolVersion = ''")
     Optional<EsptoolExecutableEntity> findByAbsolutePathEsptoolAndIsBundle(@Param("absolutePathEsptool") String absolutePathEsptool,
-                                                                           @Param("isBundle") boolean isBundle);
+                                                                           @Param("isBundled") boolean isBundle);
 
     @Query("SELECT entity " +
             "FROM EsptoolExecutableEntity entity " +

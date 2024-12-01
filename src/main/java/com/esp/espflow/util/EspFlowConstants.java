@@ -28,6 +28,7 @@ public class EspFlowConstants {
     public static final String AUTO = "auto";
     public static final String DISPLAY = "display";
     public static final String ESPTOOL = "esptool";
+    public static final String ESPTOOL_PY_V = "esptool.py v";
     public static final String ESPTOOL_PY_NOT_FOUND = "esptool.py not found!";
     public static final String[] ESPTOOL_PY_VERSION = new String[]{"esptool.py","version"};
     public static final String VERSION = "version";
@@ -57,9 +58,9 @@ public class EspFlowConstants {
     public static final String FRONTEND_IMAGES_ABOUT = "frontend/images/about/";
     public static final String FRONTEND_IMAGES_CUSTOM = "frontend/images/custom-images/";
     public static final String FRONTEND_IMAGES_SVG_ICONS = "/META-INF/resources/frontend/images/svg-icons/";
-    public static final String META_INF_RESOURCES_ESPTOOL_BUNDLE = "/META-INF/resources/esptool-bundle/";
-    public static final String ESPTOOL_BUNDLE_DIR = "/esptool-bundle-dir/";
-    public static final String EXECUTABLE_ICON_SVG = "executable-icon.svg";
+    public static final String META_INF_RESOURCES_ESPTOOL_BUNDLE = "/META-INF/resources/esptool-bundled/";
+    public static final String ESPTOOL_BUNDLE_DIR = "/esptool-bundled-dir/";
+    public static final String EXECUTABLE_ICON = "executable.svg";
     public static final String SLASH = "/";
     public static final String SET_CHMOD_X = "rwx--x--x";
     public static final String PORT = "--port";
@@ -83,7 +84,8 @@ public class EspFlowConstants {
 
     public static final String JAVA_IO_TEMPORAL_DIR_OS = System.getProperty("java.io.tmpdir");
     public static final String JAVA_IO_USER_HOME_DIR_OS = System.getProperty("user.home");
-    public static final String CUSTOM_ESPTOOL = "/.custom-esptool/";
+    public static final String ESPFLOW_DIR = "/.espflow/1.0.0/";
+    public static final String CUSTOM_ESPTOOL = "esptool/";
 
     public static final String NO_DEVICES_SHOWN = "No devices shown!";
     public static final String LOADING = "Loading...";

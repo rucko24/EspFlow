@@ -22,6 +22,7 @@ import static com.esp.espflow.util.EspFlowConstants.CHIP_TYPE;
 import static com.esp.espflow.util.EspFlowConstants.CRYSTAL_IS;
 import static com.esp.espflow.util.EspFlowConstants.DETECTED_FLASH_SIZE;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
+import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_V;
 import static com.esp.espflow.util.EspFlowConstants.FIRST_LINE_TO_CHECK_IF_IT_EXISTS;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ID;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
@@ -174,7 +175,7 @@ public class EsptoolService {
      * @return A {@link String}
      */
     private String processLineEsptoolVersion(final String rawLine) {
-        if (!(rawLine.contains("esptool.py v"))) {
+        if (!(rawLine.contains(ESPTOOL_PY_V))) {
             return ESPTOOL_PY_NOT_FOUND;
         }
         return rawLine.split(System.lineSeparator())[0];
