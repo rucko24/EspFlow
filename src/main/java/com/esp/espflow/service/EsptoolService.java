@@ -1,6 +1,7 @@
 package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
+import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.mappers.EspDeviceInfoMapper;
@@ -169,13 +170,12 @@ public class EsptoolService {
     /**
      * Check if esptool is installed by executing the command esptool.py version for the current system.
      *
-     * @param absolutePath
-     * @param isBundle or custom executable esptool
+     * @param esptoolExecutableDto
      *
      * @return A {@link Flux<String> }
      */
-    public Flux<String> showEsptoolVersion(String absolutePath, boolean isBundle) {
-        final String[] commands = {esptoolPathService.esptoolPath(absolutePath, isBundle), VERSION};
+    public Flux<String> showEsptoolVersion(EsptoolExecutableDto esptoolExecutableDto) {
+        final String[] commands = {esptoolPathService.esptoolPath(esptoolExecutableDto), VERSION};
         return this.commandService.processInputStreamLineByLine(commands)
                 .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
                 .map(this::processLineEsptoolVersion);

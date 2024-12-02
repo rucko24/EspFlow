@@ -1,7 +1,10 @@
 package com.esp.espflow.mappers;
 
 import com.esp.espflow.entity.EsptoolSha256Entity;
+import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.entity.dto.EsptoolSha256Dto;
+
+import static com.esp.espflow.util.EspFlowConstants.ESPTOOL;
 
 /**
  * @author rubn
@@ -21,13 +24,16 @@ public final class EsptoolSha256Mapper {
                 .build();
     }
 
-    public EsptoolSha256Entity dtoToEntity(final EsptoolSha256Dto esptoolSha256Dto) {
-        return EsptoolSha256Entity.builder()
-                .id(esptoolSha256Dto.id())
+    public EsptoolExecutableDto esptoolSha256ToEsptoolExecutableDto(final String fileName, final EsptoolSha256Dto esptoolSha256Dto,
+                                                                    boolean isBundle, boolean isSelected) {
+        return EsptoolExecutableDto.builder()
+                .name(ESPTOOL)
+                .esptoolVersion("esptool.py ".concat(esptoolSha256Dto.esptoolVersion()))
+                .absolutePathEsptool(fileName)
+                .isBundled(isBundle)
+                .isSelected(isSelected)
                 .sha256(esptoolSha256Dto.sha256())
-                .esptoolVersion(esptoolSha256Dto.esptoolVersion())
-                .osArch(esptoolSha256Dto.osArch())
                 .build();
     }
-    
+
 }

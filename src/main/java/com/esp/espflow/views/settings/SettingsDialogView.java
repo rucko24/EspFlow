@@ -484,7 +484,6 @@ public class SettingsDialogView extends Dialog {
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             ui.getPage().fetchCurrentURL(url -> {
-                //log.info("onAttach {}", url.getPath());
                 String ref = url.getRef();
                 this.configureDialog(ref);
                 this.initListeners();

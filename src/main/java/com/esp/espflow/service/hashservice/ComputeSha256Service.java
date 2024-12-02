@@ -34,12 +34,15 @@ public class ComputeSha256Service {
     //private final Sinks.Many<Esptool> publishEsptoolExecutable;
 
     /**
+     *
+     * First dir /home/user/.espflow/1.0.0/esptool/esptool
+     *
      * @param fileName the input file
-     * @return A {@ling Mono} with computed 256 hash
+     * @return A {@link Mono} with computed 256 hash
      */
     public Mono<EsptoolSha256Dto> computeSha256(final String fileName) {
         Objects.requireNonNull(fileName, "Absolute path is null, before compute the sha256");
-        return Mono.fromCallable(() -> this.processSha256(fileName))
+        return Mono.fromCallable(() -> this.startComputeSha256(fileName))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(Function.identity())
                 .switchIfEmpty(Mono.error(new CanNotComputeSha256Exception("Unable to process sha256")));
@@ -49,7 +52,7 @@ public class ComputeSha256Service {
      * @param fileName the input file
      * @return A {@link Mono} with sha256 computed String
      */
-    private Mono<EsptoolSha256Dto> processSha256(final String fileName) {
+    private Mono<EsptoolSha256Dto> startComputeSha256(final String fileName) {
         final Path path = Path.of(fileName);
         try (var bis = new BufferedInputStream(Files.newInputStream(path))) {
             final byte[] buffer = new byte[FileCopyUtils.BUFFER_SIZE];
@@ -68,7 +71,7 @@ public class ComputeSha256Service {
             final String processedSha256 = stringBuffer.toString();
             log.info("File: {} sha256: {}", path.getFileName(), processedSha256);
 
-            //Forced triggering of switchIfEmpty
+            //Forced triggering of switchIfEmpty in case of null
             return Mono.justOrEmpty(this.esptool256Service.findBySha256(processedSha256)
                     .orElse(null));
 

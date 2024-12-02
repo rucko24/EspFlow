@@ -1,5 +1,6 @@
 package com.esp.espflow.service;
 
+import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
 import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.MakeExecutable;
@@ -51,14 +52,18 @@ public class EsptoolPathService implements MakeExecutable {
 
     /**
      *
-     * @param isBundle or custom executable esptool
-     * @param absolutePath
+     * @param esptoolExecutableDto bundled or custom executable esptool
      *
      * @return A {@link String} with esptool bundle path
      *
      */
-    public String esptoolPath(final String absolutePath, boolean isBundle) {
-        this.esptoolExecutableServiceImpl.findByAbsolutePathEsptoolAndIsBundle(absolutePath, isBundle)
+    public String esptoolPath(EsptoolExecutableDto esptoolExecutableDto) {
+
+        final String absolutePath = esptoolExecutableDto.absolutePathEsptool();
+        final boolean isbundled = esptoolExecutableDto.isBundled();
+        final String esptoolVersion = esptoolExecutableDto.esptoolVersion();
+
+        this.esptoolExecutableServiceImpl.findByAbsolutePathEsptoolAndIsBundleAndVersion(absolutePath, isbundled, esptoolVersion)
                 .ifPresentOrElse(esptoolBundleDto -> {
                     if (esptoolBundleDto.isBundled()) {
                         this.esptoolPath = this.bundlePath();
@@ -105,7 +110,7 @@ public class EsptoolPathService implements MakeExecutable {
     private void makeExecutable(String esptoolPath) {
         if (GetOsName.getOsName() == GetOsName.LINUX) {
             if (this.makeExecutable(Path.of(esptoolPath))) {
-                //log.info("esptool is executable");
+                log.info("esptool is executable");
             } else {
                 log.info("Error when setting permissions in the esptool executable {}", esptoolPath);
             }

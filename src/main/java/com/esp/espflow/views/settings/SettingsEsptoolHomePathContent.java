@@ -4,6 +4,9 @@ import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.entity.dto.EsptoolSha256Dto;
 import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.enums.Breakpoint;
+import com.esp.espflow.exceptions.CanNotBeDeleteExecutableException;
+import com.esp.espflow.mappers.EsptoolExecutableMapper;
+import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.hashservice.ComputeSha256Service;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
@@ -43,6 +46,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.vaadin.olli.ClipboardHelper;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -53,20 +57,18 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CUSTOM_ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
-import static com.esp.espflow.util.EspFlowConstants.ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_USER_HOME_DIR_OS;
 
 /**
- * - No guardar misma entidad con el mismo path con misma version
- * - Obtener la version del esptool del executable cargado
  *
  * @author rub'n
  */
@@ -103,68 +105,22 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         this.upload.addSucceededListener(event -> {
             this.upload.clearFileList();
             final String fileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL).concat(event.getFileName());
-            log.info("Esptool custom path addSucceededListener {}", fileName);
-            // FIXME Sacar version del esptool.py aqui mismo antes de guardar en db,
-            //  1 comprobar hash de version
-            // Solo guardar en db si es valido el hash
+            log.info("addSucceededListener custom path {}", fileName);
             // Para diferenciar de un ejecutable infectado
-            // Textfield con hash del executable y que compare con la version online ?
             this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL), event.getFileName());
             this.progressBar.setVisible(true);
             this.computeSha256Service.computeSha256(fileName)
-                    .doOnError(onError -> {
-                        this.executeErrorCommandFromTextField(onError.getMessage());
-                        try {
-                            Files.deleteIfExists(Path.of(fileName));
-                        } catch (IOException e) {
-                            throw new RuntimeException("Error when trying to delete invalid loaded executable");
-                        }
-                    })
-                    .flatMap(this::executeCommandFromTextField)
-                    .map(esptoolSha256Dto -> {
-                        log.info("sha256 inside map() {}", esptoolSha256Dto.sha256());
-                        this.makeExecutable(Path.of(fileName));
-                        return EsptoolExecutableDto.builder()
-                                .name(ESPTOOL)
-                                .absolutePathEsptool(fileName)
-                                .isBundled(false)
-                                .esptoolVersion("esptool.py ".concat(esptoolSha256Dto.esptoolVersion()))
-                                .isSelected(false)
-                                .sha256(esptoolSha256Dto.sha256())
-                                .build();
-                    })
+                    .doOnError(this.errorProcessingWhenComputingSha256(fileName))
+                    .map(this.EsptoolSha256DtoToEsptoolExecutableDto(fileName))
+                    .flatMap(this.returnEmptyIfVersionAlreadyExists())
+                    .switchIfEmpty(this.fallback())
                     .subscribe(esptoolExecutableDto -> {
-                        final EsptoolExecutableDto savedEsptoolBundleDto = this.esptoolExecutableServiceImpl.save(esptoolExecutableDto);
-                        String esptoolVersion = esptoolExecutableDto.esptoolVersion();
-                        if (!esptoolVersion.contains(ESPTOOL_PY_NOT_FOUND)) {
-                            this.esptoolExecutableServiceImpl.findByEsptoolVersionWithBundle(esptoolVersion, false)
-                                    .ifPresentOrElse(present -> {
-
-                                        this.configureDirectoryForTheNewUploadedExecutable(esptoolVersion, fileName,
-                                                event, savedEsptoolBundleDto);
-
-                                    }, () -> {
-
-                                        this.executeCommandFromCombo(() -> {
-                                            ConfirmDialogBuilder.showInformation("The version " + esptoolVersion + " exists");
-                                        });
-
-                                    });
-                        } else {
-                            this.executeCommandFromCombo(() -> {
-                                ConfirmDialogBuilder.showWarning(event.getFileName() + ", It is not a valid esptool executable");
-                                this.esptoolExecutableServiceImpl.deleteById(savedEsptoolBundleDto.id());
-                                this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
-                                try {
-                                    Files.deleteIfExists(Path.of(savedEsptoolBundleDto.absolutePathEsptool()));
-                                } catch (IOException e) {
-                                    throw new RuntimeException("No se puede borrar el directorio custom del esptool.py");
-                                }
-                            });
+                        if (!esptoolExecutableDto.esptoolVersion().isEmpty()) {
+                            this.configureDirectoryForTheNewUploadedExecutable(esptoolExecutableDto.esptoolVersion(), fileName,
+                                    event, esptoolExecutableDto);
                         }
                     });
 
-            //Ejecutar comando si el hash es correcto y coincide con el ejecutable legitimo
         });
 
         this.comboBoxEsptoolHome.setPrefixComponent(SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", null));
@@ -174,26 +130,15 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         //this.comboBoxEsptoolHome.getStyle().set("--vaadin-input-field-border-width", "1px");
         //this.comboBoxEsptoolHome.getStyle().set("--vaadin-input-field-border-color", VAR_LUMO_PRIMARY_COLOR_10_PCT);
         this.comboBoxEsptoolHome.addValueChangeListener(event -> {
-            if (event.isFromClient()) {
+            if (event.isFromClient()/*Only run me if it is a click from the client.*/) {
                 final EsptoolExecutableDto esptoolExecutableDtoItem = event.getValue();
                 if (Objects.nonNull(esptoolExecutableDtoItem)) {
-                    //Hace falta tirar esta puta query ? o si lo es para poder hacer el setValue correctamente ?
-                    final EsptoolExecutableDto updatedEntity = EsptoolExecutableDto.builder()
-                            .id(esptoolExecutableDtoItem.id())
-                            .name(ESPTOOL)
-                            .esptoolVersion(esptoolExecutableDtoItem.esptoolVersion())
-                            .absolutePathEsptool(esptoolExecutableDtoItem.absolutePathEsptool())
-                            .isBundled(esptoolExecutableDtoItem.isBundled())
-                            .isSelected(true)
-                            .build();
-
-                    this.esptoolExecutableServiceImpl.save(updatedEntity);
+                    this.esptoolExecutableServiceImpl.save(esptoolExecutableDtoItem);
                     this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(esptoolExecutableDtoItem.id());
-
-                    //Ya estamos con el select a true y los demas  false, entonces sacamos la version
-                    this.esptoolService.showEsptoolVersion()
+                    this.esptoolService.showEsptoolVersion(esptoolExecutableDtoItem)
                             .subscribe(esptoolVersion -> {
                                 this.executeCommandFromCombo(() -> {
+                                    this.updateTextFieldWithComputeSha256(esptoolExecutableDtoItem.sha256());
                                     this.publishEventAndRefreshHelperText(esptoolExecutableDtoItem);
                                 });
                             });
@@ -207,15 +152,81 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     *
+     * @param fileName
+     * @return
      */
-    private void showSha256ForExecutableBundleOnTextField() {
-        this.progressBar.setVisible(true);
-        this.esptoolExecutableServiceImpl.findById(1L)
-                .ifPresent(esptoolExecutableDto -> {
-                    this.progressBar.setVisible(false);
-                    this.executeCommandFromTextField(esptoolExecutableDto.sha256());
+    private Function<EsptoolSha256Dto, EsptoolExecutableDto> EsptoolSha256DtoToEsptoolExecutableDto(String fileName) {
+        return esptoolSha256Dto -> EsptoolSha256Mapper.INSTANCE.esptoolSha256ToEsptoolExecutableDto(fileName, esptoolSha256Dto,
+                false, true);
+    }
+
+    /**
+     * @return A {@link Mono} with EsptoolExecutableDto
+     */
+    private Mono<EsptoolExecutableDto> fallback() {
+        return Mono.defer(() -> Mono.just(EsptoolExecutableDto
+                .builder()
+                .esptoolVersion(StringUtils.EMPTY)
+                .build()));
+    }
+
+    /**
+     * <p>Primero hacemos una comprobacion si existe el ejecutable en el directorio, por version y si es bundle ?</p>
+     *
+     * <p> Se supone que en este paso una vez el executable esta en el directorio</p>
+     *
+     * <p> /user-home/.espflow/1.0.0 para moverlo al /home/rubn/.espflow/1.0.0/v4.x.x/esptool </p>
+     *
+     * <p> Se mueve y luego guardamos en db con la nueva ruta </p>
+     *
+     * @return A {@link Function}
+     */
+    private Function<EsptoolExecutableDto, Mono<EsptoolExecutableDto>> returnEmptyIfVersionAlreadyExists() {
+        return args -> {
+
+            final EsptoolExecutableDto esptoolExecutableDto = this.esptoolExecutableServiceImpl
+                    .findByEsptoolVersionWithBundle(args.esptoolVersion(), false)
+                    .orElse(null);
+
+            if (Objects.nonNull(esptoolExecutableDto)) {
+
+                getUI().ifPresent(ui -> {
+                    ui.access(() -> {
+                        ConfirmDialogBuilder.showWarning("This version of the executable has already been loaded. " +
+                                args.esptoolVersion());
+                    });
                 });
+
+                try {
+                    Files.deleteIfExists(Path.of(args.absolutePathEsptool()));
+                } catch (IOException e) {
+                    throw new CanNotBeDeleteExecutableException("Error when trying to delete invalid loaded executable");
+                }
+
+                this.esptoolExecutableServiceImpl.deleteById(esptoolExecutableDto.id());
+
+                return Mono.empty();
+            }
+
+            final EsptoolExecutableDto saved = this.esptoolExecutableServiceImpl.save(args);
+
+            return Mono.just(saved);
+        };
+    }
+
+    /**
+     * @param fileName
+     * @return
+     */
+    private Consumer<Throwable> errorProcessingWhenComputingSha256(String fileName) {
+        return onError -> {
+            this.executeErrorCommandFromTextField(onError.getMessage());
+            try {
+                Files.deleteIfExists(Path.of(fileName));
+            } catch (IOException e) {
+                throw new CanNotBeDeleteExecutableException("Error when trying to delete invalid loaded executable");
+            }
+        };
     }
 
     /**
@@ -283,7 +294,10 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     *
+     * @param esptoolVersion
+     * @param fileName
+     * @param event
+     * @param savedEsptoolBundleDto
      */
     private void configureDirectoryForTheNewUploadedExecutable(final String esptoolVersion, final String fileName,
                                                                final SucceededEvent event,
@@ -298,27 +312,21 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                 // target /home/rubn/.espflow/1.0.0/esptool/esptool
                 Files.move(Path.of(fileName), newEsptoolVersionDir, StandardCopyOption.REPLACE_EXISTING);
 
-                final EsptoolExecutableDto entityToUpdate = EsptoolExecutableDto.builder()
-                        .id(savedEsptoolBundleDto.id())
-                        .name(ESPTOOL)
-                        .absolutePathEsptool(newEsptoolVersionDir.toAbsolutePath().toString())
-                        .isBundled(false)
-                        .esptoolVersion(esptoolVersion)
-                        .isSelected(true)
-                        .build();
+                final EsptoolExecutableDto entityToUpdate = EsptoolExecutableMapper.INSTANCE.executableDtoWithNewDirectory(esptoolVersion,
+                        savedEsptoolBundleDto, newEsptoolVersionDir);
 
                 this.esptoolExecutableServiceImpl.save(entityToUpdate);
-                this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(savedEsptoolBundleDto.id());
+                this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(entityToUpdate.id());
                 this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
                 this.comboBoxEsptoolHome.setValue(entityToUpdate);
-                int overlayLength = esptoolVersion.concat(fileName).length();
+                final int overlayLength = esptoolVersion.concat(fileName).length();
                 this.overlay = (overlayLength * 9) + "px";
                 this.comboBoxEsptoolHome.getStyle().set("--vaadin-combo-box-overlay-width", overlay);
-
+                this.updateTextFieldWithComputeSha256(savedEsptoolBundleDto.sha256());
                 this.publishEventAndRefreshHelperText(entityToUpdate);
 
             } catch (IOException e) {
-                throw new RuntimeException("Error al crear o mover el directorio custom del esptool");
+                throw new RuntimeException("Error creating or moving the esptool custom directory");
             }
         });
     }
@@ -381,38 +389,21 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     /**
      * @param inputHash
      */
-    public void executeCommandFromTextField(final String inputHash) {
-        this.textFieldHash.getUI().ifPresent(ui -> {
+    public void updateTextFieldWithComputeSha256(final String inputHash) {
+        getUI().ifPresent(ui -> {
             ui.access(() -> {
-                if (inputHash.contains("sha256 does not match!")) {
-                    final String sha256 = inputHash.split("!")[1].trim();
-                    this.showSpanSha256Result(sha256, "sha256 does not match!", VaadinIcon.WARNING, LumoUtility.TextColor.ERROR);
+                if (Objects.nonNull(inputHash)) {
+                    if (inputHash.contains("sha256 does not match!")) {
+                        final String sha256 = inputHash.split("!")[1].trim();
+                        this.showSpanSha256Result(sha256, "sha256 does not match!", VaadinIcon.WARNING, LumoUtility.TextColor.ERROR);
+                    } else {
+                        this.showSpanSha256Result(inputHash, "sha256 match!", VaadinIcon.INFO, LumoUtility.TextColor.PRIMARY);
+                    }
                 } else {
-                    this.showSpanSha256Result(inputHash, "sha256 match!", VaadinIcon.INFO, LumoUtility.TextColor.PRIMARY);
+                    Notification.show("Input hash is null " + inputHash);
                 }
             });
         });
-    }
-
-    /**
-     * @param esptoolSha256Dto
-     */
-    public Mono<EsptoolSha256Dto> executeCommandFromTextField(final EsptoolSha256Dto esptoolSha256Dto) {
-        final AtomicReference<String> atomicReferenceSha256 = new AtomicReference<>();
-        this.textFieldHash.getUI().ifPresent(ui -> {
-            ui.access(() -> {
-                if (esptoolSha256Dto.sha256().contains("sha256 does not match!")) {
-                    final String sha256 = esptoolSha256Dto.sha256().split("!")[1].trim();
-                    atomicReferenceSha256.set(sha256);
-                    this.showSpanSha256Result(sha256, "sha256 does not match!", VaadinIcon.WARNING, LumoUtility.TextColor.ERROR);
-                } else {
-                    final String sha256 = esptoolSha256Dto.sha256();
-                    atomicReferenceSha256.set(sha256);
-                    this.showSpanSha256Result(sha256, "sha256 match!", VaadinIcon.INFO, LumoUtility.TextColor.PRIMARY);
-                }
-            });
-        });
-        return Mono.just(esptoolSha256Dto);
     }
 
     /**
@@ -432,6 +423,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         this.progressBar.setVisible(false);
         this.textFieldHash.setSuffixComponent(clipboardHelper);
         this.textFieldHash.setValue(sha256);
+        this.textFieldHash.removeClassName(LumoUtility.TextColor.ERROR);
         this.textFieldHash.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
 
         final Span spanSha256HelperText = new Span();
@@ -443,7 +435,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     * @param error
+     * @param error the String with Error
      */
     public void executeErrorCommandFromTextField(final String error) {
         this.textFieldHash.getUI().ifPresent(ui -> {
@@ -479,7 +471,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                     this.comboBoxEsptoolHome.setHelperComponent(createHelperText(esptoolExecutableDto.esptoolVersion(),
                             esptoolExecutableDto.absolutePathEsptool()));
 
-                    this.executeCommandFromTextField(esptoolExecutableDto.sha256());
+                    this.updateTextFieldWithComputeSha256(esptoolExecutableDto.sha256());
 
                 });
     }
@@ -497,7 +489,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     * @param esptoolExecutableDto
+     * @param esptoolExecutableDto to publish
      */
     private void publishEventAndRefreshHelperText(EsptoolExecutableDto esptoolExecutableDto) {
         if (esptoolExecutableDto.isBundled()) {

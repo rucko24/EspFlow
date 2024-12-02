@@ -1,6 +1,5 @@
 package com.esp.espflow.service.respository.impl;
 
-import com.esp.espflow.entity.EsptoolExecutableEntity;
 import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.mappers.EsptoolExecutableMapper;
 import com.esp.espflow.service.respository.EsptoolExecutableRepository;
@@ -23,20 +22,23 @@ public class EsptoolExecutableServiceImpl {
     private final EsptoolExecutableRepository esptoolExecutableRepository;
 
     /**
-     * Saves the EsptoolExecutableEntity
+     * Saves the EsptoolExecutableEntity, in case of upgrading, all are marked false except the entity to be upgraded
      *
      * @param esptoolExecutableDto to save
+     *
+     * @return A {@link EsptoolExecutableDto}
      */
     public EsptoolExecutableDto save(EsptoolExecutableDto esptoolExecutableDto) {
         var mappedEntity = EsptoolExecutableMapper.INSTANCE.dtoToEntity(esptoolExecutableDto);
-        EsptoolExecutableEntity entitySaved = this.esptoolExecutableRepository.save(mappedEntity);
-        log.info("Entity saved EsptoolExecutableEntity: {}", entitySaved);
-        return EsptoolExecutableMapper.INSTANCE.entityToDto(entitySaved);
-    }
-
-    public Optional<EsptoolExecutableDto> findById(Long id) {
-        return this.esptoolExecutableRepository.findById(id)
-                .map(EsptoolExecutableMapper.INSTANCE::entityToDto);
+        this.esptoolExecutableRepository.findByEsptoolVersionWithBundle(mappedEntity.getEsptoolVersion(), mappedEntity.isBundled())
+                .ifPresentOrElse(entityIfPresent -> {
+                    var entityToUpdate = EsptoolExecutableMapper.INSTANCE.fromEntityPresent(entityIfPresent.getId(), mappedEntity);
+                    log.info("Entity updated {}", this.esptoolExecutableRepository.save(entityToUpdate));
+                }, () -> {
+                    this.esptoolExecutableRepository.save(mappedEntity);
+                    log.info("Entity saved {}", mappedEntity);
+                });
+        return EsptoolExecutableMapper.INSTANCE.entityToDto(mappedEntity);
     }
 
     public Optional<EsptoolExecutableDto> findByEsptoolVersionWithBundle(String esptoolVersion, boolean isBundle) {
@@ -54,12 +56,19 @@ public class EsptoolExecutableServiceImpl {
                 .map(EsptoolExecutableMapper.INSTANCE::entityToDto);
     }
 
+    /**
+     *
+     * @param id
+     */
     public void deleteById(final long id) {
+        log.info("deleteById {}", id);
         this.esptoolExecutableRepository.deleteById(id);
     }
 
-    public Optional<EsptoolExecutableDto> findByAbsolutePathEsptoolAndIsBundle(String absolutePathEsptool, boolean isBundle) {
-        return this.esptoolExecutableRepository.findByAbsolutePathEsptoolAndIsBundle(absolutePathEsptool, isBundle)
+    public Optional<EsptoolExecutableDto> findByAbsolutePathEsptoolAndIsBundleAndVersion(String absolutePathEsptool, boolean isBundle,
+                                                                                         String esptoolVersion) {
+        //log.info("findByAbsolutePathEsptoolAndIsBundle() absolutePathEsptool {} isBundle {} esptoolVersion {}", absolutePathEsptool, isBundle, esptoolVersion);
+        return this.esptoolExecutableRepository.findByAbsolutePathEsptoolAndIsBundleAndVersion(absolutePathEsptool, isBundle, esptoolVersion)
                 .map(EsptoolExecutableMapper.INSTANCE::entityToDto);
     }
 

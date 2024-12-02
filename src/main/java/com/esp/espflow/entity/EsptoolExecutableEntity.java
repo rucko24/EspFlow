@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "esptool_bundle")
+@Table(name = "esptool_executable")
 public class EsptoolExecutableEntity {
 
     @Id
@@ -28,7 +28,7 @@ public class EsptoolExecutableEntity {
 
     private String name;
 
-    @Column(name = "absolute_path_esptool")
+    @Column(name = "absolute_path_esptool", unique = true)
     private String absolutePathEsptool;
 
     @Column(name = "is_bundled")

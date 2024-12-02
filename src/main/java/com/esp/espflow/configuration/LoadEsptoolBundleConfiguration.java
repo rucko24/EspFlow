@@ -1,6 +1,6 @@
 package com.esp.espflow.configuration;
 
-import com.esp.espflow.mappers.EsptoolSha256ToEsptoolExecutableDtoMapper;
+import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.hashservice.ComputeSha256Service;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
@@ -24,7 +24,6 @@ import static com.esp.espflow.util.EspFlowConstants.META_INF_RESOURCES_ESPTOOL_B
 import static com.esp.espflow.util.EspFlowConstants.SLASH;
 
 /**
- *
  * <p>
  * Setting to move the esptool executable depending on the operating system to the temporary directory
  * to run it from there.
@@ -64,9 +63,8 @@ public class LoadEsptoolBundleConfiguration implements MakeExecutable {
                 case LINUX -> {
                     final String outputFileName = this.moveBundleToTempDirectory("esptool-linux-amd64/esptool");
                     computeSha256Service.computeSha256(outputFileName)
-                            .map(esptoolSha256dto ->
-                                    EsptoolSha256ToEsptoolExecutableDtoMapper.INSTANCE.esptoolSha256ToEsptoolExecutableDto(
-                                            outputFileName, esptoolSha256dto))
+                            .map(esptoolSha256dto -> EsptoolSha256Mapper.INSTANCE.esptoolSha256ToEsptoolExecutableDto(
+                                    outputFileName, esptoolSha256dto, true, true))
                             .subscribe(esptoolExecutableService::save);
                 }
                 //case MAC -> this.moveBundleToTempDirectory("esptool-macosx64/esptool.py");

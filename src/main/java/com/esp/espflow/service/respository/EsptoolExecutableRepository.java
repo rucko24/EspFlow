@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * @author rub'n
+ */
 @Repository
 public interface EsptoolExecutableRepository extends JpaRepository<EsptoolExecutableEntity, Long> {
 
@@ -23,9 +26,10 @@ public interface EsptoolExecutableRepository extends JpaRepository<EsptoolExecut
             "FROM EsptoolExecutableEntity entity " +
             "WHERE entity.absolutePathEsptool = :absolutePathEsptool " +
             "AND entity.isBundled = :isBundled " +
-            "AND entity.esptoolVersion = ''")
-    Optional<EsptoolExecutableEntity> findByAbsolutePathEsptoolAndIsBundle(@Param("absolutePathEsptool") String absolutePathEsptool,
-                                                                           @Param("isBundled") boolean isBundle);
+            "AND entity.esptoolVersion = :esptoolVersion")
+    Optional<EsptoolExecutableEntity> findByAbsolutePathEsptoolAndIsBundleAndVersion(@Param("absolutePathEsptool") String absolutePathEsptool,
+                                                                                     @Param("isBundled") boolean isBundle,
+                                                                                     @Param("esptoolVersion") String esptoolVersion);
 
     @Query("SELECT entity " +
             "FROM EsptoolExecutableEntity entity " +
