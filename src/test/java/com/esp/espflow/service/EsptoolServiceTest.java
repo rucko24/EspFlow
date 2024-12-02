@@ -370,4 +370,11 @@ class EsptoolServiceTest {
 
     }
 
+    @Test
+    void testShowEsptoolVersion() {
+    }
+
+    @Test
+    void testShowEsptoolVersion1() {
+    }
 }

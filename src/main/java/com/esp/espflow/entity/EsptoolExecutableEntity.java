@@ -40,6 +40,9 @@ public class EsptoolExecutableEntity {
     @Column(name = "is_selected")
     private boolean isSelected;
 
+    @Column(name = "sha_256")
+    private String sha256;
+
     @Override
     public String toString() {
         return "{" +
@@ -49,6 +52,7 @@ public class EsptoolExecutableEntity {
                 ", isBundled=" + isBundled +
                 ", esptoolVersion='" + esptoolVersion + '\'' +
                 ", isSelected=" + isSelected +
+                ", sha256='" + sha256 + '\'' +
                 '}';
     }
 

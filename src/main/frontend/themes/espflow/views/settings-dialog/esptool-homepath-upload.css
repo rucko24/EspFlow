@@ -1,3 +1,18 @@
+vaadin-upload.esptool-homepath-upload {
+  border: none;
+  overflow: visible;
+  height: 39px;
+  padding: 0px;
+}
+
 vaadin-upload.esptool-homepath-upload vaadin-upload-file::part(row) {
+  display: none;
+}
+
+vaadin-upload.esptool-homepath-upload::part(drop-label) {
+  display: none;
+}
+
+vaadin-upload.esptool-homepath-upload::host(:not([nodrop])) {
   display: none;
 }

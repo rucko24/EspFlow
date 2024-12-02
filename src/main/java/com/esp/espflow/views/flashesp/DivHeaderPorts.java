@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableBiConsumer;
@@ -183,11 +184,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         esptoolVersionCounter.set(true);
                     }
                     h2EsptoolVersion.setText(espToolVersion);
-
-                    //final EsptoolVersionMessageListItemEvent esptoolVersionMessageListItemEvent = new EsptoolVersionMessageListItemEvent(EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED,espToolVersion,"/tmp");
-                    //publishEstoolVersionEvent.tryEmitNext(esptoolVersionMessageListItemEvent);
-                    //log.info("Publish EsptoolVersionEvent {} {}", esptoolVersionMessageListItemEvent.getEsptoolVersion(), esptoolVersionMessageListItemEvent.getAbsolutePathEsptool());
-
+                    Tooltip.forComponent(h2EsptoolVersion).setText(EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED.getGetExecutableType());
                 }));
     }
 
@@ -253,9 +250,11 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         try {
                             ui.access(() -> {
                                 h2EsptoolVersion.setText(esptoolVersionMessageListItemEvent.getEsptoolVersion());
+                                Tooltip.forComponent(h2EsptoolVersion).setText(esptoolVersionMessageListItemEvent.getEsptoolVersionEventEnum().getGetExecutableType());
                                 log.info("Subscribe EsptoolVersionEvent: {}", esptoolVersionMessageListItemEvent.getEsptoolVersion());
                             });
-                        } catch (UIDetachedException ex) {}
+                        } catch (UIDetachedException ex) {
+                        }
                     });
         }
 

@@ -29,7 +29,8 @@ public record EsptoolExecutableDto(
         boolean isBundled,
         String absolutePathEsptool,
         String esptoolVersion,
-        boolean isSelected) {
+        boolean isSelected,
+        String sha256) {
 
     /**
      *
@@ -73,6 +74,8 @@ public record EsptoolExecutableDto(
                 ", absolutePathEsptool='" + absolutePathEsptool + '\'' +
                 ", esptoolVersion='" + esptoolVersion + '\'' +
                 ", isSelected=" + isSelected +
+                ", sha256='" + sha256 + '\'' +
                 '}';
     }
+
 }

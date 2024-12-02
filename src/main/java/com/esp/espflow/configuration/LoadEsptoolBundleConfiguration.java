@@ -1,8 +1,8 @@
 package com.esp.espflow.configuration;
 
-import com.esp.espflow.entity.dto.EsptoolExecutableDto;
+import com.esp.espflow.mappers.EsptoolSha256ToEsptoolExecutableDtoMapper;
 import com.esp.espflow.service.EsptoolPathService;
-import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.service.hashservice.ComputeSha256Service;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
 import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.MakeExecutable;
@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static com.esp.espflow.util.EspFlowConstants.ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_BUNDLE_DIR;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
 import static com.esp.espflow.util.EspFlowConstants.META_INF_RESOURCES_ESPTOOL_BUNDLE;
@@ -57,24 +56,18 @@ public class LoadEsptoolBundleConfiguration implements MakeExecutable {
      * @return A {@link CommandLineRunner}
      */
     @Bean
-    public CommandLineRunner moveEsptoolBundleToTempDir(final EsptoolService esptoolService,
-                                                        final EsptoolExecutableServiceImpl esptoolExecutableService) {
+    public CommandLineRunner moveEsptoolBundleToTempDir(final EsptoolExecutableServiceImpl esptoolExecutableService,
+                                                        final ComputeSha256Service computeSha256Service) {
         return commands -> {
             switch (GetOsName.getOsName()) {
                 case WINDOWS -> this.moveBundleToTempDirectory("esptool-winx64/esptool.exe");
                 case LINUX -> {
-                    final String outFileName = this.moveBundleToTempDirectory("esptool-linux-amd64/esptool");
-                    esptoolService.showEsptoolVersion()
-                            .subscribe(esptoolVersion -> {
-                                final EsptoolExecutableDto esptoolExecutableDto = EsptoolExecutableDto.builder()
-                                        .name(ESPTOOL)
-                                        .esptoolVersion(esptoolVersion)
-                                        .absolutePathEsptool(outFileName)
-                                        .isBundled(true)
-                                        .isSelected(true)
-                                        .build();
-                                esptoolExecutableService.save(esptoolExecutableDto);
-                            });
+                    final String outputFileName = this.moveBundleToTempDirectory("esptool-linux-amd64/esptool");
+                    computeSha256Service.computeSha256(outputFileName)
+                            .map(esptoolSha256dto ->
+                                    EsptoolSha256ToEsptoolExecutableDtoMapper.INSTANCE.esptoolSha256ToEsptoolExecutableDto(
+                                            outputFileName, esptoolSha256dto))
+                            .subscribe(esptoolExecutableService::save);
                 }
                 //case MAC -> this.moveBundleToTempDirectory("esptool-macosx64/esptool.py");
                 default -> {

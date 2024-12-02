@@ -13,6 +13,11 @@ spring:
     restart:
       poll-interval: 2s
       quiet-period: 1s
+  jpa:
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
   #h2:
   #  console:
   #    enabled: true

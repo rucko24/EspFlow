@@ -32,11 +32,13 @@ public class EsptoolVersionMessageListItemEvent extends MessageListItem {
 
     private final String esptoolVersion;
     private final String absolutePathEsptool;
+    private EsptoolVersionEventEnum esptoolVersionEventEnum;
 
     public EsptoolVersionMessageListItemEvent(final EsptoolVersionEventEnum loadedType, final String esptoolVersion,
                                               final String absolutePathEsptool) {
         this.esptoolVersion = esptoolVersion;
         this.absolutePathEsptool = absolutePathEsptool;
+        this.esptoolVersionEventEnum = loadedType;
         super.setText(esptoolVersion.concat(" ")
                 .concat(absolutePathEsptool));
         super.setTime(LocalDateTime.now().toInstant(ZoneOffset.UTC));

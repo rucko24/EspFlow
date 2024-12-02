@@ -6,7 +6,7 @@ import com.esp.espflow.entity.dto.WizardEspDto;
 /**
  * @author rub'n
  */
-public class WizardEspMapper {
+public final class WizardEspMapper {
 
     public static final WizardEspMapper INSTANCE = new WizardEspMapper();
 
