@@ -13,7 +13,7 @@ import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.CreateCustomDirectory;
 import com.esp.espflow.util.EspFlowConstants;
-import com.esp.espflow.util.MakeExecutable;
+import com.esp.espflow.util.IMakeExecutable;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
 import com.infraleap.animatecss.Animated;
@@ -69,15 +69,15 @@ import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_USER_HOME_DIR_OS;
 
 /**
- * - Architecture correctly
- * - make executable ? 
+ * - make executable before save on db calculate hash ?
+ *
  * @author rub'n
  */
 @Log4j2
 @UIScope
 @SpringComponent
 @RequiredArgsConstructor
-public class SettingsEsptoolHomePathContent extends Layout implements CreateCustomDirectory, MakeExecutable {
+public class SettingsEsptoolHomePathContent extends Layout implements CreateCustomDirectory, IMakeExecutable {
 
     private final EsptoolService esptoolService;
     private final ComputeSha256Service computeSha256Service;
@@ -134,9 +134,14 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         });
     }
 
+    /**
+     *
+     * @param esptoolExecutableDtoItem select by the user, and will be marked as true for use.
+     * @return A {@link Consumer} with String
+     */
     private Consumer<String> subscribeComboListener(EsptoolExecutableDto esptoolExecutableDtoItem) {
         return esptoolVersion -> {
-            this.executeCommandFromCombo(() -> {
+            this.executeCommandIfPresent(() -> {
                 this.updateTextFieldWithComputeSha256(esptoolExecutableDtoItem.sha256());
                 this.publishEventAndRefreshHelperText(esptoolExecutableDtoItem);
             });
@@ -144,10 +149,8 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     * 
      * @param event
-     * @param fileName
-     *
+     * @param fileName the String absolute path file home/user/.espflow/1.0.0/esptool/esptool
      * @return A {@link Consumer}
      */
     private Consumer<EsptoolExecutableDto> subscribeUploadedExecutable(SucceededEvent event, String fileName) {
@@ -166,7 +169,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     /**
      * Mapping from EsptoolSha256Dto to EsptoolExecutableDto
      *
-     * @param fileName
+     * @param fileName the String absolute path file home/user/.espflow/1.0.0/esptool/esptool
      * @return A {@link Function}
      */
     private Function<EsptoolSha256Dto, EsptoolExecutableDto> esptoolSha256DtoToEsptoolExecutableDto(String fileName) {
@@ -187,45 +190,33 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     * <p>If the executable exists, we notify, delete from dir, db, and send empty to trigger the fallback, otherwise we save</p>
+     * <p>If the executable exists, we notify, delete from dir, and send empty to trigger the fallback, otherwise we save</p>
      *
      * @return A {@link Function}
      */
     private Function<EsptoolExecutableDto, Mono<EsptoolExecutableDto>> returnEmptyIfVersionAlreadyExists() {
         return esptoolExecutableParam -> {
-
             final EsptoolExecutableDto esptoolExecutableDto = this.esptoolExecutableServiceImpl
                     .findByEsptoolVersionWithBundle(esptoolExecutableParam.esptoolVersion(), false)
                     .orElse(null);
-
             if (Objects.nonNull(esptoolExecutableDto)) {
-
-                getUI().ifPresent(ui -> {
-                    ui.access(() -> {
-                        ConfirmDialogBuilder.showWarning("This version of the executable has already been loaded. " +
-                                esptoolExecutableParam.esptoolVersion());
-                    });
+                this.executeCommandIfPresent(() -> {
+                    ConfirmDialogBuilder.showWarning("This version of the executable has already been loaded. " +
+                            esptoolExecutableParam.esptoolVersion());
                 });
-
                 try {
                     Files.deleteIfExists(Path.of(esptoolExecutableParam.absolutePathEsptool()));
                 } catch (IOException e) {
                     throw new CanNotBeDeleteExecutableException("Error when trying to delete invalid loaded executable");
                 }
-
-                this.esptoolExecutableServiceImpl.deleteById(esptoolExecutableDto.id());
-
                 return Mono.empty();
             }
-
-            final EsptoolExecutableDto saved = this.esptoolExecutableServiceImpl.save(esptoolExecutableParam);
-
-            return Mono.just(saved);
+            return Mono.just(this.esptoolExecutableServiceImpl.save(esptoolExecutableParam));
         };
     }
 
     /**
-     * @param fileName
+     * @param fileName the String absolute path file home/user/.espflow/1.0.0/esptool/esptool
      * @return A {@link Consumer}
      */
     private Consumer<Throwable> errorProcessingWhenComputingSha256(String fileName) {
@@ -313,23 +304,24 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      * Create a new directory with the executable version, select the uploaded executable, and then refresh the other
      * components, as well as notify the main panel.
      *
-     * @param esptoolVersion
-     * @param fileName
-     * @param event
-     * @param savedEsptoolBundleDto
+     * @param esptoolVersion the String with esptool version
+     * @param fileName the String absolute path file home/user/.espflow/1.0.0/esptool/esptool
+     * @param event the SucceededEvent
+     * @param savedEsptoolBundleDto the saved entity
      */
     private void configureDirectoryForTheNewUploadedExecutable(final String esptoolVersion, final String fileName,
                                                                final SucceededEvent event,
                                                                final EsptoolExecutableDto savedEsptoolBundleDto) {
-        this.executeCommandFromCombo(() -> {
+        this.executeCommandIfPresent(() -> {
             try {
                 final String version = esptoolVersion.split(" ")[1];
-                // home/user/.espflow/1.0.0/esptool/v4.x.x/esptool
                 final Path newEsptoolVersionDir = Path.of(JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR)
                         .concat(CUSTOM_ESPTOOL) + version + "/" + event.getFileName());
                 Files.createDirectories(newEsptoolVersionDir.getParent());
-                // target /home/rubn/.espflow/1.0.0/esptool/esptool
+                // newEsptoolVersionDir home/user/.espflow/1.0.0/esptool/v4.x.x/esptool
                 Files.move(Path.of(fileName), newEsptoolVersionDir, StandardCopyOption.REPLACE_EXISTING);
+                //"rwx--x--x"
+                this.makeExecutable(newEsptoolVersionDir.toString());
 
                 final EsptoolExecutableDto entityToUpdate = EsptoolExecutableMapper.INSTANCE.executableDtoWithNewDirectory(esptoolVersion,
                         savedEsptoolBundleDto, newEsptoolVersionDir);
@@ -351,8 +343,9 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     * @param textEsptoolVersion
-     * @param textAbsolutePathEsptool
+     * @param textEsptoolVersion the String with esptool version
+     * @param textAbsolutePathEsptool the String absolute path file
+     *
      * @return A {@link Component}
      */
     private Component createHelperText(final String textEsptoolVersion, final String textAbsolutePathEsptool) {
@@ -395,34 +388,28 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     * Simple utility
+     * Simple shortcut or ui.access()
      *
      * @param command
      */
-    public void executeCommandFromCombo(final Command command) {
-        this.comboBoxEsptoolHome.getUI().ifPresent(ui -> {
-            ui.access(command);
-        });
+    public void executeCommandIfPresent(final Command command) {
+        getUI().ifPresent(ui -> ui.access(command));
     }
 
     /**
      * @param inputHash the String with sha256
      */
     public void updateTextFieldWithComputeSha256(final String inputHash) {
-        this.comboBoxEsptoolHome.getUI().ifPresent(ui -> {
-            ui.access(() -> {
-                if (Objects.nonNull(inputHash)) {
-                    if (inputHash.contains("sha256 does not match!")) {
-                        final String sha256 = inputHash.split("!")[1].trim();
-                        this.showSpanSha256Result(sha256, "sha256 does not match!", VaadinIcon.WARNING, LumoUtility.TextColor.ERROR);
-                    } else {
-                        this.showSpanSha256Result(inputHash, "sha256 match!", VaadinIcon.INFO, LumoUtility.TextColor.PRIMARY);
-                    }
-                } else {
-                    ConfirmDialogBuilder.showWarning("Input hash is null " + inputHash);
-                }
-            });
-        });
+        if (Objects.nonNull(inputHash)) {
+            if (inputHash.contains("sha256 does not match!")) {
+                final String sha256 = inputHash.split("!")[1].trim();
+                this.showSpanSha256Result(sha256, "sha256 does not match!", VaadinIcon.WARNING, LumoUtility.TextColor.ERROR);
+            } else {
+                this.showSpanSha256Result(inputHash, "sha256 match!", VaadinIcon.INFO, LumoUtility.TextColor.PRIMARY);
+            }
+        } else {
+            ConfirmDialogBuilder.showWarning("Input hash is null " + inputHash);
+        }
     }
 
     /**
@@ -457,26 +444,24 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      * @param error the String with Error
      */
     public void executeErrorCommandFromTextField(final String error) {
-        this.textFieldHash.getUI().ifPresent(ui -> {
-            ui.access(() -> {
-                var icon = SvgFactory.createCopyButtonFromSvg();
-                final Span span = new Span(icon);
-                final ClipboardHelper clipboardHelper = new ClipboardHelper("Error ".concat(error), span);
-                span.addClickListener(event -> {
-                    Notification.show("Copied error: " + error, 2500, Notification.Position.MIDDLE);
-                });
-                Tooltip.forComponent(span).setText("Copy error");
-                this.progressBar.setVisible(false);
-                this.textFieldHash.setSuffixComponent(clipboardHelper);
-                this.textFieldHash.setValue(error);
-                this.textFieldHash.removeClassName(LumoUtility.TextColor.ERROR);
-                this.textFieldHash.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.ERROR);
-                final Span spanSha256 = new Span(VaadinIcon.WARNING.create());
-                spanSha256.add("unexpected error!");
-                spanSha256.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.ERROR);
-                this.textFieldHash.setHelperComponent(spanSha256);
-                ConfirmDialogBuilder.showWarning("This executable cannot be processed, the hashes do not match.");
+        this.executeCommandIfPresent(() -> {
+            var icon = SvgFactory.createCopyButtonFromSvg();
+            final Span span = new Span(icon);
+            final ClipboardHelper clipboardHelper = new ClipboardHelper("Error ".concat(error), span);
+            span.addClickListener(event -> {
+                Notification.show("Copied error: " + error, 2500, Notification.Position.MIDDLE);
             });
+            Tooltip.forComponent(span).setText("Copy error");
+            this.progressBar.setVisible(false);
+            this.textFieldHash.setSuffixComponent(clipboardHelper);
+            this.textFieldHash.setValue(error);
+            this.textFieldHash.removeClassName(LumoUtility.TextColor.ERROR);
+            this.textFieldHash.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.ERROR);
+            final Span spanSha256 = new Span(VaadinIcon.WARNING.create());
+            spanSha256.add("unexpected error!");
+            spanSha256.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.ERROR);
+            this.textFieldHash.setHelperComponent(spanSha256);
+            ConfirmDialogBuilder.showWarning("This executable cannot be processed, the hashes do not match.");
         });
     }
 

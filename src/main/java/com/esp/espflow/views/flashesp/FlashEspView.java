@@ -26,6 +26,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -78,7 +80,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
 //@PreserveOnRefresh
-public class FlashEspView extends Div implements ResponsiveHeaderDiv {
+public class FlashEspView extends Div implements AfterNavigationObserver, ResponsiveHeaderDiv {
 
     private final DivFlashUploader divFlashUploader;
     private final DivHeaderPorts divHeaderPorts;
@@ -97,6 +99,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     /**
      * OutputConsole
      */
+    private Div divColumnItems = new Div();
     private final OutPutConsole outPutConsole = new OutPutConsole();
 
     private String[] commands;
@@ -158,12 +161,12 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
 
-        outPutConsole.getStyle().set("overflow-x", "hidden");
-        outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
-        outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        Div divColumnItems = new Div(outPutConsole.getButtonDownScroll(),
-                outPutConsole.getButtonClear());
+//        outPutConsole.getStyle().set("overflow-x", "hidden");
+//        outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
+//        outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+//        outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+//        Div divColumnItems = new Div(outPutConsole.getButtonDownScroll(),
+//                outPutConsole.getButtonClear());
         divColumnItems.setId("divColumnItems");
 
         divColumnItems.addClassNames(
@@ -194,7 +197,11 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
         splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-color", "#3b3b3b #202020");
 
-        splitLayout.addClickListener(event -> this.outPutConsole.fit());
+        splitLayout.addClickListener(event -> {
+            if(this.outPutConsole.isAttached()) {
+                this.outPutConsole.fit();
+            }
+        });
 
         return splitLayout;
     }
@@ -419,4 +426,15 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
     }
 
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        //Ignored listener invocation for terminal-initialized event from the client side for an inert fc-xterm element
+        if(outPutConsole.isAttached()) {
+            outPutConsole.getStyle().set("overflow-x", "hidden");
+            outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
+            outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+            outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+            this.divColumnItems.add(outPutConsole.getButtonDownScroll(), outPutConsole.getButtonClear());
+        }
+    }
 }

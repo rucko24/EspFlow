@@ -56,18 +56,8 @@ public class EsptoolExecutableServiceImpl {
                 .map(EsptoolExecutableMapper.INSTANCE::entityToDto);
     }
 
-    /**
-     *
-     * @param id
-     */
-    public void deleteById(final long id) {
-        log.info("deleteById {}", id);
-        this.esptoolExecutableRepository.deleteById(id);
-    }
-
     public Optional<EsptoolExecutableDto> findByAbsolutePathEsptoolAndIsBundleAndVersion(String absolutePathEsptool, boolean isBundle,
                                                                                          String esptoolVersion) {
-        //log.info("findByAbsolutePathEsptoolAndIsBundle() absolutePathEsptool {} isBundle {} esptoolVersion {}", absolutePathEsptool, isBundle, esptoolVersion);
         return this.esptoolExecutableRepository.findByAbsolutePathEsptoolAndIsBundleAndVersion(absolutePathEsptool, isBundle, esptoolVersion)
                 .map(EsptoolExecutableMapper.INSTANCE::entityToDto);
     }

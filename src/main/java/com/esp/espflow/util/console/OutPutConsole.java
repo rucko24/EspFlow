@@ -199,9 +199,9 @@ public class OutPutConsole extends Div {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        if (attachEvent.isInitialAttach()) {
+        //if (attachEvent.isInitialAttach()) {
             this.getConsole();
             this.xterm.getXTerm().fit();
-        }
+        //}
     }
 }

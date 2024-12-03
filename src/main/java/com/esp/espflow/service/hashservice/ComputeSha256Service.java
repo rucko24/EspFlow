@@ -35,7 +35,7 @@ public class ComputeSha256Service {
     /**
      * First dir /home/user/.espflow/1.0.0/esptool/esptool.py
      *
-     * @param fileName the input file
+     * @param fileName the input file  /home/user/.espflow/1.0.0/esptool/esptool.py
      * @return A {@link Mono} with computed 256 hash
      */
     public Mono<EsptoolSha256Dto> computeSha256(final String fileName) {
@@ -47,7 +47,7 @@ public class ComputeSha256Service {
     }
 
     /**
-     * @param fileName the input file
+     * @param fileName the input file /home/user/.espflow/1.0.0/esptool/esptool.py
      * @return A {@link Mono} with sha256 computed String
      */
     private Mono<EsptoolSha256Dto> startComputeSha256(final String fileName) {

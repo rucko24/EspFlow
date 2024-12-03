@@ -5,7 +5,7 @@ import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.hashservice.ComputeSha256Service;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
-import com.esp.espflow.util.MakeExecutable;
+import com.esp.espflow.util.IMakeExecutable;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +47,7 @@ import static com.esp.espflow.util.EspFlowConstants.SLASH;
  */
 @Log4j2
 @Configuration
-public class LoadEsptoolBundleConfiguration implements MakeExecutable {
+public class LoadEsptoolBundleConfiguration implements IMakeExecutable {
 
     /**
      * Move the esptool executable to the system's temporary directory in runtime
@@ -103,7 +103,7 @@ public class LoadEsptoolBundleConfiguration implements MakeExecutable {
         if (GetOsName.getOsName() == GetOsName.LINUX) {
             final var pathResourceAsStream = META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName;
             this.processResourceAsStream(pathResourceAsStream, outPathFileName);
-            this.makeExecutable(outPathFileName);
+            this.makeExecutable(outPathFileName.toString());
         }
 
         return outPathFileName.toString();
