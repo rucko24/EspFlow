@@ -1,8 +1,8 @@
 package com.esp.espflow.service;
 
 import com.esp.espflow.entity.dto.EsptoolExecutableDto;
+import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
-import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.MakeExecutable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

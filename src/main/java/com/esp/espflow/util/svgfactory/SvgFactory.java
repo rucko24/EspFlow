@@ -1,6 +1,6 @@
 package com.esp.espflow.util.svgfactory;
 
-import com.esp.espflow.util.GetOsName;
+import com.esp.espflow.enums.GetOsName;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.StreamResource;
 

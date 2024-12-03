@@ -1,6 +1,6 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.util.GetOsName;
+import com.esp.espflow.enums.GetOsName;
 import com.fazecast.jSerialComm.SerialPort;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;

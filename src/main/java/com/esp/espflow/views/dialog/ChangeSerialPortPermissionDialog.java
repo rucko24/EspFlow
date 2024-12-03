@@ -1,10 +1,10 @@
 package com.esp.espflow.views.dialog;
 
 import com.esp.espflow.entity.ChangePasswordBinderRecord;
+import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.EspFlowConstants;
-import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.ProcessCommandsInternals;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.flashesp.DivHeaderPorts;

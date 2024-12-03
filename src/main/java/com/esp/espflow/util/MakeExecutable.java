@@ -23,12 +23,7 @@ public interface MakeExecutable {
         try {
             Set<PosixFilePermission> permissions = PosixFilePermissions.fromString(SET_CHMOD_X);
             Files.setPosixFilePermissions(esptoolPath, permissions);
-
-            if (Files.isExecutable(esptoolPath.toAbsolutePath())) {
-                return true;
-            } else {
-                return false;
-            }
+            return Files.isExecutable(esptoolPath.toAbsolutePath());
         } catch (IOException ex) {
             return false;
         }

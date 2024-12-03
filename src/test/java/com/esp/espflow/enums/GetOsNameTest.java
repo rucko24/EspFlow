@@ -1,5 +1,6 @@
-package com.esp.espflow.util;
+package com.esp.espflow.enums;
 
+import com.esp.espflow.util.EspFlowConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.ClearSystemProperty;

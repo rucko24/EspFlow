@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Processed sha256 from this input file
+ * Compute sha256 from this input file
  *
  * @author rubn
  */
@@ -31,21 +31,19 @@ public class ComputeSha256Service {
 
     private static final String SHA_256 = "SHA-256";
     private final EsptoolSha256ServiceImpl esptool256Service;
-    //private final Sinks.Many<Esptool> publishEsptoolExecutable;
 
     /**
-     *
-     * First dir /home/user/.espflow/1.0.0/esptool/esptool
+     * First dir /home/user/.espflow/1.0.0/esptool/esptool.py
      *
      * @param fileName the input file
      * @return A {@link Mono} with computed 256 hash
      */
     public Mono<EsptoolSha256Dto> computeSha256(final String fileName) {
-        Objects.requireNonNull(fileName, "Absolute path is null, before compute the sha256");
+        Objects.requireNonNull(fileName, "Absolute == null, before compute the sha256");
         return Mono.fromCallable(() -> this.startComputeSha256(fileName))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(Function.identity())
-                .switchIfEmpty(Mono.error(new CanNotComputeSha256Exception("Unable to process sha256")));
+                .switchIfEmpty(Mono.error(new CanNotComputeSha256Exception("Can not compute sha256")));
     }
 
     /**
@@ -62,7 +60,7 @@ public class ComputeSha256Service {
                 messageDigest.update(buffer, 0, dataRead);
             }
             final byte[] bytesDigest = messageDigest.digest();
-            final StringBuffer stringBuffer = new StringBuffer();
+            final StringBuilder stringBuffer = new StringBuilder();
             for (final byte b : bytesDigest) {
                 stringBuffer.append(
                         Integer.toString((b & 0xFF) + 0x100, 16).substring(1)
@@ -70,11 +68,16 @@ public class ComputeSha256Service {
             }
             final String processedSha256 = stringBuffer.toString();
             log.info("File: {} sha256: {}", path.getFileName(), processedSha256);
-
-            //Forced triggering of switchIfEmpty in case of null
-            return Mono.justOrEmpty(this.esptool256Service.findBySha256(processedSha256)
-                    .orElse(null));
-
+            final String osArch = System.getProperty("os.arch");
+            log.info("Current-OsArch: [{}]", osArch);
+            if (this.esptool256Service.findBySha256(processedSha256).isPresent()) {
+                final EsptoolSha256Dto esptoolSha256Dto = this.esptool256Service.findBySha256(processedSha256).get();
+                log.info("entity osArch: [{}]", esptoolSha256Dto.osArch());
+                if (esptoolSha256Dto.osArch().contains(osArch)) {
+                    return Mono.just(esptoolSha256Dto);
+                }
+            }
+            return Mono.empty();
         } catch (IOException | NoSuchAlgorithmException e) {
             return Mono.empty();
         }

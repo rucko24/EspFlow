@@ -1,8 +1,8 @@
 package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
+import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
-import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;

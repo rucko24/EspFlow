@@ -2,6 +2,7 @@ package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.enums.BaudRatesEnum;
+import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
 import com.esp.espflow.service.provider.EsptoolServiceArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceNoFlashSizeArgumentsProvider;
@@ -9,7 +10,6 @@ import com.esp.espflow.service.provider.EsptoolServiceRawFlashIdFromPortArgument
 import com.esp.espflow.service.provider.EsptoolServiceReadAllDevicesArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceReadFlashArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceWriteFlashArgumentsProvider;
-import com.esp.espflow.util.GetOsName;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;

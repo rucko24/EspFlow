@@ -1,5 +1,6 @@
 package com.esp.espflow.util;
 
+import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.exceptions.CommandNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;

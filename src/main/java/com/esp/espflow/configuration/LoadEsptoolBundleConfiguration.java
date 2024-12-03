@@ -1,10 +1,10 @@
 package com.esp.espflow.configuration;
 
+import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.hashservice.ComputeSha256Service;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
-import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.MakeExecutable;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;

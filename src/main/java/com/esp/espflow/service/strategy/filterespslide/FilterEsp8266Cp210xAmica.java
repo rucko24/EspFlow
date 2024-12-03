@@ -1,7 +1,7 @@
 package com.esp.espflow.service.strategy.filterespslide;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
-import com.esp.espflow.util.GetOsName;
+import com.esp.espflow.enums.GetOsName;
 import org.apache.commons.lang3.StringUtils;
 
 /**

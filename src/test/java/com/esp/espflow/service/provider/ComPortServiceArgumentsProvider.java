@@ -1,6 +1,6 @@
 package com.esp.espflow.service.provider;
 
-import com.esp.espflow.util.GetOsName;
+import com.esp.espflow.enums.GetOsName;
 import com.fazecast.jSerialComm.SerialPort;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;

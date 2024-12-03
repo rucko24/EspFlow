@@ -1,11 +1,11 @@
 package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
+import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.ComPortService;
 import com.esp.espflow.service.CommandService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
-import com.esp.espflow.util.GetOsName;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.dialog.ChangeSerialPortPermissionDialog;
