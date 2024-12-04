@@ -39,7 +39,9 @@ public class ComputeSha256Service {
      * @return A {@link Mono} with computed 256 hash
      */
     public Mono<EsptoolSha256Dto> computeSha256(final String fileName) {
-        Objects.requireNonNull(fileName, "Absolute == null, before compute the sha256");
+        if(Objects.isNull(fileName)  || fileName.isEmpty()) {
+            return Mono.error(new CanNotComputeSha256Exception("Can not compute sha256"));
+        }
         return Mono.fromCallable(() -> this.startComputeSha256(fileName))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(Function.identity())
