@@ -3,6 +3,7 @@ vaadin-upload.esptool-homepath-upload {
   overflow: visible;
   height: 39px;
   padding: 0px;
+  margin-right: 1px;
 }
 
 vaadin-upload.esptool-homepath-upload vaadin-upload-file::part(row) {

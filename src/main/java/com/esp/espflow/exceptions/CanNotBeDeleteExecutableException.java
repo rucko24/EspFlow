@@ -1,10 +1,10 @@
 package com.esp.espflow.exceptions;
 
 /**
- * Can not be read device exception
  *
  * @author rubn
  */
+@SuppressWarnings("unused")
 public class CanNotBeDeleteExecutableException extends RuntimeException {
 
     public CanNotBeDeleteExecutableException(final String error) {

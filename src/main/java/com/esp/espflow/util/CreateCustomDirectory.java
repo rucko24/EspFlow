@@ -1,6 +1,7 @@
 package com.esp.espflow.util;
 
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -34,7 +35,7 @@ public interface CreateCustomDirectory {
         // Get information about the uploaded file
         final Path fileNameResult = targetDir.resolve(Path.of(fileName));
         try (var input = new BufferedInputStream(buffer.getInputStream());
-             var outPut = new BufferedOutputStream(Files.newOutputStream(fileNameResult))) {
+             var outPut = new BufferedOutputStream(Files.newOutputStream(fileNameResult), FileCopyUtils.BUFFER_SIZE)) {
 
             input.transferTo(outPut);
 

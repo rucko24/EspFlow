@@ -4,7 +4,6 @@ import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.entity.dto.EsptoolSha256Dto;
 import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.enums.Breakpoint;
-import com.esp.espflow.exceptions.CanNotBeDeleteExecutableException;
 import com.esp.espflow.mappers.EsptoolExecutableMapper;
 import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolService;
@@ -105,16 +104,17 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     private void initListeners() {
         this.upload.addSucceededListener(event -> {
             this.upload.clearFileList();
-            final String fileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL).concat(event.getFileName());
-            log.info("addSucceededListener custom path {}", fileName);
+            final String initCustomFileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL).concat(event.getFileName());
+            log.info("addSucceededListener custom initial path {}", initCustomFileName);
             this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL), event.getFileName());
             this.progressBar.setVisible(true);
-            this.computeSha256Service.computeSha256(fileName)/*To differentiate from an incorrect executable*/
-                    .doOnError(this.errorProcessingWhenComputingSha256(fileName))
-                    .map(this.esptoolSha256DtoToEsptoolExecutableDto(fileName))
+            this.computeSha256Service.computeSha256(initCustomFileName)/*To differentiate from an incorrect executable*/
+                    .doOnError(this.errorProcessingWhenComputingSha256(initCustomFileName))
+                    .map(this.esptoolSha256DtoToEsptoolExecutableDto(initCustomFileName))
                     .flatMap(this.returnEmptyIfVersionAlreadyExists())
                     .switchIfEmpty(this.fallback())
-                    .subscribe(this.subscribeUploadedExecutable(event, fileName));
+                    .flatMap(this.configureNewDirectoryAndMakeExecutable(event, initCustomFileName))
+                    .subscribe(this.subscribeSaveAndUpdate());
         });
         this.comboBoxEsptoolHome.setPrefixComponent(SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", null));
         this.comboBoxEsptoolHome.setItemLabelGenerator(EsptoolExecutableDto::displayAbsoluteEsptoolPathForCombo);
@@ -136,6 +136,52 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
 
     /**
      *
+     * <p>The new directory is configured with the uploaded esptool version.</p>
+     *
+     * @param event the event when uploading
+     * @param fileName the current filename
+     *
+     * @return a {@link Function} with newEsptoolVersionDir, set to "rwx--x--x"
+     */
+    private Function<EsptoolExecutableDto, Mono<EsptoolExecutableDto>> configureNewDirectoryAndMakeExecutable(SucceededEvent event, String fileName) {
+        return esptoolExecutableDto -> {
+            if(esptoolExecutableDto.esptoolVersion().isEmpty()) {
+                return Mono.empty();
+            }
+            String version = "";
+            Path newEsptoolVersionDir = null;
+            try {
+                version = esptoolExecutableDto.esptoolVersion().split(" ")[1];
+                newEsptoolVersionDir = Path.of(JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR)
+                        .concat(CUSTOM_ESPTOOL) + version + "/" + event.getFileName());
+            } catch (ArrayIndexOutOfBoundsException ex) {
+                log.error("Error parsing version! {}", ex.getMessage());
+                return Mono.empty();
+            }
+            try {
+                Files.createDirectories(newEsptoolVersionDir.getParent());
+            } catch (IOException e) {
+                log.error("Error creating directory with new version! {}", e.getMessage());
+                return Mono.empty();
+            }
+            // newEsptoolVersionDir home/user/.espflow/1.0.0/esptool/v4.x.x/esptool
+            try {
+                Files.move(Path.of(fileName), newEsptoolVersionDir, StandardCopyOption.REPLACE_EXISTING);
+                log.info("custom modified path {}", newEsptoolVersionDir.toAbsolutePath().toString());
+            } catch (IOException e) {
+                log.error("Error when moving executable to new directory! {}", e.getMessage());
+                return Mono.empty();
+            }
+            //"rwx--x--x"
+            this.makeExecutable(newEsptoolVersionDir.toString());
+            final EsptoolExecutableDto entityToUpdate = EsptoolExecutableMapper.INSTANCE
+                    .executableDtoWithNewDirectory(esptoolExecutableDto, newEsptoolVersionDir);
+
+            return Mono.just(entityToUpdate);
+        };
+    }
+
+    /**
      * @param esptoolExecutableDtoItem select by the user, and will be marked as true for use.
      * @return A {@link Consumer} with String
      */
@@ -149,15 +195,12 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     * @param event
-     * @param fileName the String absolute path file home/user/.espflow/1.0.0/esptool/esptool
      * @return A {@link Consumer}
      */
-    private Consumer<EsptoolExecutableDto> subscribeUploadedExecutable(SucceededEvent event, String fileName) {
+    private Consumer<EsptoolExecutableDto> subscribeSaveAndUpdate() {
         return esptoolExecutableDto -> {
             if (isANewVersionOfExecutableEsptool(esptoolExecutableDto)) {
-                this.configureDirectoryForTheNewUploadedExecutable(esptoolExecutableDto.esptoolVersion(), fileName,
-                        event, esptoolExecutableDto);
+                this.saveAndUpdate(esptoolExecutableDto);
             }
         };
     }
@@ -207,7 +250,10 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                 try {
                     Files.deleteIfExists(Path.of(esptoolExecutableParam.absolutePathEsptool()));
                 } catch (IOException e) {
-                    throw new CanNotBeDeleteExecutableException("Error when trying to delete invalid loaded executable");
+                    log.info("Error when trying to delete invalid loaded executable! {}", e.getMessage());
+                    this.executeCommandIfPresent(() -> {
+                        ConfirmDialogBuilder.showWarning("Error when trying to delete invalid loaded executable!");
+                    });
                 }
                 return Mono.empty();
             }
@@ -225,7 +271,10 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
             try {
                 Files.deleteIfExists(Path.of(fileName));
             } catch (IOException e) {
-                throw new CanNotBeDeleteExecutableException("Error when trying to delete invalid loaded executable");
+                log.info("Error when trying to delete invalid loaded executable {}", e.getMessage());
+                this.executeCommandIfPresent(() -> {
+                    ConfirmDialogBuilder.showWarning("Error when trying to delete invalid loaded executable!");
+                });
             }
         };
     }
@@ -304,48 +353,25 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      * Create a new directory with the executable version, select the uploaded executable, and then refresh the other
      * components, as well as notify the main panel.
      *
-     * @param esptoolVersion the String with esptool version
-     * @param fileName the String absolute path file home/user/.espflow/1.0.0/esptool/esptool
-     * @param event the SucceededEvent
-     * @param savedEsptoolBundleDto the saved entity
+     * @param entityToUpdate the entity to update
      */
-    private void configureDirectoryForTheNewUploadedExecutable(final String esptoolVersion, final String fileName,
-                                                               final SucceededEvent event,
-                                                               final EsptoolExecutableDto savedEsptoolBundleDto) {
+    private void saveAndUpdate(final EsptoolExecutableDto entityToUpdate) {
         this.executeCommandIfPresent(() -> {
-            try {
-                final String version = esptoolVersion.split(" ")[1];
-                final Path newEsptoolVersionDir = Path.of(JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR)
-                        .concat(CUSTOM_ESPTOOL) + version + "/" + event.getFileName());
-                Files.createDirectories(newEsptoolVersionDir.getParent());
-                // newEsptoolVersionDir home/user/.espflow/1.0.0/esptool/v4.x.x/esptool
-                Files.move(Path.of(fileName), newEsptoolVersionDir, StandardCopyOption.REPLACE_EXISTING);
-                //"rwx--x--x"
-                this.makeExecutable(newEsptoolVersionDir.toString());
-
-                final EsptoolExecutableDto entityToUpdate = EsptoolExecutableMapper.INSTANCE.executableDtoWithNewDirectory(esptoolVersion,
-                        savedEsptoolBundleDto, newEsptoolVersionDir);
-
-                this.esptoolExecutableServiceImpl.save(entityToUpdate);
-                this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(entityToUpdate.id());
-                this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
-                this.comboBoxEsptoolHome.setValue(entityToUpdate);
-                final int overlayLength = esptoolVersion.concat(fileName).length();
-                this.overlay = (overlayLength * 9) + "px";
-                this.comboBoxEsptoolHome.getStyle().set("--vaadin-combo-box-overlay-width", overlay);
-                this.updateTextFieldWithComputeSha256(savedEsptoolBundleDto.sha256());
-                this.publishEventAndRefreshHelperText(entityToUpdate);
-
-            } catch (IOException e) {
-                throw new RuntimeException("Error creating or moving the esptool custom directory");
-            }
+            this.esptoolExecutableServiceImpl.save(entityToUpdate);
+            this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(entityToUpdate.id());
+            this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
+            this.comboBoxEsptoolHome.setValue(entityToUpdate);
+            final int overlayLength = entityToUpdate.esptoolVersion().concat(entityToUpdate.absolutePathEsptool()).length();
+            this.overlay = (overlayLength * 9) + "px";
+            this.comboBoxEsptoolHome.getStyle().set("--vaadin-combo-box-overlay-width", overlay);
+            this.updateTextFieldWithComputeSha256(entityToUpdate.sha256());
+            this.publishEventAndRefreshHelperText(entityToUpdate);
         });
     }
 
     /**
-     * @param textEsptoolVersion the String with esptool version
+     * @param textEsptoolVersion      the String with esptool version
      * @param textAbsolutePathEsptool the String absolute path file
-     *
      * @return A {@link Component}
      */
     private Component createHelperText(final String textEsptoolVersion, final String textAbsolutePathEsptool) {
@@ -472,11 +498,12 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         this.esptoolExecutableServiceImpl.findByIsSelectedToTrue()
                 .ifPresent(esptoolExecutableDto -> {
                     this.comboBoxEsptoolHome.setValue(esptoolExecutableDto);
+                    final int overlayLength = esptoolExecutableDto.esptoolVersion().concat(esptoolExecutableDto.absolutePathEsptool()).length();
+                    this.overlay = (overlayLength * 9) + "px";
+                    this.comboBoxEsptoolHome.getStyle().set("--vaadin-combo-box-overlay-width", overlay);
                     this.comboBoxEsptoolHome.setHelperComponent(createHelperText(esptoolExecutableDto.esptoolVersion(),
                             esptoolExecutableDto.absolutePathEsptool()));
-
                     this.updateTextFieldWithComputeSha256(esptoolExecutableDto.sha256());
-
                 });
     }
 

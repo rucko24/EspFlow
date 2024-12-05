@@ -53,17 +53,16 @@ public final class EsptoolExecutableMapper {
                 .build();
     }
 
-    public EsptoolExecutableDto executableDtoWithNewDirectory(String esptoolVersion,
-                                                              EsptoolExecutableDto savedEsptoolBundleDto,
+    public EsptoolExecutableDto executableDtoWithNewDirectory(EsptoolExecutableDto esptoolExecutableDto,
                                                               Path newEsptoolVersionDir) {
         return EsptoolExecutableDto.builder()
-                .id(savedEsptoolBundleDto.id())
+                .id(esptoolExecutableDto.id())
                 .name(ESPTOOL)
-                .absolutePathEsptool(newEsptoolVersionDir.toAbsolutePath().toString())
+                .absolutePathEsptool(newEsptoolVersionDir.toString())
                 .isBundled(false)
-                .esptoolVersion(esptoolVersion)
+                .esptoolVersion(esptoolExecutableDto.esptoolVersion())
                 .isSelected(true)
-                .sha256(savedEsptoolBundleDto.sha256())
+                .sha256(esptoolExecutableDto.sha256())
                 .build();
     }
 
