@@ -1,5 +1,6 @@
 package com.esp.espflow.service.hashservice;
 
+import com.esp.espflow.configuration.ComputeDigestAlgorithmConfiguration;
 import com.esp.espflow.entity.dto.EsptoolSha256Dto;
 import com.esp.espflow.service.respository.impl.EsptoolSha256ServiceImpl;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +29,9 @@ class ComputeSha256ServiceTest {
     @Mock
     private EsptoolSha256ServiceImpl esptoolSha256Service;
 
+    @Mock
+    private ComputeDigestAlgorithmConfiguration computeDigestAlgorithmConfiguration;
+
     @Test
     @DisplayName("Input file is empty")
     void computeSha256FailureEmpty() {
@@ -47,7 +51,7 @@ class ComputeSha256ServiceTest {
     }
 
     @Test
-    @DisplayName("Input esptool file with sha256")
+    @DisplayName("Input esptool file with SHA-256")
     void computeSha256Success() {
         String property = System.getProperty("os.arch");
         System.setProperty("os.arch", "amd64");
@@ -58,6 +62,7 @@ class ComputeSha256ServiceTest {
                 .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
                 .build();
 
+        when(computeDigestAlgorithmConfiguration.getDigestAlgorithm()).thenReturn("SHA-256");
         when(esptoolSha256Service.findBySha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")).thenReturn(Optional.of(actualEsptoolSha256Dto));
 
         EsptoolSha256Dto expectedEsptoolSha256Dto = EsptoolSha256Dto.builder()
@@ -72,6 +77,42 @@ class ComputeSha256ServiceTest {
 
         System.clearProperty("os.arch");
         System.setProperty("os.arch", property);
+
+    }
+
+    @Test
+    @DisplayName("Input esptool file with SHA-256 but arch does not match!")
+    void computeSha256Failure_emptyMono() {
+        String property = System.getProperty("os.arch");
+        System.setProperty("os.arch", "amd64");
+
+        EsptoolSha256Dto actualEsptoolSha256Dto = EsptoolSha256Dto.builder()
+                .osArch("amd63")
+                .esptoolVersion("v4.7.0")
+                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
+                .build();
+
+        when(computeDigestAlgorithmConfiguration.getDigestAlgorithm()).thenReturn("SHA-256");
+        when(esptoolSha256Service.findBySha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")).thenReturn(Optional.of(actualEsptoolSha256Dto));
+
+        StepVerifier.create(computeSha256Service.computeSha256("src/test/resources/esptool/esptool-linux-amd64/esptool"))
+                .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
+                .verify();
+
+        System.clearProperty("os.arch");
+        System.setProperty("os.arch", property);
+
+    }
+
+    @Test
+    @DisplayName("Input esptool, java.security.NoSuchAlgorithmException: shaWtF MessageDigest not available")
+    void computeSha256Failure_NoSuchAlgorithmException() {
+
+        when(computeDigestAlgorithmConfiguration.getDigestAlgorithm()).thenReturn("shaWtF");
+
+        StepVerifier.create(computeSha256Service.computeSha256("src/test/resources/esptool/esptool-linux-amd64/esptool"))
+                .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
+                .verify();
 
     }
 

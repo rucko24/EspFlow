@@ -1,5 +1,6 @@
 package com.esp.espflow.service.hashservice;
 
+import com.esp.espflow.configuration.ComputeDigestAlgorithmConfiguration;
 import com.esp.espflow.entity.dto.EsptoolSha256Dto;
 import com.esp.espflow.exceptions.CanNotComputeSha256Exception;
 import com.esp.espflow.service.respository.impl.EsptoolSha256ServiceImpl;
@@ -29,7 +30,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class ComputeSha256Service {
 
-    private static final String SHA_256 = "SHA-256";
+    private final ComputeDigestAlgorithmConfiguration computeDigestAlgorithmConfiguration;
     private final EsptoolSha256ServiceImpl esptool256Service;
 
     /**
@@ -56,7 +57,7 @@ public class ComputeSha256Service {
         final Path path = Path.of(fileName);
         try (var bis = new BufferedInputStream(Files.newInputStream(path))) {
             final byte[] buffer = new byte[FileCopyUtils.BUFFER_SIZE];
-            final MessageDigest messageDigest = MessageDigest.getInstance(SHA_256);
+            final MessageDigest messageDigest = MessageDigest.getInstance(this.computeDigestAlgorithmConfiguration.getDigestAlgorithm());
             int dataRead = 0;
             while ((dataRead = bis.read(buffer)) != -1) {
                 messageDigest.update(buffer, 0, dataRead);
