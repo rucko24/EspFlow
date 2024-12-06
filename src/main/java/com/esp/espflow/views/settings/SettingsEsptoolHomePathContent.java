@@ -68,7 +68,6 @@ import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_USER_HOME_DIR_OS;
 
 /**
- * - make executable before save on db calculate hash ?
  *
  * @author rub'n
  */
@@ -111,7 +110,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
             this.computeSha256Service.computeSha256(initCustomFileName)/*To differentiate from an incorrect executable*/
                     .doOnError(this.errorProcessingWhenComputingSha256(initCustomFileName))
                     .map(this.esptoolSha256DtoToEsptoolExecutableDto(initCustomFileName))
-                    .flatMap(this.returnEmptyIfVersionAlreadyExists())
+                    .flatMap(this::returnEmptyIfVersionAlreadyExists)
                     .switchIfEmpty(this.fallback())
                     .flatMap(this.configureNewDirectoryAndMakeExecutable(event, initCustomFileName))
                     .subscribe(this.subscribeSaveAndUpdate());
@@ -128,8 +127,6 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                     this.esptoolService.showEsptoolVersion(esptoolExecutableDtoItem)
                             .subscribe(this.subscribeComboListener(esptoolExecutableDtoItem));
                 }
-            } else {
-                Notification.show("Not from client()");
             }
         });
     }
@@ -212,16 +209,16 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     /**
      * Mapping from EsptoolSha256Dto to EsptoolExecutableDto
      *
-     * @param fileName the String absolute path file home/user/.espflow/1.0.0/esptool/esptool
+     * @param initCustomFileName the String absolute path file home/user/.espflow/1.0.0/esptool/esptool
      * @return A {@link Function}
      */
-    private Function<EsptoolSha256Dto, EsptoolExecutableDto> esptoolSha256DtoToEsptoolExecutableDto(String fileName) {
-        return esptoolSha256Dto -> EsptoolSha256Mapper.INSTANCE.esptoolSha256ToEsptoolExecutableDto(fileName, esptoolSha256Dto,
+    private Function<EsptoolSha256Dto, EsptoolExecutableDto> esptoolSha256DtoToEsptoolExecutableDto(String initCustomFileName) {
+        return esptoolSha256Dto -> EsptoolSha256Mapper.INSTANCE.esptoolSha256ToEsptoolExecutableDto(initCustomFileName, esptoolSha256Dto,
                 false, true);
     }
 
     /**
-     * Fallback with empty esptoolversion
+     * Fallback with empty esptool version
      *
      * @return A {@link Mono} with EsptoolExecutableDto
      */
@@ -237,8 +234,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      *
      * @return A {@link Function}
      */
-    private Function<EsptoolExecutableDto, Mono<EsptoolExecutableDto>> returnEmptyIfVersionAlreadyExists() {
-        return esptoolExecutableParam -> {
+    private Mono<EsptoolExecutableDto> returnEmptyIfVersionAlreadyExists(EsptoolExecutableDto esptoolExecutableParam) {
             final EsptoolExecutableDto esptoolExecutableDto = this.esptoolExecutableServiceImpl
                     .findByEsptoolVersionWithBundle(esptoolExecutableParam.esptoolVersion(), false)
                     .orElse(null);
@@ -258,7 +254,6 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                 return Mono.empty();
             }
             return Mono.just(this.esptoolExecutableServiceImpl.save(esptoolExecutableParam));
-        };
     }
 
     /**

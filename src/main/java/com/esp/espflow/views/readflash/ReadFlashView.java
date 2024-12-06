@@ -725,19 +725,19 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, AfterNavi
                         "  return hash; " +
                         "}"
         ).then(String.class, hash -> {
-            log.info("Urifragment hash={}", hash);
+            //log.info("Urifragment hash={}", hash);
             if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
                 this.add(this.wizardReadFlashView);
-                this.wizardReadFlashView.open();
+                this.wizardReadFlashView.openAndDisableModeless();
             } else {
                 ui.getPage().fetchCurrentURL(url -> {
                     final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
                     if (!ref.contains(SETTINGS)) {
-                        this.add(this.wizardReadFlashView);
                         this.wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
                                 .ifPresent(hide -> {
                                     if (hide.isWizardEnabled()) {
-                                        this.wizardReadFlashView.open();
+                                        this.add(this.wizardReadFlashView);
+                                        this.wizardReadFlashView.openAndDisableModeless();
                                     }
                                 });
                     }

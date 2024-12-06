@@ -86,7 +86,7 @@ public class SettingsDialogView extends Dialog {
 
     @PostConstruct
     public void init() {
-        //Do nothing
+        this.initListeners();
     }
 
     private void configureDialog(String ref) {
@@ -198,22 +198,22 @@ public class SettingsDialogView extends Dialog {
             case ESPTOOL_HOMEPATH, SETTINGS -> {
                 this.mainLayout.add(this.createEsptoolHomePathContent());
                 this.setBackGroundOnClick(buttonEsptoolHomePath);
-                super.open();
+                this.openAndDisableModeless();
             }
             case CONTACT_INFORMATION -> {
                 this.mainLayout.add(this.createContactInformation());
                 this.setBackGroundOnClick(buttonContactInformation);
-                super.open();
+                this.openAndDisableModeless();
             }
             case PASSWORD -> {
                 this.mainLayout.add(this.createPassword());
                 this.setBackGroundOnClick(buttonPassword);
-                super.open();
+                this.openAndDisableModeless();
             }
             case NOTIFICATION -> {
                 this.mainLayout.add(this.createNotifications());
                 this.setBackGroundOnClick(buttonNotifications);
-                super.open();
+                this.openAndDisableModeless();
             }
             case StringUtils.EMPTY -> {
                 this.mainLayout.add(this.createEsptoolHomePathContent());
@@ -226,6 +226,18 @@ public class SettingsDialogView extends Dialog {
         this.mainLayout.addClassNames(BoxSizing.BORDER, MaxWidth.SCREEN_SMALL, Padding.LARGE);
         this.mainLayout.setFlexDirection(Layout.FlexDirection.COLUMN);
         return mainLayout;
+    }
+
+    /**
+     * You must disable the server-side modality each time after opening the dialog
+     * https://github.com/vaadin/web-components/issues/7778#issuecomment-2334597476
+     *
+     */
+    public void openAndDisableModeless() {
+        getUI().ifPresent(ui -> {
+            super.open();
+            ui.setChildComponentModal(this, false);
+        });
     }
 
     public Component createEsptoolHomePathContent() {
@@ -313,14 +325,16 @@ public class SettingsDialogView extends Dialog {
         final ToggleButton toggleButtonReadFlashEsp = new ToggleButton();
 
         toggleButtonEnableAllWizards.addValueChangeListener(event -> {
-            if (event.getValue()) {
-                this.updateAllWizardStatus(event.getValue());
-                toggleButtonFlashEsp.setValue(true);
-                toggleButtonReadFlashEsp.setValue(true);
-            } else {
-                this.updateAllWizardStatus(event.getValue());
-                toggleButtonFlashEsp.setValue(false);
-                toggleButtonReadFlashEsp.setValue(false);
+            if(event.isFromClient()) {
+                if (event.getValue()) {
+                    this.updateAllWizardStatus(event.getValue());
+                    toggleButtonFlashEsp.setValue(true);
+                    toggleButtonReadFlashEsp.setValue(true);
+                } else {
+                    this.updateAllWizardStatus(event.getValue());
+                    toggleButtonFlashEsp.setValue(false);
+                    toggleButtonReadFlashEsp.setValue(false);
+                }
             }
         });
         final HorizontalLayout rowEnableInitialWizardsDialogs = new HorizontalLayout(paragraphEnableAllWizards, toggleButtonEnableAllWizards);
@@ -331,19 +345,23 @@ public class SettingsDialogView extends Dialog {
         final Paragraph spanEnableWizardFlashEsp = new Paragraph("Enable wizard Flash Esp32-ESP8266 view");
         spanEnableWizardFlashEsp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         toggleButtonFlashEsp.addValueChangeListener(event -> {
-            if (event.getValue()) {
-                updateWizardView(WIZARD_FLASH_ESP_VIEW, true);
-            } else {
-                updateWizardView(WIZARD_FLASH_ESP_VIEW, false);
+            if(event.isFromClient()) {
+                if (event.getValue()) {
+                    updateWizardView(WIZARD_FLASH_ESP_VIEW, true);
+                } else {
+                    updateWizardView(WIZARD_FLASH_ESP_VIEW, false);
+                }
             }
         });
         final Paragraph spanEnableWizardReadFlashEsp = new Paragraph("Enable wizard Read flash/firmware view");
         spanEnableWizardReadFlashEsp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         toggleButtonReadFlashEsp.addValueChangeListener(event -> {
-            if (event.getValue()) {
-                updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, true);
-            } else {
-                updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, false);
+            if(event.isFromClient()) {
+                if (event.getValue()) {
+                    updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, true);
+                } else {
+                    updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, false);
+                }
             }
         });
 
@@ -484,9 +502,8 @@ public class SettingsDialogView extends Dialog {
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             ui.getPage().fetchCurrentURL(url -> {
-                String ref = url.getRef();
+                final String ref = url.getRef();
                 this.configureDialog(ref);
-                this.initListeners();
             });
         }
     }

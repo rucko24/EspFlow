@@ -141,6 +141,22 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
     }
 
     /**
+     * You must disable the server-side modality each time after opening the dialog
+     * https://github.com/vaadin/web-components/issues/7778#issuecomment-2334597476
+     *
+     */
+    public void openAndDisableModeless() {
+        getUI().ifPresent(ui -> {
+            super.open();
+            ui.setChildComponentModal(this, false);
+        });
+    }
+
+    @Override
+    @SuppressWarnings("donotuse")
+    public void open() {}
+
+    /**
      * Configure the dialog header here
      */
     private void configureHeader() {

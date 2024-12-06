@@ -112,7 +112,6 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         super.setMaxWidth("740px");
         super.setMaxHeight("500px");
         super.setHeight("500px");
-
         /*
          * Allows that when closing the dialog, we remove the portion aka fragment of the uri after the and leaving the original path.
          */
@@ -136,6 +135,22 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         super.add(hr, this.createReadFlashDevices());
         super.addClassName("settings-content-dialog");
     }
+
+    /**
+     * You must disable the server-side modality each time after opening the dialog
+     * https://github.com/vaadin/web-components/issues/7778#issuecomment-2334597476
+     *
+     */
+    public void openAndDisableModeless() {
+        getUI().ifPresent(ui -> {
+            super.open();
+            ui.setChildComponentModal(this, false);
+        });
+    }
+
+    @Override
+    @SuppressWarnings("donotuse")
+    public void open() {}
 
     /**
      * Configure the dialog header here

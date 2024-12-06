@@ -406,16 +406,16 @@ public class FlashEspView extends Div implements AfterNavigationObserver, Respon
             //log.info("Fragmento de URI: {}", hash);
             if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
                 this.add(this.wizardFlashEspDialog);
-                this.wizardFlashEspDialog.open();
+                this.wizardFlashEspDialog.openAndDisableModeless();
             } else {
                 ui.getPage().fetchCurrentURL(url -> {
                     final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
                     if (!ref.contains(SETTINGS)) {
-                        this.add(this.wizardFlashEspDialog);
                         this.wizardFlashEspRepository.findByName(WIZARD_FLASH_ESP_VIEW)
                                 .ifPresent(hide -> {
                                     if (hide.isWizardEnabled()) {
-                                        this.wizardFlashEspDialog.open();
+                                        this.add(this.wizardFlashEspDialog);
+                                        this.wizardFlashEspDialog.openAndDisableModeless();
                                     }
                                 });
                     }

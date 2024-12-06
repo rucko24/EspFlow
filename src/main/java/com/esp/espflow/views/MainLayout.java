@@ -172,7 +172,6 @@ public class MainLayout extends AppLayout {
                     String urlWithParameters = url.getPath().concat("#settings/notifications");
                     ui.getPage().getHistory().replaceState(null, urlWithParameters);
                     settingsDialogView.open("settings/notifications");
-                    ui.setChildComponentModal(settingsDialogView, false);
                 });
             });
         });
@@ -304,7 +303,6 @@ public class MainLayout extends AppLayout {
                         String urlWithParameters = url.getPath().concat("#settings");
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
                         settingsDialogView.open(SETTINGS);
-                        ui.setChildComponentModal(settingsDialogView, false);
                     });
                 });
             }).addComponentAsFirst(VaadinIcon.COG.create());
@@ -319,14 +317,12 @@ public class MainLayout extends AppLayout {
                         String urlWithParameters = url.getPath().concat("#settings");
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
                         settingsDialogView.open(SETTINGS);
-                        ui.setChildComponentModal(settingsDialogView, false);
                         log.info("fetchCurrentURL from shortcut {}{}", url, "#settings");
                     });
                 });
             }, Key.KEY_S, KeyModifier.CONTROL, KeyModifier.ALT);
 
-            UI.getCurrent().add(settingsDialogView);
-            layout.add(userMenu);
+            layout.add(userMenu, settingsDialogView);
         } else {
             Anchor loginLink = new Anchor("login", "Sign in");
             layout.add(loginLink);
