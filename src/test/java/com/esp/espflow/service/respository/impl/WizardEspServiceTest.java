@@ -2,10 +2,11 @@ package com.esp.espflow.service.respository.impl;
 
 import com.esp.espflow.entity.WizardEspEntity;
 import com.esp.espflow.entity.dto.WizardEspDto;
-import com.esp.espflow.mappers.WizardEspMapper;
 import com.esp.espflow.service.respository.WizardEspRepository;
-import com.esp.espflow.service.respository.impl.provider.WizardEspServiceProvider;
-import com.esp.espflow.service.respository.impl.provider.WizardUpdateEspServiceProvider;
+import com.esp.espflow.service.respository.impl.provider.wizardsproviders.WizardEspServiceFindByNameProvider;
+import com.esp.espflow.service.respository.impl.provider.wizardsproviders.WizardEspServiceSaveAllProvider;
+import com.esp.espflow.service.respository.impl.provider.wizardsproviders.WizardEspServiceSaveProvider;
+import com.esp.espflow.service.respository.impl.provider.wizardsproviders.WizardEspServiceUpdateProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,16 +41,14 @@ class WizardEspServiceTest {
     private WizardEspRepository repository;
 
     @ParameterizedTest
-    @ArgumentsSource(WizardEspServiceProvider.class)
+    @ArgumentsSource(WizardEspServiceSaveAllProvider.class)
     @DisplayName("save items")
-    void saveAll(WizardEspDto wizardReadFlashViewDto, WizardEspDto wizardFlashViewDto,
+    void saveAll(WizardEspEntity toSaveReadDto, WizardEspEntity toSaveFlashDto, WizardEspDto wizardReadFlashViewDto,
+                 WizardEspDto wizardFlashViewDto,
                  WizardEspEntity entityReadViewToReturn, WizardEspEntity entityFlashViewToReturn) {
 
-        WizardEspEntity entityFlash = WizardEspMapper.INSTANCE.dtoToEntity(wizardReadFlashViewDto);
-        WizardEspEntity entityRead = WizardEspMapper.INSTANCE.dtoToEntity(wizardFlashViewDto);
-
-        when(repository.save(entityRead)).thenReturn(entityReadViewToReturn);
-        when(repository.save(entityFlash)).thenReturn(entityFlashViewToReturn);
+        when(repository.save(toSaveFlashDto)).thenReturn(entityReadViewToReturn);
+        when(repository.save(toSaveReadDto)).thenReturn(entityFlashViewToReturn);
 
         assertThatCode(() -> wizardEspService.saveAll(List.of(wizardFlashViewDto, wizardReadFlashViewDto)))
                 .doesNotThrowAnyException();
@@ -60,61 +59,60 @@ class WizardEspServiceTest {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(WizardUpdateEspServiceProvider.class)
+    @ArgumentsSource(WizardEspServiceUpdateProvider.class)
     @DisplayName("We update if the entity exists, the id 1L exists, we update the field isWizardEnabled to false")
-    void updateEntityWizardReadFlash(WizardEspDto wizardReadFlashViewDto, WizardEspDto updatedDto,
+    void updateEntityWizardReadFlash(WizardEspEntity toSave, WizardEspEntity findById, WizardEspDto updatedDto,
                                      WizardEspEntity updatedEntity) {
-
-        WizardEspEntity toSave = WizardEspMapper.INSTANCE.dtoToEntity(updatedDto);
-        WizardEspEntity findById = WizardEspMapper.INSTANCE.dtoToEntity(wizardReadFlashViewDto);
 
         when(repository.findById(findById.getId())).thenReturn(Optional.of(updatedEntity));
         when(repository.save(toSave)).thenReturn(updatedEntity);
+        when(repository.findByName(WIZARD_READ_FLASH_ESP_VIEW)).thenReturn(Optional.of(updatedEntity));
 
         assertThatCode(() -> wizardEspService.save(updatedDto)).doesNotThrowAnyException();
 
-        verify(repository, times(1)).findById(findById.getId());
-        verify(repository, times(1)).save(toSave);
+        assertAll(() -> {
+            assertThat(wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW))
+                    .map(WizardEspDto::isWizardEnabled)
+                    .hasValue(false);
+        });
+
+        verify(repository, times(1)).findById(updatedEntity.getId());
+        verify(repository, times(1)).findByName(WIZARD_READ_FLASH_ESP_VIEW);
+        verify(repository, times(1)).save(updatedEntity);
         verifyNoMoreInteractions(repository);
     }
 
     @ParameterizedTest
-    @ArgumentsSource(WizardEspServiceProvider.class)
+    @ArgumentsSource(WizardEspServiceSaveProvider.class)
     @DisplayName("id is empty, the new entity is saved")
-    void save(WizardEspDto wizardReadFlashViewDto, WizardEspDto wizardFlashViewDto,
-              WizardEspEntity entityReadView, WizardEspEntity entityFlashView) {
-
-        WizardEspEntity toSave = WizardEspMapper.INSTANCE.dtoToEntity(wizardReadFlashViewDto);
-        WizardEspEntity toFindBy = WizardEspMapper.INSTANCE.dtoToEntity(wizardReadFlashViewDto);
+    void save(WizardEspEntity toFindBy, WizardEspEntity toSave, WizardEspDto wizardReadFlashViewDto,
+              WizardEspEntity entitySaved) {
 
         when(repository.findById(toFindBy.getId())).thenReturn(Optional.empty());
-        when(repository.save(toSave)).thenReturn(entityReadView);
+        when(repository.save(toSave)).thenReturn(entitySaved);
 
         assertThatCode(() -> wizardEspService.save(wizardReadFlashViewDto)).doesNotThrowAnyException();
 
-        verify(repository, times(1)).findById(toFindBy.getId());
-        verify(repository, times(1)).save(entityReadView);
+        verify(repository, times(1)).findById(entitySaved.getId());
+        verify(repository, times(1)).save(entitySaved);
         verifyNoMoreInteractions(repository);
     }
 
     @ParameterizedTest
-    @ArgumentsSource(WizardUpdateEspServiceProvider.class)
+    @ArgumentsSource(WizardEspServiceFindByNameProvider.class)
     @DisplayName("We save the entity and search by name")
-    void findByName(WizardEspDto wizardReadFlashViewDto, WizardEspDto wizardReadFlashViewDtoToSave,
-                    WizardEspEntity expectedUpdatedEntity) {
+    void findByName(WizardEspEntity toSave, WizardEspEntity toFindBy, WizardEspDto updatedDto,
+                    WizardEspEntity updatedEntity) {
 
-        WizardEspEntity toSave = WizardEspMapper.INSTANCE.dtoToEntity(wizardReadFlashViewDtoToSave);
-        WizardEspEntity toFindBy = WizardEspMapper.INSTANCE.dtoToEntity(wizardReadFlashViewDto);
+        when(repository.findById(toFindBy.getId())).thenReturn(Optional.of(updatedEntity));
+        when(repository.save(toSave)).thenReturn(updatedEntity);
+        when(repository.findByName(WIZARD_READ_FLASH_ESP_VIEW)).thenReturn(Optional.of(updatedEntity));
 
-        when(repository.findById(toFindBy.getId())).thenReturn(Optional.of(expectedUpdatedEntity));
-        when(repository.save(toSave)).thenReturn(expectedUpdatedEntity);
-        when(repository.findByName(WIZARD_READ_FLASH_ESP_VIEW)).thenReturn(Optional.of(expectedUpdatedEntity));
-
-        assertThatCode(() -> wizardEspService.save(wizardReadFlashViewDtoToSave)).doesNotThrowAnyException();
+        assertThatCode(() -> wizardEspService.save(updatedDto)).doesNotThrowAnyException();
 
         assertThat(wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW))
                 .usingRecursiveComparison()
-                .isEqualTo(Optional.of(expectedUpdatedEntity));
+                .isEqualTo(Optional.of(updatedEntity));
 
         assertAll(() -> {
             wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
@@ -126,13 +124,13 @@ class WizardEspServiceTest {
         });
 
         verify(repository, times(1)).findById(toFindBy.getId());
-        verify(repository, times(1)).save(expectedUpdatedEntity);
+        verify(repository, times(1)).save(updatedEntity);
         verify(repository, times(2)).findByName(WIZARD_READ_FLASH_ESP_VIEW);
         verifyNoMoreInteractions(repository);
     }
 
     @Test
-    @DisplayName("Count how many wizards are true or enabled")
+    @DisplayName("We return a boolean to true if each wizard is enabled to true by counting")
     void areAllWizardsEnabled() {
 
         when(this.repository.areAllWizardsEnabled()).thenReturn(2);

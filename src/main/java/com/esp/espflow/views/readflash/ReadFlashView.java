@@ -44,8 +44,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -99,7 +97,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 @Route(value = "read-flash", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class ReadFlashView extends Div implements ResponsiveHeaderDiv, AfterNavigationObserver, BeforeEnterObserver {
+public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnterObserver {
 
     private final FlashDownloadButtonService flashDownloadButtonService;
     private final EsptoolService esptoolService;
@@ -119,7 +117,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, AfterNavi
      * Console output
      */
     private final OutPutConsole outPutConsole = new OutPutConsole();
-    private final Div divColumnItems = new Div();
     private final Span spanTotalDevices = new Span("Total devices:");
     private final Span spanPortFailure = new Span(PORT_FAILURE);
     private final Span spanTotalDevicesValue = new Span();
@@ -285,13 +282,13 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, AfterNavi
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
         divRowToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
 
-//        outPutConsole.getStyle().set("overflow-x", "hidden");
-//        outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
-//        outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-//        outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-//
-//        Div divColumnItems = new Div(outPutConsole.getButtonDownScroll(),
-//                outPutConsole.getButtonClear());
+        outPutConsole.getStyle().set("overflow-x", "hidden");
+        outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
+        outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+
+        Div divColumnItems = new Div(outPutConsole.getButtonDownScroll(),
+                outPutConsole.getButtonClear());
         divColumnItems.setId("divColumnItems");
 
         divColumnItems.addClassNames(
@@ -683,18 +680,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, AfterNavi
                 //https://stackoverflow.com/a/73885127/7267818
             }
         });
-    }
-
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        //Ignored listener invocation for terminal-initialized event from the client side for an inert fc-xterm element
-        if(outPutConsole.isAttached()) {
-            outPutConsole.getStyle().set("overflow-x", "hidden");
-            outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
-            outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-            outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-            this.divColumnItems.add(outPutConsole.getButtonDownScroll(), outPutConsole.getButtonClear());
-        }
     }
 
     @Override

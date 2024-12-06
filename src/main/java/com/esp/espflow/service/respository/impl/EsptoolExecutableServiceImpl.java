@@ -1,5 +1,6 @@
 package com.esp.espflow.service.respository.impl;
 
+import com.esp.espflow.entity.EsptoolExecutableEntity;
 import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.mappers.EsptoolExecutableMapper;
 import com.esp.espflow.service.respository.EsptoolExecutableRepository;
@@ -32,11 +33,12 @@ public class EsptoolExecutableServiceImpl {
         var mappedEntity = EsptoolExecutableMapper.INSTANCE.dtoToEntity(esptoolExecutableDto);
         this.esptoolExecutableRepository.findByEsptoolVersionWithBundle(mappedEntity.getEsptoolVersion(), mappedEntity.isBundled())
                 .ifPresentOrElse(entityIfPresent -> {
-                    var entityToUpdate = EsptoolExecutableMapper.INSTANCE.fromEntityPresent(entityIfPresent.getId(), mappedEntity);
-                    log.info("Entity updated {}", this.esptoolExecutableRepository.save(entityToUpdate));
+                    final EsptoolExecutableEntity entityToUpdate = EsptoolExecutableMapper.INSTANCE.fromEntityPresent(entityIfPresent.getId(), mappedEntity);
+                    final EsptoolExecutableEntity updatedEntity = this.esptoolExecutableRepository.save(entityToUpdate);
+                    log.info("Entity updated {}", updatedEntity);
                 }, () -> {
-                    this.esptoolExecutableRepository.save(mappedEntity);
-                    log.info("Entity saved {}", mappedEntity);
+                    final EsptoolExecutableEntity entitySaved = this.esptoolExecutableRepository.save(mappedEntity);
+                    log.info("Entity saved {}", entitySaved);
                 });
         return EsptoolExecutableMapper.INSTANCE.entityToDto(mappedEntity);
     }

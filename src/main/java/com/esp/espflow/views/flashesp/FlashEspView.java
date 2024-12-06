@@ -26,8 +26,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -37,8 +35,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
@@ -80,7 +76,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
 //@PreserveOnRefresh
-public class FlashEspView extends Div implements AfterNavigationObserver, ResponsiveHeaderDiv {
+public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
     private final DivFlashUploader divFlashUploader;
     private final DivHeaderPorts divHeaderPorts;
@@ -99,7 +95,6 @@ public class FlashEspView extends Div implements AfterNavigationObserver, Respon
     /**
      * OutputConsole
      */
-    private Div divColumnItems = new Div();
     private final OutPutConsole outPutConsole = new OutPutConsole();
 
     private String[] commands;
@@ -161,12 +156,12 @@ public class FlashEspView extends Div implements AfterNavigationObserver, Respon
         divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
 
-//        outPutConsole.getStyle().set("overflow-x", "hidden");
-//        outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
-//        outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-//        outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-//        Div divColumnItems = new Div(outPutConsole.getButtonDownScroll(),
-//                outPutConsole.getButtonClear());
+        outPutConsole.getStyle().set("overflow-x", "hidden");
+        outPutConsole.getDivTextArea().removeClassNames(LumoUtility.Margin.Left.LARGE, LumoUtility.Margin.Minus.Right.LARGE);
+        outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        Div divColumnItems = new Div(outPutConsole.getButtonDownScroll(),
+                outPutConsole.getButtonClear());
         divColumnItems.setId("divColumnItems");
 
         divColumnItems.addClassNames(
@@ -426,15 +421,4 @@ public class FlashEspView extends Div implements AfterNavigationObserver, Respon
 
     }
 
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        //Ignored listener invocation for terminal-initialized event from the client side for an inert fc-xterm element
-        if(outPutConsole.isAttached()) {
-            outPutConsole.getStyle().set("overflow-x", "hidden");
-            outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
-            outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-            outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
-            this.divColumnItems.add(outPutConsole.getButtonDownScroll(), outPutConsole.getButtonClear());
-        }
-    }
 }

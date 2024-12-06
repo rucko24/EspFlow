@@ -1,9 +1,11 @@
 package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
+import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;
+import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.service.provider.EsptoolServiceArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceNoFlashSizeArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolServiceRawFlashIdFromPortArgumentsProvider;
@@ -23,6 +25,8 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,6 +48,7 @@ import static com.esp.espflow.util.EspFlowConstants.PORT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -72,6 +77,9 @@ class EsptoolServiceTest {
 
     @Mock
     private EsptoolPathService esptoolPathService;
+
+    private static final String JAVA_IO_TEMPORAL_DIR_OS = System.getProperty("java.io.tmpdir");
+    private static final String EXPECTED_DIR = JAVA_IO_TEMPORAL_DIR_OS.concat("/esp-backup-flash-dir");
 
     @ParameterizedTest
     @ArgumentsSource(EsptoolServiceReadAllDevicesArgumentsProvider.class)
@@ -201,6 +209,27 @@ class EsptoolServiceTest {
     }
 
     @Test
+    @DisplayName("show esptoolVersion using the absolute path")
+    void testShowEsptoolVersion_absolutePath() {
+        String[] commands = ESPTOOL_PY_VERSION;
+
+        when(commandService.processInputStreamLineByLine(commands)).thenReturn(Flux.just("esptool.py v4.7.0"));
+
+        EsptoolExecutableDto esptoolExecutableDto = EsptoolExecutableDto
+                .builder()
+                .absolutePathEsptool("/tmp/esptool-dir/esptool.py")
+                .isBundled(false)
+                .isSelected(false)
+                .build();
+
+        when(esptoolPathService.esptoolPath(esptoolExecutableDto)).thenReturn("esptool.py");
+
+        StepVerifier.create(esptoolService.showEsptoolVersion(esptoolExecutableDto))
+                .expectNext("esptool.py v4.7.0")
+                .verifyComplete();
+    }
+
+    @Test
     @DisplayName("esptool.py not found!")
     @SneakyThrows
     void showEsptoolVersionFailure() {
@@ -326,55 +355,49 @@ class EsptoolServiceTest {
     }
 
     @Test
-    @SetSystemProperty(key = "java.io.tmpdir", value = "/tmp")
-    @SetSystemProperty(key = "os.name", value = "linux")
-    @DisplayName("Creation of backup file in temporary directory, on linux")
-    void createEspBackUpFlashDirIfNotExists() throws IOException {
+    @DisplayName("Create Directory when not exists")
+    void testCreateDirectoryWhenNotExists() throws Exception {
+        try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+            Path mockedPath = Path.of(EXPECTED_DIR);
 
-        Path tmpPath = Path.of("/tmp/esp-backup-flash-dir");
+            filesMock.when(() -> Files.exists(mockedPath)).thenReturn(false);
+            filesMock.when(() -> Files.createDirectory(mockedPath)).thenReturn(mockedPath);
 
-        if (Files.exists(tmpPath)) {
-            try (Stream<Path> dirStream = Files.walk(tmpPath)) {
+            esptoolService.createEspBackUpFlashDirIfNotExists();
 
-                dirStream
-                        .filter(Files::isRegularFile)
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            }
-
-            Files.deleteIfExists(tmpPath);
-            assertThatCode(() ->
-                    this.esptoolService.createEspBackUpFlashDirIfNotExists()).doesNotThrowAnyException();
-
-        } else {
-
-            assertThatExceptionOfType(IOException.class)
-                    .isThrownBy(() -> this.esptoolService.createEspBackUpFlashDirIfNotExists())
-                    .withMessage("Error creating directory /esp-backup-flash-dir on not-dir/esp-backup-flash-dir");
+            filesMock.verify(() -> Files.exists(mockedPath), times(1));
+            filesMock.verify(() -> Files.createDirectory(mockedPath), times(1));
         }
-
-
     }
 
     @Test
-    @SetSystemProperty(key = "os.name", value = "linux")
-    @SetSystemProperty(key = "java.io.tmpdir", value = "not-dir")
-    @DisplayName("Error creating directory /esp-backup-flash-dir in a directory that does not exist")
-    void createEspBackUpFlashDirIfNotExistsFailure() throws IOException {
+    @DisplayName("Directory already exists")
+    void testDirectoryAlreadyExists() throws Exception {
+        try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+            Path mockedPath = Path.of(EXPECTED_DIR);
+            filesMock.when(() -> Files.exists(mockedPath)).thenReturn(true);
 
-        Files.deleteIfExists(Path.of("not-dir/esp-backup-flash-dir"));
+            esptoolService.createEspBackUpFlashDirIfNotExists();
 
-        assertThatExceptionOfType(IOException.class)
-                .isThrownBy(() -> this.esptoolService.createEspBackUpFlashDirIfNotExists())
-                .withMessage("Error creating directory /esp-backup-flash-dir on not-dir/esp-backup-flash-dir");
-
+            filesMock.verify(() -> Files.exists(mockedPath), times(1));
+            filesMock.verify(() -> Files.createDirectory(mockedPath), never());
+        }
     }
 
     @Test
-    void testShowEsptoolVersion() {
+    @DisplayName("Error creating directory /esp-backup-flash-dir in a directory that does not exist on /tpm dir")
+    void testIOExceptionThrown() {
+        try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+            Path mockedPath = Path.of(EXPECTED_DIR);
+
+            filesMock.when(() -> Files.exists(mockedPath)).thenReturn(false);
+            filesMock.when(() -> Files.createDirectory(mockedPath)).thenThrow(new IOException("/tmp"));
+
+            assertThatExceptionOfType(CreateEspBackUpFlashDirException.class)
+                    .isThrownBy(() -> this.esptoolService.createEspBackUpFlashDirIfNotExists())
+                    .withMessage("Error creating directory /esp-backup-flash-dir on /tmp");
+
+        }
     }
 
-    @Test
-    void testShowEsptoolVersion1() {
-    }
 }

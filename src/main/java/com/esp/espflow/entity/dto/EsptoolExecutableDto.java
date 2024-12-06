@@ -70,8 +70,8 @@ public record EsptoolExecutableDto(
         return "{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", isBundled=" + isBundled +
                 ", absolutePathEsptool='" + absolutePathEsptool + '\'' +
+                ", isBundled=" + isBundled +
                 ", esptoolVersion='" + esptoolVersion + '\'' +
                 ", isSelected=" + isSelected +
                 ", sha256='" + sha256 + '\'' +

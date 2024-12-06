@@ -157,19 +157,6 @@ public class EsptoolService {
     /**
      * Check if esptool is installed by executing the command esptool.py version for the current system.
      *
-     * @param absolutePath
-     * @return A {@link Flux<String> }
-     */
-    public Flux<String> showEsptoolVersion(final String absolutePath) {
-        final String[] commands = {absolutePath, VERSION};
-        return this.commandService.processInputStreamLineByLine(commands)
-                .take(FIRST_LINE_TO_CHECK_IF_IT_EXISTS)
-                .map(this::processLineEsptoolVersion);
-    }
-
-    /**
-     * Check if esptool is installed by executing the command esptool.py version for the current system.
-     *
      * @param esptoolExecutableDto
      *
      * @return A {@link Flux<String> }
