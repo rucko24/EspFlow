@@ -3,6 +3,7 @@ package com.esp.espflow.service.respository.impl;
 import com.esp.espflow.entity.EsptoolExecutableEntity;
 import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.service.respository.EsptoolExecutableRepository;
+import com.esp.espflow.service.respository.impl.provider.esptoolexecutableprovider.EsptoolExecutableServiceFindByIsSelectedToTrueProvider;
 import com.esp.espflow.service.respository.impl.provider.esptoolexecutableprovider.EsptoolExecutableServiceSaveProvider;
 import com.esp.espflow.service.respository.impl.provider.esptoolexecutableprovider.EsptoolExecutableServiceUpdateProvider;
 import com.esp.espflow.service.respository.impl.provider.esptoolexecutableprovider.EsptoollExecutableServiceFindAllProvider;
@@ -21,7 +22,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -54,7 +54,7 @@ class EsptoolExecutableServiceImplTest {
                 .usingRecursiveComparison()
                 .isEqualTo(captor.getValue());
 
-        verify(esptoolExecutableRepository, times(1)).save(captor.getValue());
+        verify(esptoolExecutableRepository).save(captor.getValue());
 
     }
 
@@ -74,14 +74,12 @@ class EsptoolExecutableServiceImplTest {
                 .usingRecursiveComparison()
                 .isEqualTo(captor.getValue());
 
-        assertAll(() -> {
-            assertThat(esptoolExecutableService.findByEsptoolVersionWithBundle("v4.7.0", false))
-                    .map(EsptoolExecutableDto::isSelected)
-                    .hasValue(true);
-        });
+        assertThat(esptoolExecutableService.findByEsptoolVersionWithBundle("v4.7.0", false))
+                .map(EsptoolExecutableDto::isSelected)
+                .hasValue(true);
 
         verify(esptoolExecutableRepository, times(2)).findByEsptoolVersionWithBundle("v4.7.0", false);
-        verify(esptoolExecutableRepository, times(1)).save(captor.getValue());
+        verify(esptoolExecutableRepository).save(captor.getValue());
 
     }
 
@@ -118,7 +116,7 @@ class EsptoolExecutableServiceImplTest {
                 .usingRecursiveComparison()
                 .isEqualTo(expectedEsptoolExecutableDto);
 
-        verify(esptoolExecutableRepository, times(1)).findByEsptoolVersionWithBundle("v4.7.0", false);
+        verify(esptoolExecutableRepository).findByEsptoolVersionWithBundle("v4.7.0", false);
         verifyNoMoreInteractions(esptoolExecutableRepository);
 
     }
@@ -127,45 +125,29 @@ class EsptoolExecutableServiceImplTest {
     @DisplayName("update all items except this id")
     void updateAllSelectedToFalseExcept() {
 
-        assertThatCode(() -> esptoolExecutableService.updateAllSelectedToFalseExcept(1L))
-                .doesNotThrowAnyException();
+        assertThatCode(() -> esptoolExecutableService.updateAllSelectedToFalseExcept(1L)).doesNotThrowAnyException();
 
-        verify(esptoolExecutableRepository, times(1)).updateAllSelectedToFalseExcept(1L);
+        verify(esptoolExecutableRepository).updateAllSelectedToFalseExcept(1L);
         verifyNoMoreInteractions(esptoolExecutableRepository);
 
     }
 
-    @Test
+    @ParameterizedTest
+    @ArgumentsSource(EsptoolExecutableServiceFindByIsSelectedToTrueProvider.class)
     @DisplayName("Only is set to true")
-    void findByIsSelectedToTrue() {
-        final EsptoolExecutableEntity esptoolExecutableEntityToSave = EsptoolExecutableEntity
-                .builder()
-                .id(1L)
-                .name("esptool")
-                .absolutePathEsptool("/tmp/esptool-dir/esptool.py")
-                .esptoolVersion("v4.7.0")
-                .isBundled(false)
-                .isSelected(true)
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
-                .build();
+    void findByIsSelectedToTrue(EsptoolExecutableEntity entitySaved, EsptoolExecutableDto expectedEsptoolExecutableDto) {
 
-        when(esptoolExecutableRepository.findByIsSelectedToTrue())
-                .thenReturn(Optional.of(esptoolExecutableEntityToSave));
-
-        final Optional<EsptoolExecutableDto> expectedEsptoolExecutableDto = Optional.of(EsptoolExecutableDto
-                .builder()
-                .id(1L)
-                .name("esptool")
-                .absolutePathEsptool("/tmp/esptool-dir/esptool.py")
-                .esptoolVersion("v4.7.0")
-                .isBundled(false)
-                .isSelected(true)
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
-                .build());
+        when(esptoolExecutableRepository.findByIsSelectedToTrue()).thenReturn(Optional.of(entitySaved));
 
         assertThat(this.esptoolExecutableService.findByIsSelectedToTrue())
                 .usingRecursiveComparison()
-                .isEqualTo(expectedEsptoolExecutableDto);
+                .isEqualTo(Optional.of(expectedEsptoolExecutableDto));
+
+        assertThat(this.esptoolExecutableService.findByIsSelectedToTrue())
+                .map(EsptoolExecutableDto::isSelected)
+                .hasValue(true);
+
+
     }
 
     @Test
@@ -204,7 +186,7 @@ class EsptoolExecutableServiceImplTest {
 
     @ParameterizedTest
     @ArgumentsSource(EsptoollExecutableServiceFindAllProvider.class)
-    @DisplayName("findAll ")
+    @DisplayName("findAll saved two entities")
     void findAll(EsptoolExecutableEntity entity, EsptoolExecutableEntity entity2,
                  EsptoolExecutableDto expectedEsptoolExecutableDto, EsptoolExecutableDto expectedEsptoolExecutableDto2) {
 

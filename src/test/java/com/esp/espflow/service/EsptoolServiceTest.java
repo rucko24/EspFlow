@@ -16,9 +16,7 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -32,12 +30,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY;
@@ -46,10 +42,7 @@ import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_VERSION;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ID;
 import static com.esp.espflow.util.EspFlowConstants.PORT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -59,7 +52,6 @@ import static org.mockito.Mockito.when;
  * @author rubn
  */
 @Log4j2
-@TestMethodOrder(MethodOrderer.class)
 @ExtendWith(MockitoExtension.class)
 class EsptoolServiceTest {
 
@@ -110,8 +102,6 @@ class EsptoolServiceTest {
                 .expectNext(expectedEspDeviceInfoRecord)
                 .verifyComplete();
 
-        verify(esptoolFallbackService, times(0)).fallback("/dev/ttyUSB1");
-        verify(esptoolFallbackService, times(0)).fallbackEmptyPorts();
         verifyNoInteractions(esptoolFallbackService);
 
     }
@@ -132,7 +122,7 @@ class EsptoolServiceTest {
                 .expectErrorMatches(error -> error.getMessage().contains("Possibly empty ports"))
                 .verify();
 
-        verify(esptoolFallbackService, times(1)).fallbackEmptyPorts();
+        verify(esptoolFallbackService).fallbackEmptyPorts();
         verifyNoMoreInteractions(esptoolFallbackService);
 
     }
@@ -157,7 +147,6 @@ class EsptoolServiceTest {
                 .expectNext(expectedLines)
                 .verifyComplete();
 
-        verify(esptoolFallbackService, times(0)).fallback(portForInputStream);
         verifyNoInteractions(esptoolFallbackService);
 
     }
@@ -186,7 +175,7 @@ class EsptoolServiceTest {
                 .expectNext(expectedLines)
                 .verifyComplete();
 
-        verify(esptoolFallbackService, times(1)).fallback(portForInputStream);
+        verify(esptoolFallbackService).fallback(portForInputStream);
         verifyNoMoreInteractions(esptoolFallbackService);
 
     }
@@ -365,8 +354,9 @@ class EsptoolServiceTest {
 
             esptoolService.createEspBackUpFlashDirIfNotExists();
 
-            filesMock.verify(() -> Files.exists(mockedPath), times(1));
-            filesMock.verify(() -> Files.createDirectory(mockedPath), times(1));
+            filesMock.verify(() -> Files.exists(mockedPath));
+            filesMock.verify(() -> Files.createDirectory(mockedPath));
+            filesMock.verifyNoMoreInteractions();
         }
     }
 
@@ -379,8 +369,8 @@ class EsptoolServiceTest {
 
             esptoolService.createEspBackUpFlashDirIfNotExists();
 
-            filesMock.verify(() -> Files.exists(mockedPath), times(1));
-            filesMock.verify(() -> Files.createDirectory(mockedPath), never());
+            filesMock.verify(() -> Files.exists(mockedPath));
+            filesMock.verifyNoMoreInteractions();
         }
     }
 
