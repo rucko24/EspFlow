@@ -13,6 +13,8 @@ import reactor.test.StepVerifier;
 
 import java.util.Optional;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -32,6 +34,8 @@ class ComputeSha256ServiceTest {
     @Mock
     private ComputeDigestAlgorithmConfiguration computeDigestAlgorithmConfiguration;
 
+    private static final String COMPUTED_SHA_256 = "ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194";
+
     @Test
     @DisplayName("Input file is empty")
     void computeSha256FailureEmpty() {
@@ -39,6 +43,8 @@ class ComputeSha256ServiceTest {
         StepVerifier.create(computeSha256Service.computeSha256(""))
                 .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
                 .verify();
+
+        verifyNoInteractions(esptoolSha256Service);
     }
 
     @Test
@@ -48,6 +54,9 @@ class ComputeSha256ServiceTest {
         StepVerifier.create(computeSha256Service.computeSha256(null))
                 .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
                 .verify();
+
+        verifyNoInteractions(esptoolSha256Service);
+
     }
 
     @Test
@@ -59,21 +68,23 @@ class ComputeSha256ServiceTest {
         EsptoolSha256Dto actualEsptoolSha256Dto = EsptoolSha256Dto.builder()
                 .osArch("amd64")
                 .esptoolVersion("v4.7.0")
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
+                .sha256(COMPUTED_SHA_256)
                 .build();
 
         when(computeDigestAlgorithmConfiguration.getDigestAlgorithm()).thenReturn("SHA-256");
-        when(esptoolSha256Service.findBySha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")).thenReturn(Optional.of(actualEsptoolSha256Dto));
+        when(esptoolSha256Service.findBySha256(COMPUTED_SHA_256)).thenReturn(Optional.of(actualEsptoolSha256Dto));
 
         EsptoolSha256Dto expectedEsptoolSha256Dto = EsptoolSha256Dto.builder()
                 .osArch("amd64")
                 .esptoolVersion("v4.7.0")
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
+                .sha256(COMPUTED_SHA_256)
                 .build();
 
         StepVerifier.create(computeSha256Service.computeSha256("src/test/resources/esptool/esptool-linux-amd64/esptool"))
                 .expectNext(expectedEsptoolSha256Dto)
                 .verifyComplete();
+
+        verify(esptoolSha256Service).findBySha256(COMPUTED_SHA_256);
 
         System.clearProperty("os.arch");
         System.setProperty("os.arch", property);
@@ -89,15 +100,17 @@ class ComputeSha256ServiceTest {
         EsptoolSha256Dto actualEsptoolSha256Dto = EsptoolSha256Dto.builder()
                 .osArch("amd63")
                 .esptoolVersion("v4.7.0")
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
+                .sha256(COMPUTED_SHA_256)
                 .build();
 
         when(computeDigestAlgorithmConfiguration.getDigestAlgorithm()).thenReturn("SHA-256");
-        when(esptoolSha256Service.findBySha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")).thenReturn(Optional.of(actualEsptoolSha256Dto));
+        when(esptoolSha256Service.findBySha256(COMPUTED_SHA_256)).thenReturn(Optional.of(actualEsptoolSha256Dto));
 
         StepVerifier.create(computeSha256Service.computeSha256("src/test/resources/esptool/esptool-linux-amd64/esptool"))
                 .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
                 .verify();
+
+        verify(esptoolSha256Service).findBySha256(COMPUTED_SHA_256);
 
         System.clearProperty("os.arch");
         System.setProperty("os.arch", property);
@@ -113,6 +126,8 @@ class ComputeSha256ServiceTest {
         StepVerifier.create(computeSha256Service.computeSha256("src/test/resources/esptool/esptool-linux-amd64/esptool"))
                 .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
                 .verify();
+
+        verifyNoInteractions(esptoolSha256Service);
 
     }
 

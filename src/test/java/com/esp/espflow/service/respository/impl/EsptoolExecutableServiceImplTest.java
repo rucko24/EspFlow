@@ -39,6 +39,8 @@ class EsptoolExecutableServiceImplTest {
     @Mock
     private EsptoolExecutableRepository esptoolExecutableRepository;
 
+    private static final String COMPUTED_SHA_256 = "ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194";
+
     @ParameterizedTest
     @ArgumentsSource(EsptoolExecutableServiceSaveProvider.class)
     @DisplayName("Save the entity, if esptoolVersion not found and bundled to false")
@@ -66,8 +68,8 @@ class EsptoolExecutableServiceImplTest {
 
         when(esptoolExecutableRepository.findByEsptoolVersionWithBundle("v4.7.0", false)).thenReturn(Optional.of(savedFindByEntity));
 
-        final ArgumentCaptor<EsptoolExecutableEntity> captor = ArgumentCaptor.forClass(EsptoolExecutableEntity.class);
         esptoolExecutableRepository.save(toSave);
+        final ArgumentCaptor<EsptoolExecutableEntity> captor = ArgumentCaptor.forClass(EsptoolExecutableEntity.class);
         verify(esptoolExecutableRepository).save(captor.capture());
 
         assertThat(this.esptoolExecutableService.save(dtoToSave))
@@ -95,7 +97,7 @@ class EsptoolExecutableServiceImplTest {
                 .esptoolVersion("v4.7.0")
                 .isBundled(false)
                 .isSelected(false)
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
+                .sha256(COMPUTED_SHA_256)
                 .build();
 
         when(esptoolExecutableRepository.findByEsptoolVersionWithBundle("v4.7.0", false))
@@ -109,7 +111,7 @@ class EsptoolExecutableServiceImplTest {
                 .esptoolVersion("v4.7.0")
                 .isBundled(false)
                 .isSelected(false)
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
+                .sha256(COMPUTED_SHA_256)
                 .build());
 
         assertThat(this.esptoolExecutableService.findByEsptoolVersionWithBundle("v4.7.0", false))
@@ -160,7 +162,7 @@ class EsptoolExecutableServiceImplTest {
                 .esptoolVersion("v4.7.0")
                 .isBundled(false)
                 .isSelected(true)
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
+                .sha256(COMPUTED_SHA_256)
                 .build();
 
         when(esptoolExecutableRepository.findByAbsolutePathEsptoolAndIsBundleAndVersion(
@@ -175,7 +177,7 @@ class EsptoolExecutableServiceImplTest {
                 .esptoolVersion("v4.7.0")
                 .isBundled(false)
                 .isSelected(true)
-                .sha256("ae1a3fe6eed5bf7e5dbaee78aea868c5e62f80dd43e13a2f69016da86387a194")
+                .sha256(COMPUTED_SHA_256)
                 .build();
 
         assertThat(this.esptoolExecutableService.findByAbsolutePathEsptoolAndIsBundleAndVersion(

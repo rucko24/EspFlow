@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -73,8 +74,9 @@ public class ComputeSha256Service {
             log.info("File: {} sha256: {}", path.getFileName(), processedSha256);
             final String osArch = System.getProperty("os.arch");
             log.info("Current-OsArch: [{}]", osArch);
-            if (this.esptool256Service.findBySha256(processedSha256).isPresent()) {
-                final EsptoolSha256Dto esptoolSha256Dto = this.esptool256Service.findBySha256(processedSha256).get();
+            final Optional<EsptoolSha256Dto> optionalEsptoolSha256Dto = this.esptool256Service.findBySha256(processedSha256);
+            if (optionalEsptoolSha256Dto.isPresent()) {
+                final EsptoolSha256Dto esptoolSha256Dto = optionalEsptoolSha256Dto.get();
                 log.info("entity osArch: [{}]", esptoolSha256Dto.osArch());
                 if (esptoolSha256Dto.osArch().contains(osArch)) {
                     return Mono.just(esptoolSha256Dto);
