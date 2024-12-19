@@ -1,16 +1,12 @@
 package com.esp.espflow.entity.event;
 
-import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.server.StreamResource;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-
-import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_SVG_ICONS;
 
 /**
  *
@@ -47,13 +43,7 @@ public class EsptoolFRWMessageListItemEvent extends MessageListItem {
         super.setText(operation);
         super.setTime(LocalDateTime.now().toInstant(ZoneOffset.UTC));
         super.setUserName(port);
-        super.setUserImageResource(setCustomImage());
-    }
-
-    private static StreamResource setCustomImage() {
-        return new StreamResource("usb-port-black.svg",
-                () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + "usb-port-black.svg"));
-
+        super.setUserImage("frontend/images/svg-icons/" + "usb-port-black.svg");
     }
 
 }
