@@ -26,6 +26,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -53,6 +54,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
+import static com.esp.espflow.util.EspFlowConstants.THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
@@ -75,7 +77,7 @@ public class SettingsDialogView extends Dialog {
     private static final String ITEM_ICON_SIZE = "24px";
 
     private final Button buttonEsptoolHomePath = new Button("esptool.py home path");
-    private final Button buttonContactInformation = new Button("Manage settings...");
+    private final Button buttonManageSettings = new Button("Manage settings...");
     private final Button buttonPassword = new Button("Password");
     private final Button buttonNotifications = new Button("Notifications");
     private final Button buttonCheckUpdates = new Button("Check updates...");
@@ -155,20 +157,15 @@ public class SettingsDialogView extends Dialog {
             this.setBackGroundOnClick(buttonEsptoolHomePath);
             this.updateFragment(ESPTOOL_HOMEPATH);
         });
-        buttonContactInformation.setPrefixComponent(VaadinIcon.ARCHIVE.create());
-        buttonContactInformation.addClickListener(event -> {
-            this.mainLayout.removeAll();
-            this.mainLayout.add(createContactInformation());
-            this.setBackGroundOnClick(buttonContactInformation);
-            this.updateFragment(CONTACT_INFORMATION);
+        buttonManageSettings.setPrefixComponent(VaadinIcon.ARCHIVE.create());
+        buttonManageSettings.addClickListener(event -> {
+            Notification.show(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET, 2000, Notification.Position.MIDDLE);
         });
         buttonPassword.setPrefixComponent(VaadinIcon.PASSWORD.create());
         buttonPassword.addClickListener(event -> {
-            this.mainLayout.removeAll();
-            this.mainLayout.add(createPassword());
-            this.setBackGroundOnClick(buttonPassword);
-            this.updateFragment(PASSWORD);
+            Notification.show(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET, 2000, Notification.Position.MIDDLE);
         });
+        buttonCheckUpdates.addClickListener(event -> Notification.show(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET, 2000, Notification.Position.MIDDLE));
     }
 
     private void updateFragment(String contentName) {
@@ -202,7 +199,7 @@ public class SettingsDialogView extends Dialog {
             }
             case CONTACT_INFORMATION -> {
                 this.mainLayout.add(this.createContactInformation());
-                this.setBackGroundOnClick(buttonContactInformation);
+                this.setBackGroundOnClick(buttonManageSettings);
                 this.openAndDisableModeless();
             }
             case PASSWORD -> {
@@ -453,14 +450,14 @@ public class SettingsDialogView extends Dialog {
 
     public Component createButtonsItemsMenu() {
 
-        Stream.of(buttonNotifications, buttonPassword, buttonEsptoolHomePath, buttonContactInformation, buttonCheckUpdates)
+        Stream.of(buttonNotifications, buttonPassword, buttonEsptoolHomePath, buttonManageSettings, buttonCheckUpdates)
                 .forEach(button -> {
                     button.getStyle().setCursor(EspFlowConstants.CURSOR_POINTER);
                     button.addClassNames("settings-buttons");
                     button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 });
 
-        final Div div = new Div(buttonEsptoolHomePath, buttonContactInformation, buttonPassword, buttonNotifications, buttonCheckUpdates);
+        final Div div = new Div(buttonEsptoolHomePath, buttonManageSettings, buttonPassword, buttonNotifications, buttonCheckUpdates);
         div.setId("div-item-container");
         div.addClassNames(Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Margin.Vertical.XLARGE, Padding.Horizontal.LARGE);
@@ -485,7 +482,7 @@ public class SettingsDialogView extends Dialog {
 
         final Predicate<Button> ignoreTheParameterButtonSoAsNotToChangeItsStyle = buttonItem -> !buttonItem.equals(buttonToChange);
 
-        Stream.of(buttonPassword, buttonNotifications, buttonContactInformation, buttonEsptoolHomePath)
+        Stream.of(buttonPassword, buttonNotifications, buttonManageSettings, buttonEsptoolHomePath)
                 .filter(ignoreTheParameterButtonSoAsNotToChangeItsStyle)
                 .forEach(buttonItem -> buttonItem.getStyle().remove(backgroundColorStyle));
 

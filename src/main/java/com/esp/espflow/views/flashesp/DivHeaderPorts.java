@@ -184,7 +184,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         esptoolVersionCounter.set(true);
                     }
                     h2EsptoolVersion.setText(espToolVersion);
-                    Tooltip.forComponent(h2EsptoolVersion).setText(EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED.getGetExecutableType());
+                    Tooltip.forComponent(h2EsptoolVersion).setText(EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED.getExecutableType());
                 }));
     }
 
@@ -250,7 +250,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         try {
                             ui.access(() -> {
                                 h2EsptoolVersion.setText(esptoolVersionMessageListItemEvent.getEsptoolVersion());
-                                Tooltip.forComponent(h2EsptoolVersion).setText(esptoolVersionMessageListItemEvent.getEsptoolVersionEventEnum().getGetExecutableType());
+                                Tooltip.forComponent(h2EsptoolVersion).setText(esptoolVersionMessageListItemEvent.getEsptoolVersionEventEnum().getExecutableType());
                                 log.info("Subscribe EsptoolVersionEvent: {}", esptoolVersionMessageListItemEvent.getEsptoolVersion());
                             });
                         } catch (UIDetachedException ex) {
