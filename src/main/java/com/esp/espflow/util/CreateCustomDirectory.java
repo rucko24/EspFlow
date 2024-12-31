@@ -1,13 +1,18 @@
 package com.esp.espflow.util;
 
+import com.esp.espflow.exceptions.ExecutableCannotBeLoadedException;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.util.FileCopyUtils;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
 /**
@@ -32,15 +37,26 @@ public interface CreateCustomDirectory {
                 log.info(() -> "Error when creating directory " + targetDir + " " + ex.getMessage());
             }
         }
-        // Get information about the uploaded file
         final Path fileNameResult = targetDir.resolve(Path.of(fileName));
-        try (var input = new BufferedInputStream(buffer.getInputStream());
-             var outPut = new BufferedOutputStream(Files.newOutputStream(fileNameResult), FileCopyUtils.BUFFER_SIZE)) {
-
-            input.transferTo(outPut);
-
-        } catch (IOException ex) {
-            log.info("Error when writing flash to temporary directory " + targetDir + " " + ex.getMessage());
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        DataBufferUtils.readInputStream(buffer::getInputStream, DefaultDataBufferFactory.sharedInstance, FileCopyUtils.BUFFER_SIZE)
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnError(error -> log.info("doOnError: {}" + error.getMessage()))
+                .onErrorResume(throwable ->
+                        Mono.error(new RuntimeException("Error when writing flash to temporary directory " + targetDir + " " + throwable.getMessage())))
+                .as(dataBuffer -> DataBufferUtils.write(dataBuffer, fileNameResult, StandardOpenOption.CREATE)
+                        .doOnError(error -> log.info("doOnError: {}" + error.getMessage())))
+                .doOnTerminate(() -> {
+                    log.info("Writed executable successfully on " + fileNameResult);
+                    countDownLatch.countDown();
+                })
+                .subscribe();
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ExecutableCannotBeLoadedException(e.getMessage());
         }
     }
+
 }
