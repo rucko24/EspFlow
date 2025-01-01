@@ -13,6 +13,7 @@ import com.esp.espflow.views.dialog.ChangeSerialPortPermissionDialog;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
@@ -201,7 +202,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                             final EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum loadedType = esptoolExecutableDto.isBundled()
                                     ? EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED
                                     : EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.CUSTOM;
-                            Tooltip.forComponent(h2EsptoolVersion).setText(loadedType.getExecutableType());
+                            this.createToolTip(h2EsptoolVersion, loadedType.getExecutableType());
                         });
 
         esptoolExecutableServiceImpl.findAll()
@@ -219,7 +220,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     });
                     item.addClassName("context-menu-item-xterm");
                     String isBundled = esptoolExecutableDto.isBundled() ? "Bundled" : "Custom";
-                    Tooltip.forComponent(item).setText(isBundled);
+                    this.createToolTip(item, isBundled);
                 });
     }
 
@@ -231,6 +232,17 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         span.addClassNames(LumoUtility.Padding.Left.SMALL);
         div.add(icon, span);
         return div;
+    }
+
+    /**
+     *
+     * @param component
+     * @param text
+     */
+    private void createToolTip(Component component, String text) {
+        Tooltip tooltip = Tooltip.forComponent(component);
+        tooltip.setText(text);
+        tooltip.setPosition(Tooltip.TooltipPosition.TOP);
     }
 
     /**
@@ -296,7 +308,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                             ui.access(() -> {
                                 h2EsptoolVersion.setText(esptoolVersionMessageListItemEvent.getEsptoolVersion());
                                 this.putItemEsptool();
-                                Tooltip.forComponent(h2EsptoolVersion).setText(esptoolVersionMessageListItemEvent.getEsptoolVersionEventEnum().getExecutableType());
+                                this.createToolTip(h2EsptoolVersion, esptoolVersionMessageListItemEvent.getEsptoolVersionEventEnum().getExecutableType());
                                 log.info("Subscribe EsptoolVersionEvent: {}", esptoolVersionMessageListItemEvent.getEsptoolVersion());
                             });
                         } catch (UIDetachedException ex) {

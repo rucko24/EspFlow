@@ -122,7 +122,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
             if (event.isFromClient()/*Only run me if it is a click from the client.*/) {
                 final EsptoolExecutableDto esptoolExecutableDtoItem = event.getValue();
                 if (Objects.nonNull(esptoolExecutableDtoItem)) {
-                    this.esptoolExecutableServiceImpl.selectThisNewEsptoolVersion(esptoolExecutableDtoItem);
+                    this.esptoolExecutableServiceImpl.selectThisEsptoolExecutableVersion(esptoolExecutableDtoItem);
                     this.esptoolService.showEsptoolVersion(esptoolExecutableDtoItem)
                             .subscribe(this.subscribeComboListener(esptoolExecutableDtoItem));
                 }
@@ -351,7 +351,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      */
     private void saveAndUpdate(final EsptoolExecutableDto entityToUpdate) {
         this.executeCommandIfPresent(() -> {
-            this.esptoolExecutableServiceImpl.selectThisNewEsptoolVersion(entityToUpdate);
+            this.esptoolExecutableServiceImpl.selectThisEsptoolExecutableVersion(entityToUpdate);
             this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
             this.comboBoxEsptoolHome.setValue(entityToUpdate);
             final int overlayLength = entityToUpdate.esptoolVersion().concat(entityToUpdate.absolutePathEsptool()).length();

@@ -28,7 +28,7 @@ public class EsptoolExecutableServiceImpl {
      * @param esptoolExecutableDto
      */
     @Transactional
-    public void selectThisNewEsptoolVersion(EsptoolExecutableDto esptoolExecutableDto) {
+    public void selectThisEsptoolExecutableVersion(EsptoolExecutableDto esptoolExecutableDto) {
         this.save(esptoolExecutableDto);
         this.updateAllSelectedToFalseExcept(esptoolExecutableDto.id());
     }
