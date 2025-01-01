@@ -5,6 +5,7 @@ import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.ComPortService;
 import com.esp.espflow.service.CommandService;
 import com.esp.espflow.service.EsptoolService;
+import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.svgfactory.SvgFactory;
@@ -18,6 +19,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -25,6 +28,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -36,6 +40,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -52,6 +57,7 @@ import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIO
 import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_V;
+import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_10_PX;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
@@ -78,6 +84,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
     private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
+    private final EsptoolExecutableServiceImpl esptoolExecutableServiceImpl;
 
     @PostConstruct
     public void constructDiv() {
@@ -173,7 +180,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      */
     public void updateH2WithEsptoolVersion(final UI ui) {
         h2EsptoolVersion.addClassName("pulse");
-
+        this.putItemEsptool();
         this.esptoolService.showEsptoolVersion()
                 .doOnError(error -> ui.access(() -> {
                     log.error("doOnError: {}", error.getCause());
@@ -186,6 +193,29 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     h2EsptoolVersion.setText(espToolVersion);
                     Tooltip.forComponent(h2EsptoolVersion).setText(EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED.getExecutableType());
                 }));
+    }
+
+    private void putItemEsptool() {
+        final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
+        esptoolExecutableServiceImpl.findAll()
+                .forEach(version -> {
+                    final MenuItem item = contextMenu.addItem(this.createIconItemEsptoolVersionContext(version.esptoolVersion()), event -> {
+                        h2EsptoolVersion.setText(version.esptoolVersion());
+                        Notification.show("Esptool version " + version.esptoolVersion(), 2000, Notification.Position.MIDDLE);
+                    });
+                    item.addClassName("context-menu-item-xterm");
+                    Tooltip.forComponent(item).setText(version.isBundled() ? "Bundled version" : StringUtils.EMPTY);
+                });
+    }
+
+    private Div createIconItemEsptoolVersionContext(String esptoolVersion) {
+        final Div div = new Div();
+        div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
+        final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", "20px");
+        final Span span = new Span(esptoolVersion);
+        span.addClassNames(LumoUtility.Padding.Left.SMALL);
+        div.add(icon, span);
+        return div;
     }
 
     /**
@@ -213,8 +243,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     unlockPort.setEnabled(true);
                 } else {
                     unlockPort.setTooltipText("Not available for Windows");
-                    //Tooltip.forComponent(unlockPort).setText("Not available for Windows");
                     unlockPort.addClickListener(event -> {
+                        Notification.show("Not available for Windows", 2000, Notification.Position.MIDDLE);
                     });
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
@@ -250,6 +280,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         try {
                             ui.access(() -> {
                                 h2EsptoolVersion.setText(esptoolVersionMessageListItemEvent.getEsptoolVersion());
+                                this.putItemEsptool();
                                 Tooltip.forComponent(h2EsptoolVersion).setText(esptoolVersionMessageListItemEvent.getEsptoolVersionEventEnum().getExecutableType());
                                 log.info("Subscribe EsptoolVersionEvent: {}", esptoolVersionMessageListItemEvent.getEsptoolVersion());
                             });
