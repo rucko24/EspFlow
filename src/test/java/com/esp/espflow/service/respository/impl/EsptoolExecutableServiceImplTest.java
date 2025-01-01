@@ -202,4 +202,23 @@ class EsptoolExecutableServiceImplTest {
 
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(EsptoolExecutableServiceUpdateProvider.class)
+    @DisplayName("actualiza la entidad con el selected a true y marca todos los id a false menos el actual")
+    void selectThisEsptoolExecutableVersion(EsptoolExecutableEntity toSave, EsptoolExecutableDto dtoToSave, EsptoolExecutableDto savedDto,
+                                            EsptoolExecutableEntity savedFindByEntity, EsptoolExecutableEntity savedEntity) {
+
+        when(esptoolExecutableRepository.findByEsptoolVersionWithBundle("v4.7.0", false)).thenReturn(Optional.of(savedFindByEntity));
+
+        esptoolExecutableRepository.save(toSave);
+
+        final ArgumentCaptor<EsptoolExecutableEntity> captor = ArgumentCaptor.forClass(EsptoolExecutableEntity.class);
+
+        verify(esptoolExecutableRepository).save(captor.capture());
+
+        assertThatCode(() -> esptoolExecutableService.selectThisEsptoolExecutableVersion(dtoToSave))
+                .doesNotThrowAnyException();
+
+    }
+
 }
