@@ -40,7 +40,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -85,6 +84,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
     private final EsptoolExecutableServiceImpl esptoolExecutableServiceImpl;
+    private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
 
     @PostConstruct
     public void constructDiv() {
@@ -191,20 +191,35 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         esptoolVersionCounter.set(true);
                     }
                     h2EsptoolVersion.setText(espToolVersion);
-                    Tooltip.forComponent(h2EsptoolVersion).setText(EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED.getExecutableType());
                 }));
     }
 
     private void putItemEsptool() {
-        final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
+        contextMenu.removeAll();
+        esptoolExecutableServiceImpl.findByIsSelectedToTrue()
+                        .ifPresent(esptoolExecutableDto -> {
+                            final EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum loadedType = esptoolExecutableDto.isBundled()
+                                    ? EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED
+                                    : EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.CUSTOM;
+                            Tooltip.forComponent(h2EsptoolVersion).setText(loadedType.getExecutableType());
+                        });
+
         esptoolExecutableServiceImpl.findAll()
-                .forEach(version -> {
-                    final MenuItem item = contextMenu.addItem(this.createIconItemEsptoolVersionContext(version.esptoolVersion()), event -> {
-                        h2EsptoolVersion.setText(version.esptoolVersion());
-                        Notification.show("Esptool version " + version.esptoolVersion(), 2000, Notification.Position.MIDDLE);
+                .forEach(esptoolExecutableDto -> {
+                    final MenuItem item = contextMenu.addItem(this.createIconItemEsptoolVersionContext(esptoolExecutableDto.esptoolVersion()), menuItemClickEvent -> {
+                        //This version of esptool.py will be used and selected via context
+                        this.esptoolExecutableServiceImpl.selectThisEsptoolExecutableVersion(esptoolExecutableDto);
+                        this.h2EsptoolVersion.setText(esptoolExecutableDto.esptoolVersion());
+                        final EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum loadedType = esptoolExecutableDto.isBundled()
+                                ? EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED
+                                : EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.CUSTOM;
+                        final EsptoolVersionMessageListItemEvent event = new EsptoolVersionMessageListItemEvent(loadedType,
+                                esptoolExecutableDto.esptoolVersion(), esptoolExecutableDto.absolutePathEsptool());
+                        this.publishEstoolVersionEvent.tryEmitNext(event);
                     });
                     item.addClassName("context-menu-item-xterm");
-                    Tooltip.forComponent(item).setText(version.isBundled() ? "Bundled version" : StringUtils.EMPTY);
+                    String isBundled = esptoolExecutableDto.isBundled() ? "Bundled" : "Custom";
+                    Tooltip.forComponent(item).setText(isBundled);
                 });
     }
 
