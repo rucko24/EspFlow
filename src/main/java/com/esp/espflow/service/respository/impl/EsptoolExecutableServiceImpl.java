@@ -23,6 +23,17 @@ public class EsptoolExecutableServiceImpl {
     private final EsptoolExecutableRepository esptoolExecutableRepository;
 
     /**
+     * Used to select the new version of esptool.py
+     *
+     * @param esptoolExecutableDto
+     */
+    @Transactional
+    public void selectThisNewEsptoolVersion(EsptoolExecutableDto esptoolExecutableDto) {
+        this.save(esptoolExecutableDto);
+        this.updateAllSelectedToFalseExcept(esptoolExecutableDto.id());
+    }
+
+    /**
      * Saves the EsptoolExecutableEntity, in case of upgrading, all are marked false except the entity to be upgraded
      *
      * @param esptoolExecutableDto to save

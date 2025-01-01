@@ -122,8 +122,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
             if (event.isFromClient()/*Only run me if it is a click from the client.*/) {
                 final EsptoolExecutableDto esptoolExecutableDtoItem = event.getValue();
                 if (Objects.nonNull(esptoolExecutableDtoItem)) {
-                    this.esptoolExecutableServiceImpl.save(esptoolExecutableDtoItem);
-                    this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(esptoolExecutableDtoItem.id());
+                    this.esptoolExecutableServiceImpl.selectThisNewEsptoolVersion(esptoolExecutableDtoItem);
                     this.esptoolService.showEsptoolVersion(esptoolExecutableDtoItem)
                             .subscribe(this.subscribeComboListener(esptoolExecutableDtoItem));
                 }
@@ -345,15 +344,14 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     * Create a new directory with the executable version, select the uploaded executable, and then refresh the other
+     * Create a new directory with the new executable version, select the uploaded executable, and then refresh the other
      * components, as well as notify the main panel.
      *
      * @param entityToUpdate the entity to update
      */
     private void saveAndUpdate(final EsptoolExecutableDto entityToUpdate) {
         this.executeCommandIfPresent(() -> {
-            this.esptoolExecutableServiceImpl.save(entityToUpdate);
-            this.esptoolExecutableServiceImpl.updateAllSelectedToFalseExcept(entityToUpdate.id());
+            this.esptoolExecutableServiceImpl.selectThisNewEsptoolVersion(entityToUpdate);
             this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
             this.comboBoxEsptoolHome.setValue(entityToUpdate);
             final int overlayLength = entityToUpdate.esptoolVersion().concat(entityToUpdate.absolutePathEsptool()).length();
@@ -614,7 +612,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             this.fillComboBox(ui, comboBoxEsptoolHome);
-            log.info("Attach {}", SettingsEsptoolHomePathContent.class);
+            log.info("Attach {}", SettingsEsptoolHomePathContent.class.getSimpleName());
         }
         this.setValueForCombo();
     }
