@@ -218,7 +218,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                                 esptoolExecutableDto.esptoolVersion(), esptoolExecutableDto.absolutePathEsptool());
                         this.publishEstoolVersionEvent.tryEmitNext(event);
                     });
-                    item.addClassName("context-menu-item-xterm");
+                    item.addClassName("context-menu-item-no-checkmark");
                     String isBundled = esptoolExecutableDto.isBundled() ? "Bundled" : "Custom";
                     this.createToolTip(item, isBundled);
                 });

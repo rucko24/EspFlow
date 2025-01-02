@@ -75,7 +75,7 @@ public class OutPutConsole extends Div {
         divWithIconAndText.add(iconTrash, spanClearAll);
         contextMenu.addItem(divWithIconAndText, menuItemClickEvent -> {
            this.clear();
-        }).addClassName("context-menu-item-xterm");
+        }).addClassName("context-menu-item-no-checkmark");
 
         xterm.getXTerm().setId("id-for-xterm");
         xterm.getXTerm().addClassName("xterm");

@@ -285,12 +285,12 @@ html {
     scrollbar-width: thin;
 }
 
-vaadin-context-menu-item.context-menu-item-xterm::part(checkmark)::before {
+vaadin-context-menu-item.context-menu-item-no-checkmark::part(checkmark)::before {
   display: none;
 }
 
 /* some indent for the content */
-vaadin-context-menu-item.context-menu-item-xterm {
+vaadin-context-menu-item.context-menu-item-no-checkmark {
   padding-left: var(--lumo-space-s);
   justify-content: flex-start;
 }
