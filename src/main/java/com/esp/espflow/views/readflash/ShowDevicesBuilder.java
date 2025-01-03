@@ -12,6 +12,7 @@ import com.esp.espflow.service.downloader.FlashDownloadButtonService;
 import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
 import com.esp.espflow.service.strategy.filterespslide.FilterEsp01s;
 import com.esp.espflow.service.strategy.filterespslide.FilterEsp32S3;
+import com.esp.espflow.service.strategy.filterespslide.FilterEsp32S3Mini;
 import com.esp.espflow.service.strategy.filterespslide.FilterEsp8266CH340G;
 import com.esp.espflow.service.strategy.filterespslide.FilterEsp8266Cp210xAmica;
 import com.esp.espflow.service.strategy.filterespslide.FilterEsp828852MB;
@@ -307,6 +308,7 @@ public class ShowDevicesBuilder {
                     this.showEsp82664Cp201x4MB();
                     this.showEsp8285();
                     this.showEsp32S3();
+                    this.showEsp32S3Mini();
                 });
             }
             return this;
@@ -428,6 +430,29 @@ public class ShowDevicesBuilder {
                         espDeviceInfoRecord, downFlashButton, flashDownloadButtonWrapper));
 
                 espDevicesCarousel.addSlide(esp32s3Slide);
+            } else {
+                //log.info("Cannot create the Slide from ESP32-S3-DEVKITC-1-N8_SPL {}", espDeviceInfo);
+            }
+
+        }
+
+        /**
+         * Show the ESP32-s3 Mini slide
+         */
+        private void showEsp32S3Mini() {
+            final FilterEspDeviceContext filterEspDeviceContext = new FilterEspDeviceContext(new FilterEsp32S3Mini());
+
+            if (filterEspDeviceContext.filter(espDeviceInfoRecord)) {
+
+                final FlashDownloadButtonWrapper flashDownloadButtonWrapper = flashDownloadButtonService.getFlashDownloadButtonWrapper();
+
+                Button downFlashButton = this.buttonForReadFlash(ui, flashDownloadButtonWrapper);
+
+                Slide esp32s3MiniSlide = new Slide(createSlideContent(
+                        FRONTEND_IMAGES_ESPDEVICES + "Esp32-S3-Mini.png",
+                        espDeviceInfoRecord, downFlashButton, flashDownloadButtonWrapper));
+
+                espDevicesCarousel.addSlide(esp32s3MiniSlide);
             } else {
                 //log.info("Cannot create the Slide from ESP32-S3-DEVKITC-1-N8_SPL {}", espDeviceInfo);
             }

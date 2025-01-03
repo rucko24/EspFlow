@@ -208,6 +208,12 @@ public final class DeviceCardLayout extends Div {
             }
         }
 
+        if(descriptivePortName.contains("USB JTAG/serial debug unit")) {
+            if(GetOsName.getOsName() == GetOsName.LINUX) {
+                spanFriendlyName.setText(descriptivePortName.split("/")[0]);
+            }
+        }
+
         if(descriptivePortName.startsWith("USB Serial")
                 || descriptivePortName.startsWith("USB-SERIAL")
                 || descriptivePortName.startsWith("USB2.0-Serial")) {

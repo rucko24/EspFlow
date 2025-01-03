@@ -367,7 +367,7 @@ public class MainLayout extends AppLayout {
                 }
             });
         } catch (UIDetachedException ex) {
-            //Do nothing
+            //Do nothing, "Browser window was closed while pushing updates."
         }
     }
 
