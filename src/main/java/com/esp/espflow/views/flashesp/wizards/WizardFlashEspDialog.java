@@ -152,10 +152,6 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
         });
     }
 
-    @Override
-    @SuppressWarnings("donotuse")
-    public void open() {}
-
     /**
      * Configure the dialog header here
      */
@@ -322,7 +318,6 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
         avatar.setName(numberStep);
         Tooltip.forComponent(avatar).setText(tooltip);
         avatar.setThemeName(AvatarVariant.LUMO_SMALL.getVariantName());
-        avatar.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         if (numberStep.equals("2") || numberStep.equals("3")) {
             avatar.addClassName(AVATAR_STEP_INACTIVE);
         } else {

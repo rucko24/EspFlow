@@ -1,0 +1,7 @@
+.espflow-logo-login-view {
+    transition: box-shadow .2s;
+}
+
+.espflow-logo-login-view:hover {
+    box-shadow: var(--custom-image-shadow);
+}

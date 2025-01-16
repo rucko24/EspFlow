@@ -2,11 +2,21 @@
     color: black;
     border: 1px solid black;
     background-color: white;
+    transition: box-shadow .2s;
 }
 
 .avatar-step-active {
     background: var(--lumo-primary-color);
     color: var(--lumo-primary-contrast-color);
+    transition: box-shadow .2s;
+}
+
+.avatar-step-active:hover {
+    box-shadow: var(--custom-box-shadow-avatar);
+}
+
+.avatar-step-inactive:hover {
+    box-shadow: var(--custom-box-shadow-avatar);
 }
 
 .espflow-logo-wizard {
