@@ -10,6 +10,7 @@ import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
+import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
@@ -48,6 +49,7 @@ import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.Lumo;
@@ -64,6 +66,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
@@ -91,8 +94,9 @@ public class MainLayout extends AppLayout {
     private final MessageList messageListAll = new MessageList();
     private final List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
     private final List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
-    private String currentTheme = "";
     private H1 viewTitle;
+    private final ToggleButton toggleButton = new ToggleButton();
+    private final Span spanDarkOrLight = new Span();
 
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
@@ -320,7 +324,9 @@ public class MainLayout extends AppLayout {
             userName.getSubMenu().add(new Hr());
 
             final MenuItem sigOutItem = userName.getSubMenu().addItem("Sign out", e -> authenticatedUser.logout());
-            sigOutItem.addComponentAsFirst(SvgFactory.createIconFromSvg("signout.svg", "20px", null));
+            var iconSigout = SvgFactory.createIconFromSvg("signout.svg", "20px", null);
+            iconSigout.addClassName(BLACK_TO_WHITE_ICON);
+            sigOutItem.addComponentAsFirst(iconSigout);
 
             Shortcuts.addShortcutListener(userName, e -> {
                 getUI().ifPresent(ui -> {
@@ -340,6 +346,27 @@ public class MainLayout extends AppLayout {
         }
 
         return layout;
+    }
+
+    private void changeTheme() {
+        spanDarkOrLight.add(VaadinIcon.MOON_O.create());
+        toggleButton.setTooltipText("Change to dark theme");
+        toggleButton.addClickListener(event -> {
+            final ThemeList themeList = UI.getCurrent().getElement().getThemeList();
+            if (themeList.contains(Lumo.DARK)) {
+                toggleButton.setTooltipText("Change to dark theme");
+                spanDarkOrLight.removeAll();
+                spanDarkOrLight.add(VaadinIcon.MOON_O.create());
+                themeList.remove(Lumo.DARK);
+            } else {
+                toggleButton.setTooltipText("Change to light theme");
+                spanDarkOrLight.removeAll();
+                var icon = SvgFactory.createIconFromSvg("brightness.svg", "25px", "");
+                icon.addClassName(BLACK_TO_WHITE_ICON);
+                spanDarkOrLight.add(icon);
+                themeList.add(Lumo.DARK);
+            }
+        });
     }
 
     @Override
