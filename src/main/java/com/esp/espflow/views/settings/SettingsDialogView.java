@@ -380,9 +380,6 @@ public class SettingsDialogView extends Dialog {
         verticalLayout.setSpacing(false);
         verticalLayout.getStyle().setOverflow(Overflow.HIDDEN);
 
-        Stream.of(toggleButtonReadFlashEsp, toggleButtonFlashEsp, toggleButtonEnableAllWizards)
-                .forEach(combo -> combo.getStyle().set("--_checkbox-size", "18px"));
-
         final Layout layout = new Layout(title, description, spanWizardsNotifications, verticalLayout);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
 

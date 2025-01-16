@@ -239,7 +239,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             textField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
         });
         Tooltip.forComponent(autoDetectFlashSize).setText("Set custom flash size to ALL");
-        autoDetectFlashSize.getStyle().set("--_checkbox-size", "18px");
         autoDetectFlashSize.addValueChangeListener(event -> {
             if (event.getValue()) {
                 endAddress.setValue(0);

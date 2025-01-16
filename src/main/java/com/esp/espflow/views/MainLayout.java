@@ -95,8 +95,6 @@ public class MainLayout extends AppLayout {
     private final List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
     private final List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
     private H1 viewTitle;
-    private final ToggleButton toggleButton = new ToggleButton();
-    private final Span spanDarkOrLight = new Span();
 
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
@@ -294,24 +292,19 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
 
-            userName.getSubMenu().addItem("Small font theme", event -> {
-                //UI.getCurrent().getElement().getClassList().remove("default-font-theme");
-                UI.getCurrent().getElement().getThemeList().remove("default-font-theme");
-                // Apply the new theme:
-                //UI.getCurrent().getElement().getClassList().add("small-font-theme");
-                UI.getCurrent().getElement().getThemeList().add(Lumo.DARK);
-                //currentTheme = "small-font-theme";
-            }).addComponentAsFirst(VaadinIcon.SUN_O.create());
+            var itemTheme = userName.getSubMenu().addItem("");
+            itemTheme.getStyle().setHeight("40px");
+            itemTheme.addComponentAsFirst(this.changeTheme());
 
-            final HorizontalLayout divSettings = new HorizontalLayout();
-            divSettings.setWidthFull();
-            divSettings.addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.BETWEEN);
+            final HorizontalLayout rowForSettings = new HorizontalLayout();
+            rowForSettings.addClassNames(Display.FLEX, LumoUtility.Width.FULL, FlexDirection.ROW, JustifyContent.BETWEEN);
             final Span span = new Span("Settings...");
+            span.addClassName(LumoUtility.Margin.Left.MEDIUM);
             final Span shorcutSettings = new Span("Ctrl+Alt+S");
             shorcutSettings.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-            divSettings.add(span, shorcutSettings);
+            rowForSettings.add(span, shorcutSettings);
 
-            userName.getSubMenu().addItem(divSettings, event -> {
+            userName.getSubMenu().addItem(rowForSettings, event -> {
                 getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
                         log.info("fetchCurrentURL {}", url);
@@ -323,12 +316,14 @@ public class MainLayout extends AppLayout {
             }).addComponentAsFirst(VaadinIcon.COG.create());
             userName.getSubMenu().add(new Hr());
 
-            final MenuItem sigOutItem = userName.getSubMenu().addItem("Sign out", e -> authenticatedUser.logout());
+            final Span spanSignOut = new Span("Sign out");
+            spanSignOut.addClassName(LumoUtility.Margin.Left.MEDIUM);
+            final MenuItem sigOutItem = userName.getSubMenu().addItem(spanSignOut, e -> authenticatedUser.logout());
             var iconSigout = SvgFactory.createIconFromSvg("signout.svg", "20px", null);
             iconSigout.addClassName(BLACK_TO_WHITE_ICON);
             sigOutItem.addComponentAsFirst(iconSigout);
 
-            Shortcuts.addShortcutListener(userName, e -> {
+            Shortcuts.addShortcutListener(userName, shortcutEvent -> {
                 getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
                         String urlWithParameters = url.getPath().concat("#settings");
@@ -348,8 +343,11 @@ public class MainLayout extends AppLayout {
         return layout;
     }
 
-    private void changeTheme() {
+    private HorizontalLayout changeTheme() {
+        final ToggleButton toggleButton = new ToggleButton();
+        final Span spanDarkOrLight = new Span();
         spanDarkOrLight.add(VaadinIcon.MOON_O.create());
+        spanDarkOrLight.getStyle().setMarginLeft("2px");
         toggleButton.setTooltipText("Change to dark theme");
         toggleButton.addClickListener(event -> {
             final ThemeList themeList = UI.getCurrent().getElement().getThemeList();
@@ -361,12 +359,20 @@ public class MainLayout extends AppLayout {
             } else {
                 toggleButton.setTooltipText("Change to light theme");
                 spanDarkOrLight.removeAll();
-                var icon = SvgFactory.createIconFromSvg("brightness.svg", "25px", "");
+                var icon = SvgFactory.createIconFromSvg("brightness.svg", "20px", "");
                 icon.addClassName(BLACK_TO_WHITE_ICON);
                 spanDarkOrLight.add(icon);
                 themeList.add(Lumo.DARK);
             }
         });
+        final Span spanTheme = new Span("Theme");
+        spanTheme.addClassName(LumoUtility.TextColor.SECONDARY);
+        final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButton, spanTheme);
+        rowToggleSpan.addClassNames(Display.FLEX, FlexDirection.ROW, LumoUtility.Width.FULL, JustifyContent.BETWEEN);
+        final HorizontalLayout rowTogle = new HorizontalLayout(spanDarkOrLight, rowToggleSpan);
+        rowTogle.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
+        rowTogle.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
+        return rowTogle;
     }
 
     @Override
