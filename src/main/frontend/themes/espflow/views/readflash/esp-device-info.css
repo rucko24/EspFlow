@@ -146,3 +146,7 @@
 .custom-box-shadow-vaadin-button {
     box-shadow: var(--custom-box-shadow-vaadin-button);
 }
+
+.carousel-border-dark {
+    border: var(--carousel-border);
+}

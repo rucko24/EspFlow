@@ -58,6 +58,7 @@ public class EspDevicesCarousel extends Div {
         super.setHeight("100%");
         super.getStyle().set("border-radius", "6px");
         super.getStyle().set("box-shadow", "var(--lumo-box-shadow-s)");
+        super.addClassName("carousel-border-dark");
         this.initialCenterLogo();
         Animated.animate(this, Animation.FADE_IN);
     }
