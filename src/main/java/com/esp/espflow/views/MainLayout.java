@@ -138,7 +138,7 @@ public class MainLayout extends AppLayout {
             this.removeRedCircleErrorInTheBell();
             Animated.removeAnimations(spanCircleRed);
         });
-        spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.FIXED);
+        spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.ABSOLUTE);
         spanCircleRed.getStyle().set("margin-left", "13px");
         spanCircleRed.getStyle().set("top", "14px");
         divBell.add(spanCircleRed);
