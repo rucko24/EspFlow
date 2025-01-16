@@ -55,6 +55,7 @@ import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_ACTIVE;
 import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_INACTIVE;
+import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
@@ -448,6 +449,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
         titlePermissionDenied.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
         titlePermissionDenied.setId(titlePermissionDenied.getText().replace(" ", "-").toLowerCase());
         final Button writePasswordButton = new Button(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
+        writePasswordButton.getIcon().addClassName(BLACK_TO_WHITE_ICON);
         writePasswordButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         writePasswordButton.setTooltipText("Shortcut is SPACE");
         var rowPermisson = new HorizontalLayout(writePasswordButton, titlePermissionDenied);
