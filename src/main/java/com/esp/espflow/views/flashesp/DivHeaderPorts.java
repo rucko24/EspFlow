@@ -182,7 +182,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      * @param ui which comes from onAttach
      */
     public void updateH2WithEsptoolVersion(final UI ui) {
-        h2EsptoolVersion.addClassName("pulse");
+        h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
         this.putItemEsptool();
         this.esptoolService.showEsptoolVersion()
                 .doOnError(error -> ui.access(() -> {
