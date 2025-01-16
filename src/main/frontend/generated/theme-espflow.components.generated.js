@@ -1,6 +1,7 @@
 import { unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin/register-styles';
 
 import vaadinUploadFileCss from 'themes/espflow/components/vaadin-upload-file.css?inline';
+import vaadinTabsheetCss from 'themes/espflow/components/vaadin-tabsheet.css?inline';
 import stepperCss from 'themes/espflow/components/stepper.css?inline';
 import listCss from 'themes/espflow/components/list.css?inline';
 import layoutCss from 'themes/espflow/components/layout.css?inline';
@@ -11,6 +12,10 @@ if (!document['_vaadintheme_espflow_componentCss']) {
   registerStyles(
         'vaadin-upload-file',
         unsafeCSS(vaadinUploadFileCss.toString())
+      );
+      registerStyles(
+        'vaadin-tabsheet',
+        unsafeCSS(vaadinTabsheetCss.toString())
       );
       registerStyles(
         'stepper',

@@ -1,0 +1,42 @@
+.pulse {
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+    	transform: scale(0.95);
+    	box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+
+    70% {
+    	transform: scale(1);
+    	box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+    	box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+/*For the dark theme a little white*/
+[theme~="dark"] .pulse {
+    animation: pulse-dark 2s infinite;
+}
+
+@keyframes pulse-dark {
+    0% {
+    	transform: scale(0.95);
+    	box-shadow: 0 0 0 0 rgb(213 213 213 / 70%);
+    }
+
+    70% {
+    	transform: scale(1);
+    	box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+    	box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
