@@ -20,7 +20,7 @@ public class EspFlowConstants {
     public static final String[] OTHER = new String[]{"other"};
     public static final String BOX_SHADOW_PROPERTY = "box-shadow";
     public static final String BOX_SHADOW_VALUE = "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)";
-    public static final String BOX_SHADOW_VAADIN_BUTTON= "custom-box-shadow-vaadin-button";
+    public static final String BOX_SHADOW_VAADIN_BUTTON = "custom-box-shadow-vaadin-button";
     public static final String MARGIN_TOP = "margin-top";
     public static final String MARGIN_LEFT = "margin-left";
     public static final String MARGIN = "margin";
@@ -30,7 +30,7 @@ public class EspFlowConstants {
     public static final String ESPTOOL = "esptool";
     public static final String ESPTOOL_PY_V = "esptool.py v";
     public static final String ESPTOOL_PY_NOT_FOUND = "esptool.py not found!";
-    public static final String[] ESPTOOL_PY_VERSION = new String[]{"esptool.py","version"};
+    public static final String[] ESPTOOL_PY_VERSION = new String[]{"esptool.py", "version"};
     public static final String VERSION = "version";
     public static final int FIRST_LINE_TO_CHECK_IF_IT_EXISTS = 1;
     public static final String NOT_FOUND = "not found!";
@@ -111,6 +111,7 @@ public class EspFlowConstants {
     public static final String STEP3 = "step3";
     public static final String SETTINGS = "settings";
     public static final String VAR_LUMO_PRIMARY_COLOR_10_PCT = "var(--lumo-primary-color-10pct)";
-
+    //Applies only for DARK MODE
+    public static final String BLACK_TO_WHITE_ICON = "black-to-white";
 
 }
