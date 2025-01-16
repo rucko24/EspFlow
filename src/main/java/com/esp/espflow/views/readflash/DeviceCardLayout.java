@@ -12,6 +12,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
@@ -239,6 +240,7 @@ public final class DeviceCardLayout extends Div {
 
     private Div createDivRightSubHeader() {
         final Span spanOverView = new Span("Overview");
+        spanOverView.addClassName(LumoUtility.FontWeight.BOLD);
         divRightSubHeader.add(spanOverView);
         divRightSubHeader.addClassName("div-right-subheader");
         return divRightSubHeader;
@@ -251,7 +253,7 @@ public final class DeviceCardLayout extends Div {
      */
     private Div createDivRightContentText() {
         divRightContentText.addClassName("div-right-content-text");
-        Stream.of(chipType, detectedFlashSize, crystal, chipIs, spanMadAddress).forEach(span -> span.getStyle().set("font-weight", "bold"));
+        Stream.of(chipType, detectedFlashSize, crystal, chipIs, spanMadAddress).forEach(span -> span.addClassName(LumoUtility.FontWeight.BOLD));
         chipTypeValue.setText(":  " + espDeviceInfoRecord.chipType());
         chipIsValue.setText(":  " + espDeviceInfoRecord.chipIs());
 
