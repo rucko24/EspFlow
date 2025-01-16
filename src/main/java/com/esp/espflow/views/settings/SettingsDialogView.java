@@ -142,7 +142,9 @@ public class SettingsDialogView extends Dialog {
      * We invoke them within the onAttach, to correctly create the component.
      */
     private void initListeners() {
-        buttonNotifications.setPrefixComponent(SvgFactory.createIconFromSvg("bell.svg", ITEM_ICON_SIZE, null));
+        var bell = SvgFactory.createIconFromSvg("bell.svg", ITEM_ICON_SIZE, null);
+        bell.addClassName("black-to-white");
+        buttonNotifications.setPrefixComponent(bell);
         buttonNotifications.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(this.createNotifications());

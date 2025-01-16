@@ -50,6 +50,7 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -90,7 +91,7 @@ public class MainLayout extends AppLayout {
     private final MessageList messageListAll = new MessageList();
     private final List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
     private final List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
-
+    private String currentTheme = "";
     private H1 viewTitle;
 
     private final AuthenticatedUser authenticatedUser;
@@ -128,6 +129,7 @@ public class MainLayout extends AppLayout {
      */
     private HorizontalLayout headerRow() {
         Tooltip.forComponent(divBell).setText("Notifications");
+        bellIcon.addClassName("black-to-white");
         divBell.add(bellIcon);
         divBell.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
         divBell.getStyle().setCursor(CURSOR_POINTER);
@@ -287,6 +289,15 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("align-items", "center");
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
+
+            userName.getSubMenu().addItem("Small font theme", event -> {
+                //UI.getCurrent().getElement().getClassList().remove("default-font-theme");
+                UI.getCurrent().getElement().getThemeList().remove("default-font-theme");
+                // Apply the new theme:
+                //UI.getCurrent().getElement().getClassList().add("small-font-theme");
+                UI.getCurrent().getElement().getThemeList().add(Lumo.DARK);
+                //currentTheme = "small-font-theme";
+            }).addComponentAsFirst(VaadinIcon.SUN_O.create());
 
             final HorizontalLayout divSettings = new HorizontalLayout();
             divSettings.setWidthFull();

@@ -109,6 +109,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         final SerializableBiConsumer<Div, String> serializableBiConsumer = (div, itemName) -> {
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
             final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", "25px", null);
+            icon.addClassName("black-to-white");
             final Span span = new Span(itemName);
             span.addClassNames(LumoUtility.Padding.Left.SMALL);
             div.add(icon, span);

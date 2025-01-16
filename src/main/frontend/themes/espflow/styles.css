@@ -30,36 +30,12 @@ html {
 }
 
 [theme~="dark"] {
-    --lumo-body-text-color: hsla(214, 0%, 98%, 0.9);
-    --lumo-shade-5pct: rgba(33, 33, 33, 0.05);
-    --lumo-shade-10pct: rgba(33, 33, 33, 0.1);
-    --lumo-shade-20pct: rgba(33, 33, 33, 0.2);
-    --lumo-shade-30pct: rgba(33, 33, 33, 0.3);
-    --lumo-shade-40pct: rgba(33, 33, 33, 0.4);
-    --lumo-shade-50pct: rgba(33, 33, 33, 0.5);
-    --lumo-shade-60pct: rgba(33, 33, 33, 0.6);
-    --lumo-shade-70pct: rgba(33, 33, 33, 0.7);
-    --lumo-shade-80pct: rgba(33, 33, 33, 0.8);
-    --lumo-shade-90pct: rgba(33, 33, 33, 0.9);
-    --lumo-primary-color-50pct: rgba(235, 89, 5, 0.5);
-    --lumo-primary-color-10pct: rgba(235, 89, 5, 0.1);
-    --lumo-error-color-50pct: rgba(231, 24, 24, 0.5);
-    --lumo-error-color-10pct: rgba(231, 24, 24, 0.1);
-    --lumo-success-color-50pct: rgba(62, 229, 170, 0.5);
-    --lumo-success-color-10pct: rgba(62, 229, 170, 0.1);
-    --lumo-shade: hsl(0, 0%, 13%);
-    --lumo-primary-color: hsl(22, 96%, 47%);
-    --lumo-primary-text-color: hsl(22, 100%, 42%);
-    --lumo-error-color: hsl(0, 81%, 50%);
-    --lumo-error-text-color: hsl(0, 86%, 45%);
-    --lumo-success-color: hsl(159, 76%, 57%);
-    --lumo-success-contrast-color: hsl(159, 29%, 10%);
-    --lumo-success-text-color: hsl(159, 61%, 40%);
     --dt-shadow-elevation-1: 0px 3px 1px -2px rgba(0,0,0,0.2),0px 2px 2px 0px rgba(0,0,0,0.14),0px 1px 5px 0px rgba(0,0,0,0.12);
     --custom-image-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     --custom-box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 8px 0px, rgba(0, 0, 0, 0.19) 0px 6px 20px 0px;
     --custom-box-shadow-avatar: var(--dt-shadow-elevation-2,0 1px 2px 0 rgba(60,64,67,.3),0 2px 6px 2px rgba(60,64,67,.15));
     --custom-box-shadow-vaadin-button: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
+    --invert-svg: invert(1);
 }
 
 .pulse {
@@ -324,4 +300,8 @@ vaadin-split-layout > [slot="secondary"] {
 ::-webkit-scrollbar-thumb {
   background-color: hsla(0, 0%, 49.8%, 0.5);
   border-radius: 4px;
+}
+
+.black-to-white {
+  filter: var(--invert-svg);
 }
