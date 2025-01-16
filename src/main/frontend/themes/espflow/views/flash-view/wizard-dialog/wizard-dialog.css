@@ -8,3 +8,11 @@
     background: var(--lumo-primary-color);
     color: var(--lumo-primary-contrast-color);
 }
+
+.espflow-logo-wizard {
+    transition: box-shadow .2s;
+}
+
+.espflow-logo-wizard:hover {
+    box-shadow: var(--custom-image-shadow);
+}

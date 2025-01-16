@@ -362,7 +362,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
                 .forEach(items -> items.getStyle().setCursor("pointer"));
 
         final Image image = new Image(FRONTEND_ICON, "icon");
-        image.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+        image.addClassName("espflow-logo-wizard");
         image.getStyle().setCursor(EspFlowConstants.CURSOR_POINTER);
         image.addClassName(BorderRadius.LARGE);
         image.setWidth("180px");
