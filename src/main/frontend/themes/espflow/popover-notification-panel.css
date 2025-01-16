@@ -36,3 +36,7 @@ vaadin-tabsheet.notifications {
     color: var(--lumo-secondary-text-color);
   }
 }
+
+vaadin-message > vaadin-avatar {
+    filter: var(--invert-svg);
+}
