@@ -187,6 +187,14 @@ public class OutPutConsole extends Div {
         this.xterm.scrollToBottom();
     }
 
+    /**
+     * The text is reset to the end when the splilayout is enlarged.
+     */
+    public void fitAndScrollToBottom() {
+        this.fit();
+        this.xterm.scrollToBottom();
+    }
+
     public void fit() {
         this.xterm.getXTerm().fit();
     }
