@@ -282,7 +282,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
         divRowToSecondary.getStyle().set("background", "linear-gradient(var(--lumo-shade-5pct), var(--lumo-shade-5pct))");
 
-        outPutConsole.getStyle().set("overflow-x", "hidden");
         outPutConsole.getDivTextArea().removeClassNames(Left.LARGE, Right.LARGE);
         outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
         outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);

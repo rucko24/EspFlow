@@ -156,7 +156,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         divRowToSecondary.addClassNames(Display.FLEX, FlexDirection.ROW);
         divRowToSecondary.getStyle().set(OVERFLOW_Y, HIDDEN);
 
-        outPutConsole.getStyle().set("overflow-x", "hidden");
         outPutConsole.getDivTextArea().removeClassNames(LumoUtility.Margin.Left.LARGE, LumoUtility.Margin.Minus.Right.LARGE);
         outPutConsole.getButtonClear().addClassName(BOX_SHADOW_VAADIN_BUTTON);
         outPutConsole.getButtonDownScroll().addClassName(BOX_SHADOW_VAADIN_BUTTON);
