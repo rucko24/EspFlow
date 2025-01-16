@@ -50,6 +50,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
+import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
@@ -160,6 +161,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final SerializableBiConsumer<Div, String> serializableBiConsumer = (div, itemName) -> {
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
             final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", "25px", null);
+            icon.addClassName(BLACK_TO_WHITE_ICON);
             final Span span = new Span(itemName);
             span.addClassNames(LumoUtility.Padding.Left.SMALL);
             div.add(icon, span);
@@ -228,6 +230,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
         final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", "20px");
+        icon.addClassName(BLACK_TO_WHITE_ICON);
         final Span span = new Span(esptoolVersion);
         span.addClassNames(LumoUtility.Padding.Left.SMALL);
         div.add(icon, span);
@@ -268,6 +271,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
             if (!ports.isEmpty()) {
                 if (GetOsName.getOsName() != GetOsName.WINDOWS) {
                     unlockPort.setEnabled(true);
+                    unlockPort.getIcon().addClassName(BLACK_TO_WHITE_ICON);
                 } else {
                     unlockPort.setTooltipText("Not available for Windows");
                     unlockPort.addClickListener(event -> {
@@ -277,6 +281,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 ConfirmDialogBuilder.showInformation("Port found!");
                 this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
+                this.unlockPort.getIcon().addClassName(BLACK_TO_WHITE_ICON);
                 buttonExecuteFlashId.setEnabled(true);
                 Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
                 Animated.animate(unlockPort, Animation.FADE_IN);

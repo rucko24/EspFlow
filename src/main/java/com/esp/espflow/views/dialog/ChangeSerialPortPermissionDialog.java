@@ -39,6 +39,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 
+import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 
 /**
@@ -109,7 +110,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         final SerializableBiConsumer<Div, String> serializableBiConsumer = (div, itemName) -> {
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
             final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", "25px", null);
-            icon.addClassName("black-to-white");
+            icon.addClassName(BLACK_TO_WHITE_ICON);
             final Span span = new Span(itemName);
             span.addClassNames(LumoUtility.Padding.Left.SMALL);
             div.add(icon, span);
@@ -147,6 +148,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         passwordField.setClearButtonVisible(true);
         passwordField.setPlaceholder("input user system password");
         writePasswordButton.setWidthFull();
+        writePasswordButton.getIcon().addClassName(BLACK_TO_WHITE_ICON);
         verticalLayout.add(divIcon, passwordField);
         verticalLayout.setAlignSelf(Alignment.CENTER, divIcon);
 
