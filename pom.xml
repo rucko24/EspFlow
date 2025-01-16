@@ -126,12 +126,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.flowingcode.addons.carousel</groupId>
-            <artifactId>carousel-addon</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.vaadin.olli</groupId>
             <artifactId>file-download-wrapper</artifactId>
             <version>7.0.0</version>
@@ -147,6 +141,12 @@
         <dependency>
             <groupId>com.flowingcode.addons</groupId>
             <artifactId>xterm-console</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flowingcode.addons.carousel</groupId>
+            <artifactId>carousel-addon</artifactId>
             <version>3.0.0</version>
         </dependency>
 
