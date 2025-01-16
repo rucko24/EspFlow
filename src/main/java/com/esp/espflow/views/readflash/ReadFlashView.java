@@ -192,7 +192,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
         splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-color", "#3b3b3b #202020");
 
-        splitLayout.addClickListener(event -> this.outPutConsole.fit());
+        splitLayout.addClickListener(event -> this.outPutConsole.fitAndScrollToBottom());
 
         return splitLayout;
     }

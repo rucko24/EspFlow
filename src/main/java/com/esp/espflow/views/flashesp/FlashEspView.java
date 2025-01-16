@@ -191,11 +191,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
         splitLayout.getSecondaryComponent().getElement().getStyle().set("scrollbar-color", "#3b3b3b #202020");
 
-        splitLayout.addClickListener(event -> {
-            if(this.outPutConsole.isAttached()) {
-                this.outPutConsole.fit();
-            }
-        });
+        splitLayout.addClickListener(event -> this.outPutConsole.fitAndScrollToBottom());
 
         return splitLayout;
     }
