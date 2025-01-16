@@ -59,6 +59,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CUSTOM_ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
@@ -115,7 +116,9 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                     .flatMap(this.configureNewDirectoryAndMakeExecutable(event, initCustomFileName))
                     .subscribe(this.subscribeSaveAndUpdate());
         });
-        this.comboBoxEsptoolHome.setPrefixComponent(SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", null));
+        var executableIcon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", null);
+        executableIcon.addClassName(BLACK_TO_WHITE_ICON);
+        this.comboBoxEsptoolHome.setPrefixComponent(executableIcon);
         this.comboBoxEsptoolHome.setItemLabelGenerator(EsptoolExecutableDto::displayAbsoluteEsptoolPathForCombo);
         this.comboBoxEsptoolHome.setRenderer(EsptoolExecutableDto.rendererExecutableIcon());
         this.comboBoxEsptoolHome.addValueChangeListener(event -> {
