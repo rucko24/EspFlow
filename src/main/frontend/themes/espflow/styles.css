@@ -1,14 +1,12 @@
 @import url('./main-layout.css');
 @import url('./popover-notification-panel.css');
 @import url('components/vaadin-upload-file.css');
-/*/@import url('components/list.css');
-//@import url('components/stepper.css');
-//@import url('components/border.css');*/
 @import url('components/layout.css');
 @import url('./views/readflash/esp-device-info.css');
 @import url('./views/flash-view/wizard-dialog/wizard-dialog.css');
 @import url('./views/settings-dialog/settings-dialog.css');
 @import url('./views/settings-dialog/esptool-homepath-upload.css');
+@import url('./views/login-view/login-view.css');
 @import url('./fonts/stylesheet.css');
 
 html {
@@ -24,6 +22,7 @@ html {
     --lumo-space-xs: 0.1875rem;
     --lumo-body-text-color: hsla(214, 0%, 0%, 0.94);
     --lumo-font-family: 'Arimo', sans-serif;
+    --custom-image-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 [theme~="dark"] {

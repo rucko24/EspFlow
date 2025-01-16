@@ -13,8 +13,6 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
-import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_ICON;
 
 @PageTitle("Login")
@@ -30,7 +28,7 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
         var image = new Image(FRONTEND_ICON, "icon");
         image.setWidth("100px");
         image.setHeight("100px");
-        image.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+        image.addClassName("espflow-logo-login-view");
         setTitle(new Span(image));
 
         LoginI18n i18n = LoginI18n.createDefault();
