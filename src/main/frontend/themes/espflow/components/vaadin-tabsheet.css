@@ -1,0 +1,122 @@
+:host([hidden]) {
+  display: none !important;
+}
+
+:host {
+  display: flex;
+          flex-direction: column;
+}
+
+[part='tabs-container'] {
+  position: relative;
+          display: flex;
+          align-items: center;
+}
+
+::slotted([slot='tabs']) {
+  flex: 1;
+          align-self: stretch;
+          min-width: 8em;
+}
+
+[part='content'] {
+  position: relative;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+      background-color: var(--bg2);
+  }
+  ::-webkit-scrollbar-thumb {
+      background-color: hsla(0, 0%, 49.8%, 0.5);
+      border-radius: 4px;
+  }
+}
+
+:host {
+  font-size: var(--lumo-font-size-m);
+    line-height: var(--lumo-line-height-m);
+    font-family: var(--lumo-font-family);
+}
+
+:host([theme~='bordered']) {
+  border: 1px solid var(--lumo-contrast-20pct);
+    border-radius: var(--lumo-border-radius-l);
+}
+
+[part='tabs-container'] {
+  box-shadow: inset 0 -1px 0 0 var(--lumo-contrast-10pct);
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    gap: var(--lumo-space-s);
+}
+
+::slotted([slot='tabs']) {
+  box-shadow: initial;
+    margin: calc(var(--lumo-space-xs) * -1) calc(var(--lumo-space-s) * -1);
+}
+
+[part='content'] {
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+}
+
+:host([loading]) [part='content'] {
+  display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:host([theme~='no-padding']) [part='content'] {
+  padding: 0;
+}
+
+[part~='loader'] {
+  box-sizing: border-box;
+    width: var(--lumo-icon-size-s);
+    height: var(--lumo-icon-size-s);
+    border: 2px solid transparent;
+    border-color: var(--lumo-primary-color-10pct) var(--lumo-primary-color-10pct) var(--lumo-primary-color)
+      var(--lumo-primary-color);
+    border-radius: calc(0.5 * var(--lumo-icon-size-s));
+    opacity: 0;
+    pointer-events: none;
+}
+
+:host(:not([loading])) [part~='loader'] {
+  display: none;
+}
+
+:host([loading]) [part~='loader'] {
+  animation:
+      1s linear infinite lumo-loader-rotate,
+      0.3s 0.1s lumo-loader-fade-in both;
+}
+
+@keyframes lumo-loader-fade-in {
+0% {
+  opacity: 0;
+}
+
+100% {
+  opacity: 1;
+}
+
+}
+
+@keyframes lumo-loader-rotate {
+0% {
+  transform: rotate(0deg);
+}
+
+100% {
+  transform: rotate(360deg);
+}
+
+}
+
