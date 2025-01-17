@@ -1,0 +1,19 @@
+.div-error-image {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+}
+
+.error-image {
+  max-width: 600px;
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  transition: box-shadow .3s;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+.error-image:hover {
+    box-shadow: var(--custom-image-shadow);
+}
