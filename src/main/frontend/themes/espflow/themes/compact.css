@@ -26,9 +26,11 @@
     --lumo-space-l: 1rem;
     --lumo-space-xl: 1.5rem;
     --toggle-size: 15px;
+    --avatar-size-s: 1.75rem;
 
     [theme~="dark"] {
        --toggle-size: 15px;
+       --avatar-size-s: 1.75rem;
     }
 }
 
