@@ -35,6 +35,7 @@ html {
     --custom-box-shadow-vaadin-button: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
     --toggle-size: 18px;
     --avatar-size-s: var(--lumo-size-s);
+    --icon-svg-settings-size: 25px !important;
 }
 
 [theme~="dark"] {
@@ -46,6 +47,7 @@ html {
     --invert-svg: invert(1);
     --carousel-border: 1px solid var(--lumo-contrast-10pct);
     --toggle-size: 18px;
+    --icon-svg-settings-size: 25px !important;
 }
 
 @media (max-width: 1155px) {
@@ -226,6 +228,7 @@ html {
         margin-left: 0px !important;
         overflow-y: hidden;
     }
+
 
 }
 

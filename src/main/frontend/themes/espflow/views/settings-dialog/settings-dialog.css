@@ -4,6 +4,11 @@ vaadin-button.settings-buttons::part(label) {
   justify-content: flex-start;
 }
 
+vaadin-button.settings-buttons:hover {
+  transition: .4s;
+  background-color: var(--lumo-primary-color-10pct)
+}
+
 vaadin-dialog-overlay.settings-content-dialog::part(content) {
   overflow: hidden;
 }
@@ -15,3 +20,47 @@ vaadin-dialog-overlay.settings-content-dialog::part(content) {
   background-size: 100% 3px, 100% 1px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
+
+.settings-button-toggle {
+    display: none;
+}
+
+@media (max-width: 800px) {
+
+   vaadin-dialog-overlay.settings-content-dialog::part(overlay) {
+        width: 100%;
+   }
+
+   .main-settings {
+        flex-direction: column !important;
+   }
+
+   .nav-settings {
+        display: flex !important;
+        /*hidden: true;*/
+   }
+
+   #div-item-container {
+        width: 100%;
+        /*hidden: true;*/
+   }
+
+   .svg-icon-settings {
+        width: var(--icon-svg-settings-size) !important;
+        height: var(--icon-svg-settings-size) !important;
+   }
+
+   .settings-button-toggle {
+        display: flex !important;
+        width: 10%;
+        align-self: start;
+   }
+
+   vaadin-dialog-overlay.settings-content-dialog::part(content) {
+     overflow: auto;
+     overflow-x: hidden;
+     scrollbar-width: thin;
+   }
+
+}
+

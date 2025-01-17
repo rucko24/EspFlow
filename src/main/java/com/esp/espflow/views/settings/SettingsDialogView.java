@@ -6,6 +6,7 @@ import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
+import com.infraleap.animatecss.Animated;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -82,7 +83,7 @@ public class SettingsDialogView extends Dialog {
     private final Button buttonPassword = new Button("Password");
     private final Button buttonNotifications = new Button("Notifications");
     private final Button buttonCheckUpdates = new Button("Check updates...");
-
+    private final Button buttonToggle = new Button(VaadinIcon.MENU.create());
     private final Layout mainLayout = new Layout();
     private final WizardEspService wizardFlashEspRepository;
     private final SettingsEsptoolHomePathContent settingsEsptoolHomePathContent;
@@ -128,15 +129,22 @@ public class SettingsDialogView extends Dialog {
 
         final Main main = new Main();
         main.setId("main-settings");
+        main.addClassName("main-settings");
         main.addClassNames(Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Height.FULL);
 
         final Hr hr = new Hr();
         hr.addClassName("hr-header-settings");
 
-        main.add(this.createButtonsItemsMenu(), this.createForm(ref));
+        main.add(this.createButtonToggle(), this.createButtonsItemsMenu() , this.createForm(ref));
 
         super.add(hr, main);
         super.addClassName("settings-content-dialog");
+    }
+
+    private Button createButtonToggle() {
+        buttonToggle.addClassName("settings-button-toggle");
+        buttonToggle.setTooltipText("Show menu");
+        return buttonToggle;
     }
 
     /**
@@ -144,7 +152,7 @@ public class SettingsDialogView extends Dialog {
      */
     private void initListeners() {
         var bell = SvgFactory.createIconFromSvg("bell.svg", ITEM_ICON_SIZE, null);
-        bell.addClassName("black-to-white");
+        bell.addClassNames("black-to-white", "svg-icon-settings");
         buttonNotifications.setPrefixComponent(bell);
         buttonNotifications.addClickListener(event -> {
             this.mainLayout.removeAll();
@@ -153,7 +161,9 @@ public class SettingsDialogView extends Dialog {
             this.updateFragment(NOTIFICATION);
         });
 
-        buttonEsptoolHomePath.setPrefixComponent(SvgFactory.createIconFromSvg("espressif-logo.svg", "26px", null));
+        var iconEspressifSvg = SvgFactory.createIconFromSvg("espressif-logo.svg", "26px", null);
+        iconEspressifSvg.addClassName("svg-icon-settings");
+        buttonEsptoolHomePath.setPrefixComponent(iconEspressifSvg);
         buttonEsptoolHomePath.addClickListener(event -> {
             this.mainLayout.removeAll();
             this.mainLayout.add(createEsptoolHomePathContent());
@@ -464,6 +474,16 @@ public class SettingsDialogView extends Dialog {
 
         final Nav nav = new Nav(div);
         nav.addClassNames(Display.HIDDEN, Display.Breakpoint.Small.FLEX, LumoUtility.FontSize.SMALL, LumoUtility.Position.STICKY, "top-0");
+        //nav.addClassName("nav-settings");
+
+        buttonToggle.addClickListener(buttonClickEvent -> {
+            if(nav.getClassName().contains("nav-settings")) {
+                nav.removeClassName("nav-settings");
+            } else {
+                nav.addClassName("nav-settings");
+            }
+            Animated.animate(div, Animated.Animation.FADE_IN);
+        });
 
         return nav;
     }
