@@ -7,12 +7,12 @@ vaadin-side-nav-item vaadin-icon {
 }
 
 [slot="drawer"]:is(header, footer) {
-  display: flex;
   align-items: center;
-  gap: var(--lumo-space-s);
-  padding: var(--lumo-space-s) var(--lumo-space-m);
-  min-height: var(--lumo-size-xl);
   box-sizing: border-box;
+  display: flex;
+  gap: var(--lumo-space-s);
+  min-height: var(--lumo-size-xl);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
 }
 
 [slot="drawer"]:is(header, footer):is(:empty) {

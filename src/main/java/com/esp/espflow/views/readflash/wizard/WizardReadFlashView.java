@@ -418,6 +418,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         final Scroller scroller = new Scroller(layout);
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
         scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
+        Animated.animate(scroller, Animation.FADE_IN);
 
         return scroller;
     }
@@ -429,8 +430,6 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      */
     private Component showImageWithInformationAboutToggleButton() {
         final Image image = new Image(FRONTEND_IMAGES_CUSTOM + "enable-toggle-button.png", "alt");
-        image.setWidth("70%");
-        image.setHeight("70%");
         image.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
         final VerticalLayout content = new VerticalLayout(new Text("Please set the custom size greater than zero, or enable the toggle button for full readability."));
@@ -505,6 +504,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         scroller.setWidthFull();
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
         scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
+        Animated.animate(scroller, Animation.FADE_IN);
 
         return scroller;
     }

@@ -4,6 +4,8 @@ import com.esp.espflow.entity.User;
 import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
+import com.esp.espflow.util.Item;
+import com.esp.espflow.util.RadioButtonTheme;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
@@ -12,6 +14,7 @@ import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
@@ -45,10 +48,12 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.popover.PopoverPosition;
 import com.vaadin.flow.component.popover.PopoverVariant;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
@@ -60,6 +65,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -120,9 +127,6 @@ public class MainLayout extends AppLayout {
     private void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
         toggle.setAriaLabel("Menu toggle");
-
-        viewTitle = new H1();
-        viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
         addToNavbar(true, toggle, this.headerRow());
     }
@@ -197,6 +201,9 @@ public class MainLayout extends AppLayout {
         tabSheet.add("All", contentAll);
         popover.add(tabSheet);
 
+        viewTitle = new H1();
+        viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
+
         final var row = new HorizontalLayout(viewTitle, divBell);
         row.setWidthFull();
         row.addClassNames(LumoUtility.Margin.Right.MEDIUM);
@@ -219,7 +226,9 @@ public class MainLayout extends AppLayout {
         });
         appName.add(logo);
         appName.addClassNames(LumoUtility.FontWeight.SEMIBOLD, LumoUtility.FontSize.LARGE);
+
         Header header = new Header(appName);
+        header.setId("header-logo");
         addToDrawer(header);
 
         Optional<User> maybeUser = authenticatedUser.get();
@@ -294,7 +303,11 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
 
-            var itemTheme = userName.getSubMenu().addItem("");
+            var itemSizeMode = userName.getSubMenu().addItem(StringUtils.EMPTY);
+            itemSizeMode.getStyle().setHeight("40px");
+            itemSizeMode.addComponentAsFirst(this.sizeMode());
+
+            var itemTheme = userName.getSubMenu().addItem(StringUtils.EMPTY);
             itemTheme.getStyle().setHeight("40px");
             itemTheme.addComponentAsFirst(this.changeTheme());
 
@@ -345,6 +358,25 @@ public class MainLayout extends AppLayout {
         return layout;
     }
 
+    public HorizontalLayout sizeMode() {
+        // Density
+        RadioButtonGroup<String> density = new RadioButtonGroup<>();
+        density.setItems("default", "compact");
+        density.setValue("default");
+        density.addClassNames(LumoUtility.BoxSizing.BORDER, Padding.XSMALL);
+        density.addThemeNames(RadioButtonTheme.EQUAL_WIDTH, RadioButtonTheme.PRIMARY, RadioButtonTheme.TOGGLE);
+        density.setRenderer(new ComponentRenderer<>(this::renderDensity));
+        density.setWidthFull();
+        density.addValueChangeListener(e -> this.setDensity(e.getValue()));
+        density.getChildren().forEach(component -> {
+            component.getElement().getThemeList().add(RadioButtonTheme.PRIMARY);
+            component.getElement().getThemeList().add(RadioButtonTheme.TOGGLE);
+        });
+
+        final HorizontalLayout rowSizeMode = new HorizontalLayout(density);
+        return rowSizeMode;
+    }
+
     private HorizontalLayout changeTheme() {
         final ToggleButton toggleButton = new ToggleButton();
         toggleButton.addClassName(LumoUtility.Margin.Left.XSMALL);
@@ -370,6 +402,7 @@ public class MainLayout extends AppLayout {
                 themeList.add(Lumo.DARK);
             }
         });
+
         final Span spanTheme = new Span("Theme");
         spanTheme.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
         final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButton, spanTheme);
@@ -379,6 +412,25 @@ public class MainLayout extends AppLayout {
         rowTogle.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
         rowTogle.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
         return rowTogle;
+    }
+
+    private Component renderDensity(String density) {
+        LineAwesomeIcon icon = density.equals("default") ? LineAwesomeIcon.EXPAND_SOLID : LineAwesomeIcon.COMPRESS_SOLID;
+        Item item = new Item(density, icon);
+        item.addClassNames(LumoUtility.Margin.Horizontal.AUTO);
+        return item;
+    }
+
+    private String density = "";
+
+    private void setDensity(String density) {
+        this.density = density.equals("compact") ? "compact" : "";
+        updateTheme();
+    }
+
+    private void updateTheme() {
+        var js = "document.documentElement.setAttribute('theme', $0)";
+        getElement().executeJs(js, Lumo.LIGHT + " " + this.density);
     }
 
     @Override

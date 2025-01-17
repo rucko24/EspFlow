@@ -2,10 +2,14 @@ import { unsafeCSS, registerStyles } from '@vaadin/vaadin-themable-mixin/registe
 
 import vaadinUploadFileCss from 'themes/espflow/components/vaadin-upload-file.css?inline';
 import vaadinTabsheetCss from 'themes/espflow/components/vaadin-tabsheet.css?inline';
+import vaadinRadioGroupCss from 'themes/espflow/components/vaadin-radio-group.css?inline';
+import vaadinRadioButtonCss from 'themes/espflow/components/vaadin-radio-button.css?inline';
 import vaadinCheckboxCss from 'themes/espflow/components/vaadin-checkbox.css?inline';
+import vaadinAppLayoutCss from 'themes/espflow/components/vaadin-app-layout.css?inline';
 import stepperCss from 'themes/espflow/components/stepper.css?inline';
 import listCss from 'themes/espflow/components/list.css?inline';
 import layoutCss from 'themes/espflow/components/layout.css?inline';
+import inputFieldCss from 'themes/espflow/components/input-field.css?inline';
 import borderCss from 'themes/espflow/components/border.css?inline';
 
 
@@ -19,8 +23,20 @@ if (!document['_vaadintheme_espflow_componentCss']) {
         unsafeCSS(vaadinTabsheetCss.toString())
       );
       registerStyles(
+        'vaadin-radio-group',
+        unsafeCSS(vaadinRadioGroupCss.toString())
+      );
+      registerStyles(
+        'vaadin-radio-button',
+        unsafeCSS(vaadinRadioButtonCss.toString())
+      );
+      registerStyles(
         'vaadin-checkbox',
         unsafeCSS(vaadinCheckboxCss.toString())
+      );
+      registerStyles(
+        'vaadin-app-layout',
+        unsafeCSS(vaadinAppLayoutCss.toString())
       );
       registerStyles(
         'stepper',
@@ -33,6 +49,10 @@ if (!document['_vaadintheme_espflow_componentCss']) {
       registerStyles(
         'layout',
         unsafeCSS(layoutCss.toString())
+      );
+      registerStyles(
+        'input-field',
+        unsafeCSS(inputFieldCss.toString())
       );
       registerStyles(
         'border',

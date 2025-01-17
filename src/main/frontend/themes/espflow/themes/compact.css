@@ -1,0 +1,34 @@
+[theme~='compact'] {
+
+    --lumo-size-xs: 1rem;
+    --lumo-size-s: 1.25rem;
+    --lumo-size-m: 1.5rem;
+    --lumo-size-l: 2rem;
+    --lumo-size-xl: 2.5rem;
+
+    --lumo-font-size: 0.875rem;
+    --lumo-font-size-xxs: 0.625rem;
+    --lumo-font-size-xs: 0.6875rem;
+    --lumo-font-size-s: 0.75rem;
+    --lumo-font-size-m: 0.8125rem;
+    --lumo-font-size-l: 0.875rem;
+    --lumo-font-size-xl: 1rem;
+    --lumo-font-size-xxl: 1.25rem;
+    --lumo-font-size-xxxl: 1.5rem;
+
+    --lumo-line-height-xs: 1.1;
+    --lumo-line-height-s: 1.2;
+    --lumo-line-height-m: 1.4;
+
+    --lumo-space-xs: 0.125rem;
+    --lumo-space-s: 0.25rem;
+    --lumo-space-m: 0.5rem;
+    --lumo-space-l: 1rem;
+    --lumo-space-xl: 1.5rem;
+    --toggle-size: 15px;
+
+    [theme~="dark"] {
+       --toggle-size: 15px;
+    }
+}
+

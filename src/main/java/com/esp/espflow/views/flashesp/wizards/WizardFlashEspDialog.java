@@ -485,6 +485,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
         final Scroller scroller = new Scroller(layout);
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
         scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
+        Animated.animate(scroller, Animation.FADE_IN);
 
         return scroller;
     }
@@ -529,6 +530,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
         final Scroller scroller = new Scroller(layout);
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
         scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
+        Animated.animate(scroller, Animation.FADE_IN);
 
         return scroller;
     }

@@ -530,6 +530,7 @@ public class ShowDevicesBuilder {
             image.setWidth("50%");
             image.setHeight("50%");
             image.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+            Animated.animate(image, Animated.Animation.FADE_IN);
 
             final VerticalLayout content = new VerticalLayout(new com.vaadin.flow.component.Text(text));
 
