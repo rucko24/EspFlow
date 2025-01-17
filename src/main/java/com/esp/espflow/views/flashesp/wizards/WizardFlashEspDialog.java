@@ -62,6 +62,7 @@ import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_ICON;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_CUSTOM;
 import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
+import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.STEP1;
 import static com.esp.espflow.util.EspFlowConstants.STEP2;
 import static com.esp.espflow.util.EspFlowConstants.STEP3;
@@ -483,7 +484,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
 
         final Scroller scroller = new Scroller(layout);
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
-        scroller.getStyle().set("scrollbar-width", "thin");
+        scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
 
         return scroller;
     }
@@ -527,7 +528,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
 
         final Scroller scroller = new Scroller(layout);
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
-        scroller.getStyle().set("scrollbar-width", "thin");
+        scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
 
         return scroller;
     }

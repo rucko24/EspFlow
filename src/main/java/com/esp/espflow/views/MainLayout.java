@@ -73,6 +73,7 @@ import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
 import static com.esp.espflow.util.EspFlowConstants.ROTATE_0_DEGREE;
+import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
 import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
@@ -236,6 +237,7 @@ public class MainLayout extends AppLayout {
         }
 
         final Scroller scroller = new Scroller(createNavigation());
+        scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
         addToDrawer(scroller, createFooter());
 
     }

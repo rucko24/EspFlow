@@ -261,11 +261,11 @@ vaadin-context-menu-item.context-menu-item-no-checkmark {
 }
 
 vaadin-split-layout > [slot="primary"] {
-
+    /*none*/
 }
 
 vaadin-split-layout > [slot="secondary"] {
-
+    /*none*/
 }
 
 ::-webkit-scrollbar {

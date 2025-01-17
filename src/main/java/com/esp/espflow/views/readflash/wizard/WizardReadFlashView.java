@@ -57,6 +57,7 @@ import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_CUSTOM;
 import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
+import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.STEP1;
 import static com.esp.espflow.util.EspFlowConstants.STEP2;
 import static com.esp.espflow.util.EspFlowConstants.STEP3;
@@ -385,8 +386,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
 
         final Div divPortFailure = new Div("Port failure: /dev/ttyUSB2");
         divPortFailure.setHeight("25px");
-        divPortFailure.getStyle().set("color", "red");
-        divPortFailure.getElement().setAttribute("theme", "badge");
+        divPortFailure.getElement().getThemeList().add("badge error primary");
         divPortFailure.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
 
         final HorizontalLayout rowPermisson = new HorizontalLayout(divPortFailure, titlePermissionDenied);
@@ -416,8 +416,8 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, titleIncorrectSizeAddress, descriptionIncorrectFinalFlashSize, separator, changePermissionsImage, descriptionPermissionDeniedPort);
 
         final Scroller scroller = new Scroller(layout);
-        scroller.getStyle().set("scrollbar-width", "thin");
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
+        scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
 
         return scroller;
     }
@@ -504,7 +504,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         final Scroller scroller = new Scroller(layout);
         scroller.setWidthFull();
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
-        scroller.getStyle().set("scrollbar-width", "thin");
+        scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
 
         return scroller;
     }

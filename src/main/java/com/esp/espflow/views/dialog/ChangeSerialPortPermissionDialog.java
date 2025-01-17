@@ -10,7 +10,6 @@ import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.flashesp.DivHeaderPorts;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
@@ -155,7 +154,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         writePasswordButton.addClickShortcut(Key.ENTER);
         writePasswordButton.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         writePasswordButton.setTooltipText("Write password! - ENTER");
-        writePasswordButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        writePasswordButton.getElement().getThemeList().add("badge error primary");
 
         final Binder<ChangePasswordBinderRecord> binder = new Binder<>();
         binder.forField(copyComboBox)

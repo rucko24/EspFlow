@@ -76,7 +76,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.HIDDEN;
 import static com.esp.espflow.util.EspFlowConstants.LOADING;
@@ -313,13 +315,13 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * @return A {@link HorizontalLayout}
      */
     private HorizontalLayout getFooter() {
-        final HorizontalLayout footer = new HorizontalLayout();
-        footer.setWidthFull();
-        footer.setHeight("40px");
-        footer.getStyle().set("border-top", " 1px solid var(--lumo-contrast-10pct)");
-        footer.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        footer.setAlignItems(Alignment.CENTER);
-        footer.setJustifyContentMode(JustifyContentMode.START);
+        final HorizontalLayout horizontalLayoutFooter = new HorizontalLayout();
+        horizontalLayoutFooter.setWidthFull();
+        horizontalLayoutFooter.setHeight("40px");
+        horizontalLayoutFooter.getStyle().set("border-top", " 1px solid var(--lumo-contrast-10pct)");
+        horizontalLayoutFooter.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        horizontalLayoutFooter.setAlignItems(Alignment.CENTER);
+        horizontalLayoutFooter.setJustifyContentMode(JustifyContentMode.START);
 
         final Div divSpanTotalDevices = new Div(this.spanTotalDevices, this.spanTotalDevicesValue);
 
@@ -335,35 +337,38 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         final Div divWithIconAndText = new Div();
         divWithIconAndText.addClassNames(Display.FLEX, FlexDirection.ROW, AlignItems.CENTER, JustifyContent.START);
         final Text text = new Text("Change port permissions");
-        divWithIconAndText.add(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null), text);
-        contextMenuDivPortError.addItem(divWithIconAndText,
-                event -> this.showErroneousPortsInDialog()).setCheckable(true);
+        var iconBlackLock = SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null);
+        iconBlackLock.addClassName(BLACK_TO_WHITE_ICON);
+        divWithIconAndText.add(iconBlackLock, text);
+        contextMenuDivPortError.addItem(divWithIconAndText, event -> this.showErroneousPortsInDialog())
+                        .addClassName(CONTEXT_MENU_ITEM_NO_CHECKMARK);
 
         spanPortFailure.addClassName(Left.SMALL);
         spanPortFailure.getStyle().setCursor(CURSOR_POINTER);
         this.divWithPortErrors.add(spanPortFailure);
-        divWithPortErrors.getStyle().set("color", "red");
+        this.divWithPortErrors.getElement().getThemeList().add("badge error primary");
+        divSpanTotalDevices.getElement().getThemeList().add("badge");
 
-        Stream.of(divSpanTotalDevices, divWithPortErrors)
-                .forEach(div -> {
+        Stream.of(divSpanTotalDevices, divWithPortErrors).forEach(div -> {
                     div.addClassNames(Right.MEDIUM, BOX_SHADOW_VAADIN_BUTTON);
-                    div.getElement().setAttribute("theme", "badge");
                 });
 
         final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);
         divForBadges.setId("divForBadges");
         divForBadges.setWidthFull();
-        divForBadges.addClassName(Left.MEDIUM);
+        divForBadges.addClassNames(Display.FLEX, FlexDirection.ROW, Left.MEDIUM);
         /*Margin left to span values */
         Stream.of(spanTotalDevicesValue, spanPortFailure)
                 .forEach(spans -> spans.addClassName(Left.SMALL));
-        footer.add(divForBadges);
+        horizontalLayoutFooter.add(divForBadges);
+
         Stream.of(this.spanTotalDevices, this.spanTotalDevicesValue, this.divWithPortErrors)
                 .forEach(span -> {
                     span.getStyle().set("font-size", "var(--lumo-font-size-xs)");
                     span.addClassName("row-span-flash-size-footer");
                 });
-        return footer;
+
+        return horizontalLayoutFooter;
     }
 
     /**

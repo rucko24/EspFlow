@@ -113,5 +113,22 @@ public class EspFlowConstants {
     public static final String VAR_LUMO_PRIMARY_COLOR_10_PCT = "var(--lumo-primary-color-10pct)";
     //Applies only for DARK MODE
     public static final String BLACK_TO_WHITE_ICON = "black-to-white";
-
+    public static final String CONTEXT_MENU_ITEM_NO_CHECKMARK = "context-menu-item-no-checkmark";
+    public static final String SCROLLBAR_CUSTOM_STYLE = """
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        ::-webkit-scrollbar {
+                            width: 8px;
+                            height: 8px;
+                        }
+                        ::-webkit-scrollbar-track {
+                            background-color: var(--bg2);
+                        }
+                        ::-webkit-scrollbar-thumb {
+                            background-color: hsla(0, 0%, 49.8%, 0.5);
+                            border-radius: 4px;
+                        }
+                    `;
+                    this.appendChild(style);
+                """;
 }

@@ -55,6 +55,7 @@ import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
+import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
 import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_V;
@@ -220,7 +221,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                                 esptoolExecutableDto.esptoolVersion(), esptoolExecutableDto.absolutePathEsptool());
                         this.publishEstoolVersionEvent.tryEmitNext(event);
                     });
-                    item.addClassName("context-menu-item-no-checkmark");
+                    item.addClassName(CONTEXT_MENU_ITEM_NO_CHECKMARK);
                     String isBundled = esptoolExecutableDto.isBundled() ? "Bundled" : "Custom";
                     this.createToolTip(item, isBundled);
                 });

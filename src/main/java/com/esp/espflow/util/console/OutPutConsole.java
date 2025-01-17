@@ -25,6 +25,7 @@ import lombok.extern.log4j.Log4j2;
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
 import static com.esp.espflow.util.EspFlowConstants.HIDDEN;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 
@@ -75,7 +76,7 @@ public class OutPutConsole extends Div {
         divWithIconAndText.add(iconTrash, spanClearAll);
         contextMenu.addItem(divWithIconAndText, menuItemClickEvent -> {
            this.clear();
-        }).addClassName("context-menu-item-no-checkmark");
+        }).addClassName(CONTEXT_MENU_ITEM_NO_CHECKMARK);
 
         xterm.getXTerm().setId("id-for-xterm");
         xterm.getXTerm().addClassName("xterm");

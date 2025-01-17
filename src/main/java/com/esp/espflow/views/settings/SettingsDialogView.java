@@ -53,6 +53,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
@@ -405,7 +406,7 @@ public class SettingsDialogView extends Dialog {
         final Scroller scroller = new Scroller(layout);
         scroller.setWidthFull();
         scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-        scroller.getStyle().set("scrollbar-width", "thin");
+        scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
         return scroller;
     }
 
