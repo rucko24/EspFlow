@@ -299,7 +299,7 @@ public class MainLayout extends AppLayout {
             itemTheme.addComponentAsFirst(this.changeTheme());
 
             final HorizontalLayout rowForSettings = new HorizontalLayout();
-            rowForSettings.addClassNames(Display.FLEX, LumoUtility.Width.FULL, FlexDirection.ROW, JustifyContent.BETWEEN);
+            rowForSettings.addClassNames(Display.FLEX, LumoUtility.Width.FULL, FlexDirection.ROW, JustifyContent.BETWEEN, AlignItems.CENTER);
             final Span span = new Span("Settings...");
             span.addClassName(LumoUtility.Margin.Left.MEDIUM);
             final Span shorcutSettings = new Span("Ctrl+Alt+S");
@@ -347,8 +347,11 @@ public class MainLayout extends AppLayout {
 
     private HorizontalLayout changeTheme() {
         final ToggleButton toggleButton = new ToggleButton();
+        toggleButton.addClassName(LumoUtility.Margin.Left.XSMALL);
         final Span spanDarkOrLight = new Span();
-        spanDarkOrLight.add(VaadinIcon.MOON_O.create());
+        var moonO = VaadinIcon.MOON_O.create();
+        moonO.setSize("20px");
+        spanDarkOrLight.add(moonO);
         spanDarkOrLight.getStyle().setMarginLeft("2px");
         toggleButton.setTooltipText("Change to dark theme");
         toggleButton.addClickListener(event -> {
@@ -356,7 +359,7 @@ public class MainLayout extends AppLayout {
             if (themeList.contains(Lumo.DARK)) {
                 toggleButton.setTooltipText("Change to dark theme");
                 spanDarkOrLight.removeAll();
-                spanDarkOrLight.add(VaadinIcon.MOON_O.create());
+                spanDarkOrLight.add(moonO);
                 themeList.remove(Lumo.DARK);
             } else {
                 toggleButton.setTooltipText("Change to light theme");
@@ -368,9 +371,10 @@ public class MainLayout extends AppLayout {
             }
         });
         final Span spanTheme = new Span("Theme");
-        spanTheme.addClassName(LumoUtility.TextColor.SECONDARY);
+        spanTheme.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
         final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButton, spanTheme);
-        rowToggleSpan.addClassNames(Display.FLEX, FlexDirection.ROW, LumoUtility.Width.FULL, JustifyContent.BETWEEN);
+        rowToggleSpan.addClassNames(Display.FLEX, FlexDirection.ROW, LumoUtility.Width.FULL, JustifyContent.BETWEEN,
+                AlignItems.CENTER);
         final HorizontalLayout rowTogle = new HorizontalLayout(spanDarkOrLight, rowToggleSpan);
         rowTogle.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
         rowTogle.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
