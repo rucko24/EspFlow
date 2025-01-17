@@ -4,21 +4,14 @@ import com.esp.espflow.entity.User;
 import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
-import com.esp.espflow.util.Item;
-import com.esp.espflow.util.RadioButtonTheme;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
-import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -26,20 +19,14 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Header;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -48,32 +35,23 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.popover.PopoverPosition;
 import com.vaadin.flow.component.popover.PopoverVariant;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
-import com.vaadin.flow.theme.lumo.Lumo;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang3.StringUtils;
-import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
@@ -81,7 +59,6 @@ import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_ESPDEVICES;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
 import static com.esp.espflow.util.EspFlowConstants.ROTATE_0_DEGREE;
 import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
-import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
 import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
 
@@ -109,15 +86,18 @@ public class MainLayout extends AppLayout {
     private final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems;
     private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
     private final SettingsDialogView settingsDialogView;
+    private final MainFooter mainFooter;
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
                       Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems, SettingsDialogView settingsDialogView,
-                      Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems) {
+                      Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems,
+                      final MainFooter mainFooter) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
         this.subscribersMessageListItems = subscribersMessageListItems;
         this.settingsDialogView = settingsDialogView;
         this.subscribersEsptoolVersionMessageListItems = subscribersEsptoolVersionMessageListItems;
+        this.mainFooter = mainFooter;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -247,7 +227,7 @@ public class MainLayout extends AppLayout {
 
         final Scroller scroller = new Scroller(createNavigation());
         scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
-        addToDrawer(scroller, createFooter());
+        addToDrawer(scroller, mainFooter.createFooter());
 
     }
 
@@ -275,162 +255,6 @@ public class MainLayout extends AppLayout {
         }
 
         return nav;
-    }
-
-    private Footer createFooter() {
-        Footer layout = new Footer();
-        layout.addClassNames("app-nav-footer");
-
-        Optional<User> maybeUser = authenticatedUser.get();
-        if (maybeUser.isPresent()) {
-            User user = maybeUser.get();
-
-            Avatar avatar = new Avatar(user.getName(), user.getProfilePictureUrl());
-            avatar.setThemeName("xsmall");
-            avatar.getElement().setAttribute("tabindex", "-1");
-
-            MenuBar userMenu = new MenuBar();
-            userMenu.setThemeName("tertiary-inline contrast");
-            MenuItem userName = userMenu.addItem("");
-
-            userName.getStyle().setCursor(CURSOR_POINTER);
-            Div div = new Div();
-            div.add(avatar);
-            div.add(user.getName());
-            div.add(new Icon("lumo", "dropdown"));
-            div.getElement().getStyle().set("display", "flex");
-            div.getElement().getStyle().set("align-items", "center");
-            div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
-            userName.add(div);
-
-            var itemSizeMode = userName.getSubMenu().addItem(StringUtils.EMPTY);
-            itemSizeMode.getStyle().setHeight("40px");
-            itemSizeMode.addComponentAsFirst(this.sizeMode());
-
-            var itemTheme = userName.getSubMenu().addItem(StringUtils.EMPTY);
-            itemTheme.getStyle().setHeight("40px");
-            itemTheme.addComponentAsFirst(this.changeTheme());
-
-            final HorizontalLayout rowForSettings = new HorizontalLayout();
-            rowForSettings.addClassNames(Display.FLEX, LumoUtility.Width.FULL, FlexDirection.ROW, JustifyContent.BETWEEN, AlignItems.CENTER);
-            final Span span = new Span("Settings...");
-            span.addClassName(LumoUtility.Margin.Left.MEDIUM);
-            final Span shorcutSettings = new Span("Ctrl+Alt+S");
-            shorcutSettings.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-            rowForSettings.add(span, shorcutSettings);
-
-            userName.getSubMenu().addItem(rowForSettings, event -> {
-                getUI().ifPresent(ui -> {
-                    ui.getPage().fetchCurrentURL(url -> {
-                        log.info("fetchCurrentURL {}", url);
-                        String urlWithParameters = url.getPath().concat("#settings");
-                        ui.getPage().getHistory().replaceState(null, urlWithParameters);
-                        settingsDialogView.open(SETTINGS);
-                    });
-                });
-            }).addComponentAsFirst(VaadinIcon.COG.create());
-            userName.getSubMenu().add(new Hr());
-
-            final Span spanSignOut = new Span("Sign out");
-            spanSignOut.addClassName(LumoUtility.Margin.Left.MEDIUM);
-            final MenuItem sigOutItem = userName.getSubMenu().addItem(spanSignOut, e -> authenticatedUser.logout());
-            var iconSigout = SvgFactory.createIconFromSvg("signout.svg", "20px", null);
-            iconSigout.addClassName(BLACK_TO_WHITE_ICON);
-            sigOutItem.addComponentAsFirst(iconSigout);
-
-            Shortcuts.addShortcutListener(userName, shortcutEvent -> {
-                getUI().ifPresent(ui -> {
-                    ui.getPage().fetchCurrentURL(url -> {
-                        String urlWithParameters = url.getPath().concat("#settings");
-                        ui.getPage().getHistory().replaceState(null, urlWithParameters);
-                        settingsDialogView.open(SETTINGS);
-                        log.info("fetchCurrentURL from shortcut {}{}", url, "#settings");
-                    });
-                });
-            }, Key.KEY_S, KeyModifier.CONTROL, KeyModifier.ALT);
-
-            layout.add(userMenu, settingsDialogView);
-        } else {
-            Anchor loginLink = new Anchor("login", "Sign in");
-            layout.add(loginLink);
-        }
-
-        return layout;
-    }
-
-    public HorizontalLayout sizeMode() {
-        // Density
-        RadioButtonGroup<String> density = new RadioButtonGroup<>();
-        density.setItems("default", "compact");
-        density.setValue("default");
-        density.addClassNames(LumoUtility.BoxSizing.BORDER, Padding.XSMALL);
-        density.addThemeNames(RadioButtonTheme.EQUAL_WIDTH, RadioButtonTheme.PRIMARY, RadioButtonTheme.TOGGLE);
-        density.setRenderer(new ComponentRenderer<>(this::renderDensity));
-        density.setWidthFull();
-        density.addValueChangeListener(e -> this.setDensity(e.getValue()));
-        density.getChildren().forEach(component -> {
-            component.getElement().getThemeList().add(RadioButtonTheme.PRIMARY);
-            component.getElement().getThemeList().add(RadioButtonTheme.TOGGLE);
-        });
-
-        final HorizontalLayout rowSizeMode = new HorizontalLayout(density);
-        return rowSizeMode;
-    }
-
-    private HorizontalLayout changeTheme() {
-        final ToggleButton toggleButton = new ToggleButton();
-        toggleButton.addClassName(LumoUtility.Margin.Left.XSMALL);
-        final Span spanDarkOrLight = new Span();
-        var moonO = VaadinIcon.MOON_O.create();
-        moonO.setSize("20px");
-        spanDarkOrLight.add(moonO);
-        spanDarkOrLight.getStyle().setMarginLeft("2px");
-        toggleButton.setTooltipText("Change to dark theme");
-        toggleButton.addClickListener(event -> {
-            final ThemeList themeList = UI.getCurrent().getElement().getThemeList();
-            if (themeList.contains(Lumo.DARK)) {
-                toggleButton.setTooltipText("Change to dark theme");
-                spanDarkOrLight.removeAll();
-                spanDarkOrLight.add(moonO);
-                themeList.remove(Lumo.DARK);
-            } else {
-                toggleButton.setTooltipText("Change to light theme");
-                spanDarkOrLight.removeAll();
-                var icon = SvgFactory.createIconFromSvg("brightness.svg", "20px", "");
-                icon.addClassName(BLACK_TO_WHITE_ICON);
-                spanDarkOrLight.add(icon);
-                themeList.add(Lumo.DARK);
-            }
-        });
-
-        final Span spanTheme = new Span("Theme");
-        spanTheme.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
-        final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButton, spanTheme);
-        rowToggleSpan.addClassNames(Display.FLEX, FlexDirection.ROW, LumoUtility.Width.FULL, JustifyContent.BETWEEN,
-                AlignItems.CENTER);
-        final HorizontalLayout rowTogle = new HorizontalLayout(spanDarkOrLight, rowToggleSpan);
-        rowTogle.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
-        rowTogle.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
-        return rowTogle;
-    }
-
-    private Component renderDensity(String density) {
-        LineAwesomeIcon icon = density.equals("default") ? LineAwesomeIcon.EXPAND_SOLID : LineAwesomeIcon.COMPRESS_SOLID;
-        Item item = new Item(density, icon);
-        item.addClassNames(LumoUtility.Margin.Horizontal.AUTO);
-        return item;
-    }
-
-    private String density = "";
-
-    private void setDensity(String density) {
-        this.density = density.equals("compact") ? "compact" : "";
-        updateTheme();
-    }
-
-    private void updateTheme() {
-        var js = "document.documentElement.setAttribute('theme', $0)";
-        getElement().executeJs(js, Lumo.LIGHT + " " + this.density);
     }
 
     @Override
