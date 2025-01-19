@@ -3,7 +3,6 @@ package com.esp.espflow.views;
 import com.esp.espflow.entity.User;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.Item;
-import com.esp.espflow.util.RadioButtonTheme;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.settings.SettingsDialogView;
 import com.vaadin.componentfactory.ToggleButton;
@@ -25,7 +24,6 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -57,7 +55,6 @@ public class MainFooter {
     private String density = "";
 
     /**
-     *
      * @return A Custom Footer
      */
     public Footer createFooter() {
@@ -150,15 +147,8 @@ public class MainFooter {
         density.setWidthFull();
         density.setItems("default", "compact");
         density.setValue("default");
-        density.addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Padding.XSMALL);
-        density.addThemeNames(RadioButtonTheme.EQUAL_WIDTH, RadioButtonTheme.PRIMARY, RadioButtonTheme.TOGGLE);
-        density.setRenderer(new ComponentRenderer<>(this::renderDensity));
         density.setWidthFull();
         density.addValueChangeListener(e -> this.setDensity(footer, e.getValue()));
-        density.getChildren().forEach(component -> {
-            component.getElement().getThemeList().add(RadioButtonTheme.PRIMARY);
-            component.getElement().getThemeList().add(RadioButtonTheme.TOGGLE);
-        });
         final HorizontalLayout rowSizeMode = new HorizontalLayout(density);
         rowSizeMode.setWidthFull();
         return rowSizeMode;

@@ -4,6 +4,7 @@ import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.enums.Breakpoint;
 import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.EspFlowConstants;
+import com.esp.espflow.util.animations.AnimationsUtils;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
 import com.infraleap.animatecss.Animated;
@@ -50,10 +51,12 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.esp.espflow.util.EspFlowConstants.NAV_SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET;
@@ -70,7 +73,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 @Log4j2
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class SettingsDialogView extends Dialog {
+public class SettingsDialogView extends Dialog implements AnimationsUtils {
 
     private static final String PASSWORD = "password";
     private static final String CONTACT_INFORMATION = "contact-information";
@@ -135,7 +138,30 @@ public class SettingsDialogView extends Dialog {
         final Hr hr = new Hr();
         hr.addClassName("hr-header-settings");
 
-        main.add(this.createButtonToggle(), this.createButtonsItemsMenu() , this.createForm(ref));
+        var nav = this.createButtonsItemsMenu();
+
+        UI.getCurrent().getPage().addBrowserWindowResizeListener(e -> {
+            if (e.getWidth() > 660) {
+                Animated.removeAnimations(nav);
+                nav.addClassName(NAV_SETTINGS);
+            }
+        });
+
+        buttonToggle.addClickListener(buttonClickEvent -> {
+            if (buttonClickEvent.isFromClient()) {
+                if (nav.getClassName().contains(NAV_SETTINGS)) {
+                    Animated.animate(nav, Animated.Animation.FADE_OUT);
+                    this.removesClassWithDelay(() -> {
+                        nav.removeClassName(NAV_SETTINGS);
+                    }, nav, Duration.ofMillis(500));
+                } else {
+                    nav.addClassName(NAV_SETTINGS);
+                    Animated.animate(nav, Animated.Animation.FADE_IN);
+                }
+            }
+        });
+
+        main.add(this.createButtonToggle(), nav, this.createForm(ref));
 
         super.add(hr, main);
         super.addClassName("settings-content-dialog");
@@ -241,7 +267,6 @@ public class SettingsDialogView extends Dialog {
     /**
      * You must disable the server-side modality each time after opening the dialog
      * https://github.com/vaadin/web-components/issues/7778#issuecomment-2334597476
-     *
      */
     public void openAndDisableModeless() {
         getUI().ifPresent(ui -> {
@@ -335,7 +360,7 @@ public class SettingsDialogView extends Dialog {
         final ToggleButton toggleButtonReadFlashEsp = new ToggleButton();
 
         toggleButtonEnableAllWizards.addValueChangeListener(event -> {
-            if(event.isFromClient()) {
+            if (event.isFromClient()) {
                 if (event.getValue()) {
                     this.updateAllWizardStatus(event.getValue());
                     toggleButtonFlashEsp.setValue(true);
@@ -355,7 +380,7 @@ public class SettingsDialogView extends Dialog {
         final Paragraph spanEnableWizardFlashEsp = new Paragraph("Enable wizard Flash Esp32-ESP8266 view");
         spanEnableWizardFlashEsp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         toggleButtonFlashEsp.addValueChangeListener(event -> {
-            if(event.isFromClient()) {
+            if (event.isFromClient()) {
                 if (event.getValue()) {
                     updateWizardView(WIZARD_FLASH_ESP_VIEW, true);
                 } else {
@@ -366,7 +391,7 @@ public class SettingsDialogView extends Dialog {
         final Paragraph spanEnableWizardReadFlashEsp = new Paragraph("Enable wizard Read flash/firmware view");
         spanEnableWizardReadFlashEsp.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
         toggleButtonReadFlashEsp.addValueChangeListener(event -> {
-            if(event.isFromClient()) {
+            if (event.isFromClient()) {
                 if (event.getValue()) {
                     updateWizardView(WIZARD_READ_FLASH_ESP_VIEW, true);
                 } else {
@@ -474,16 +499,6 @@ public class SettingsDialogView extends Dialog {
 
         final Nav nav = new Nav(div);
         nav.addClassNames(Display.HIDDEN, Display.Breakpoint.Small.FLEX, LumoUtility.FontSize.SMALL, LumoUtility.Position.STICKY, "top-0");
-        //nav.addClassName("nav-settings");
-
-        buttonToggle.addClickListener(buttonClickEvent -> {
-            if(nav.getClassName().contains("nav-settings")) {
-                nav.removeClassName("nav-settings");
-            } else {
-                nav.addClassName("nav-settings");
-            }
-            Animated.animate(div, Animated.Animation.FADE_IN);
-        });
 
         return nav;
     }
