@@ -8,6 +8,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.server.StreamResource;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.FastByteArrayOutputStream;
+import org.springframework.util.FileCopyUtils;
 import org.vaadin.olli.FileDownloadWrapper;
 
 import java.io.BufferedInputStream;
@@ -64,7 +65,7 @@ public class FlashDownloadButtonWrapper extends FileDownloadWrapper {
         final Path path = Path.of(writFileToTempFile);
         path.toFile().deleteOnExit();
         try (final var bin = new BufferedInputStream(Files.newInputStream(path));
-             final var baos = new FastByteArrayOutputStream()) {
+             final var baos = new FastByteArrayOutputStream(FileCopyUtils.BUFFER_SIZE)) {
             //transfer
             bin.transferTo(baos);
             return new ByteArrayInputStream(baos.toByteArray());
