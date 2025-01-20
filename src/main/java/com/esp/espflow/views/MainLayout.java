@@ -41,6 +41,7 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
@@ -66,6 +67,7 @@ import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
  * The main view is a top-level placeholder for other views.
  */
 @Log4j2
+@AnonymousAllowed
 public class MainLayout extends AppLayout {
 
     private final Popover popover = new Popover();

@@ -29,6 +29,7 @@ import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -110,6 +111,8 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
      *
      */
     private final WizardEspService wizardFlashEspRepository;
+
+    private final AccessAnnotationChecker accessChecker;
 
     @PostConstruct
     public void init() {

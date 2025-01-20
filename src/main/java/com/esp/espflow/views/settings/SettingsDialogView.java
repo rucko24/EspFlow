@@ -7,7 +7,6 @@ import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.util.animations.AnimationsUtils;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
-import com.infraleap.animatecss.Animated;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -51,7 +50,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
-import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -142,22 +140,13 @@ public class SettingsDialogView extends Dialog implements AnimationsUtils {
 
         UI.getCurrent().getPage().addBrowserWindowResizeListener(e -> {
             if (e.getWidth() > 660) {
-                Animated.removeAnimations(nav);
-                nav.addClassName(NAV_SETTINGS);
+                nav.addClassNames(NAV_SETTINGS);
             }
         });
 
         buttonToggle.addClickListener(buttonClickEvent -> {
             if (buttonClickEvent.isFromClient()) {
-                if (nav.getClassName().contains(NAV_SETTINGS)) {
-                    Animated.animate(nav, Animated.Animation.FADE_OUT);
-                    this.removesClassWithDelay(() -> {
-                        nav.removeClassName(NAV_SETTINGS);
-                    }, nav, Duration.ofMillis(500));
-                } else {
-                    nav.addClassName(NAV_SETTINGS);
-                    Animated.animate(nav, Animated.Animation.FADE_IN);
-                }
+                nav.getStyle().setWidth("80%");
             }
         });
 
@@ -492,13 +481,22 @@ public class SettingsDialogView extends Dialog implements AnimationsUtils {
                     button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 });
 
-        final Div div = new Div(buttonEsptoolHomePath, buttonManageSettings, buttonPassword, buttonNotifications, buttonCheckUpdates);
+        final Button button = new Button(VaadinIcon.CLOSE.create());
+        //button.getStyle().set("display","none");
+        button.setWidth("10px");
+        button.addClassName("button-cross-nav-settings");
+
+        final Div div = new Div(button, buttonEsptoolHomePath, buttonManageSettings, buttonPassword, buttonNotifications, buttonCheckUpdates);
         div.setId("div-item-container");
         div.addClassNames(Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Margin.Vertical.XLARGE, Padding.Horizontal.LARGE);
 
         final Nav nav = new Nav(div);
-        nav.addClassNames(Display.HIDDEN, Display.Breakpoint.Small.FLEX, LumoUtility.FontSize.SMALL, LumoUtility.Position.STICKY, "top-0");
+        nav.addClassNames(NAV_SETTINGS);
+
+        button.addClickListener(event -> {
+            nav.getStyle().setWidth("0");
+        });
 
         return nav;
     }

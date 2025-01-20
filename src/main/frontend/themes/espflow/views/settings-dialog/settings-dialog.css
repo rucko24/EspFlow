@@ -25,6 +25,15 @@ vaadin-dialog-overlay.settings-content-dialog::part(content) {
     display: none;
 }
 
+.nav-settings {
+    display: none;
+    display: flex;
+    font-size: var(--lumo-font-size-s);
+    position: sticky;
+    top: 0;
+    /*width: 100%;*/
+}
+
 @media (max-width: 800px) {
 
    vaadin-dialog-overlay.settings-content-dialog::part(overlay) {
@@ -36,8 +45,22 @@ vaadin-dialog-overlay.settings-content-dialog::part(content) {
    }
 
    .nav-settings {
-        display: flex !important;
-        /*hidden: true;*/
+        width: 0;
+        position: absolute;
+        z-index: 1;
+        background: #ffffff;
+        left: 0;
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 0px;
+        box-shadow: var(--custom-box-shadow);
+        border-radius: 9px 0px 0px;
+   }
+
+   vaadin-button .button-cross-nav-settings {
+       visibility: visible;
+       align-self: end;
+       display: block;
    }
 
    #div-item-container {
