@@ -31,7 +31,8 @@ vaadin-dialog-overlay.settings-content-dialog::part(content) {
     font-size: var(--lumo-font-size-s);
     position: sticky;
     top: 0;
-    /*width: 100%;*/
+    transition: 0.5s;
+    height: 100%;
 }
 
 @media (max-width: 800px) {
@@ -54,7 +55,7 @@ vaadin-dialog-overlay.settings-content-dialog::part(content) {
         transition: 0.5s;
         padding-top: 0px;
         box-shadow: var(--custom-box-shadow);
-        border-radius: 9px 0px 0px;
+        border-radius: 9px 9px 9px;
    }
 
    vaadin-button .button-cross-nav-settings {

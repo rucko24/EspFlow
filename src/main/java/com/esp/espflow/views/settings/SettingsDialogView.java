@@ -35,6 +35,7 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.dom.Style.Overflow;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -85,6 +86,7 @@ public class SettingsDialogView extends Dialog implements AnimationsUtils {
     private final Button buttonNotifications = new Button("Notifications");
     private final Button buttonCheckUpdates = new Button("Check updates...");
     private final Button buttonToggle = new Button(VaadinIcon.MENU.create());
+    private final Button buttonToggleHelper = new Button(new Icon("lumo", "cross"));
     private final Layout mainLayout = new Layout();
     private final WizardEspService wizardFlashEspRepository;
     private final SettingsEsptoolHomePathContent settingsEsptoolHomePathContent;
@@ -140,13 +142,19 @@ public class SettingsDialogView extends Dialog implements AnimationsUtils {
 
         UI.getCurrent().getPage().addBrowserWindowResizeListener(e -> {
             if (e.getWidth() > 660) {
+                nav.getStyle().setWidth("80%");
                 nav.addClassNames(NAV_SETTINGS);
+                buttonToggleHelper.setVisible(false);
+            } else {
+                buttonToggleHelper.setVisible(true);
             }
         });
 
+        buttonToggle.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         buttonToggle.addClickListener(buttonClickEvent -> {
             if (buttonClickEvent.isFromClient()) {
                 nav.getStyle().setWidth("80%");
+                buttonToggleHelper.setVisible(true);
             }
         });
 
@@ -481,12 +489,12 @@ public class SettingsDialogView extends Dialog implements AnimationsUtils {
                     button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 });
 
-        final Button button = new Button(VaadinIcon.CLOSE.create());
-        //button.getStyle().set("display","none");
-        button.setWidth("10px");
-        button.addClassName("button-cross-nav-settings");
+        buttonToggleHelper.setVisible(false);
+        buttonToggleHelper.setWidth("10px");
+        buttonToggleHelper.getStyle().setAlignSelf(Style.AlignSelf.END);
+        buttonToggleHelper.addClassName("button-cross-nav-settings");
 
-        final Div div = new Div(button, buttonEsptoolHomePath, buttonManageSettings, buttonPassword, buttonNotifications, buttonCheckUpdates);
+        final Div div = new Div(buttonToggleHelper, buttonEsptoolHomePath, buttonManageSettings, buttonPassword, buttonNotifications, buttonCheckUpdates);
         div.setId("div-item-container");
         div.addClassNames(Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Margin.Vertical.XLARGE, Padding.Horizontal.LARGE);
@@ -494,9 +502,7 @@ public class SettingsDialogView extends Dialog implements AnimationsUtils {
         final Nav nav = new Nav(div);
         nav.addClassNames(NAV_SETTINGS);
 
-        button.addClickListener(event -> {
-            nav.getStyle().setWidth("0");
-        });
+        buttonToggleHelper.addClickListener(event -> nav.getStyle().setWidth("0"));
 
         return nav;
     }
