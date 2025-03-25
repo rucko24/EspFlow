@@ -41,6 +41,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -88,6 +89,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
     private final EsptoolExecutableServiceImpl esptoolExecutableServiceImpl;
     private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
+    private Disposable disposableSubscriberEsptoolVersionEvent;
 
     @PostConstruct
     public void constructDiv() {
@@ -201,12 +203,12 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private void putItemEsptool() {
         contextMenu.removeAll();
         esptoolExecutableServiceImpl.findByIsSelectedToTrue()
-                        .ifPresent(esptoolExecutableDto -> {
-                            final EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum loadedType = esptoolExecutableDto.isBundled()
-                                    ? EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED
-                                    : EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.CUSTOM;
-                            this.createToolTip(h2EsptoolVersion, loadedType.getExecutableType());
-                        });
+                .ifPresent(esptoolExecutableDto -> {
+                    final EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum loadedType = esptoolExecutableDto.isBundled()
+                            ? EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED
+                            : EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.CUSTOM;
+                    this.createToolTip(h2EsptoolVersion, loadedType.getExecutableType());
+                });
 
         esptoolExecutableServiceImpl.findAll()
                 .forEach(esptoolExecutableDto -> {
@@ -239,7 +241,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
-     *
      * @param component
      * @param text
      */
@@ -296,19 +297,28 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         }
     }
 
+    private void closeSubscribers() {
+        if (this.disposableSubscriberEsptoolVersionEvent != null) {
+            this.disposableSubscriberEsptoolVersionEvent.dispose();
+            this.disposableSubscriberEsptoolVersionEvent = null;
+        }
+    }
+
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
+        this.closeSubscribers();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        this.closeSubscribers();
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             this.initListeners();
             this.updateH2WithEsptoolVersion(ui);
-            this.subscriberEsptoolVersionEvent
+            this.disposableSubscriberEsptoolVersionEvent = this.subscriberEsptoolVersionEvent
                     .subscribe(esptoolVersionMessageListItemEvent -> {
                         try {
                             ui.access(() -> {
