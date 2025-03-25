@@ -74,6 +74,7 @@ public class EspFlowConstants {
     public static final String DEFAULT_INIT_ADDRESS_SIZE_TO_WRITE_0x_00000 = "0x00000";
     public static final String WRITE_FLASH = "write_flash";
     public static final String FLASH_ON_SVG = "flash-on.svg";
+    public static final String TABLE_SVG = "table.svg";
     public static final String FLASH_OFF_SVG = "flash-off.svg";
     public static final String SIZE_25_PX = "25px";
     public static final String ROTATE_0_DEGREE = "rotate(0deg)";

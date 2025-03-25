@@ -63,6 +63,7 @@ import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
 import static com.esp.espflow.util.EspFlowConstants.ROTATE_0_DEGREE;
 import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.TABLE_SVG;
 import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
 
 /**
@@ -257,7 +258,7 @@ public class MainLayout extends AppLayout {
         }
 
         if(accessChecker.hasAccess(HexDumpView.class)) {
-            nav.addItem(new SideNavItem("HexDump", HexDumpView.class, VaadinIcon.GRID_H.create()));
+            nav.addItem(new SideNavItem("HexDump", HexDumpView.class, SvgFactory.createIconFromSvg(TABLE_SVG, SIZE_25_PX, null)));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {
