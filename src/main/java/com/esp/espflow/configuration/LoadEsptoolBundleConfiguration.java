@@ -59,13 +59,13 @@ public class LoadEsptoolBundleConfiguration implements IMakeExecutable {
                                                         final ComputeSha256Service computeSha256Service) {
         return commands -> {
             switch (GetOsName.getOsName()) {
-                case WINDOWS -> this.moveBundleToTempDirectory("esptool-winx64/esptool.exe");
+                case WINDOWS -> {
+                    final String outputFileName = this.moveBundleToTempDirectory("esptool-winx64/esptool.exe");
+                    this.computeBundleSha256(esptoolExecutableService, computeSha256Service, outputFileName);
+                }
                 case LINUX -> {
                     final String outputFileName = this.moveBundleToTempDirectory("esptool-linux-amd64/esptool");
-                    computeSha256Service.computeSha256(outputFileName)
-                            .map(esptoolSha256dto -> EsptoolSha256Mapper.INSTANCE.esptoolSha256ToEsptoolExecutableDto(
-                                    outputFileName, esptoolSha256dto, true, true))
-                            .subscribe(esptoolExecutableService::save);
+                    this.computeBundleSha256(esptoolExecutableService, computeSha256Service, outputFileName);
                 }
                 //case MAC -> this.moveBundleToTempDirectory("esptool-macosx64/esptool.py");
                 default -> {
@@ -100,9 +100,12 @@ public class LoadEsptoolBundleConfiguration implements IMakeExecutable {
         var esptoolFileNameOutput = Path.of(META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName).getFileName().toString();
         var outPathFileName = Path.of(tempDir + File.separator + esptoolFileNameOutput);
 
-        if (GetOsName.getOsName() == GetOsName.LINUX) {
-            final var pathResourceAsStream = META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName;
-            this.processResourceAsStream(pathResourceAsStream, outPathFileName);
+        final var pathResourceAsStream = META_INF_RESOURCES_ESPTOOL_BUNDLE + bundleFileName;
+        this.processResourceAsStream(pathResourceAsStream, outPathFileName);
+
+        if (GetOsName.getOsName() == GetOsName.LINUX
+                || GetOsName.getOsName() == GetOsName.FREEBSD
+                || GetOsName.getOsName() == GetOsName.MAC) {
             this.makeExecutable(outPathFileName.toString());
         }
 
@@ -126,6 +129,23 @@ public class LoadEsptoolBundleConfiguration implements IMakeExecutable {
         } catch (IOException ex) {
             log.info("Error by copying the esptool executable to the temporary directory {}", ex.getMessage());
         }
+    }
+
+
+    /**
+     * Calculation of sha256 and marked as bundle and set to true by default, it will appear in the default settings.
+     *
+     * @param esptoolExecutableService to store in memory this version of the bundle
+     * @param computeSha256Service service to compute sha256
+     * @param outputFileName the path where the esptool version bundle file is located
+     */
+    private void computeBundleSha256(EsptoolExecutableServiceImpl esptoolExecutableService,
+                                     ComputeSha256Service computeSha256Service,
+                                     String outputFileName) {
+        computeSha256Service.computeSha256(outputFileName)
+                .map(esptoolSha256dto -> EsptoolSha256Mapper.INSTANCE.esptoolSha256ToEsptoolExecutableDto(
+                        outputFileName, esptoolSha256dto, true, true))
+                .subscribe(esptoolExecutableService::save);
     }
 
 }

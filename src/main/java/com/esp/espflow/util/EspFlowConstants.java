@@ -132,4 +132,6 @@ public class EspFlowConstants {
                     `;
                     this.appendChild(style);
                 """;
+    public static final String CAN_NOT_COMPUTE_SHA_256 = "Can not compute sha256";
+
 }

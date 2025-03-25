@@ -21,6 +21,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.esp.espflow.util.EspFlowConstants.CAN_NOT_COMPUTE_SHA_256;
+
 /**
  * Compute sha256 from this input file
  *
@@ -42,12 +44,12 @@ public class ComputeSha256Service {
      */
     public Mono<EsptoolSha256Dto> computeSha256(final String fileName) {
         if(Objects.isNull(fileName)  || fileName.isEmpty()) {
-            return Mono.error(new CanNotComputeSha256Exception("Can not compute sha256"));
+            return Mono.error(new CanNotComputeSha256Exception(CAN_NOT_COMPUTE_SHA_256));
         }
         return Mono.fromCallable(() -> this.startComputeSha256(fileName))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(Function.identity())
-                .switchIfEmpty(Mono.error(new CanNotComputeSha256Exception("Can not compute sha256")));
+                .switchIfEmpty(Mono.error(new CanNotComputeSha256Exception(CAN_NOT_COMPUTE_SHA_256)));
     }
 
     /**

@@ -13,6 +13,7 @@ import reactor.test.StepVerifier;
 
 import java.util.Optional;
 
+import static com.esp.espflow.util.EspFlowConstants.CAN_NOT_COMPUTE_SHA_256;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -41,7 +42,7 @@ class ComputeSha256ServiceTest {
     void computeSha256FailureEmpty() {
 
         StepVerifier.create(computeSha256Service.computeSha256(""))
-                .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
+                .expectErrorMatches(error -> error.getMessage().contains(CAN_NOT_COMPUTE_SHA_256))
                 .verify();
 
         verifyNoInteractions(esptoolSha256Service);
@@ -52,7 +53,7 @@ class ComputeSha256ServiceTest {
     void computeSha256FailureNull() {
 
         StepVerifier.create(computeSha256Service.computeSha256(null))
-                .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
+                .expectErrorMatches(error -> error.getMessage().contains(CAN_NOT_COMPUTE_SHA_256))
                 .verify();
 
         verifyNoInteractions(esptoolSha256Service);
@@ -107,7 +108,7 @@ class ComputeSha256ServiceTest {
         when(esptoolSha256Service.findBySha256(COMPUTED_SHA_256)).thenReturn(Optional.of(actualEsptoolSha256Dto));
 
         StepVerifier.create(computeSha256Service.computeSha256("src/test/resources/esptool/esptool-linux-amd64/esptool"))
-                .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
+                .expectErrorMatches(error -> error.getMessage().contains(CAN_NOT_COMPUTE_SHA_256))
                 .verify();
 
         verify(esptoolSha256Service).findBySha256(COMPUTED_SHA_256);
@@ -124,7 +125,7 @@ class ComputeSha256ServiceTest {
         when(computeDigestAlgorithmConfiguration.getDigestAlgorithm()).thenReturn("shaWtF");
 
         StepVerifier.create(computeSha256Service.computeSha256("src/test/resources/esptool/esptool-linux-amd64/esptool"))
-                .expectErrorMatches(error -> error.getMessage().contains("Can not compute sha256"))
+                .expectErrorMatches(error -> error.getMessage().contains(CAN_NOT_COMPUTE_SHA_256))
                 .verify();
 
         verifyNoInteractions(esptoolSha256Service);
