@@ -138,7 +138,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         this.progressBarForShowEsptoolVersion.setVisible(false);
         this.progressBarForShowEsptoolVersion.setIndeterminate(true);
         this.progressBarForShowEsptoolVersion.setWidth("200px");
-        final Div divH2espToolVersion = new Div(h2EsptoolVersion,this.progressBarForShowEsptoolVersion, hr);
+        final Div divH2espToolVersion = new Div(h2EsptoolVersion, this.progressBarForShowEsptoolVersion, hr);
         divH2espToolVersion.getStyle().set(MARGIN_TOP, AUTO);
 
         final Div divEndForH2EspToolVersion = new Div(divH2espToolVersion);
@@ -331,24 +331,21 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.closeSubscribers();
-        if (attachEvent.isInitialAttach()) {
-            final UI ui = attachEvent.getUI();
-            this.initListeners();
-            this.updateH2WithEsptoolVersion(ui);
-            this.disposableSubscriberEsptoolVersionEvent = this.subscriberEsptoolVersionEvent
-                    .subscribe(esptoolVersionMessageListItemEvent -> {
-                        try {
-                            ui.access(() -> {
-                                h2EsptoolVersion.setText(esptoolVersionMessageListItemEvent.getEsptoolVersion());
-                                this.putItemEsptool();
-                                this.createToolTip(h2EsptoolVersion, esptoolVersionMessageListItemEvent.getEsptoolVersionEventEnum().getExecutableType());
-                                log.info("Subscribe EsptoolVersionEvent: {}", esptoolVersionMessageListItemEvent.getEsptoolVersion());
-                            });
-                        } catch (UIDetachedException ex) {
-                        }
-                    });
-        }
-
+        final UI ui = attachEvent.getUI();
+        this.initListeners();
+        this.updateH2WithEsptoolVersion(ui);
+        this.disposableSubscriberEsptoolVersionEvent = this.subscriberEsptoolVersionEvent
+                .subscribe(esptoolVersionMessageListItemEvent -> {
+                    try {
+                        ui.access(() -> {
+                            h2EsptoolVersion.setText(esptoolVersionMessageListItemEvent.getEsptoolVersion());
+                            this.putItemEsptool();
+                            this.createToolTip(h2EsptoolVersion, esptoolVersionMessageListItemEvent.getEsptoolVersionEventEnum().getExecutableType());
+                            log.info("Subscribe EsptoolVersionEvent: {}", esptoolVersionMessageListItemEvent.getEsptoolVersion());
+                        });
+                    } catch (UIDetachedException ex) {
+                    }
+                });
     }
 
 }
