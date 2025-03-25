@@ -13,6 +13,10 @@ vaadin-dialog-overlay.settings-content-dialog::part(content) {
   overflow: hidden;
 }
 
+vaadin-dialog-overlay.settings-content-dialog::part(backdrop) {
+   backdrop-filter: blur(1px);
+}
+
 .hr-header-settings {
   width: 100%;
   height: 3px;

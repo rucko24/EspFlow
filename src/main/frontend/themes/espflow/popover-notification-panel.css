@@ -40,3 +40,7 @@ vaadin-tabsheet.notifications {
 vaadin-message > vaadin-avatar {
     filter: var(--invert-svg);
 }
+
+vaadin-popover-overlay::part(backdrop) {
+    backdrop-filter: blur(1px);
+}
