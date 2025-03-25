@@ -7,6 +7,7 @@ import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
+import com.esp.espflow.views.hexdump.HexDumpView;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
@@ -253,6 +254,10 @@ public class MainLayout extends AppLayout {
             var itemReadFlash = new SideNavItem("Read flash/firmware", ReadFlashView.class, VaadinIcon.DOWNLOAD.create());
             Tooltip.forComponent(itemReadFlash).setText("All devices are read and displayed in a carousel");
             nav.addItem(itemReadFlash);
+        }
+
+        if(accessChecker.hasAccess(HexDumpView.class)) {
+            nav.addItem(new SideNavItem("HexDump", HexDumpView.class, VaadinIcon.GRID_H.create()));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {
