@@ -282,3 +282,7 @@ vaadin-split-layout > [slot="secondary"] {
 .black-to-white {
   filter: var(--invert-svg);
 }
+
+vaadin-confirm-dialog-overlay::part(backdrop) {
+  backdrop-filter: blur(1px);
+}
