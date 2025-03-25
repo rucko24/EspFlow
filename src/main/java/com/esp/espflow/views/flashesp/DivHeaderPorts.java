@@ -30,6 +30,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -45,6 +46,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -84,6 +86,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final EsptoolService esptoolService;
     private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final H2 h2EsptoolVersion = new H2();
+    private final ProgressBar progressBarForShowEsptoolVersion = new ProgressBar();
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
     private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
@@ -134,7 +137,10 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         hr.getStyle().set("background-size", "100% 3px, 100% 1px");
         hr.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
-        final Div divH2espToolVersion = new Div(h2EsptoolVersion, hr);
+        this.progressBarForShowEsptoolVersion.setVisible(false);
+        this.progressBarForShowEsptoolVersion.setIndeterminate(true);
+        this.progressBarForShowEsptoolVersion.setWidth("200px");
+        final Div divH2espToolVersion = new Div(h2EsptoolVersion,this.progressBarForShowEsptoolVersion, hr);
         divH2espToolVersion.getStyle().set(MARGIN_TOP, AUTO);
 
         final Div divEndForH2EspToolVersion = new Div(divH2espToolVersion);
@@ -185,19 +191,31 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      * @param ui which comes from onAttach
      */
     public void updateH2WithEsptoolVersion(final UI ui) {
-        h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
         this.putItemEsptool();
+        this.progressBarForShowEsptoolVersion.setVisible(true);
         this.esptoolService.showEsptoolVersion()
+                .delayElements(Duration.ofSeconds(5))
                 .doOnError(error -> ui.access(() -> {
                     log.error("doOnError: {}", error.getCause());
                     h2EsptoolVersion.setText(ESPTOOL_PY_NOT_FOUND);
+                    this.progressBarForShowEsptoolVersion.setVisible(false);
+                    h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
                 }))
-                .subscribe(espToolVersion -> ui.access(() -> {
-                    if (espToolVersion.contains(ESPTOOL_PY_V)) {
-                        esptoolVersionCounter.set(true);
-                    }
-                    h2EsptoolVersion.setText(espToolVersion);
-                }));
+                .doOnComplete(() -> {
+                    ui.access(() -> {
+                        this.progressBarForShowEsptoolVersion.setVisible(false);
+                        h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
+                    });
+                })
+                .subscribe(espToolVersion -> {
+                    ui.access(() -> {
+                        if (espToolVersion.contains(ESPTOOL_PY_V)) {
+                            esptoolVersionCounter.set(true);
+                        }
+                        h2EsptoolVersion.setText(espToolVersion);
+                        Animated.animate(h2EsptoolVersion, Animation.FADE_IN);
+                    });
+                });
     }
 
     private void putItemEsptool() {
@@ -241,6 +259,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     }
 
     /**
+     * This creates a tooltip to show the version of esptool.py, at the top of the tooltip
+     *
      * @param component
      * @param text
      */
