@@ -47,6 +47,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -89,6 +90,8 @@ public class MainLayout extends AppLayout {
     private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
     private final SettingsDialogView settingsDialogView;
     private final MainFooter mainFooter;
+    private Disposable disposableSubscribersMessageListItems;
+    private Disposable disposableSubscribersEsptoolVersionMessageListItems;
 
     public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
                       Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems, SettingsDialogView settingsDialogView,
@@ -325,24 +328,37 @@ public class MainLayout extends AppLayout {
         spanCircleRed.getElement().removeAttribute("theme");
     }
 
+    private void closeSubscribers() {
+        if (this.disposableSubscribersMessageListItems != null) {
+            disposableSubscribersMessageListItems.dispose();
+            disposableSubscribersMessageListItems = null;
+        }
+        if(disposableSubscribersEsptoolVersionMessageListItems != null) {
+            disposableSubscribersEsptoolVersionMessageListItems.dispose();
+            disposableSubscribersEsptoolVersionMessageListItems = null;
+        }
+    }
+
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
         this.settingsDialogView.close();
+        this.closeSubscribers();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        this.closeSubscribers();
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             //Subscription to flash_id, read_flash, write_flash events
-            this.subscribersMessageListItems
+            this.disposableSubscribersMessageListItems = this.subscribersMessageListItems
                     .subscribe(messageListItem -> {
                         this.subscribe(ui, messageListItem);
                     });
             //Subscription to esptool version events
-            this.subscribersEsptoolVersionMessageListItems
+            this.disposableSubscribersEsptoolVersionMessageListItems = this.subscribersEsptoolVersionMessageListItems
                     .subscribe(esptoolVersionMessageListItemEvent -> {
                         this.subscribe(ui, esptoolVersionMessageListItemEvent);
                     });
