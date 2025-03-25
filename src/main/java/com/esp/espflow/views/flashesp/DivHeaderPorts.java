@@ -46,7 +46,6 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
-import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -193,7 +192,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         this.putItemEsptool();
         this.progressBarForShowEsptoolVersion.setVisible(true);
         this.esptoolService.showEsptoolVersion()
-                .delayElements(Duration.ofSeconds(5))
                 .doOnError(error -> ui.access(() -> {
                     log.error("doOnError: {}", error.getCause());
                     h2EsptoolVersion.setText(ESPTOOL_PY_NOT_FOUND);
