@@ -132,8 +132,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
         final Hr hr = new Hr();
         hr.setHeight("6px");
-        hr.getStyle().set("background-image", "linear-gradient(#e0260b, #e0260b),\n" +
-                "        linear-gradient(#e0260b, #e0260b)");
+        hr.getStyle().set("background-image", "linear-gradient(#e0260b, #e0260b), linear-gradient(#e0260b, #e0260b)");
         hr.getStyle().set("background-size", "100% 3px, 100% 1px");
         hr.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
