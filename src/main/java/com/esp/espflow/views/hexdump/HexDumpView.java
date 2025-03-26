@@ -114,10 +114,11 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
     private void configureGrid() {
 //        this.grid.setColumnReorderingAllowed(true);
+        this.grid.setWidthFull();
         this.grid.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_ROW_STRIPES);
         this.grid.setEmptyStateText("No .bin has been loaded for analysis.");
-        grid.getColumns().forEach(e -> e.setResizable(Boolean.TRUE));
-        grid.getColumns().forEach(e -> e.setComparator(Comparator.comparing(Objects::toString)));
+        this.grid.getColumns().forEach(e -> e.setResizable(Boolean.TRUE));
+        this.grid.getColumns().forEach(e -> e.setComparator(Comparator.comparing(Objects::toString)));
     }
 
 
