@@ -22,7 +22,7 @@ public class HexDumpService {
             System.arraycopy(data, offset, chunk, 0, chunk.length);
 
             // 1. Offset (ej. 00000000)
-            final String offsetStr = String.format("%08X", offset);
+            final String offsetStr = String.format("%08X", offset).concat(":");
 
             // 2. Rellenar hexBytes[0..15], usando "" si no hay más bytes
             final String[] hexBytes = new String[bytesPerLine];

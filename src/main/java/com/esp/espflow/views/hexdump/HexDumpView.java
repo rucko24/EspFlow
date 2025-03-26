@@ -8,6 +8,7 @@ import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.upload.Upload;
@@ -27,7 +28,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
@@ -53,6 +56,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
     private void init() {
         super.setSizeFull();
         this.initListeners();
+        this.configureGrid();
         super.add(upload, grid);
         Animated.animate(this, Animated.Animation.FADE_IN);
     }
@@ -77,8 +81,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
             // 4. Agregar columna de Offset
             grid.addColumn(HexDumpDTO::getOffset)
-                    .setHeader("Offset")
-                    .setAutoWidth(true);
+                    .setHeader("Offset");
 
             // 5. Agregar 16 columnas, una para cada byte en hex
             //    Etiquetamos la cabecera con el índice en hex (0..F)
@@ -93,8 +96,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
             // 6. Agregar columna de ASCII
             grid.addColumn(HexDumpDTO::getAscii)
-                    .setHeader("ASCII")
-                    .setAutoWidth(true);
+                    .setHeader("ASCII");
 
             // 7. Asignar ítems y añadir el grid
             grid.setItems(hexLines);
@@ -108,6 +110,14 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         Tooltip.forComponent(upload).setText("Drop executable here!");
         this.i18N(upload);
 
+    }
+
+    private void configureGrid() {
+//        this.grid.setColumnReorderingAllowed(true);
+        this.grid.addThemeVariants(GridVariant.LUMO_COMPACT, GridVariant.LUMO_ROW_STRIPES);
+        this.grid.setEmptyStateText("No .bin has been loaded for analysis.");
+        grid.getColumns().forEach(e -> e.setResizable(Boolean.TRUE));
+        grid.getColumns().forEach(e -> e.setComparator(Comparator.comparing(Objects::toString)));
     }
 
 
