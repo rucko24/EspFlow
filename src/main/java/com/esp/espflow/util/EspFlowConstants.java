@@ -87,6 +87,7 @@ public class EspFlowConstants {
     public static final String JAVA_IO_USER_HOME_DIR_OS = System.getProperty("user.home");
     public static final String ESPFLOW_DIR = "/.espflow/1.0.0/";
     public static final String CUSTOM_ESPTOOL = "esptool/";
+    public static final String FLASH_HEX_DUMP_ANALIZE = "flash-hex-dump-analize/";
 
     public static final String NO_DEVICES_SHOWN = "No devices shown!";
     public static final String LOADING = "Loading...";
