@@ -1,6 +1,7 @@
 package com.esp.espflow.views;
 
 import com.esp.espflow.entity.User;
+import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
 import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
@@ -90,20 +91,26 @@ public class MainLayout extends AppLayout {
     private final AccessAnnotationChecker accessChecker;
     private final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems;
     private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
+    private final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent;
     private final SettingsDialogView settingsDialogView;
     private final MainFooter mainFooter;
     private Disposable disposableSubscribersMessageListItems;
     private Disposable disposableSubscribersEsptoolVersionMessageListItems;
+    private Disposable disposableSubscribersEspflowMessageEvent;
 
-    public MainLayout(AuthenticatedUser authenticatedUser, AccessAnnotationChecker accessChecker,
-                      Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems, SettingsDialogView settingsDialogView,
-                      Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems,
+    public MainLayout(final AuthenticatedUser authenticatedUser,
+                      final AccessAnnotationChecker accessChecker,
+                      final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems,
+                      final SettingsDialogView settingsDialogView,
+                      final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems,
+                      final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent,
                       final MainFooter mainFooter) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
         this.subscribersMessageListItems = subscribersMessageListItems;
         this.settingsDialogView = settingsDialogView;
         this.subscribersEsptoolVersionMessageListItems = subscribersEsptoolVersionMessageListItems;
+        this.subscribersEspFlowMessageEvent = subscribersEspFlowMessageEvent;
         this.mainFooter = mainFooter;
 
         setPrimarySection(Section.DRAWER);
@@ -257,7 +264,7 @@ public class MainLayout extends AppLayout {
             nav.addItem(itemReadFlash);
         }
 
-        if(accessChecker.hasAccess(HexDumpView.class)) {
+        if (accessChecker.hasAccess(HexDumpView.class)) {
             nav.addItem(new SideNavItem("HexDump", HexDumpView.class, SvgFactory.createIconFromSvg(TABLE_SVG, SIZE_25_PX, null)));
         }
 
@@ -339,9 +346,13 @@ public class MainLayout extends AppLayout {
             disposableSubscribersMessageListItems.dispose();
             disposableSubscribersMessageListItems = null;
         }
-        if(disposableSubscribersEsptoolVersionMessageListItems != null) {
+        if (disposableSubscribersEsptoolVersionMessageListItems != null) {
             disposableSubscribersEsptoolVersionMessageListItems.dispose();
             disposableSubscribersEsptoolVersionMessageListItems = null;
+        }
+        if(disposableSubscribersEspflowMessageEvent != null) {
+            disposableSubscribersEspflowMessageEvent.dispose();
+            disposableSubscribersEspflowMessageEvent = null;
         }
     }
 
@@ -356,19 +367,21 @@ public class MainLayout extends AppLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.closeSubscribers();
-        if (attachEvent.isInitialAttach()) {
-            final UI ui = attachEvent.getUI();
-            //Subscription to flash_id, read_flash, write_flash events
-            this.disposableSubscribersMessageListItems = this.subscribersMessageListItems
-                    .subscribe(messageListItem -> {
-                        this.subscribe(ui, messageListItem);
-                    });
-            //Subscription to esptool version events
-            this.disposableSubscribersEsptoolVersionMessageListItems = this.subscribersEsptoolVersionMessageListItems
-                    .subscribe(esptoolVersionMessageListItemEvent -> {
-                        this.subscribe(ui, esptoolVersionMessageListItemEvent);
-                    });
-        }
+        final UI ui = attachEvent.getUI();
+        //Subscription to flash_id, read_flash, write_flash events
+        this.disposableSubscribersMessageListItems = this.subscribersMessageListItems
+                .subscribe(messageListItem -> {
+                    this.subscribe(ui, messageListItem);
+                });
+        //Subscription to esptool version events
+        this.disposableSubscribersEsptoolVersionMessageListItems = this.subscribersEsptoolVersionMessageListItems
+                .subscribe(esptoolVersionMessageListItemEvent -> {
+                    this.subscribe(ui, esptoolVersionMessageListItemEvent);
+                });
+        this.subscribersEspFlowMessageEvent
+                .subscribe(espflowMessageListItemEvent -> {
+                    this.subscribe(ui, espflowMessageListItemEvent);
+                });
 
     }
 
