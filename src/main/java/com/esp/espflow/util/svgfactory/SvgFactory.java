@@ -6,6 +6,7 @@ import com.vaadin.flow.server.StreamResource;
 
 import java.util.Objects;
 
+import static com.esp.espflow.util.EspFlowConstants.COPY_ALT_SVG;
 import static com.esp.espflow.util.EspFlowConstants.FREE_BSD_ICON;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_SVG_ICONS;
 import static com.esp.espflow.util.EspFlowConstants.LINUX_ICON;
@@ -40,8 +41,8 @@ public class SvgFactory {
      */
     public static SvgIcon createCopyButtonFromSvg() {
         //copy-alt.svg
-        final StreamResource iconResource = new StreamResource("copy-alt.svg",
-                () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + "copy-alt.svg"));
+        final StreamResource iconResource = new StreamResource(COPY_ALT_SVG,
+                () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + COPY_ALT_SVG));
         final SvgIcon icon = new SvgIcon(iconResource);
         icon.setSize("25px");
         return icon;

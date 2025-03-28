@@ -373,7 +373,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      */
     private Component incorrectFlashSize() {
         final H2 titleIncorrectSizeAddress = new H2("Incorrect size address");
-        titleIncorrectSizeAddress.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
+        titleIncorrectSizeAddress.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         titleIncorrectSizeAddress.setId(titleIncorrectSizeAddress.getText().replace(" ", "-").toLowerCase());
 
         final Component descriptionIncorrectFinalFlashSize = showImageWithInformationAboutToggleButton();
@@ -381,7 +381,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         final Hr separator = this.createSeparator();
 
         final H2 titlePermissionDenied = new H2("Port failure: E.g. '/dev/ttyUSB2'");
-        titlePermissionDenied.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
+        titlePermissionDenied.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         titlePermissionDenied.setId(titlePermissionDenied.getText().replace(" ", "-").toLowerCase());
 
         final Div divPortFailure = new Div("Port failure: /dev/ttyUSB2");
@@ -439,13 +439,13 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         final Icon iconArrowRight = VaadinIcon.ARROW_RIGHT.create();
         Tooltip.forComponent(iconArrowRight).setText("Enable the toggle button!!!");
         iconArrowRight.setSize("30px");
-        Animated.animate(iconArrowRight, Animated.Animation.HEART_BEAT, INFINITE);
+        Animated.animate(iconArrowRight, Animation.HEART_BEAT, INFINITE);
 
         final HorizontalLayout row = new HorizontalLayout(iconArrowRight, image);
         row.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        row.setVerticalComponentAlignment(FlexComponent.Alignment.END, iconArrowRight);
+        row.setVerticalComponentAlignment(Alignment.END, iconArrowRight);
         content.add(row);
-        content.setHorizontalComponentAlignment(FlexComponent.Alignment.CENTER, row);
+        content.setHorizontalComponentAlignment(Alignment.CENTER, row);
 
         return content;
     }
@@ -469,7 +469,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      */
     private Component createDownloadFlashContent() {
         final H2 selectingTheFirmwareTitle = new H2("Read flash and Download flash backup");
-        selectingTheFirmwareTitle.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
+        selectingTheFirmwareTitle.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         selectingTheFirmwareTitle.setId(selectingTheFirmwareTitle.getText().replace(" ", "-").toLowerCase());
 
         final Button readFlashButton = new Button("Read flash");

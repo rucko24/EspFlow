@@ -14,8 +14,8 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 public class Item extends Layout {
 
     public Item(String text, LineAwesomeIcon icon) {
-        setAlignItems(Layout.AlignItems.CENTER);
-        setGap(Layout.Gap.SMALL);
+        setAlignItems(AlignItems.CENTER);
+        setGap(Gap.SMALL);
 
         SvgIcon svgIcon = icon.create();
         svgIcon.addClassNames(IconSize.SMALL);
@@ -23,8 +23,8 @@ public class Item extends Layout {
     }
 
     public Item(String text, LumoIcon icon) {
-        setAlignItems(Layout.AlignItems.CENTER);
-        setGap(Layout.Gap.SMALL);
+        setAlignItems(AlignItems.CENTER);
+        setGap(Gap.SMALL);
 
         Icon i = icon.create();
         i.addClassNames(IconSize.SMALL);

@@ -314,9 +314,9 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
 
         this.esptoolLayout.add(divCombo);
         this.esptoolLayout.addClassNames(LumoUtility.Margin.Bottom.XSMALL, LumoUtility.Margin.Top.MEDIUM);
-        this.esptoolLayout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, divCombo);
-        this.esptoolLayout.setAlignItems(Layout.AlignItems.CENTER);
-        this.esptoolLayout.setGap(Layout.Gap.SMALL);
+        this.esptoolLayout.setColumnSpan(ColumnSpan.COLUMN_SPAN_FULL, divCombo);
+        this.esptoolLayout.setAlignItems(AlignItems.CENTER);
+        this.esptoolLayout.setGap(Gap.SMALL);
 
         final Hr separator = new Hr();
         separator.setWidthFull();
@@ -331,12 +331,12 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
 
         super.add(title, description, description2, esptoolLayout, separator, textFieldHash);
         // Viewport < 1024px
-        super.setFlexDirection(Layout.FlexDirection.COLUMN);
+        super.setFlexDirection(FlexDirection.COLUMN);
         // Viewport > 1024px
-        super.setDisplay(Breakpoint.LARGE, Layout.Display.GRID);
-        super.setColumns(Layout.GridColumns.COLUMNS_2);
-        super.setColumnGap(Layout.Gap.MEDIUM);
-        super.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, title, description, description2, esptoolLayout,
+        super.setDisplay(Breakpoint.LARGE, Display.GRID);
+        super.setColumns(GridColumns.COLUMNS_2);
+        super.setColumnGap(Gap.MEDIUM);
+        super.setColumnSpan(ColumnSpan.COLUMN_SPAN_FULL, title, description, description2, esptoolLayout,
                 separator, textFieldHash);
 
         final Scroller scroller = new Scroller(this);

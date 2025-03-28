@@ -346,11 +346,11 @@ public class MainLayout extends AppLayout {
             disposableSubscribersMessageListItems.dispose();
             disposableSubscribersMessageListItems = null;
         }
-        if (disposableSubscribersEsptoolVersionMessageListItems != null) {
+        if (this.disposableSubscribersEsptoolVersionMessageListItems != null) {
             disposableSubscribersEsptoolVersionMessageListItems.dispose();
             disposableSubscribersEsptoolVersionMessageListItems = null;
         }
-        if(disposableSubscribersEspflowMessageEvent != null) {
+        if(this.disposableSubscribersEspflowMessageEvent != null) {
             disposableSubscribersEspflowMessageEvent.dispose();
             disposableSubscribersEspflowMessageEvent = null;
         }

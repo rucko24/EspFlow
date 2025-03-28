@@ -8,7 +8,7 @@ import lombok.Value;
 public class HexDumpDTO {
 
     String offset;
-    String[] hexBytes; // 16 columnas para los bytes en hex
+    String[] hexBytes; // 16 columns for bytes in hex
     String ascii;
 
 }

@@ -412,7 +412,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
      */
     private Component createFlashIdContent() {
         final H2 titlePortScanning = new H2("Port scanning");
-        titlePortScanning.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
+        titlePortScanning.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         titlePortScanning.setId(titlePortScanning.getText().replace(" ", "-").toLowerCase());
 
         final Button scanButton = new Button(VaadinIcon.REFRESH.create());
@@ -429,7 +429,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
         comboImage.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
 
         final H2 titlePlayButton = new H2("Using the play button");
-        titlePlayButton.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
+        titlePlayButton.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         titlePlayButton.setId(titlePlayButton.getText().replace(" ", "-").toLowerCase());
 
         final Button playButton = new Button(VaadinIcon.PLAY.create());
@@ -447,7 +447,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
         final Hr separator = this.createSeparator();
 
         final H2 titlePermissionDenied = new H2("Permission denied E.g. port: '/dev/ttyUSB2'");
-        titlePermissionDenied.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
+        titlePermissionDenied.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         titlePermissionDenied.setId(titlePermissionDenied.getText().replace(" ", "-").toLowerCase());
         final Button writePasswordButton = new Button(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
         writePasswordButton.getIcon().addClassName(BLACK_TO_WHITE_ICON);
@@ -509,7 +509,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
      */
     private Component createWriteFlashContent() {
         final H2 selectingTheFirmwareTitle = new H2("Selecting the firmware");
-        selectingTheFirmwareTitle.addClassNames(LumoUtility.FontSize.XLARGE, LumoUtility.Margin.Top.MEDIUM);
+        selectingTheFirmwareTitle.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         selectingTheFirmwareTitle.setId(selectingTheFirmwareTitle.getText().replace(" ", "-").toLowerCase());
 
         final Paragraph description = new Paragraph();

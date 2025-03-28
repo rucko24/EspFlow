@@ -24,27 +24,22 @@ public class HexDumpService {
             // 1. Offset (ej. 00000000)
             final String offsetStr = String.format("%08X", offset).concat(":");
 
-            // 2. Rellenar hexBytes[0..15], usando "" si no hay más bytes
+            // 2. Fill hexBytes[0..15], using "" if there are no more bytes
             final String[] hexBytes = new String[bytesPerLine];
             for (int i = 0; i < bytesPerLine; i++) {
                 if (i < chunk.length) {
-                    // Convertir el byte a hex con 2 dígitos
+                    // Convert byte to hex with 2 digits
                     String hexValue = hexFormat.toHexDigits(chunk[i]);
-                    // hexValue vendrá en minúsculas si no usas withUpperCase(); 
-                    // Con withUpperCase() se ve "4A" en vez de "4a"
-                    // Asegúrate de ponerlo en mayúsculas si lo deseas
                     hexBytes[i] = hexValue.toUpperCase();
                 } else {
-                    // Si el chunk es menor a 16 bytes, rellena con "" o "  "
+                    // If the chunk is less than 16 bytes, fill with "" or " ".
                     hexBytes[i] = "";
                 }
             }
 
-            // 3. ASCII (punto para no imprimibles)
-            //    Ojo: chunk.length podría ser < 16, pero eso no afecta a la conversión a ASCII
+            // Note: chunk.length could be < 16, but this does not affect the ASCII conversion
             final String ascii = new String(chunk).replaceAll("[^\\x20-\\x7E]", ".");
 
-            // 4. Crear el DTO
             final HexDumpDTO dto = HexDumpDTO.builder()
                     .offset(offsetStr)
                     .hexBytes(hexBytes)

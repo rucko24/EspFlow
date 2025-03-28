@@ -286,3 +286,13 @@ vaadin-split-layout > [slot="secondary"] {
 vaadin-confirm-dialog-overlay::part(backdrop) {
   backdrop-filter: blur(1px);
 }
+
+vaadin-context-menu-item.context-menu-item-grid::part(checkmark)::before {
+  display: none;
+}
+
+/* some indent for the content */
+vaadin-context-menu-item.context-menu-item-grid {
+  padding-left: var(--lumo-space-s);
+  justify-content: flex-start;
+}
