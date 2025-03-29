@@ -58,6 +58,7 @@ import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_INACTIVE;
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
+import static com.esp.espflow.util.EspFlowConstants.CONTINUE;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_ICON;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_CUSTOM;
@@ -193,7 +194,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
 
         step3.addClickListener(event -> {
             this.sNext = STEP3;
-            this.next.setText("Continue...");
+            this.next.setText(CONTINUE);
             this.previous.setVisible(true);
             this.mainContent.removeAll();
             this.mainContent.add(createWriteFlashContent());
@@ -214,7 +215,9 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
     private void configureFooter() {
         this.previous.setVisible(false);
         this.next.addClickListener(event -> {
-            next.setText("Next");
+            if(!next.getText().contains(CONTINUE)) {
+                next.setText("Next");
+            }
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
                     ui.getPage().getHistory().replaceState(null, url.getPath());
@@ -241,7 +244,7 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
                 avatar3.addClassName(AVATAR_STEP_ACTIVE);
                 Animated.removeAnimations(previous);
                 sNext = STEP3;
-                next.setText("Continue...");
+                next.setText(CONTINUE);
             } else if (sNext.equals("step3")) {
                 sNext = STEP1;
                 super.close();
