@@ -11,6 +11,8 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -48,6 +50,7 @@ import reactor.core.publisher.Sinks;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -96,14 +99,14 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         this.initListeners();
         this.configureUpload();
 
-        final HorizontalLayout row = new HorizontalLayout(searchTextField, filterComboBox);
+        final HorizontalLayout filterRow = this.configureFilterRow();
         final Component componentGrid = this.configureGrid();
 
-        super.add(upload, row, componentGrid);
+        super.add(upload, filterRow, componentGrid);
         Animated.animate(this, Animated.Animation.FADE_IN);
 
-        if(!hexDumpDTOList.isEmpty()) {
-            this.gridListDataView = this.grid.setItems(hexDumpDTOList);
+        if (!this.hexDumpDTOList.isEmpty()) {
+            this.gridListDataView = this.grid.setItems(this.hexDumpDTOList);
         }
     }
 
@@ -119,8 +122,8 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
             } catch (IOException e) {
                 log.error("readAllBytes failed ");
             }
-            this.hexDumpDTOList = List.copyOf(this.hexDumpService.generateHexDump(fileBytes));
-            this.gridListDataView = this.grid.setItems(hexDumpDTOList);
+            this.hexDumpDTOList = new ArrayList<>(this.hexDumpService.generateHexDump(fileBytes));
+            this.gridListDataView = this.grid.setItems(this.hexDumpDTOList);
             if (this.gridListDataView != null) {
                 new HexDumpFilter(this.gridListDataView, searchTextField, filterComboBox);
             }
@@ -137,6 +140,25 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
         Tooltip.forComponent(upload).setText("Drop .bin here!");
         this.i18N(upload);
+    }
+
+    private HorizontalLayout configureFilterRow() {
+        final HorizontalLayout row = new HorizontalLayout(searchTextField, filterComboBox);
+
+        final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
+        buttonClearGrid.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonClearGrid.setTooltipText("Clear grid");
+        buttonClearGrid.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        buttonClearGrid.addClickListener(event -> {
+            if (this.gridListDataView != null) {
+                hexDumpDTOList.clear();
+                this.grid.setItems(List.of());
+                this.upload.clearFileList();
+            }
+        });
+        row.add(buttonClearGrid);
+
+        return row;
     }
 
     /**
