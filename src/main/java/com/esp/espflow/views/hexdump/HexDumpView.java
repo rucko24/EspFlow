@@ -70,7 +70,6 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @SpringComponent
 @PageTitle("HexDump")
 @Route(value = "hex-dump-viewer", layout = MainLayout.class)
-//@PreserveOnRefresh
 @JsModule("./scripts/copy_to_clipboard.js")
 @CssImport("./styles/hexdump-grid/grid-message-when-empty.css")
 @RolesAllowed("ADMIN")
