@@ -40,9 +40,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Sinks;
@@ -65,7 +63,6 @@ import static com.esp.espflow.util.EspFlowConstants.TABLE_SVG;
 import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 
 @Log4j2
-@RequiredArgsConstructor
 @UIScope
 @SpringComponent
 @PageTitle("HexDump")
@@ -88,10 +85,13 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
     private final ComboBox<String> filterComboBox = new ComboBox<>();
 
     private GridListDataView<HexDumpDTO> gridListDataView;
-    private List<HexDumpDTO> hexDumpDTOList = new CopyOnWriteArrayList<>();
+    private static List<HexDumpDTO> hexDumpDTOList = new CopyOnWriteArrayList<>();
 
-    @PostConstruct
-    private void init() {
+    public HexDumpView(final HexDumpService hexDumpService,
+                       final Sinks.Many<EspflowMessageListItemEvent> publisher) {
+        this.hexDumpService = hexDumpService;
+        this.publisher = publisher;
+
         super.setSizeFull();
         this.initListeners();
         this.configureUpload();
@@ -101,12 +101,15 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
         super.add(upload, row, componentGrid);
         Animated.animate(this, Animated.Animation.FADE_IN);
+
+        if(!hexDumpDTOList.isEmpty()) {
+            this.gridListDataView = this.grid.setItems(hexDumpDTOList);
+        }
     }
 
     private void initListeners() {
 
         this.upload.addSucceededListener(event -> {
-            this.upload.clearFileList();
             final String initCustomFileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE).concat(event.getFileName());
             log.info("addSucceededListener flash-hex-dump-analize/ {}", initCustomFileName);
             this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE), event.getFileName());
@@ -149,7 +152,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
     private Component configureGrid() {
 
-        registerScrollEventListener();
+        this.registerScrollEventListener();
 
         super.addClassName("grid-message-example");
 
@@ -167,7 +170,8 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
         this.grid.addColumn(HexDumpDTO::getAscii)
                 .setKey("ascii")
-                .setHeader("Ascii");
+                .setAutoWidth(true)
+                .setHeader("Ascii/Text");
 
         this.grid.setWidthFull();
         this.grid.addClassName("grid");
@@ -302,7 +306,6 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         }
     }
 
-
     private void registerScrollEventListener() {
         // grid._firstVisibleIndex is not public api of the vaadin grid. I hope this will not be
         // removed.
@@ -332,7 +335,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-        List<String> index = beforeEnterEvent.getLocation().getQueryParameters().getParameters().get(INDEX_PARAM_NAME);
+        final List<String> index = beforeEnterEvent.getLocation().getQueryParameters().getParameters().get(INDEX_PARAM_NAME);
         if (index != null && index.size() > 0) {
             grid.scrollToIndex(Integer.parseInt(index.get(0)));
         }

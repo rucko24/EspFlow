@@ -10,6 +10,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Service
 public class HexDumpService {
 
+    private static final String NON_PRINTABLE_BYTES = "[^\\x20-\\x7E]";
+
     public List<HexDumpDTO> generateHexDump(byte[] data) {
         final List<HexDumpDTO> lines = new CopyOnWriteArrayList<>();
         final HexFormat hexFormat = HexFormat.of().withUpperCase();
@@ -29,8 +31,7 @@ public class HexDumpService {
             for (int i = 0; i < bytesPerLine; i++) {
                 if (i < chunk.length) {
                     // Convert byte to hex with 2 digits
-                    String hexValue = hexFormat.toHexDigits(chunk[i]);
-                    hexBytes[i] = hexValue.toUpperCase();
+                    hexBytes[i] = hexFormat.toHexDigits(chunk[i]);
                 } else {
                     // If the chunk is less than 16 bytes, fill with "" or " ".
                     hexBytes[i] = "";
@@ -38,7 +39,7 @@ public class HexDumpService {
             }
 
             // Note: chunk.length could be < 16, but this does not affect the ASCII conversion
-            final String ascii = new String(chunk).replaceAll("[^\\x20-\\x7E]", ".");
+            final String ascii = new String(chunk).replaceAll(NON_PRINTABLE_BYTES, ".");
 
             final HexDumpDTO dto = HexDumpDTO.builder()
                     .offset(offsetStr)
