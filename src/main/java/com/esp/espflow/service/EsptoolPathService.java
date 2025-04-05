@@ -2,7 +2,7 @@ package com.esp.espflow.service;
 
 import com.esp.espflow.entity.dto.EsptoolExecutableDto;
 import com.esp.espflow.enums.GetOsName;
-import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
+import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import com.esp.espflow.util.IMakeExecutable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -20,7 +20,7 @@ import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_TEMPORAL_DIR_OS;
 @RequiredArgsConstructor
 public class EsptoolPathService implements IMakeExecutable {
 
-    private final EsptoolExecutableServiceImpl esptoolExecutableServiceImpl;
+    private final EsptoolExecutableService esptoolExecutableService;
     private String esptoolPath = StringUtils.EMPTY;
 
     /**
@@ -30,7 +30,7 @@ public class EsptoolPathService implements IMakeExecutable {
      */
     public String esptoolPath() {
 
-        this.esptoolExecutableServiceImpl.findByIsSelectedToTrue()
+        this.esptoolExecutableService.findByIsSelectedToTrue()
                 .ifPresentOrElse(esptoolBundleDto -> {
                     if (esptoolBundleDto.isBundled()) {
                         this.esptoolPath = this.bundlePath();
@@ -60,7 +60,7 @@ public class EsptoolPathService implements IMakeExecutable {
         final boolean isbundled = esptoolExecutableDto.isBundled();
         final String esptoolVersion = esptoolExecutableDto.esptoolVersion();
 
-        this.esptoolExecutableServiceImpl.findByAbsolutePathEsptoolAndIsBundleAndVersion(absolutePath, isbundled, esptoolVersion)
+        this.esptoolExecutableService.findByAbsolutePathEsptoolAndIsBundleAndVersion(absolutePath, isbundled, esptoolVersion)
                 .ifPresentOrElse(esptoolBundleDto -> {
                     if (esptoolBundleDto.isBundled()) {
                         this.esptoolPath = this.bundlePath();

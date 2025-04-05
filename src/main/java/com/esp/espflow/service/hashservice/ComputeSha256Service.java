@@ -3,7 +3,7 @@ package com.esp.espflow.service.hashservice;
 import com.esp.espflow.configuration.ComputeDigestAlgorithmConfiguration;
 import com.esp.espflow.entity.dto.EsptoolSha256Dto;
 import com.esp.espflow.exceptions.CanNotComputeSha256Exception;
-import com.esp.espflow.service.respository.impl.EsptoolSha256ServiceImpl;
+import com.esp.espflow.service.respository.impl.EsptoolSha256Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ import static com.esp.espflow.util.EspFlowConstants.CAN_NOT_COMPUTE_SHA_256;
 public class ComputeSha256Service {
 
     private final ComputeDigestAlgorithmConfiguration computeDigestAlgorithmConfiguration;
-    private final EsptoolSha256ServiceImpl esptool256Service;
+    private final EsptoolSha256Service esptool256Service;
 
     /**
      * First dir /home/user/.espflow/1.0.0/esptool/esptool.py

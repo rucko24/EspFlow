@@ -17,6 +17,8 @@ import reactor.core.scheduler.Schedulers;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -110,6 +112,38 @@ public final class ProcessCommandsInternals {
     }
 
     /**
+     * Used for firmware reading
+     *
+     * @param inputPath a input file to process
+     * @return A {@link Flux}
+     */
+    public Flux<byte[]> processInputPath(final Path inputPath) {
+        return Flux.defer(() -> this.processInputStream(inputPath))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(this::mappingDataBufferToByteArray)
+                .onErrorResume(throwable -> {
+                    log.error("onErrorResume: {}", throwable.getMessage());
+                    return Mono.error(new CommandNotFoundException("can read this .bin file"));
+                });
+    }
+
+    /**
+     *  The spring DataBufferUtils is used to read the inputStream coming from the shell, with a buffer of 8192 kbs.
+     *
+     * @param inputPath a input file to process
+     *
+     * @return A {@link Flux}
+     */
+    private Flux<DataBuffer> processInputStream(final Path inputPath) {
+        try {
+            return DataBufferUtils.readInputStream(() -> Files.newInputStream(inputPath), DefaultDataBufferFactory.sharedInstance, FileCopyUtils.BUFFER_SIZE);
+        } catch (Exception ex) {
+            log.error("Error to process inputstream with DataBufferUtils {}", ex.getMessage());
+            return Flux.error(ex);
+        }
+    }
+
+    /**
      *
      * This method can also read the DataBuffer but, it does not give the possibility to decode so that it can be read
      * line by line if you want to read line by line see processInputStreamLineByLine method
@@ -130,6 +164,13 @@ public final class ProcessCommandsInternals {
             }
         }
         return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    private byte[] mappingDataBufferToByteArray(final DataBuffer dataBuffer) {
+        final byte[] bytes = new byte[dataBuffer.readableByteCount()];
+        dataBuffer.read(bytes);
+        DataBufferUtils.release(dataBuffer);
+        return bytes;
     }
 
     @SuppressWarnings("unused")

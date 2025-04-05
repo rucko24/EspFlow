@@ -5,7 +5,7 @@ import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.ComPortService;
 import com.esp.espflow.service.CommandService;
 import com.esp.espflow.service.EsptoolService;
-import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
+import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.svgfactory.SvgFactory;
@@ -89,7 +89,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
     private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
-    private final EsptoolExecutableServiceImpl esptoolExecutableServiceImpl;
+    private final EsptoolExecutableService esptoolExecutableService;
     private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
     private Disposable disposableSubscriberEsptoolVersionEvent;
 
@@ -217,7 +217,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
     private void putItemEsptool() {
         contextMenu.removeAll();
-        esptoolExecutableServiceImpl.findByIsSelectedToTrue()
+        esptoolExecutableService.findByIsSelectedToTrue()
                 .ifPresent(esptoolExecutableDto -> {
                     final EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum loadedType = esptoolExecutableDto.isBundled()
                             ? EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED
@@ -225,11 +225,11 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     this.createToolTip(h2EsptoolVersion, loadedType.getExecutableType());
                 });
 
-        esptoolExecutableServiceImpl.findAll()
+        esptoolExecutableService.findAll()
                 .forEach(esptoolExecutableDto -> {
                     final MenuItem item = contextMenu.addItem(this.createIconItemEsptoolVersionContext(esptoolExecutableDto.esptoolVersion()), menuItemClickEvent -> {
                         //This version of esptool.py will be used and selected via context
-                        this.esptoolExecutableServiceImpl.selectThisEsptoolExecutableVersion(esptoolExecutableDto);
+                        this.esptoolExecutableService.selectThisEsptoolExecutableVersion(esptoolExecutableDto);
                         this.h2EsptoolVersion.setText(esptoolExecutableDto.esptoolVersion());
                         final EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum loadedType = esptoolExecutableDto.isBundled()
                                 ? EsptoolVersionMessageListItemEvent.EsptoolVersionEventEnum.BUNDLED

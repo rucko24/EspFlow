@@ -53,8 +53,8 @@ class WizardEspServiceTest {
         assertThatCode(() -> wizardEspService.saveAll(List.of(wizardFlashViewDto, wizardReadFlashViewDto)))
                 .doesNotThrowAnyException();
 
-        verify(repository, times(1)).save(entityReadViewToReturn);
-        verify(repository, times(1)).save(entityFlashViewToReturn);
+        verify(repository, times(2)).save(entityReadViewToReturn);
+        verify(repository, times(2)).save(entityFlashViewToReturn);
         verifyNoMoreInteractions(repository);
     }
 

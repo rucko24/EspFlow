@@ -1,8 +1,9 @@
 package com.esp.espflow.views.hexdump;
 
-import com.esp.espflow.entity.dto.HexDumpDTO;
+import com.esp.espflow.entity.dto.HexDumpDto;
 import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
-import com.esp.espflow.service.HexDumpService;
+import com.esp.espflow.service.HexDumpGeneratorService;
+import com.esp.espflow.service.respository.impl.HexDumpService;
 import com.esp.espflow.util.CreateCustomDirectory;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
@@ -13,7 +14,6 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.ColumnRendering;
@@ -28,6 +28,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
@@ -42,18 +43,21 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
 import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.vaadin.firitin.components.grid.PagingGrid;
 import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_GRID;
@@ -73,28 +77,28 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @JsModule("./scripts/copy_to_clipboard.js")
 @CssImport("./styles/hexdump-grid/grid-message-when-empty.css")
 @RolesAllowed("ADMIN")
+@RequiredArgsConstructor
 public class HexDumpView extends VerticalLayout implements CreateCustomDirectory, BeforeEnterObserver {
 
     private static final int DEBOUNCE_MS = 500;
     private static final String INDEX_PARAM_NAME = "i";
 
+    private final HexDumpGeneratorService hexDumpGeneratorService;
     private final HexDumpService hexDumpService;
     private final Sinks.Many<EspflowMessageListItemEvent> publisher;
     private final Upload upload = new Upload();
     private final FileBuffer buffer = new FileBuffer();
-    private final Grid<HexDumpDTO> grid = new Grid<>();
+    private final PagingGrid<HexDumpDto> grid = new PagingGrid<>();
     private final TextField searchTextField = new TextField();
-    private final ComboBox<String> filterComboBox = new ComboBox<>();
+    private final IntegerField setRowNumbersField = new IntegerField();
 
-    private GridListDataView<HexDumpDTO> gridListDataView;
-    private static List<HexDumpDTO> hexDumpDTOList = new CopyOnWriteArrayList<>();
+    private GridListDataView<HexDumpDto> gridListDataView;
 
-    public HexDumpView(final HexDumpService hexDumpService,
-                       final Sinks.Many<EspflowMessageListItemEvent> publisher) {
-        this.hexDumpService = hexDumpService;
-        this.publisher = publisher;
-
+    @PostConstruct
+    public void postConstruct() {
         super.setSizeFull();
+        super.addClassName("grid-message-example");
+
         this.initListeners();
         this.configureUpload();
 
@@ -104,9 +108,8 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         super.add(upload, filterRow, componentGrid);
         Animated.animate(this, Animated.Animation.FADE_IN);
 
-        if (!this.hexDumpDTOList.isEmpty()) {
-            this.gridListDataView = this.grid.setItems(this.hexDumpDTOList);
-        }
+        this.addPaginationOnGrid(StringUtils.EMPTY);
+
     }
 
     private void initListeners() {
@@ -121,11 +124,11 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
             } catch (IOException e) {
                 log.error("readAllBytes failed ");
             }
-            this.hexDumpDTOList = new ArrayList<>(this.hexDumpService.generateHexDump(fileBytes));
-            this.gridListDataView = this.grid.setItems(this.hexDumpDTOList);
-            if (this.gridListDataView != null) {
-                new HexDumpFilter(this.gridListDataView, searchTextField, filterComboBox);
-            }
+
+            this.hexDumpGeneratorService.generateHexDump(fileBytes);
+
+            this.addPaginationOnGrid(StringUtils.EMPTY);
+
             this.publisher.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
         });
 
@@ -142,15 +145,15 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
     }
 
     private HorizontalLayout configureFilterRow() {
-        final HorizontalLayout row = new HorizontalLayout(searchTextField, filterComboBox);
+        final HorizontalLayout row = new HorizontalLayout(searchTextField, setRowNumbersField);
 
         final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
         buttonClearGrid.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonClearGrid.setTooltipText("Clear grid");
         buttonClearGrid.addThemeVariants(ButtonVariant.LUMO_ERROR);
         buttonClearGrid.addClickListener(event -> {
-            if (this.gridListDataView != null) {
-                hexDumpDTOList.clear();
+            if (event.isFromClient()) {
+                this.hexDumpService.deleteAll();
                 this.grid.setItems(List.of());
                 this.upload.clearFileList();
             }
@@ -175,9 +178,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
         this.registerScrollEventListener();
 
-        super.addClassName("grid-message-example");
-
-        this.grid.addColumn(HexDumpDTO::getOffset)
+        this.grid.addColumn(HexDumpDto::getOffset)
                 .setKey("offset")
                 .setHeader("Offset");
 
@@ -189,10 +190,10 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
                     .setWidth("40px");
         }
 
-        this.grid.addColumn(HexDumpDTO::getAscii)
+        this.grid.addColumn(HexDumpDto::getAscii)
                 .setKey("ascii")
                 .setAutoWidth(true)
-                .setHeader("Ascii/Text");
+                .setHeader("Ascii / Text");
 
         this.grid.setWidthFull();
         this.grid.addClassName("grid");
@@ -200,14 +201,16 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         this.grid.setColumnRendering(ColumnRendering.LAZY);
         this.grid.setColumnReorderingAllowed(true);
         this.grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+        this.grid.setPageSize(15);
         this.gridListDataView = this.grid.setItems(List.of());
         this.grid.getColumns().forEach(e -> e.setResizable(Boolean.TRUE));
+        this.grid.setPaginationBarMode(PagingGrid.PaginationBarMode.TOP);
 
-        final GridContextMenu<HexDumpDTO> contextMenu = grid.addContextMenu();
-        final GridMenuItem<HexDumpDTO> gridContextMeuOffset = contextMenu.addItem("Copy Offset");
-        final GridMenuItem<HexDumpDTO> gridContextMenuAscii = contextMenu.addItem("Copy Ascii text");
-        final GridMenuItem<HexDumpDTO> gridContextMenuHex = contextMenu.addItem("Copy Hex columns");
-        final GridMenuItem<HexDumpDTO> gridContextMenuRow = contextMenu.addItem("Copy entire row");
+        final GridContextMenu<HexDumpDto> contextMenu = grid.addContextMenu();
+        final GridMenuItem<HexDumpDto> gridContextMeuOffset = contextMenu.addItem("Copy Offset");
+        final GridMenuItem<HexDumpDto> gridContextMenuAscii = contextMenu.addItem("Copy Ascii text");
+        final GridMenuItem<HexDumpDto> gridContextMenuHex = contextMenu.addItem("Copy Hex columns");
+        final GridMenuItem<HexDumpDto> gridContextMenuRow = contextMenu.addItem("Copy entire row");
 
         final Div gridRoot = new Div();
         gridRoot.addClassName("grid-root");
@@ -273,25 +276,46 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
             });
         });
 
-        this.filterComboBox.setWidthFull();
-        this.filterComboBox.setItems("Filter by Offset", "Filter by Ascii text");
-        this.filterComboBox.setClearButtonVisible(true);
-        this.filterComboBox.setPrefixComponent(VaadinIcon.FILTER.create());
-        this.filterComboBox.setPlaceholder("Filter by");
-        this.filterComboBox.addValueChangeListener(valueChangeEvent -> this.gridListDataView.refreshAll());
-
         this.searchTextField.setWidthFull();
+        this.searchTextField.setPlaceholder("Filter by: offset or ascii/text");
         this.searchTextField.setPrefixComponent(VaadinIcon.SEARCH.create());
         this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
         this.searchTextField.setClearButtonVisible(true);
         this.searchTextField.getStyle().set("max-width", "100%");
-        this.searchTextField.addValueChangeListener(valueChangeEvent -> this.gridListDataView.refreshAll());
+        this.searchTextField.addValueChangeListener(valueChangeEvent -> {
+
+            this.addPaginationOnGrid(valueChangeEvent.getValue());
+
+        });
+
+        this.setRowNumbersField.setPlaceholder("Set row numbers");
+        this.setRowNumbersField.setTooltipText("Set row numbers");
+        this.setRowNumbersField.setClearButtonVisible(true);
+        this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
+        this.setRowNumbersField.addValueChangeListener(event -> {
+
+            if (event.isFromClient() && event.getValue() != null) {
+                final Integer rowsToShowAkaPageSize = event.getValue();
+                this.grid.setPageSize(rowsToShowAkaPageSize);
+                this.addPaginationOnGrid(StringUtils.EMPTY);
+            }
+
+        });
 
         final VerticalLayout verticalLayout = new VerticalLayout(gridRoot);
         verticalLayout.setPadding(false);
         verticalLayout.setId("verticallayout-gridroot");
         verticalLayout.setSizeFull();
         return verticalLayout;
+    }
+
+    private void addPaginationOnGrid(String filterText) {
+
+        this.grid.setPagingDataProvider((page, pageSize) -> {
+            int start = (int) (page * this.grid.getPageSize());
+            return this.hexDumpService.findByFilterText(filterText, PageRequest.of(start, pageSize));
+        });
+
     }
 
     /**

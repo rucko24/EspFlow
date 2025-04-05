@@ -2,7 +2,7 @@ package com.esp.espflow.service.hashservice;
 
 import com.esp.espflow.configuration.ComputeDigestAlgorithmConfiguration;
 import com.esp.espflow.entity.dto.EsptoolSha256Dto;
-import com.esp.espflow.service.respository.impl.EsptoolSha256ServiceImpl;
+import com.esp.espflow.service.respository.impl.EsptoolSha256Service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class ComputeSha256ServiceTest {
     private ComputeSha256Service computeSha256Service;
 
     @Mock
-    private EsptoolSha256ServiceImpl esptoolSha256Service;
+    private EsptoolSha256Service esptoolSha256Service;
 
     @Mock
     private ComputeDigestAlgorithmConfiguration computeDigestAlgorithmConfiguration;

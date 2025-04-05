@@ -22,10 +22,10 @@ import static org.mockito.Mockito.when;
  * @author rubn
  */
 @ExtendWith(MockitoExtension.class)
-class EsptoolSha256ServiceImplTest {
+class EsptoolSha256ServiceTest {
 
     @InjectMocks
-    private EsptoolSha256ServiceImpl esptoolSha256Service;
+    private EsptoolSha256Service esptoolSha256Service;
 
     @Mock
     private EsptoolSha256Repository esptoolSha256Repository;

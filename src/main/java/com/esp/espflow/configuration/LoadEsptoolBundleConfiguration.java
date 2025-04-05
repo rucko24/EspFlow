@@ -4,7 +4,7 @@ import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.hashservice.ComputeSha256Service;
-import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
+import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import com.esp.espflow.util.IMakeExecutable;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.CommandLineRunner;
@@ -55,7 +55,7 @@ public class LoadEsptoolBundleConfiguration implements IMakeExecutable {
      * @return A {@link CommandLineRunner}
      */
     @Bean
-    public CommandLineRunner moveEsptoolBundleToTempDir(final EsptoolExecutableServiceImpl esptoolExecutableService,
+    public CommandLineRunner moveEsptoolBundleToTempDir(final EsptoolExecutableService esptoolExecutableService,
                                                         final ComputeSha256Service computeSha256Service) {
         return commands -> {
             switch (GetOsName.getOsName()) {
@@ -139,7 +139,7 @@ public class LoadEsptoolBundleConfiguration implements IMakeExecutable {
      * @param computeSha256Service service to compute sha256
      * @param outputFileName the path where the esptool version bundle file is located
      */
-    private void computeBundleSha256(EsptoolExecutableServiceImpl esptoolExecutableService,
+    private void computeBundleSha256(EsptoolExecutableService esptoolExecutableService,
                                      ComputeSha256Service computeSha256Service,
                                      String outputFileName) {
         computeSha256Service.computeSha256(outputFileName)

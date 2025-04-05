@@ -18,7 +18,7 @@ import java.util.Optional;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class EsptoolExecutableServiceImpl {
+public class EsptoolExecutableService {
 
     private final EsptoolExecutableRepository esptoolExecutableRepository;
 

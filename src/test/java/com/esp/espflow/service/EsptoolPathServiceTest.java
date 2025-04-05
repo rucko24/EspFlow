@@ -1,7 +1,7 @@
 package com.esp.espflow.service;
 
 import com.esp.espflow.entity.dto.EsptoolExecutableDto;
-import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
+import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class EsptoolPathServiceTest {
     private EsptoolPathService esptoolPathService;
 
     @Mock
-    private EsptoolExecutableServiceImpl esptoolExecutableService;
+    private EsptoolExecutableService esptoolExecutableService;
 
 
     @Test

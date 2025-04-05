@@ -31,10 +31,10 @@ import static org.mockito.Mockito.when;
  * @author rubn
  */
 @ExtendWith(MockitoExtension.class)
-class EsptoolExecutableServiceImplTest {
+class EsptoolExecutableServiceTest {
 
     @InjectMocks
-    private EsptoolExecutableServiceImpl esptoolExecutableService;
+    private EsptoolExecutableService esptoolExecutableService;
 
     @Mock
     private EsptoolExecutableRepository esptoolExecutableRepository;

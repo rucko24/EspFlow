@@ -8,7 +8,7 @@ import com.esp.espflow.mappers.EsptoolExecutableMapper;
 import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.hashservice.ComputeSha256Service;
-import com.esp.espflow.service.respository.impl.EsptoolExecutableServiceImpl;
+import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.CreateCustomDirectory;
 import com.esp.espflow.util.EspFlowConstants;
@@ -80,7 +80,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
 
     private final EsptoolService esptoolService;
     private final ComputeSha256Service computeSha256Service;
-    private final EsptoolExecutableServiceImpl esptoolExecutableServiceImpl;
+    private final EsptoolExecutableService esptoolExecutableService;
 
     private final Layout esptoolLayout = new Layout();
     private final Upload upload = new Upload();
@@ -125,7 +125,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
             if (event.isFromClient()/*Only run me if it is a click from the client.*/) {
                 final EsptoolExecutableDto esptoolExecutableDtoItem = event.getValue();
                 if (Objects.nonNull(esptoolExecutableDtoItem)) {
-                    this.esptoolExecutableServiceImpl.selectThisEsptoolExecutableVersion(esptoolExecutableDtoItem);
+                    this.esptoolExecutableService.selectThisEsptoolExecutableVersion(esptoolExecutableDtoItem);
                     this.esptoolService.showEsptoolVersion(esptoolExecutableDtoItem)
                             .subscribe(this.subscribeComboListener(esptoolExecutableDtoItem));
                 }
@@ -237,7 +237,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      * @return A {@link Function}
      */
     private Mono<EsptoolExecutableDto> returnEmptyIfVersionAlreadyExists(EsptoolExecutableDto esptoolExecutableParam) {
-            final EsptoolExecutableDto esptoolExecutableDto = this.esptoolExecutableServiceImpl
+            final EsptoolExecutableDto esptoolExecutableDto = this.esptoolExecutableService
                     .findByEsptoolVersionWithBundle(esptoolExecutableParam.esptoolVersion(), false)
                     .orElse(null);
             if (Objects.nonNull(esptoolExecutableDto)) {
@@ -255,7 +255,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                 }
                 return Mono.empty();
             }
-            return Mono.just(this.esptoolExecutableServiceImpl.save(esptoolExecutableParam));
+            return Mono.just(this.esptoolExecutableService.save(esptoolExecutableParam));
     }
 
     /**
@@ -297,7 +297,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
 
         this.comboBoxEsptoolHome.setWidthFull();
         this.comboBoxEsptoolHome.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
-        this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
+        this.comboBoxEsptoolHome.setItems(this.esptoolExecutableService.findAll());
         this.setValueForCombo();
 
         upload.setDropAllowed(true);
@@ -354,8 +354,8 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      */
     private void saveAndUpdate(final EsptoolExecutableDto entityToUpdate) {
         this.executeCommandIfPresent(() -> {
-            this.esptoolExecutableServiceImpl.selectThisEsptoolExecutableVersion(entityToUpdate);
-            this.comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
+            this.esptoolExecutableService.selectThisEsptoolExecutableVersion(entityToUpdate);
+            this.comboBoxEsptoolHome.setItems(this.esptoolExecutableService.findAll());
             this.comboBoxEsptoolHome.setValue(entityToUpdate);
             final int overlayLength = entityToUpdate.esptoolVersion().concat(entityToUpdate.absolutePathEsptool()).length();
             this.overlay = (overlayLength * 9) + "px";
@@ -491,7 +491,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      * Sets the value of the combo if previously selected to true, initially the default is bundled to true.
      */
     private void setValueForCombo() {
-        this.esptoolExecutableServiceImpl.findByIsSelectedToTrue()
+        this.esptoolExecutableService.findByIsSelectedToTrue()
                 .ifPresent(esptoolExecutableDto -> {
                     this.comboBoxEsptoolHome.setValue(esptoolExecutableDto);
                     final int overlayLength = esptoolExecutableDto.esptoolVersion().concat(esptoolExecutableDto.absolutePathEsptool()).length();
@@ -553,7 +553,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                 })
                 .subscribe(espToolVersion -> {
                     ui.access(() -> {
-                        comboBoxEsptoolHome.setItems(this.esptoolExecutableServiceImpl.findAll());
+                        comboBoxEsptoolHome.setItems(this.esptoolExecutableService.findAll());
                         this.setValueForCombo();
                     });
                 });

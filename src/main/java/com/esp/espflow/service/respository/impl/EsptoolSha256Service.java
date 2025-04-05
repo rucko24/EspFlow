@@ -15,7 +15,7 @@ import java.util.Optional;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class EsptoolSha256ServiceImpl {
+public class EsptoolSha256Service {
 
     private final EsptoolSha256Repository esptoolSha256Repository;
 
