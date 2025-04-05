@@ -69,6 +69,9 @@ import static com.esp.espflow.util.EspFlowConstants.SIZE_30_PX;
 import static com.esp.espflow.util.EspFlowConstants.TABLE_SVG;
 import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 
+/**
+ * @author rubn
+ */
 @Log4j2
 @UIScope
 @SpringComponent
