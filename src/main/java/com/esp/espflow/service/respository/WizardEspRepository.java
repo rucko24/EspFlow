@@ -7,13 +7,18 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * @author rubn
+ */
 @Repository
 public interface WizardEspRepository extends JpaRepository<WizardEspEntity, Long> {
 
     Optional<WizardEspEntity> findByName(String name);
 
-    @Query("SELECT COUNT(isWizardEnabled) " +
-            "FROM WizardEspEntity " +
-            "WHERE isWizardEnabled = true")
+    @Query("""
+            SELECT COUNT(isWizardEnabled)
+            FROM WizardEspEntity
+            WHERE isWizardEnabled = true
+            """)
     Integer areAllWizardsEnabled();
 }

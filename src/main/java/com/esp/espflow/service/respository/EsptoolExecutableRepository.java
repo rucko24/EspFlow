@@ -15,31 +15,39 @@ import java.util.Optional;
 @Repository
 public interface EsptoolExecutableRepository extends JpaRepository<EsptoolExecutableEntity, Long> {
 
-    @Query("SELECT entity " +
-            "FROM EsptoolExecutableEntity entity " +
-            "WHERE entity.esptoolVersion = :esptoolVersion " +
-            "AND entity.isBundled = :isBundled")
+    @Query("""
+            SELECT entity
+            FROM EsptoolExecutableEntity entity
+            WHERE entity.esptoolVersion = :esptoolVersion
+            AND entity.isBundled = :isBundled
+            """)
     Optional<EsptoolExecutableEntity> findByEsptoolVersionWithBundle(@Param("esptoolVersion")String esptoolVersion,
                                                                      @Param("isBundled") boolean isBundle);
 
-    @Query("SELECT entity " +
-            "FROM EsptoolExecutableEntity entity " +
-            "WHERE entity.absolutePathEsptool = :absolutePathEsptool " +
-            "AND entity.isBundled = :isBundled " +
-            "AND entity.esptoolVersion = :esptoolVersion")
+    @Query("""
+            SELECT entity
+            FROM EsptoolExecutableEntity entity
+            WHERE entity.absolutePathEsptool = :absolutePathEsptool
+            AND entity.isBundled = :isBundled
+            AND entity.esptoolVersion = :esptoolVersion
+            """)
     Optional<EsptoolExecutableEntity> findByAbsolutePathEsptoolAndIsBundleAndVersion(@Param("absolutePathEsptool") String absolutePathEsptool,
                                                                                      @Param("isBundled") boolean isBundle,
                                                                                      @Param("esptoolVersion") String esptoolVersion);
 
-    @Query("SELECT entity " +
-            "FROM EsptoolExecutableEntity entity " +
-            "WHERE entity.isSelected = true")
+    @Query("""
+            SELECT entity
+            FROM EsptoolExecutableEntity entity
+            WHERE entity.isSelected = true
+            """)
     Optional<EsptoolExecutableEntity> findByIsSelectedToTrue();
 
     @Modifying
-    @Query("UPDATE EsptoolExecutableEntity entity " +
-            "SET entity.isSelected = false " +
-            "WHERE entity.id <> :id")
+    @Query("""
+            UPDATE EsptoolExecutableEntity entity
+            SET entity.isSelected = false
+            WHERE entity.id <> :id
+            """)
     void updateAllSelectedToFalseExcept(@Param("id") Long id);
 
 }

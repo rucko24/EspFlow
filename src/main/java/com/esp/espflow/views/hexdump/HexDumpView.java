@@ -281,6 +281,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
         this.searchTextField.setWidthFull();
         this.searchTextField.setPlaceholder("Filter by: offset or ascii/text");
+        this.searchTextField.setTooltipText("Filter by: offset or ascii/text");
         this.searchTextField.setPrefixComponent(VaadinIcon.SEARCH.create());
         this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
         this.searchTextField.setClearButtonVisible(true);
