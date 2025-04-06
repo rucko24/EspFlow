@@ -1,6 +1,7 @@
 package com.esp.espflow.util;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.H3;
@@ -39,6 +40,15 @@ public class ConfirmDialogBuilder {
                 .withText(text)
                 .withComponent(null)
                 .make();
+    }
+
+    public static void showWarningUI(String text, final UI ui) {
+        final var confirmDialog = ConfirmDialogBuilder.builder()
+                .withHeaderIconAndHeaderText(VaadinIcon.WARNING, EspFlowConstants.WARNING)
+                .withText(text)
+                .withComponent(null)
+                .make();
+        ui.addToModalComponent(confirmDialog);
     }
 
     public static void showInformation(final String text) {
