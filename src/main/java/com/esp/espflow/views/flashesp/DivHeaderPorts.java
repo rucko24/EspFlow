@@ -110,10 +110,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         buttonExecuteFlashId.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setTooltipText("Execute flash_id");
 
-        //inputCommand.setPlaceholder("input command");
-        //inputCommand.setClearButtonVisible(Boolean.TRUE);
-        //killProcess.setEnabled(false);
-        //killProcess.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        this.initListeners();
 
         final Div divHeader = new Div(divh3SerialPort, divCombo);
         divHeader.setWidthFull();
@@ -147,6 +144,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         divEndForH2EspToolVersion.getStyle().set("justify-content", "center");
 
         divHeader.addClassName("header-flex-wrap");
+
         super.add(divHeader, divEndForH2EspToolVersion);
         super.setWidthFull();
         super.getStyle().set(DISPLAY, "flex");
@@ -307,7 +305,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
             } else {
                 buttonExecuteFlashId.setEnabled(false);
                 comboBoxSerialPort.setItems(List.of());
-                ConfirmDialogBuilder.showWarning("Port not found!");
+                scanPort.getUI().ifPresent(ui -> ConfirmDialogBuilder.showWarningUI("Port not found!", ui));
             }
         } else {
             ConfirmDialogBuilder.showWarning("Verify if esptool.py is installed!!!");
@@ -332,7 +330,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         super.onAttach(attachEvent);
         this.closeSubscribers();
         final UI ui = attachEvent.getUI();
-        this.initListeners();
         this.updateH2WithEsptoolVersion(ui);
         this.disposableSubscriberEsptoolVersionEvent = this.subscriberEsptoolVersionEvent
                 .subscribe(esptoolVersionMessageListItemEvent -> {
