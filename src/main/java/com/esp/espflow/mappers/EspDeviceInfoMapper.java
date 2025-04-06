@@ -15,6 +15,7 @@ import static com.esp.espflow.util.EspFlowConstants.SERIAL_PORT;
 
 /**
  * The EspDeviceInfoMapper
+ * @author rubn
  */
 public final class EspDeviceInfoMapper {
 

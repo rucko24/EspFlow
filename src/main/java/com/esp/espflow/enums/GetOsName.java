@@ -13,6 +13,7 @@ import static com.esp.espflow.util.EspFlowConstants.CMD_C;
 
 /**
  * Get operating system in runtime
+ * @author rubn
  */
 @Getter
 @RequiredArgsConstructor

@@ -5,6 +5,7 @@ import com.esp.espflow.enums.GetOsName;
 
 /**
  * The FilterEsp32S3
+ * @author rubn
  */
 public class FilterEsp32S3 implements FilterEspDeviceStrategy {
 

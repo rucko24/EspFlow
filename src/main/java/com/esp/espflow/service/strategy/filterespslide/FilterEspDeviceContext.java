@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * The FilterContext
+ * @author rubn
  */
 @RequiredArgsConstructor
 public class FilterEspDeviceContext {

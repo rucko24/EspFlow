@@ -3,6 +3,9 @@ package com.esp.espflow.entity.dto;
 import lombok.Builder;
 import lombok.Value;
 
+/**
+ * @author rubn
+ */
 @Value
 @Builder
 public class HexDumpDto {

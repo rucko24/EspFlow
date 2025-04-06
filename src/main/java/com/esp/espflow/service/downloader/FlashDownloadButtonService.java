@@ -4,7 +4,7 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Service;
 
 /**
- * @author rucko
+ * @author rubn
  */
 @Service
 @UIScope

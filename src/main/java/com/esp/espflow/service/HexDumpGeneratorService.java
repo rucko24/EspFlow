@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.HexFormat;
 
+/**
+ * @author rubn
+ */
 @Service
 @RequiredArgsConstructor
 public class HexDumpGeneratorService {

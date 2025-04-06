@@ -3,6 +3,9 @@ package com.esp.espflow.entity;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+/**
+ * @author rubn
+ */
 @Converter
 public class StringArrayConverter implements AttributeConverter<String[], String> {
 

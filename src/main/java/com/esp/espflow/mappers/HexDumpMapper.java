@@ -3,6 +3,9 @@ package com.esp.espflow.mappers;
 import com.esp.espflow.entity.HexDumpEntity;
 import com.esp.espflow.entity.dto.HexDumpDto;
 
+/**
+ * @author rubn
+ */
 public final class HexDumpMapper {
 
     public static final HexDumpMapper INSTANCE = new HexDumpMapper();

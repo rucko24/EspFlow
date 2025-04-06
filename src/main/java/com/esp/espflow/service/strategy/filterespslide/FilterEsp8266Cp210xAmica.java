@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * The FilterEsp8266Cp210x
+ * @author rubn
  */
 public class FilterEsp8266Cp210xAmica implements FilterEspDeviceStrategy {
 

@@ -5,6 +5,7 @@ import com.esp.espflow.enums.GetOsName;
 
 /**
  * The FilterEsp8266CH340G
+ * @author rubn
  */
 public class FilterEsp8266CH340G implements FilterEspDeviceStrategy {
 

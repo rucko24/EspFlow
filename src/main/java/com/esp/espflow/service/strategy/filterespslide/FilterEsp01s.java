@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * The FilterEsp01s
+ * @author rubn
  */
 public class FilterEsp01s implements FilterEspDeviceStrategy {
 

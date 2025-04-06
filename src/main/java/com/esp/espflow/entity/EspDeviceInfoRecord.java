@@ -2,6 +2,10 @@ package com.esp.espflow.entity;
 
 import lombok.Builder;
 
+/**
+ *
+ * @author rubn
+ */
 @Builder
 public record EspDeviceInfoRecord(
         String port,
