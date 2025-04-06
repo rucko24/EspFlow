@@ -2,7 +2,7 @@
 @import url('./popover-notification-panel.css');
 @import url('components/vaadin-upload-file.css');
 @import url('components/layout.css');
-@import url('./views/readflash/esp-device-info.css');
+@import url('./views/read-flash/esp-device-info.css');
 @import url('./views/flash-view/wizard-dialog/wizard-dialog.css');
 @import url('./views/flash-view/flash-view.css');
 @import url('./views/settings-dialog/settings-dialog.css');
