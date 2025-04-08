@@ -375,7 +375,7 @@ class EsptoolServiceTest {
     }
 
     @Test
-    @DisplayName("Error creating directory /esp-backup-flash-dir in a directory that does not exist on /tpm dir")
+    @DisplayName("Error creating directory /esp-backup-flash-dir in a directory that does not exist on /tmp dir")
     void testIOExceptionThrown() {
         try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
             Path mockedPath = Path.of(EXPECTED_DIR);
