@@ -1,6 +1,8 @@
 package com.esp.espflow.views.webserial;
 
 import com.esp.espflow.views.MainLayout;
+import com.nimbusds.jose.shaded.gson.JsonObject;
+import com.nimbusds.jose.shaded.gson.JsonParser;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -93,24 +95,27 @@ public class WebSerialView extends VerticalLayout {
         // Botones de operación
         Button connectButton = new Button("Conectar", e -> {
 
-            this.getElement()
-                    .executeJs(JS_CONNECT, baudRateField.getValue(), chipTypeComboBox.getValue(), true)
+            UI.getCurrent()
+                    .getElement()
+                    .executeJs(JS_CONNECT, baudRateField.getValue(), false)
                     .then(String.class, result -> {
-                        log.info("Result {}", result);
-//                        try {
-//                            JsonObject jsonResult = JsonParser.parseString(result).getAsJsonObject();
-//                            if (jsonResult.get("success").getAsBoolean()) {
-//                                resultArea.setValue("Operación exitosa: " +
-//                                        (jsonResult.has("message")
-//                                                ? jsonResult.get("message").getAsString()
-//                                                : ""));
-//                            } else {
-//                                resultArea.setValue("Error: " + jsonResult.get("error").getAsString());
-//                            }
-//                        } catch(Exception ex) {
-//                            resultArea.setValue("Error al procesar el resultado: " + result);
-//                            ex.printStackTrace();
-//                        }
+                        try {
+                            JsonObject jsonResult = JsonParser.parseString(result).getAsJsonObject();
+                            if (jsonResult.get("success").getAsBoolean()) {
+                                log.info("Operación exitosa: {}", (jsonResult.has("message")
+                                        ? jsonResult.get("message").getAsString()
+                                        : ""));
+                                resultArea.setValue("Operación exitosa: " + (jsonResult.has("message")
+                                                ? jsonResult.get("message").getAsString()
+                                                : ""));
+                            } else {
+                                log.error("Error {}", jsonResult.get("error").getAsString());
+                                resultArea.setValue("Error: " + jsonResult.get("error").getAsString());
+                            }
+                        } catch(Exception ex) {
+                            log.error("Error {}", ex.getMessage());
+                            resultArea.setValue("Error al procesar el resultado: " + ex.getMessage());
+                        }
                     });
 
         });

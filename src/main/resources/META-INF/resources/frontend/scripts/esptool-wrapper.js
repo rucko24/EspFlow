@@ -19,7 +19,7 @@ const serialLib = !navigator.serial && navigator.usb ? serial : navigator.serial
  * @param {boolean} noReset - Indica si se quiere usar el modo "no_reset".
  * @returns {string} JSON con el resultado.
  */
-window.espConnect = async (baudRate, chipType, noReset) => {
+window.espConnect = async (baudRate, noReset) => {
   try {
     // Modo toggle: desconectar si ya hay conexión
     if (esploader !== null) {
@@ -58,32 +58,26 @@ window.espConnect = async (baudRate, chipType, noReset) => {
     // Crear la instancia de ESPLoader y llamar a main pasando resetMode
     esploader = new ESPLoader(options);
 
-    // Determinar resetMode y, en caso de ser necesario, realizar pasos extras
     let resetMode = "default_reset";
-    if (noReset) {
-      resetMode = "no_reset";
-      try {
-        // Iniciar la conexión en modo passthrough
-        await transport.connect(parseInt(baudRate));
-        await transport.disconnect();
-        // Pausa para permitir que se estabilice la conexión
-        await new Promise(resolve => setTimeout(resolve, 350));
-      } catch (e) {
-        if (e.name !== "InvalidStateError") {
-              console.error("Error en la fase de no_reset:", e);
-            } else {
-              console.warn("El puerto ya estaba abierto (no_reset). Se continúa la conexión.");
-            }
-      }
+    if (noReset.checked) {
+        resetMode = "no_reset";
+        try {
+            // Initiate passthrough serial setup
+            await transport.connect(romBaudrate);
+            await transport.disconnect();
+            await sleep(350);
+        } catch (e) {
+        }
     }
 
     const chip = await esploader.main(resetMode);
 
     return JSON.stringify({
       success: true,
-      message: "Conectado exitosamente al dispositivo " + chipType,
+      message: "Conectado exitosamente al dispositivo " + chip,
       chip: chip
     });
+
   } catch (err) {
     console.error("Error en espConnect:", err);
     return JSON.stringify({
