@@ -36,14 +36,15 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class WebSerialView extends VerticalLayout {
 
+    private String chromeVersion = "Desconocida";
+    private String firefoxVersion = "Desconocida";
+
     @PostConstruct
     public void setup() {
         final Button requestPortButton = new Button("Solicitar Puerto Serial");
 
         VaadinRequest request = VaadinService.getCurrentRequest();
         String userAgent = request.getHeader("User-Agent");
-        String chromeVersion = "Desconocida";
-        String firefoxVersion = "Desconocida";
 
         if (userAgent != null) {
             // El patrón busca "Chrome/" seguido de la versión.
@@ -51,17 +52,15 @@ public class WebSerialView extends VerticalLayout {
             Matcher matcher = pattern.matcher(userAgent);
             if (matcher.find()) {
                 chromeVersion = matcher.group(1);
-                ConfirmDialogBuilder.showInformation("User Agent: " + userAgent + "\nChrome Version: " + chromeVersion);
-
+                getUI().ifPresent(ui -> ConfirmDialogBuilder.showWarningUI("User Agent: " + userAgent + "\nChrome Version: " + chromeVersion, ui));
             }
 
             // Patrón para encontrar "Firefox/" seguido de la versión
             Pattern patternMozilla = Pattern.compile("Firefox/(\\d+\\.\\d+)");
             Matcher matcherMozilla = patternMozilla.matcher(userAgent);
             if (matcherMozilla.find()) {
-                firefoxVersion = matcher.group(1);
-                ConfirmDialogBuilder.showInformation("User Agent: " + userAgent + "\nVersión de Firefox: " + firefoxVersion);
-
+                firefoxVersion = matcherMozilla.group(1);
+                getUI().ifPresent(ui -> ConfirmDialogBuilder.showWarningUI("User Agent: " + userAgent + "\nVersión de Firefox: " + firefoxVersion, ui));
             }
         }
 

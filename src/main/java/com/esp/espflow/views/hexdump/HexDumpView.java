@@ -154,6 +154,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
         final HorizontalLayout filterRow = this.configureFilterRow();
         final HorizontalLayout row = new HorizontalLayout(upload, filterRow);
+        row.addClassNames("row-header-hexdump");
         row.setWidthFull();
         row.setJustifyContentMode(JustifyContentMode.BETWEEN);
         return row;
@@ -258,7 +259,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         final GridMenuItem<HexDumpDto> gridContextMenuRow = contextMenu.addItem("Copy entire row");
 
         final Div gridRoot = new Div();
-        gridRoot.addClassName("grid-root");
+        gridRoot.addClassNames("grid-root", LumoUtility.Border.ALL, LumoUtility.BorderRadius.LARGE);
         var tableIcon = SvgFactory.createIconFromSvg("table.svg", SIZE_30_PX, null);
         tableIcon.getStyle().setMarginRight("10px");
         final Div warning = new Div(tableIcon, new Text("Empty grid!"));

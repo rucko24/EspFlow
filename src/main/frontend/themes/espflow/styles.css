@@ -251,6 +251,11 @@ html {
          flex-direction: column;
      }
 
+     .row-header-hexdump {
+        display: flex;
+        flex-direction: column;
+     }
+
 }
 
 .xterm {

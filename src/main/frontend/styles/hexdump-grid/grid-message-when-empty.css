@@ -8,6 +8,7 @@
   position: relative;
   height: var(--grid-heigth);
   width: 100%;
+  overflow-x: auto;
 }
 
 .grid-message-example .grid,
