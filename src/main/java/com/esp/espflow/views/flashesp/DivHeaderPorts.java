@@ -305,7 +305,17 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
             } else {
                 buttonExecuteFlashId.setEnabled(false);
                 comboBoxSerialPort.setItems(List.of());
-                scanPort.getUI().ifPresent(ui -> ConfirmDialogBuilder.showWarningUI("Port not found!", ui));
+                scanPort.getUI().ifPresent(ui -> {
+                    ui.getPage().fetchCurrentURL(url -> {
+                        if(url.getRef() != null) {
+                            if(!url.getRef().contains("settings")) {
+                                ConfirmDialogBuilder.showWarningUI("Port not found!", ui);
+                            }
+                        } else {
+                            ConfirmDialogBuilder.showWarningUI("Port not found!", ui);
+                        }
+                    });
+                });
             }
         } else {
             ConfirmDialogBuilder.showWarning("Verify if esptool.py is installed!!!");
