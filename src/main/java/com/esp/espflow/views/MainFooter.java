@@ -40,6 +40,7 @@ import java.util.Optional;
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
 
 /**
  * The Main Footer for the Applayout Drawer
@@ -105,7 +106,7 @@ public class MainFooter {
                 footer.getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
                         log.info("fetchCurrentURL {}", url);
-                        String urlWithParameters = url.getPath().concat("#settings");
+                        String urlWithParameters = url.getPath().concat(SETTINGS_SHARP);
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
                         settingsDialogView.open(SETTINGS);
                     });
@@ -123,10 +124,10 @@ public class MainFooter {
             Shortcuts.addShortcutListener(userName, shortcutEvent -> {
                 footer.getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
-                        String urlWithParameters = url.getPath().concat("#settings");
+                        String urlWithParameters = url.getPath().concat(SETTINGS_SHARP);
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
                         settingsDialogView.open(SETTINGS);
-                        log.info("fetchCurrentURL from shortcut {}{}", url, "#settings");
+                        log.info("fetchCurrentURL from shortcut {}{}", url, SETTINGS_SHARP);
                     });
                 });
             }, Key.KEY_S, KeyModifier.CONTROL, KeyModifier.ALT);
