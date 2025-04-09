@@ -50,7 +50,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import lombok.extern.log4j.Log4j2;
-import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
@@ -68,6 +67,7 @@ import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
 import static com.esp.espflow.util.EspFlowConstants.TABLE_SVG;
 import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
+import static com.esp.espflow.util.EspFlowConstants.WEB_SERIAL_ICON_SVG;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -271,7 +271,7 @@ public class MainLayout extends AppLayout {
         }
 
         if (accessChecker.hasAccess(WebSerialView.class)) {
-            nav.addItem(new SideNavItem("Web-Serial", WebSerialView.class, LineAwesomeIcon.USB.create()));
+            nav.addItem(new SideNavItem("Web-Serial", WebSerialView.class, SvgFactory.createIconFromSvg(WEB_SERIAL_ICON_SVG, SIZE_25_PX, null)));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {

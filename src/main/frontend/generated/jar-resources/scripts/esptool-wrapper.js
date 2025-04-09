@@ -199,24 +199,25 @@ const espLoaderTerminal = {
     if (window.$server && window.$server.cleanLog) {
       window.$server.cleanLog();
     } else {
-      console.log("clean: función cleanLog no disponible");
+      console.log("Terminal clean: función cleanLog no disponible");
     }
   },
   writeLine(data) {
     if (window.$server && window.$server.writeLogLine) {
       window.$server.writeLogLine(data);
     } else {
-      console.log("writeLine:", data);
+      console.log("Terminal writeLine:", data);
     }
   },
   write(data) {
     if (window.$server && window.$server.writeLog) {
       window.$server.writeLog(data);
     } else {
-      console.log("write:", data);
+      console.log("Terminal write:", data);
     }
-  },
+  }
 };
+
 
 /**
  * Cambia el baudrate de la conexión.
