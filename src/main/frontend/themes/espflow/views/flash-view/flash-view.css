@@ -40,3 +40,7 @@
     	box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
     }
 }
+
+vaadin-dialog-overlay.change-port-permission-dialog::part(backdrop) {
+   backdrop-filter: blur(1px);
+}
