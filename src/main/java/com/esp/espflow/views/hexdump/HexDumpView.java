@@ -23,10 +23,13 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.popover.Popover;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -51,7 +54,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.vaadin.firitin.components.grid.PagingGrid;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -62,6 +68,7 @@ import java.util.List;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_GRID;
 import static com.esp.espflow.util.EspFlowConstants.COPY_ALT_SVG;
+import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_HEX_DUMP_ANALIZE;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_USER_HOME_DIR_OS;
@@ -94,7 +101,9 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
     private final PagingGrid<HexDumpDto> grid = new PagingGrid<>();
     private final TextField searchTextField = new TextField();
     private final IntegerField setRowNumbersField = new IntegerField();
-
+    /**
+     * Only to use the icon, when the Grid is empty.
+     */
     private GridListDataView<HexDumpDto> gridListDataView;
 
     @PostConstruct
@@ -103,12 +112,10 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         super.addClassName("grid-message-example");
 
         this.initListeners();
-        this.configureUpload();
-
-        final HorizontalLayout filterRow = this.configureFilterRow();
+        final Component uploadAndFilterRow = this.configureUpload();
         final Component componentGrid = this.configureGrid();
 
-        super.add(upload, filterRow, componentGrid);
+        super.add(uploadAndFilterRow, componentGrid);
         Animated.animate(this, Animated.Animation.FADE_IN);
 
         this.addPaginationOnGrid(StringUtils.EMPTY);
@@ -137,33 +144,68 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
     }
 
-    private void configureUpload() {
-        upload.setWidthFull();
+    private HorizontalLayout configureUpload() {
         upload.setDropAllowed(true);
         upload.setMaxFiles(1);
         upload.setReceiver(buffer);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
         Tooltip.forComponent(upload).setText("Drop .bin here!");
         this.i18N(upload);
+
+        final HorizontalLayout filterRow = this.configureFilterRow();
+        final HorizontalLayout row = new HorizontalLayout(upload, filterRow);
+        row.setWidthFull();
+        row.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        return row;
     }
 
     private HorizontalLayout configureFilterRow() {
-        final HorizontalLayout row = new HorizontalLayout(searchTextField, setRowNumbersField);
-
+        final HorizontalLayout row = new HorizontalLayout();
         final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
         buttonClearGrid.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonClearGrid.setTooltipText("Clear grid");
         buttonClearGrid.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        final ProgressBar progressBar = new ProgressBar();
+        progressBar.setWidth("50px");
+        progressBar.setIndeterminate(true);
+        progressBar.setVisible(false);
         buttonClearGrid.addClickListener(event -> {
-            if (event.isFromClient()) {
-                this.hexDumpService.deleteAll();
-                this.grid.setItems(List.of());
-                this.upload.clearFileList();
+            if (event.isFromClient() && this.gridListDataView.getItems().findAny().isPresent()) {
+                progressBar.setVisible(true);
+                buttonClearGrid.setVisible(false);
+                Animated.animate(buttonClearGrid, Animated.Animation.FADE_IN);
+                Mono.fromRunnable(this.runnableMe(buttonClearGrid))
+                        .subscribeOn(Schedulers.boundedElastic())
+                        .doOnTerminate(this.onTerminate(buttonClearGrid, progressBar))
+                        .subscribe();
             }
         });
-        row.add(buttonClearGrid);
-
+        row.add(progressBar, buttonClearGrid, searchTextField);
+        row.setAlignSelf(Alignment.CENTER, searchTextField);
+        row.setAlignSelf(Alignment.CENTER, buttonClearGrid);
+        row.setAlignSelf(Alignment.CENTER, progressBar);
         return row;
+    }
+
+    private Runnable onTerminate(Button buttonClearGrid, ProgressBar progressBar) {
+        return () -> {
+            buttonClearGrid.getUI().ifPresent(ui -> ui.access(() -> {
+                progressBar.setVisible(false);
+                buttonClearGrid.setVisible(true);
+            }));
+        };
+    }
+
+    private Runnable runnableMe(Button buttonClearGrid) {
+        return () -> {
+            buttonClearGrid.getUI().ifPresent(ui -> {
+                ui.access(() -> {
+                    this.hexDumpService.deleteAll();
+                    this.grid.setItems(List.of());
+                    this.upload.clearFileList();
+                });
+            });
+        };
     }
 
     /**
@@ -280,30 +322,35 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         });
 
         this.searchTextField.setWidthFull();
-        this.searchTextField.setPlaceholder("Filter by: offset or ascii/text");
+        SvgIcon icon = LineAwesomeIcon.SLIDERS_H_SOLID.create();
+        icon.setTooltipText("Advanced search");
+        icon.getStyle().setCursor(CURSOR_POINTER);
+        searchTextField.setSuffixComponent(icon);
+
+        final Popover popover = new Popover();
+        popover.setModal(true);
+        popover.setWidth("340px");
+        popover.setTarget(searchTextField);
+        popover.add(setRowNumbersField);
+
+        this.searchTextField.setPlaceholder("Search");
         this.searchTextField.setTooltipText("Filter by: offset or ascii/text");
         this.searchTextField.setPrefixComponent(VaadinIcon.SEARCH.create());
         this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
         this.searchTextField.setClearButtonVisible(true);
         this.searchTextField.getStyle().set("max-width", "100%");
-        this.searchTextField.addValueChangeListener(valueChangeEvent -> {
-
-            this.addPaginationOnGrid(valueChangeEvent.getValue());
-
-        });
+        this.searchTextField.addValueChangeListener(valueChangeEvent -> this.addPaginationOnGrid(valueChangeEvent.getValue()));
 
         this.setRowNumbersField.setPlaceholder("Set row numbers");
         this.setRowNumbersField.setTooltipText("Set row numbers");
         this.setRowNumbersField.setClearButtonVisible(true);
         this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
         this.setRowNumbersField.addValueChangeListener(event -> {
-
             if (event.isFromClient() && event.getValue() != null) {
-                final Integer rowsToShowAkaPageSize = event.getValue();
-                this.grid.setPageSize(rowsToShowAkaPageSize);
+                final Integer reconfigureNumberOfRecords = event.getValue();
+                this.grid.setPageSize(reconfigureNumberOfRecords);
                 this.addPaginationOnGrid(StringUtils.EMPTY);
             }
-
         });
 
         final VerticalLayout verticalLayout = new VerticalLayout(gridRoot);

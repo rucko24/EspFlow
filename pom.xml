@@ -170,19 +170,6 @@
             <version>2.0.0</version>
         </dependency>
 
-        <!-- https://vaadin.com/directory/component/tree -->
-        <dependency>
-            <groupId>org.vaadin.tatu</groupId>
-            <artifactId>tree</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.vaadin.addons.themeselect</groupId>-->
-<!--            <artifactId>themeselect</artifactId>-->
-<!--            <version>1.0.1</version>-->
-<!--        </dependency>-->
-
         <!-- https://central.sonatype.com/artifact/org.junit-pioneer/junit-pioneer -->
         <dependency>
             <groupId>org.junit-pioneer</groupId>
