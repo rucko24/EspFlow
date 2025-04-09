@@ -11,6 +11,7 @@ import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.hexdump.HexDumpView;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.esp.espflow.views.settings.SettingsDialogView;
+import com.esp.espflow.views.webserial.WebSerialView;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -49,6 +50,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import lombok.extern.log4j.Log4j2;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
@@ -266,6 +268,10 @@ public class MainLayout extends AppLayout {
 
         if (accessChecker.hasAccess(HexDumpView.class)) {
             nav.addItem(new SideNavItem("HexDump", HexDumpView.class, SvgFactory.createIconFromSvg(TABLE_SVG, SIZE_25_PX, null)));
+        }
+
+        if (accessChecker.hasAccess(WebSerialView.class)) {
+            nav.addItem(new SideNavItem("Web-Serial", WebSerialView.class, LineAwesomeIcon.USB.create()));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {
