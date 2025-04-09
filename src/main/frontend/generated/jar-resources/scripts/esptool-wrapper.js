@@ -9,6 +9,15 @@ let transport = null;
 let device = null;
 const serialLib = !navigator.serial && navigator.usb ? serial : navigator.serial;
 
+// Variable privada para guardar la referencia al servidor de Vaadin
+let espTerminalServerRef = null;
+
+// Función para que el servidor se registre y se guarde la referencia
+window.setEspTerminalServerRef = function(server) {
+  espTerminalServerRef = server;
+  console.log("espTerminalServerRef asignado:", espTerminalServerRef);
+};
+
 /**
  * Conecta o desconecta el dispositivo en modo toggle.
  * Si ya hay conexión activa, se desconecta;
@@ -51,7 +60,7 @@ window.espConnect = async (baudRate, noReset) => {
     const options = {
       transport: transport,
       baudrate: parseInt(baudRate),
-      terminal: espLoaderTerminal,
+      terminal: window.espLoaderTerminal,
       debugLogging: false
     };
 
@@ -188,24 +197,26 @@ window.espWriteFlash = async (address, hexString, eraseAll) => {
   }
 };
 
-const espLoaderTerminal = {
+// Definimos el objeto terminal de forma global. Este objeto se utilizará para
+// escribir logs en el servidor a través de los métodos expuestos en $server.
+window.espLoaderTerminal = {
   clean() {
-    if (window.$server && window.$server.cleanLog) {
-      window.$server.cleanLog();
+    if (espTerminalServerRef && espTerminalServerRef.cleanLog) {
+      espTerminalServerRef.cleanLog();
     } else {
       console.log("Terminal clean: función cleanLog no disponible");
     }
   },
   writeLine(data) {
-    if (window.$server && window.$server.writeLogLine) {
-      window.$server.writeLogLine(data);
+    if (espTerminalServerRef && espTerminalServerRef.writeLogLine) {
+      espTerminalServerRef.writeLogLine(data);
     } else {
       console.log("Terminal writeLine:", data);
     }
   },
   write(data) {
-    if (window.$server && window.$server.writeLog) {
-      window.$server.writeLog(data);
+    if (espTerminalServerRef && espTerminalServerRef.writeLog) {
+      espTerminalServerRef.writeLog(data);
     } else {
       console.log("Terminal write:", data);
     }

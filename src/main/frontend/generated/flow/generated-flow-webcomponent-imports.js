@@ -17,7 +17,6 @@ import '@vaadin/dialog/theme/lumo/vaadin-dialog.js';
 import 'Frontend/generated/jar-resources/flow-component-renderer.js';
 import 'Frontend/generated/jar-resources/scripts/copy_to_clipboard.js';
 import '@vaadin/login/theme/lumo/vaadin-login-overlay.js';
-import 'Frontend/generated/jar-resources/scripts/esptool-wrapper.js';
 import 'Frontend/generated/jar-resources/paper-slider/fc-l2t-paper-slider.js';
 import 'Frontend/generated/jar-resources/fc-xterm/xterm-element.ts';
 import 'Frontend/generated/jar-resources/fc-xterm/xterm.ts';
@@ -114,6 +113,7 @@ import '@vaadin/vaadin-lumo-styles/spacing.js';
 import '@vaadin/vaadin-lumo-styles/style.js';
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
 import 'Frontend/generated/jar-resources/clipboard-helper.js';
+import 'Frontend/generated/jar-resources/scripts/esptool-wrapper.js';
 
 injectGlobalCss($cssFromFile_0.toString(), 'CSSImport end', document);
 injectGlobalWebcomponentCss($cssFromFile_0.toString());

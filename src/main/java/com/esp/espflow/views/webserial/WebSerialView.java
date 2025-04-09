@@ -7,6 +7,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -19,6 +20,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.ui.LoadMode;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.RolesAllowed;
@@ -36,7 +38,7 @@ import java.io.InputStream;
 @PageTitle("WebSerial")
 @Route(value = "web-serial-api", layout = MainLayout.class)
 @JsModule("./scripts/copy_to_clipboard.js")
-@JsModule("./scripts/esptool-wrapper.js")
+@JavaScript(value = "./scripts/esptool-wrapper.js", loadMode = LoadMode.EAGER)
 @RolesAllowed("ADMIN")
 public class WebSerialView extends VerticalLayout {
 
@@ -57,6 +59,9 @@ public class WebSerialView extends VerticalLayout {
     private byte[] fileContent = null;
 
     public WebSerialView() {
+        // Esto se podría hacer una sola vez, en el constructor de la vista:
+        getElement().executeJs("window.setEspTerminalServerRef(this.$server);");
+
         setPadding(true);
         setSpacing(true);
 
@@ -105,14 +110,15 @@ public class WebSerialView extends VerticalLayout {
                                 log.info("Operación exitosa: {}", (jsonResult.has("message")
                                         ? jsonResult.get("message").getAsString()
                                         : ""));
-                                resultArea.setValue("Operación exitosa: " + (jsonResult.has("message")
-                                                ? jsonResult.get("message").getAsString()
-                                                : ""));
+                                resultArea.setValue(resultArea.getValue().concat("\n") +
+                                        "Operación exitosa: " + (jsonResult.has("message")
+                                        ? jsonResult.get("message").getAsString()
+                                        : ""));
                             } else {
                                 log.error("Error {}", jsonResult.get("error").getAsString());
                                 resultArea.setValue("Error: " + jsonResult.get("error").getAsString());
                             }
-                        } catch(Exception ex) {
+                        } catch (Exception ex) {
                             log.error("Error {}", ex.getMessage());
                             resultArea.setValue("Error al procesar el resultado: " + ex.getMessage());
                         }
@@ -240,23 +246,19 @@ public class WebSerialView extends VerticalLayout {
 
     @ClientCallable
     public void cleanLog() {
-        // Actualizar un TextArea o componente similar, por ejemplo:
-        Notification.show("clean()");
-        log.info("Clean()");
+        resultArea.setValue("");
     }
 
     @ClientCallable
     public void writeLogLine(String msg) {
-
-        Notification.show("writeLogLine() " + msg);
+        resultArea.setValue(resultArea.getValue().concat(msg.concat("\n")));
         log.info("writeLogLine() {}", msg);
     }
 
     @ClientCallable
     public void writeLog(String msg) {
-        Notification.show("writeLog() " + msg);
+        resultArea.setValue(msg.concat("\n"));
         log.info("writeLog() {}", msg);
-
     }
 
 
