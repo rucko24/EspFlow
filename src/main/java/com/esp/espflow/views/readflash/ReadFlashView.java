@@ -12,7 +12,6 @@ import com.esp.espflow.service.downloader.FlashDownloadButtonService;
 import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
-import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
@@ -66,8 +65,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
-import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -143,8 +140,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * Publisher for RefreshDevicesEvent
      */
     private final Sinks.Many<RefreshDevicesEvent> publisherRefreshEvent;
-    private final Flux<RefreshDevicesEvent> subscriberRefreshEvent;
-    private Disposable disposableRefreshEvents;
 
     /*
      * Show initial wizard
@@ -593,8 +588,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 ConfirmDialogBuilder.showWarning(canNotBeReadDevice.getMessage());
                 this.setDivCarouselNoDevicesShown();
                 this.leftPrimarySectionProgressBar.setVisible(false);
-                //this.buttonRefreshDevices.setEnabled(true);
-                BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.ENABLE);
+                this.updateButtonState(true);
+                publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.ENABLE);
             });
         } catch (UIDetachedException ex) {
             //Do nothing
@@ -614,11 +609,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         ui.access(() -> {
             this.leftPrimarySectionProgressBar.setVisible(false);
             //this.buttonRefreshDevices.setEnabled(true);
-            this.updateButtonState(true);
+            //this.updateButtonState(true);
             //Enviar evento aqui con Sinks.Many de project reactor
             //BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.ENABLE);
             publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.ENABLE);
-
+            log.info("Subscribers count {}", publisherRefreshEvent.currentSubscriberCount());
             if (spanErrorPortList.isEmpty()) {
                 this.divWithPortErrors.setVisible(false);
                 this.divWithPortErrors.removeAll();
@@ -650,10 +645,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     }
 
     public void updateButtonState(boolean enabled) {
-        // Ejecuta js para cambiar la propiedad disabled del botón con id "button-refresh-device"
-        this.getElement().executeJs(
-                "document.getElementById('button-refresh-device').disabled = $0", !enabled
-        );
+        this.getElement().executeJs("document.getElementById('button-refresh-device').disabled = $0", !enabled);
     }
 
 
@@ -681,18 +673,20 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     }
 
     /**
-     * This button triggers the scanning of the microcontrollers and creates the slides, it also updates the footer badges.
+     * This method triggers the scanning of the microcontrollers and creates the slides, it also updates the footer badges.
      * <p>
      * It is also disabled on the first click preventing the user from clicking and another scan is processed to avoid interfering with the previous one.
      *
-     * @param refreshDevicesEvent
+     * @param refreshDevicesEvent events to process them in this view
      */
-    //FIXME quizas con project reactor en vez de ApplicationEventPublisher
     @EventListener
     public void refreshDevice(RefreshDevicesEvent refreshDevicesEvent) {
+        //Evento de scan, solo uno a la vez
         if (refreshDevicesEvent == RefreshDevicesEvent.SCAN) {
             getUI().ifPresent(ui -> {
+                //Evento de disable para los subscriptores
                 publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.DISABLE);
+                log.info("Send disable event");
                 final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), LOADING);
                 this.divCarousel.removeAll();
                 this.divCarousel.add(espDevicesCarousel);
@@ -711,65 +705,25 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         //Disabled event for buttonRefreshDevices while in use
-        this.disposableRefreshEvents = subscriberRefreshEvent
-                .subscribe(refreshDevicesEvent -> {
-                    try {
-                        var value = RefreshDevicesEvent.fromEvent(refreshDevicesEvent);
-                        event.getUI().access(() -> this.updateButtonState(value));
-                        log.info("beforeEnter value {}", value);
-                    } catch (UIDetachedException ex) {
-                        //Do nothing,  It is thrown when you attempt to access closed UI.
-                        //https://stackoverflow.com/a/73885127/7267818
-                    }
-                });
-
-    }
-
-    public void closeSubscribers() {
-        if (disposableRefreshEvents != null) {
-            disposableRefreshEvents.dispose();
-            disposableRefreshEvents = null;
-        }
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        this.closeSubscribers();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        this.closeSubscribers();
-        if (attachEvent.isInitialAttach()) {
-            final UI ui = attachEvent.getUI();
-
-            this.disposableRefreshEvents = this.subscriberRefreshEvent.subscribe(refreshDevicesEvent -> {
-                var value = RefreshDevicesEvent.fromEvent(refreshDevicesEvent);
-                try {
-                    ui.access(() -> this.updateButtonState(value));
-                    log.info("on attach value {}", value);
-                } catch (UIDetachedException ex) {
-                }
-            });
-
-            //Disabled event for buttonRefreshDevices while in use
-            this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value -> {
-                try {
-                    //ui.access(() -> this.buttonRefreshDevices.setEnabled(value));
-                } catch (UIDetachedException ex) {
-                }
-            });
-        }
         final UI ui = attachEvent.getUI();
         ui.getPage().executeJs(
-                "if (window.location.hash) { " +
-                        "  var hash = window.location.hash.substring(1); " + // Delete the '#'
-                        "  return hash; " +
-                        "}"
+                """
+                        if (window.location.hash) {
+                          var hash = window.location.hash.substring(1); // Delete the '#'
+                          return hash;"
+                        }
+                        """
         ).then(String.class, hash -> {
-            //log.info("Urifragment hash={}", hash);
             if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
                 this.add(this.wizardReadFlashView);
                 this.wizardReadFlashView.openAndDisableModeless();

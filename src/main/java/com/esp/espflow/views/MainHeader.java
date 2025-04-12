@@ -7,6 +7,8 @@ import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -32,7 +34,9 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -70,16 +74,20 @@ public class MainHeader extends HorizontalLayout {
     private final SettingsDialogView settingsDialogView;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final Flux<RefreshDevicesEvent> subscriberRefreshDevicesEvent;
+    private final Sinks.Many<RefreshDevicesEvent> publisherRefreshEvent;
+    private Disposable disposableRefreshEvents;
 
     private H1 viewTitle;
 
     public MainHeader(final SettingsDialogView settingsDialogView,
                       final ApplicationEventPublisher applicationEventPublisher,
-                      final Flux<RefreshDevicesEvent> subscriberRefreshDevicesEvent) {
+                      final Flux<RefreshDevicesEvent> subscriberRefreshDevicesEvent,
+                      final Sinks.Many<RefreshDevicesEvent> publisherRefreshEvent) {
 
         this.settingsDialogView = settingsDialogView;
         this.applicationEventPublisher = applicationEventPublisher;
         this.subscriberRefreshDevicesEvent = subscriberRefreshDevicesEvent;
+        this.publisherRefreshEvent = publisherRefreshEvent;
     }
 
     /**
@@ -171,6 +179,7 @@ public class MainHeader extends HorizontalLayout {
         this.infoCircleIcon.setTooltipText("Show dialog");
 
         //Added listeners here, only once
+        //Envio de scan
         this.buttonRefreshDevices.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.SCAN));
         this.buttonConfigure.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.OPEN_SIDEBAR));
         this.infoCircleIcon.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.OPEN_READ_FLASH_WIZARD));
@@ -207,14 +216,35 @@ public class MainHeader extends HorizontalLayout {
         }
     }
 
+    public void closeSubscribers() {
+        if (disposableRefreshEvents != null) {
+            disposableRefreshEvents.dispose();
+            disposableRefreshEvents = null;
+        }
+    }
+
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
+        this.closeSubscribers();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        final UI ui = attachEvent.getUI();
+        this.closeSubscribers();
+        this.disposableRefreshEvents = this.subscriberRefreshDevicesEvent.subscribe(refreshDevicesEvent -> {
 
+            try {
+                var value = RefreshDevicesEvent.fromEvent(refreshDevicesEvent);
+                ui.access(() -> this.buttonRefreshDevices.setEnabled(value));
+                log.info("onAttach value {}", value);
+            } catch (UIDetachedException ex) {
+                //Do nothing,  It is thrown when you attempt to access closed UI.
+                //https://stackoverflow.com/a/73885127/7267818
+            }
+
+        });
     }
 }
