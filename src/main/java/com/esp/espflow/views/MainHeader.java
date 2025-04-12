@@ -166,7 +166,10 @@ public class MainHeader extends HorizontalLayout {
 
         this.infoCircleIcon.setVisible(false);
         Stream.of(this.buttonConfigure, this.buttonRefreshDevices)
-                .forEach(button -> button.setVisible(false));
+                .forEach(button -> {
+                    button.setVisible(false);
+                    button.addClassName("header-read-flash-buttons-no-label");
+                });
         this.buttonConfigure.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         this.buttonRefreshDevices.setId("button-refresh-device");
         this.buttonRefreshDevices.setEnabled(true);

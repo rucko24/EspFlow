@@ -38,8 +38,3 @@ vaadin-dialog-overlay.settings-content-dialog::part(backdrop) {
     transition: 0.5s;
     height: 100%;
 }
-
-@media (max-width: 800px) {
-
-}
-
