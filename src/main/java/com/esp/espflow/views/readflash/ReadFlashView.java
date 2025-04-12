@@ -588,7 +588,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 ConfirmDialogBuilder.showWarning(canNotBeReadDevice.getMessage());
                 this.setDivCarouselNoDevicesShown();
                 this.leftPrimarySectionProgressBar.setVisible(false);
-                this.updateButtonState(true);
                 publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.ENABLE);
             });
         } catch (UIDetachedException ex) {
@@ -643,11 +642,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             }
         });
     }
-
-    public void updateButtonState(boolean enabled) {
-        this.getElement().executeJs("document.getElementById('button-refresh-device').disabled = $0", !enabled);
-    }
-
 
     /**
      * It is invoked when the reactive stream ends, in the {@link ReadFlashView#onComplete(UI, EspDevicesCarousel, Set)}
@@ -719,8 +713,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         ui.getPage().executeJs(
                 """
                         if (window.location.hash) {
-                          var hash = window.location.hash.substring(1); // Delete the '#'
-                          return hash;"
+                            return window.location.hash.substring(1); // Elimina el '#'
                         }
                         """
         ).then(String.class, hash -> {
