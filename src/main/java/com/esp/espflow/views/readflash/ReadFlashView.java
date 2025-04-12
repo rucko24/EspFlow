@@ -66,6 +66,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
+import reactor.core.Disposable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -141,6 +143,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * Publisher for RefreshDevicesEvent
      */
     private final Sinks.Many<RefreshDevicesEvent> publisherRefreshEvent;
+    private final Flux<RefreshDevicesEvent> subscriberRefreshEvent;
+    private Disposable disposableRefreshEvents;
 
     /*
      * Show initial wizard
@@ -610,8 +614,11 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         ui.access(() -> {
             this.leftPrimarySectionProgressBar.setVisible(false);
             //this.buttonRefreshDevices.setEnabled(true);
+            this.updateButtonState(true);
             //Enviar evento aqui con Sinks.Many de project reactor
-            BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.ENABLE);
+            //BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.ENABLE);
+            publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.ENABLE);
+
             if (spanErrorPortList.isEmpty()) {
                 this.divWithPortErrors.setVisible(false);
                 this.divWithPortErrors.removeAll();
@@ -641,6 +648,14 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             }
         });
     }
+
+    public void updateButtonState(boolean enabled) {
+        // Ejecuta js para cambiar la propiedad disabled del botón con id "button-refresh-device"
+        this.getElement().executeJs(
+                "document.getElementById('button-refresh-device').disabled = $0", !enabled
+        );
+    }
+
 
     /**
      * It is invoked when the reactive stream ends, in the {@link ReadFlashView#onComplete(UI, EspDevicesCarousel, Set)}
@@ -672,11 +687,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      *
      * @param refreshDevicesEvent
      */
+    //FIXME quizas con project reactor en vez de ApplicationEventPublisher
     @EventListener
     public void refreshDevice(RefreshDevicesEvent refreshDevicesEvent) {
         if (refreshDevicesEvent == RefreshDevicesEvent.SCAN) {
             getUI().ifPresent(ui -> {
-                BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.DISABLE);
+                publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.DISABLE);
                 final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), LOADING);
                 this.divCarousel.removeAll();
                 this.divCarousel.add(espDevicesCarousel);
@@ -695,31 +711,48 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         //Disabled event for buttonRefreshDevices while in use
-        //this.sidebarReadFlash.closeSidebar();
-        //publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.ENABLE)
+        this.disposableRefreshEvents = subscriberRefreshEvent
+                .subscribe(refreshDevicesEvent -> {
+                    try {
+                        var value = RefreshDevicesEvent.fromEvent(refreshDevicesEvent);
+                        event.getUI().access(() -> this.updateButtonState(value));
+                        log.info("beforeEnter value {}", value);
+                    } catch (UIDetachedException ex) {
+                        //Do nothing,  It is thrown when you attempt to access closed UI.
+                        //https://stackoverflow.com/a/73885127/7267818
+                    }
+                });
 
-        this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value -> {
-            try {
-                //event.getUI().access(() -> this.buttonRefreshDevices.setEnabled(value));
-            } catch (UIDetachedException ex) {
-                //Do nothing,  It is thrown when you attempt to access closed UI.
-                //https://stackoverflow.com/a/73885127/7267818
-            }
-        });
+    }
+
+    public void closeSubscribers() {
+        if (disposableRefreshEvents != null) {
+            disposableRefreshEvents.dispose();
+            disposableRefreshEvents = null;
+        }
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        broadcasterRefreshButton.remove();
-        broadcasterRefreshButton = null;
+        this.closeSubscribers();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        this.closeSubscribers();
         if (attachEvent.isInitialAttach()) {
-            super.onAttach(attachEvent);
             final UI ui = attachEvent.getUI();
+
+            this.disposableRefreshEvents = this.subscriberRefreshEvent.subscribe(refreshDevicesEvent -> {
+                var value = RefreshDevicesEvent.fromEvent(refreshDevicesEvent);
+                try {
+                    ui.access(() -> this.updateButtonState(value));
+                    log.info("on attach value {}", value);
+                } catch (UIDetachedException ex) {
+                }
+            });
 
             //Disabled event for buttonRefreshDevices while in use
             this.broadcasterRefreshButton = BroadcasterRefreshDevicesButton.INSTANCE.register(value -> {

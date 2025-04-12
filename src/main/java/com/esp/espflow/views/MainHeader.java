@@ -4,6 +4,8 @@ import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -30,6 +32,7 @@ import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import org.vaadin.lineawesome.LineAwesomeIcon;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -66,14 +69,17 @@ public class MainHeader extends HorizontalLayout {
      */
     private final SettingsDialogView settingsDialogView;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final Flux<RefreshDevicesEvent> subscriberRefreshDevicesEvent;
 
     private H1 viewTitle;
 
     public MainHeader(final SettingsDialogView settingsDialogView,
-                      final ApplicationEventPublisher applicationEventPublisher) {
+                      final ApplicationEventPublisher applicationEventPublisher,
+                      final Flux<RefreshDevicesEvent> subscriberRefreshDevicesEvent) {
 
         this.settingsDialogView = settingsDialogView;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.subscriberRefreshDevicesEvent = subscriberRefreshDevicesEvent;
     }
 
     /**
@@ -154,6 +160,8 @@ public class MainHeader extends HorizontalLayout {
         Stream.of(this.buttonConfigure, this.buttonRefreshDevices)
                 .forEach(button -> button.setVisible(false));
         this.buttonConfigure.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        this.buttonRefreshDevices.setId("button-refresh-device");
+        this.buttonRefreshDevices.setEnabled(true);
         this.buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         this.buttonRefreshDevices.addClickShortcut(Key.ENTER);
@@ -199,4 +207,14 @@ public class MainHeader extends HorizontalLayout {
         }
     }
 
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+    }
 }
