@@ -25,6 +25,9 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.time.Duration;
 
+import static com.esp.espflow.util.EspFlowConstants.CLOSE_SIDEBAR_OUTSIDE_CLICK;
+import static com.esp.espflow.util.EspFlowConstants.REMOVE_SIDEBAR_LISTENER;
+
 /**
  * @author rubn
  */
@@ -77,7 +80,6 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         form.setFlexDirection(Layout.FlexDirection.COLUMN);
 
         this.sidebar.add(header, leftFormForAddress);
-        //this.sidebar.addClassNames("sidebar-read-flash");
 
     }
 
@@ -91,17 +93,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
 
     private void openSidebar() {
         super.setModal(true);
-        super.getElement().executeJs(
-                """
-                        setTimeout(function() {
-                          document.addEventListener('click', function(e) {
-                            var sidebar = document.getElementById('sidebar');
-                            if (sidebar && !sidebar.contains(e.target)) {
-                              $0.$server.closeFromOutsideClick();
-                            }
-                          }, { once: true });
-                        }, 100);
-                        """, this);
+        this.sidebar.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, this);
         Animated.removeAnimations(this);
         Animated.animate(this.sidebar, Animated.Animation.FADE_IN_RIGHT);
         this.sidebar.addClassNames("end-0");
@@ -119,6 +111,8 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
             super.setModal(false);
             super.close();
         }, this, Duration.ofMillis(1500));
+        getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
+
     }
 
     @ClientCallable

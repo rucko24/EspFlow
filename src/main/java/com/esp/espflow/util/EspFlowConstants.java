@@ -125,26 +125,43 @@ public class EspFlowConstants {
     public static final String CONTEXT_MENU_ITEM_NO_CHECKMARK = "context-menu-item-no-checkmark";
     public static final String NAV_SETTINGS = "nav-settings";
     public static final String SCROLLBAR_CUSTOM_STYLE = """
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        ::-webkit-scrollbar {
-                            width: 8px;
-                            height: 8px;
-                        }
-                        ::-webkit-scrollbar-track {
-                            background-color: var(--bg2);
-                        }
-                        ::-webkit-scrollbar-thumb {
-                            background-color: hsla(0, 0%, 49.8%, 0.5);
-                            border-radius: 4px;
-                        }
-                    `;
-                    this.appendChild(style);
-                """;
+                const style = document.createElement('style');
+                style.textContent = `
+                    ::-webkit-scrollbar {
+                        width: 8px;
+                        height: 8px;
+                    }
+                    ::-webkit-scrollbar-track {
+                        background-color: var(--bg2);
+                    }
+                    ::-webkit-scrollbar-thumb {
+                        background-color: hsla(0, 0%, 49.8%, 0.5);
+                        border-radius: 4px;
+                    }
+                `;
+                this.appendChild(style);
+            """;
     public static final String CAN_NOT_COMPUTE_SHA_256 = "Can not compute sha256";
     public static final String WINDOW_COPY_TO_CLIPBOARD = "window.copyToClipboard($0)";
     public static final String CONTEXT_MENU_ITEM_GRID = "context-menu-item-grid";
     public static final String CONTINUE = "Continue...";
     public static final String SETTINGS_SHARP = "#settings";
+    public static final String CLOSE_SIDEBAR_OUTSIDE_CLICK = """
+            setTimeout(function() {
+              // Remove previous listeners
+              document.removeEventListener('click', window._sidebarOutsideClickListener);
+              // Define the listener and store it globally.
+              window._sidebarOutsideClickListener = function(e) {
+                 var sidebar = document.getElementById('sidebar');
+                 if (sidebar && !sidebar.contains(e.target)) {
+                   $0.$server.closeFromOutsideClick();
+                   // Remove the listener
+                   document.removeEventListener('click', window._sidebarOutsideClickListener);
+                 }
+              };
+              document.addEventListener('click', window._sidebarOutsideClickListener);
+            }, 100);
+            """;
+    public static final String REMOVE_SIDEBAR_LISTENER = "document.removeEventListener('click', window._sidebarOutsideClickListener);";
 
 }
