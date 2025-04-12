@@ -610,6 +610,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         ui.access(() -> {
             this.leftPrimarySectionProgressBar.setVisible(false);
             //this.buttonRefreshDevices.setEnabled(true);
+            //Enviar evento aqui con Sinks.Many de project reactor
             BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.ENABLE);
             if (spanErrorPortList.isEmpty()) {
                 this.divWithPortErrors.setVisible(false);
