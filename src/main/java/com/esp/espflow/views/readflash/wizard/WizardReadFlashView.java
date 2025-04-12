@@ -386,7 +386,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         titleIncorrectSizeAddress.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         titleIncorrectSizeAddress.setId(titleIncorrectSizeAddress.getText().replace(" ", "-").toLowerCase());
 
-        final Component descriptionIncorrectFinalFlashSize = showImageWithInformationAboutToggleButton();
+        final Component descriptionIncorrectFinalFlashSize = this.showImageWithInformationAboutToggleButton();
 
         final Hr separator = this.createSeparator();
 
@@ -486,6 +486,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         final Icon iconArrowRight = VaadinIcon.ARROW_RIGHT.create();
         Tooltip.forComponent(iconArrowRight).setText("Enable the toggle button!!!");
         iconArrowRight.setSize("30px");
+        iconArrowRight.addClassName(Bottom.LARGE);
         Animated.animate(iconArrowRight, Animation.HEART_BEAT, INFINITE);
 
         final HorizontalLayout row = new HorizontalLayout(iconArrowRight, image);
