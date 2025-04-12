@@ -15,6 +15,7 @@ import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.broadcaster.BroadcasterRefreshDevicesButton;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
+import com.esp.espflow.views.Layout;
 import com.esp.espflow.views.MainLayout;
 import com.esp.espflow.views.dialog.ChangeSerialPortPermissionDialog;
 import com.esp.espflow.views.readflash.wizard.WizardReadFlashView;
@@ -28,16 +29,21 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -51,6 +57,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignSelf;
 import com.vaadin.flow.theme.lumo.LumoUtility.Display;
@@ -65,6 +72,7 @@ import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -115,6 +123,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final ComboBox<BaudRatesEnum> baudRatesComboBox = new ComboBox<>("Baud rate");
     private final Span spanAutoDetectFlashSize = new Span("Set size address to ALL");
     private final Div divWithPortErrors = new Div();
+    private final Button buttonConfigure = new Button("Configure", LineAwesomeIcon.SLIDERS_H_SOLID.create());
+    private final Button buttonMore = new Button(VaadinIcon.INFO_CIRCLE.create());
     /**
      * Console output
      */
@@ -145,6 +155,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     private final WizardEspService wizardEspService;
 
+    private Section sidebar;
+
     @PostConstruct
     public void init() {
         super.setSizeFull();
@@ -167,16 +179,19 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private SplitLayout getSplitLayout() {
         final var splitLayout = new SplitLayout(Orientation.VERTICAL);
         splitLayout.setSizeFull();
-        splitLayout.setSplitterPosition(65);
+        splitLayout.setSplitterPosition(70);
         splitLayout.getStyle().set(OVERFLOW_Y, HIDDEN);
         splitLayout.getStyle().set(OVERFLOW_X, HIDDEN);
         /*
          * Primary section
          */
-        final var rightFormForAddress = this.rigthFormForAddress();
-        final var divForLeftCarousel = divForLeftCarousel();
-        final var horizontalLayoutToPrimarySection = horizontalLayoutToPrimarySection(rightFormForAddress, divForLeftCarousel);
-        splitLayout.addToPrimary(horizontalLayoutToPrimarySection);
+        final HorizontalLayout headerConfigurationButtons = this.headerConfigurationButtons();
+        final Div divForRightCarousel = this.divForRightCarousel();
+        final var horizontalLayoutToPrimarySection = this.horizontalLayoutToPrimarySection(divForRightCarousel);
+
+        final VerticalLayout verticalLayoutPrimarySecction = new VerticalLayout(this.createSection(), headerConfigurationButtons, horizontalLayoutToPrimarySection);
+        verticalLayoutPrimarySecction.setSizeFull();
+        splitLayout.addToPrimary(verticalLayoutPrimarySecction);
         /*
          * Secondary section
          */
@@ -199,18 +214,102 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         return splitLayout;
     }
 
+    private Section createSection() {
+        final H2 title = new H2("Configure");
+        title.addClassNames(LumoUtility.FontSize.MEDIUM);
+
+        final Button close = new Button(LineAwesomeIcon.TIMES_SOLID.create(), e -> closeSidebar());
+        close.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        close.addClassName(Padding.Right.NONE);
+        close.setAriaLabel("Close sidebar");
+        close.setTooltipText("Close sidebar");
+
+        final Layout header = new Layout(title, close);
+        header.addClassNames(Padding.End.LARGE, Padding.Start.LARGE, Padding.Vertical.SMALL);
+        header.setAlignItems(Layout.AlignItems.CENTER);
+        header.setJustifyContent(Layout.JustifyContent.BETWEEN);
+
+        final var rightFormForAddress = this.rigthFormForAddress();
+        rightFormForAddress.addClassNames(Padding.End.LARGE, Padding.Start.LARGE, Padding.Vertical.SMALL);
+
+        Layout form = new Layout(rightFormForAddress);
+        form.addClassNames(Padding.Horizontal.LARGE);
+        form.setFlexDirection(Layout.FlexDirection.COLUMN);
+
+        this.sidebar = new Section(header, rightFormForAddress);
+        this.sidebar.addClassNames("backdrop-blur-sm",
+                "bg-tint-90",
+                LumoUtility.Border.RIGHT,
+                Display.FLEX, FlexDirection.COLUMN,
+                LumoUtility.Position.ABSOLUTE,
+                //"lg:static",
+                "bottom-0",
+                "top-0",
+                "transition-all",
+                "z-10");
+        this.sidebar.setWidth(20, Unit.REM);
+        this.closeSidebar();
+        return this.sidebar;
+    }
+
+    private void toggleSidebar() {
+        if (this.sidebar.isEnabled()) {
+            this.closeSidebar();
+        } else {
+            this.openSidebar();
+        }
+    }
+
+    private void openSidebar() {
+        this.sidebar.setEnabled(true);
+        this.sidebar.addClassNames(LumoUtility.Border.RIGHT);
+        // Desktop
+        this.sidebar.getStyle().remove("margin-inline-start");
+        // Mobile
+        this.sidebar.addClassNames("start-0");
+        this.sidebar.removeClassName("-start-full");
+    }
+
+    private void closeSidebar() {
+        this.sidebar.setEnabled(false);
+        this.sidebar.removeClassName(LumoUtility.Border.RIGHT);
+        // Desktop
+        this.sidebar.getStyle().set("margin-inline-start", "-20rem");
+        // Mobile
+        this.sidebar.addClassNames("-start-full");
+        this.sidebar.removeClassName("start-0");
+    }
+
     /**
-     * @param rightFormForAddress The form in the right-hand corner with the textfields for the memory zones
-     * @param divForLeftCarousel  The carousel with the scanned scans
+     * @param divForRightCarousel The carousel with the scanned scans
      * @return A {@link HorizontalLayout} with the form on the right and the carousel on the left side
      */
-    private HorizontalLayout horizontalLayoutToPrimarySection(Div rightFormForAddress, Div divForLeftCarousel) {
+    private HorizontalLayout horizontalLayoutToPrimarySection(Div divForRightCarousel) {
         this.leftPrimarySectionProgressBar.setVisible(false);
         this.leftPrimarySectionProgressBar.setIndeterminate(true);
         this.horizontalLayoutForPrimarySection.setId("div-for-primary");
         this.horizontalLayoutForPrimarySection.setSizeFull();
-        this.horizontalLayoutForPrimarySection.add(rightFormForAddress, divForLeftCarousel);
+        this.horizontalLayoutForPrimarySection.setJustifyContentMode(JustifyContentMode.CENTER);
+        this.horizontalLayoutForPrimarySection.add(divForRightCarousel);
         return horizontalLayoutForPrimarySection;
+    }
+
+    private HorizontalLayout headerConfigurationButtons() {
+        buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        buttonConfigure.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonMore.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonConfigure.addClickListener(event -> this.toggleSidebar());
+
+        buttonMore.setTooltipText("Show dialog");
+        buttonMore.addClickListener(event -> {
+            this.add(this.wizardReadFlashView);
+            this.wizardReadFlashView.openAndDisableModeless();
+        });
+
+        final HorizontalLayout horizontalLayout = new HorizontalLayout(buttonMore, buttonConfigure, buttonRefreshDevices);
+        horizontalLayout.setWidthFull();
+        horizontalLayout.setJustifyContentMode(JustifyContentMode.END);
+        return horizontalLayout;
     }
 
     /**
@@ -221,13 +320,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private Div rigthFormForAddress() {
         var rowAutoSize = new HorizontalLayout(autoDetectFlashSize, spanAutoDetectFlashSize);
         rowAutoSize.setWidthFull();
-        final Div formLayout = new Div(buttonRefreshDevices, startAddress, endAddress, baudRatesComboBox, rowAutoSize, leftPrimarySectionProgressBar);
-        Stream.of(buttonRefreshDevices, startAddress, endAddress, rowAutoSize, baudRatesComboBox, leftPrimarySectionProgressBar)
+        rowAutoSize.addClassNames(LumoUtility.Margin.Top.MEDIUM);
+        final Div formLayout = new Div(startAddress, endAddress, baudRatesComboBox, rowAutoSize, leftPrimarySectionProgressBar);
+        Stream.of(startAddress, endAddress, rowAutoSize, baudRatesComboBox, leftPrimarySectionProgressBar)
                 .forEach(items -> {
                     items.addClassName(AlignSelf.BASELINE);
                     items.setWidthFull();
                 });
-        formLayout.addClassNames(Display.FLEX, FlexDirection.COLUMN, AlignItems.START, JustifyContent.CENTER);
+        formLayout.addClassNames(Display.FLEX, FlexDirection.COLUMN, LumoUtility.Width.FULL,
+                AlignItems.START, JustifyContent.CENTER);
 
         startAddress.setTooltipText("default size is 0");
         endAddress.setTooltipText("default size is 0, enable button to set to ALL");
@@ -254,8 +355,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.baudRatesComboBox.setValue(BaudRatesEnum.BAUD_RATE_115200);
         this.baudRatesComboBox.setItemLabelGenerator(BaudRatesEnum::toString);
         final Div parent = new Div(formLayout);
-        parent.setWidth("50%");
-        parent.addClassNames(Display.FLEX, JustifyContent.CENTER, AlignItems.CENTER);
+        parent.setId("parent-sidebar-content-div");
+        parent.addClassNames(Display.FLEX, AlignItems.CENTER);
 
         return parent;
     }
@@ -265,9 +366,9 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      *
      * @return A {@link Div}
      */
-    private Div divForLeftCarousel() {
+    private Div divForRightCarousel() {
         divCarousel.setId("div-carousel");
-        divCarousel.setWidth("50%");
+        //divCarousel.setWidth("50%");
         divCarousel.addClassNames(Padding.LARGE, AlignItems.CENTER, JustifyContent.CENTER);
         return divCarousel;
     }
@@ -341,7 +442,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         iconBlackLock.addClassName(BLACK_TO_WHITE_ICON);
         divWithIconAndText.add(iconBlackLock, text);
         contextMenuDivPortError.addItem(divWithIconAndText, event -> this.showErroneousPortsInDialog())
-                        .addClassName(CONTEXT_MENU_ITEM_NO_CHECKMARK);
+                .addClassName(CONTEXT_MENU_ITEM_NO_CHECKMARK);
 
         spanPortFailure.addClassName(Left.SMALL);
         spanPortFailure.getStyle().setCursor(CURSOR_POINTER);
@@ -350,8 +451,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         divSpanTotalDevices.getElement().getThemeList().add("badge");
 
         Stream.of(divSpanTotalDevices, divWithPortErrors).forEach(div -> {
-                    div.addClassNames(Right.MEDIUM, BOX_SHADOW_VAADIN_BUTTON);
-                });
+            div.addClassNames(Right.MEDIUM, BOX_SHADOW_VAADIN_BUTTON);
+        });
 
         final Div divForBadges = new Div(divSpanTotalDevices, divWithPortErrors);
         divForBadges.setId("divForBadges");
@@ -392,6 +493,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     private void refreshDevices(final UI ui) {
         buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonRefreshDevices.addClickShortcut(Key.ENTER);
         buttonRefreshDevices.setDisableOnClick(true);
         buttonRefreshDevices.addClickListener(event -> {
             BroadcasterRefreshDevicesButton.INSTANCE.broadcast(RefreshDevicesEvent.DISABLE);
