@@ -44,6 +44,7 @@ import reactor.core.publisher.Sinks;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
@@ -245,7 +246,8 @@ public class ShowDevicesBuilder {
 
         @Override
         public AllAddressSizeStage withCustomFlashSizeAddress(IntegerField customFlashSizeAddress) {
-            var customSize = customFlashSizeAddress.getValue().toString();
+            final Integer integerValue = Optional.ofNullable(customFlashSizeAddress.getValue()).orElse(0);
+            final String customSize = integerValue.toString();
             if (customSize.matches("\\d+") || customSize.isEmpty()) {
                 this.customSizeToRead = customFlashSizeAddress;
             } else {
@@ -257,7 +259,8 @@ public class ShowDevicesBuilder {
 
         @Override
         public EndAddressSizeStage withStartSizeAddress(IntegerField startSizeAddress) {
-            var startSize = startSizeAddress.getValue().toString();
+            final Integer integerValue = Optional.ofNullable(startSizeAddress.getValue()).orElse(0);
+            final String startSize = integerValue.toString();
             if (startSize.matches("\\d+") || startSize.isEmpty()) {
                 this.startAddressSize = startSizeAddress;
             } else {
