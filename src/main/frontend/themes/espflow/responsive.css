@@ -1,0 +1,267 @@
+
+@media (max-width: 1155px) {
+     .vertical-parent {
+        margin-right: 10px;
+    }
+
+    .vertical-flex-wrap {
+        display: flex;
+        width: 100%;
+        justify-content: space-around;
+        flex-wrap: wrap-reverse;
+    }
+
+    .header-flex-wrap {
+        margin: 10px;
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .serial-port-h3-div {
+        display: flex;
+        width: 100%;
+        margin-left: 10px;
+        justify-content: center;
+    }
+
+    .baud-rate-flex-wrap {
+      //display: flex;
+      //margin-left: 10px;
+      //width: 100%;
+      //justify-content: center;
+      //flex-wrap: wrap;
+    }
+
+    .baud-rate-h3-div {
+        //display: flex;
+        //width: 100%;
+        //align-items: center;
+        //justify-content: center;
+    }
+
+    .baud-rate-radio-button {
+        //margin-left: 0px !important;
+    }
+
+    .firmwareh3-vaadin-upload-div {
+        margin-left: 10px;
+        display: flex;
+        //width: 100%;
+        //justify-content: center;
+        //flex-wrap: wrap;
+    }
+
+    .h2-firmware-div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        //width: 100%;
+    }
+
+    .vaadin-upload {
+       border: none;
+       padding: 0px;
+       display: flex;
+       margin-left: 0px !important;
+    }
+
+    .h3-text-area-div {
+        display: flex;
+        margin-left: 10px;
+        flex-direction: column;
+        overflow-y: visible !important;
+    }
+
+    .child-text-area-console {
+       margin-bottom: 10px;
+       height: 98%;
+       //maring-right: 20px;
+    }
+
+    .text-area-console-div {
+        margin-left: 0px !important;
+        overflow-y: hidden;
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+     vaadin-dialog-overlay.settings-content-dialog::part(overlay) {
+          width: 100%;
+     }
+
+     .main-settings {
+          flex-direction: column !important;
+     }
+
+     .nav-settings {
+          width: 0;
+          position: absolute;
+          z-index: 1;
+          background: #ffffff;
+          left: 0;
+          overflow-x: hidden;
+          transition: 0.5s;
+          padding-top: 0px;
+          box-shadow: var(--custom-box-shadow);
+          border-radius: 9px 9px 9px;
+     }
+
+     vaadin-button .button-cross-nav-settings {
+         visibility: visible;
+         align-self: end;
+         display: block;
+     }
+
+     #div-item-container {
+          width: 100%;
+          /*hidden: true;*/
+     }
+
+     .svg-icon-settings {
+          width: var(--icon-svg-settings-size) !important;
+          height: var(--icon-svg-settings-size) !important;
+     }
+
+     .settings-button-toggle {
+          display: flex !important;
+          width: 10%;
+          align-self: start;
+     }
+
+     vaadin-dialog-overlay.settings-content-dialog::part(content) {
+       overflow: auto;
+       overflow-x: hidden;
+       scrollbar-width: thin;
+     }
+
+    .vertical-parent {
+        margin-right: 10px;
+    }
+
+    .vertical-flex-wrap {
+        display: flex;
+        width: 100%;
+        justify-content: space-around;
+        flex-wrap: wrap-reverse;
+    }
+
+    .header-flex-wrap {
+        margin: 10px;
+        display: flex;
+        width: 100%;
+        min-width: 100%;
+        align-items: baseline;
+        flex-wrap: wrap;
+    }
+
+    .serial-port-h3-div {
+        display: flex;
+        width: 100%;
+        margin-left: 10px;
+        justify-content: center;
+    }
+
+    .baud-rate-h3-div {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .baud-rate-radio-button {
+        margin-left: 0px !important;
+    }
+
+    .baud-rate-flex-wrap {
+        display: flex;
+        margin-left: 10px;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .firmwareh3-vaadin-upload-div {
+        margin-left: 10px;
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .h2-firmware-div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        //width: 100%;
+    }
+
+    .vaadin-upload {
+       border: none;
+       padding: 0px;
+       display: flex;
+       margin-left: 0px !important;
+    }
+
+    .h3-text-area-div {
+        display: flex;
+        width: 96% !important;
+        margin-left: 10px;
+        flex-direction: column;
+        overflow-y: visible !important;
+    }
+
+    .child-text-area-console {
+       margin-bottom: 10px;
+       height: 98%;
+       overflow-x: hidden;
+    }
+
+    .text-area-console-div {
+        margin-left: 0px !important;
+        overflow-y: hidden;
+    }
+
+    .sidebar-read-flash {
+        inset-inline-start: 0em !important;
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .sidebar-read-flash {
+        inset-inline-start: 0em !important;
+    }
+
+    .row-header-hexdump {
+       display: flex;
+       flex-direction: column;
+    }
+}
+
+@media (max-width: 400px) {
+
+    .row-about {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-items: center !important;
+        justify-content: center;
+    }
+
+    .row-span-flash-size-footer {
+        font-size: 70% !important;
+    }
+
+     [part="meta"] {
+         display: inline-grid;
+         flex-direction: column;
+     }
+
+}

@@ -1,0 +1,30 @@
+
+vaadin-popover-overlay.popover-sidebar::part(backdrop) {
+    backdrop-filter: blur(1px);
+    will-change: backdrop-filter;
+    -webkit-backdrop-filter: blur(1px);
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+/* Do not show white center when opening popover */
+vaadin-popover-overlay.popover-sidebar::part(content) {
+    padding: 0;
+}
+
+.sidebar-read-flash {
+    display: flex;
+    flex-direction: column;
+    width: 20rem;
+    background-color: var(--lumo-base-color);
+    box-shadow: var(--lumo-box-shadow-m);
+    position: fixed;
+    transition: transition-all;
+    z-index: 10;
+    overflow: hidden;
+    top: 50px;
+    bottom: 40px;
+    inset-inline-start: 16.0em;
+}

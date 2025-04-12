@@ -25,10 +25,10 @@ import java.time.ZoneOffset;
 @Log4j2
 public class EspflowMessageListItemEvent extends MessageListItem {
 
-    public EspflowMessageListItemEvent(String message, String userName, String icon) {
+    public EspflowMessageListItemEvent(String message, String title, String icon) {
         super.setText(message);
         super.setTime(LocalDateTime.now().toInstant(ZoneOffset.UTC));
-        super.setUserName(userName);
+        super.setUserName(title);
         super.setUserImage("frontend/images/svg-icons/" + icon);
     }
 

@@ -41,54 +41,5 @@ vaadin-dialog-overlay.settings-content-dialog::part(backdrop) {
 
 @media (max-width: 800px) {
 
-   vaadin-dialog-overlay.settings-content-dialog::part(overlay) {
-        width: 100%;
-   }
-
-   .main-settings {
-        flex-direction: column !important;
-   }
-
-   .nav-settings {
-        width: 0;
-        position: absolute;
-        z-index: 1;
-        background: #ffffff;
-        left: 0;
-        overflow-x: hidden;
-        transition: 0.5s;
-        padding-top: 0px;
-        box-shadow: var(--custom-box-shadow);
-        border-radius: 9px 9px 9px;
-   }
-
-   vaadin-button .button-cross-nav-settings {
-       visibility: visible;
-       align-self: end;
-       display: block;
-   }
-
-   #div-item-container {
-        width: 100%;
-        /*hidden: true;*/
-   }
-
-   .svg-icon-settings {
-        width: var(--icon-svg-settings-size) !important;
-        height: var(--icon-svg-settings-size) !important;
-   }
-
-   .settings-button-toggle {
-        display: flex !important;
-        width: 10%;
-        align-self: start;
-   }
-
-   vaadin-dialog-overlay.settings-content-dialog::part(content) {
-     overflow: auto;
-     overflow-x: hidden;
-     scrollbar-width: thin;
-   }
-
 }
 

@@ -1,8 +1,8 @@
 package com.esp.espflow.views.webserial;
 
+import com.esp.espflow.entity.dto.WebSerialClientDto;
 import com.esp.espflow.views.MainLayout;
-import com.nimbusds.jose.shaded.gson.JsonObject;
-import com.nimbusds.jose.shaded.gson.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -44,6 +44,7 @@ public class WebSerialView extends VerticalLayout {
 
     // Constantes para las llamadas JavaScript
     private static final String JS_CONNECT = "return window.espConnect($0, $1, $2)";
+    private static final String JS_HARD_RESET = "window.testHardReset()";
     private static final String JS_FLASH_ID = "return window.espFlashId()";
     private static final String JS_READ_FLASH = "return window.espReadFlash($0, $1)";
     private static final String JS_WRITE_FLASH = "return window.espWriteFlash($0, $1, $2)";
@@ -57,6 +58,8 @@ public class WebSerialView extends VerticalLayout {
     private final TextArea resultArea = new TextArea("Resultados");
 
     private byte[] fileContent = null;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public WebSerialView() {
         // Esto se podría hacer una sola vez, en el constructor de la vista:
@@ -102,28 +105,49 @@ public class WebSerialView extends VerticalLayout {
 
             UI.getCurrent()
                     .getElement()
-                    .executeJs(JS_CONNECT, baudRateField.getValue(), false)
+                    .executeJs(JS_CONNECT, baudRateField.getValue(), true)
                     .then(String.class, result -> {
                         try {
-                            JsonObject jsonResult = JsonParser.parseString(result).getAsJsonObject();
-                            if (jsonResult.get("success").getAsBoolean()) {
-                                log.info("Operación exitosa: {}", (jsonResult.has("message")
-                                        ? jsonResult.get("message").getAsString()
-                                        : ""));
-                                resultArea.setValue(resultArea.getValue().concat("\n") +
-                                        "Operación exitosa: " + (jsonResult.has("message")
-                                        ? jsonResult.get("message").getAsString()
-                                        : ""));
+
+                            WebSerialClientDto resultValue = objectMapper.readValue(result, WebSerialClientDto.class);
+
+                            String message = resultValue.message();
+                            String chip = resultValue.chip();
+                            String error = resultValue.error();
+
+                            if (resultValue.success()) {
+
+
+                                log.info("Operación exitosa: {}", message);
+                                resultArea.setValue(resultArea.getValue().concat("\n") + "Operación exitosa: " + message);
                             } else {
-                                log.error("Error {}", jsonResult.get("error").getAsString());
-                                resultArea.setValue("Error: " + jsonResult.get("error").getAsString());
+                                log.error("Error {}", error);
+                                resultArea.setValue("Error: " + error);
                             }
+
+//                            JsonObject jsonResult = JsonParser.parseString(result).getAsJsonObject();
+//                            if (jsonResult.get("success").getAsBoolean()) {
+//                                log.info("Operación exitosa: {}", (jsonResult.has("message")
+//                                        ? jsonResult.get("message").getAsString()
+//                                        : ""));
+//                                resultArea.setValue(resultArea.getValue().concat("\n") +
+//                                        "Operación exitosa: " + (jsonResult.has("message")
+//                                        ? jsonResult.get("message").getAsString()
+//                                        : ""));
+//                            } else {
+//                                log.error("Error {}", jsonResult.get("error").getAsString());
+//                                resultArea.setValue("Error: " + jsonResult.get("error").getAsString());
+//                            }
                         } catch (Exception ex) {
                             log.error("Error {}", ex.getMessage());
                             resultArea.setValue("Error al procesar el resultado: " + ex.getMessage());
                         }
                     });
 
+        });
+
+        Button hardReset = new Button("Hard reset", e -> {
+            getElement().executeJs(JS_HARD_RESET);
         });
 
         Button flashIdButton = new Button("Obtener Flash ID", e -> {
@@ -151,7 +175,7 @@ public class WebSerialView extends VerticalLayout {
 
         // Layout para operaciones básicas
         HorizontalLayout operationsLayout = new HorizontalLayout(
-                connectButton, flashIdButton
+                connectButton, hardReset, flashIdButton
         );
 
         // Layout para lectura
@@ -257,7 +281,7 @@ public class WebSerialView extends VerticalLayout {
 
     @ClientCallable
     public void writeLog(String msg) {
-        resultArea.setValue(msg.concat("\n"));
+        resultArea.setValue(resultArea.getValue().concat(msg.concat("\n")));
         log.info("writeLog() {}", msg);
     }
 

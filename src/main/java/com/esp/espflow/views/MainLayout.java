@@ -4,6 +4,7 @@ import com.esp.espflow.entity.User;
 import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
 import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
+import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
@@ -15,6 +16,7 @@ import com.esp.espflow.views.webserial.WebSerialView;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -28,6 +30,7 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageList;
@@ -50,13 +53,17 @@ import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
+import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
+import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ON_SVG;
@@ -65,6 +72,7 @@ import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
 import static com.esp.espflow.util.EspFlowConstants.ROTATE_0_DEGREE;
 import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_30_PX;
 import static com.esp.espflow.util.EspFlowConstants.TABLE_SVG;
 import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
 import static com.esp.espflow.util.EspFlowConstants.WEB_SERIAL_ICON_SVG;
@@ -87,15 +95,24 @@ public class MainLayout extends AppLayout {
     private final MessageList messageListAll = new MessageList();
     private final List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
     private final List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
-    private H1 viewTitle;
-
+    private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
+    private final Button buttonConfigure = new Button("Configure", LineAwesomeIcon.SLIDERS_H_SOLID.create());
+    private final Icon infoCircleIcon = VaadinIcon.INFO_CIRCLE.create();
+    /**
+     * Services
+     */
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
     private final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems;
     private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
     private final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final SettingsDialogView settingsDialogView;
     private final MainFooter mainFooter;
+    /**
+     * Mutable properties
+     */
+    private H1 viewTitle;
     private Disposable disposableSubscribersMessageListItems;
     private Disposable disposableSubscribersEsptoolVersionMessageListItems;
     private Disposable disposableSubscribersEspflowMessageEvent;
@@ -106,13 +123,15 @@ public class MainLayout extends AppLayout {
                       final SettingsDialogView settingsDialogView,
                       final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems,
                       final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent,
-                      final MainFooter mainFooter) {
+                      final MainFooter mainFooter,
+                      final ApplicationEventPublisher applicationEventPublisher) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
         this.subscribersMessageListItems = subscribersMessageListItems;
         this.settingsDialogView = settingsDialogView;
         this.subscribersEsptoolVersionMessageListItems = subscribersEsptoolVersionMessageListItems;
         this.subscribersEspFlowMessageEvent = subscribersEspFlowMessageEvent;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.mainFooter = mainFooter;
 
         setPrimarySection(Section.DRAWER);
@@ -200,7 +219,26 @@ public class MainLayout extends AppLayout {
         viewTitle = new H1();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-        final var row = new HorizontalLayout(viewTitle, divBell);
+        this.infoCircleIcon.setVisible(false);
+        Stream.of(this.buttonConfigure, this.buttonRefreshDevices)
+                .forEach(button -> button.setVisible(false));
+        this.buttonConfigure.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        this.buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        this.buttonRefreshDevices.addClickShortcut(Key.ENTER);
+        this.buttonRefreshDevices.setDisableOnClick(true);
+        this.infoCircleIcon.getStyle().setCursor(CURSOR_POINTER);
+        this.infoCircleIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
+        this.infoCircleIcon.setTooltipText("Show dialog");
+
+        //Added listeners here, only once
+        this.buttonRefreshDevices.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.SCAN));
+        this.buttonConfigure.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.OPEN_SIDEBAR));
+        this.infoCircleIcon.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.OPEN_READ_FLASH_WIZARD));
+
+        final HorizontalLayout rowEnd = new HorizontalLayout(this.infoCircleIcon, this.buttonConfigure, this.buttonRefreshDevices, divBell);
+        rowEnd.setAlignItems(FlexComponent.Alignment.CENTER);
+        final var row = new HorizontalLayout(viewTitle, rowEnd);
         row.setWidthFull();
         row.addClassNames(LumoUtility.Margin.Right.MEDIUM);
         row.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -271,7 +309,7 @@ public class MainLayout extends AppLayout {
         }
 
         if (accessChecker.hasAccess(WebSerialView.class)) {
-            nav.addItem(new SideNavItem("Web-Serial", WebSerialView.class, SvgFactory.createIconFromSvg(WEB_SERIAL_ICON_SVG, SIZE_25_PX, null)));
+            nav.addItem(new SideNavItem("Web-Serial", WebSerialView.class, SvgFactory.createIconFromSvg(WEB_SERIAL_ICON_SVG, SIZE_30_PX, null)));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {
@@ -285,6 +323,15 @@ public class MainLayout extends AppLayout {
     protected void afterNavigation() {
         super.afterNavigation();
         viewTitle.setText(getCurrentPageTitle());
+        if (getCurrentPageTitle().contains("Read flash")) {
+            this.buttonRefreshDevices.setVisible(true);
+            this.buttonConfigure.setVisible(true);
+            this.infoCircleIcon.setVisible(true);
+        } else {
+            this.buttonRefreshDevices.setVisible(false);
+            this.buttonConfigure.setVisible(false);
+            this.infoCircleIcon.setVisible(false);
+        }
     }
 
     private String getCurrentPageTitle() {
@@ -356,7 +403,7 @@ public class MainLayout extends AppLayout {
             disposableSubscribersEsptoolVersionMessageListItems.dispose();
             disposableSubscribersEsptoolVersionMessageListItems = null;
         }
-        if(this.disposableSubscribersEspflowMessageEvent != null) {
+        if (this.disposableSubscribersEspflowMessageEvent != null) {
             disposableSubscribersEspflowMessageEvent.dispose();
             disposableSubscribersEspflowMessageEvent = null;
         }

@@ -1,18 +1,14 @@
 // Archivo: frontend/js/espToolFlow.js
 // Importa las clases necesarias desde el bundle de esptool-js
-import { ESPLoader, Transport } from "./esptool-bundle.js";
-//import { ESPLoader, Transport } from "https://unpkg.com/esptool-js@0.5.4/bundle.js";
+import { ESPLoader, Transport } from "./esptool-bundle-0.5.4.js";
 
-// Variables globales para mantener el estado de conexión
 let esploader = null;
 let transport = null;
 let device = null;
 const serialLib = !navigator.serial && navigator.usb ? serial : navigator.serial;
 
-// Variable privada para guardar la referencia al servidor de Vaadin
 let espTerminalServerRef = null;
 
-// Función para que el servidor se registre y se guarde la referencia
 window.setEspTerminalServerRef = function(server) {
   espTerminalServerRef = server;
   console.log("espTerminalServerRef asignado:", espTerminalServerRef);
@@ -24,27 +20,41 @@ window.setEspTerminalServerRef = function(server) {
  * si no hay conexión, se conecta usando el parámetro resetMode.
  *
  * @param {number} baudRate - Velocidad de transmisión (por ejemplo, 115200).
- * @param {string} chipType - Tipo de chip (por ejemplo, "ESP32" o "ESP8266").
  * @param {boolean} noReset - Indica si se quiere usar el modo "no_reset".
  * @returns {string} JSON con el resultado.
  */
 window.espConnect = async (baudRate, noReset) => {
   try {
     // Modo toggle: desconectar si ya hay conexión
-    if (esploader !== null) {
-      await transport.disconnect();
-      await transport.waitForUnlock(1500);
-      if (device) {
-        await device.close();
-        device = null;
-      }
-      esploader = null;
-      transport = null;
-      return JSON.stringify({
-        success: true,
-        message: "Desconectado exitosamente"
-      });
+
+    // Disconnect if connected
+    if (transport !== null) {
+        await transport.disconnect();
+        await transport.waitForUnlock(1500);
+        //toggleUIConnected(false);
+        transport = null;
+        if (device !== null) {
+            await device.close();
+            device = null;
+        }
+        chip = null;
+        return;
     }
+
+//    if (esploader !== null) {
+//      await transport.disconnect();
+//      await transport.waitForUnlock(1500);
+//      if (device) {
+//        await device.close();
+//        device = null;
+//      }
+//      esploader = null;
+//      transport = null;
+//      return JSON.stringify({
+//        success: true,
+//        message: "Desconectado exitosamente"
+//      });
+//    }
 
     if (device === null) {
         device = await serialLib.requestPort({});
@@ -61,13 +71,29 @@ window.espConnect = async (baudRate, noReset) => {
       transport: transport,
       baudrate: parseInt(baudRate),
       terminal: window.espLoaderTerminal,
-      debugLogging: false
-    };
+      debugLogging: false,
+      resetConstructors: {
+          hardReset: (transport, baudrate) => {
+            return {
+              reset: async () => {
+                console.log("Hard resetting via RTS pin...");
+                // Usamos el objeto device en lugar de transport para setSignals
+                await transport.setRTS(true);
+                await new Promise(resolve => setTimeout(resolve, 50)); // Pausa de 50 ms
+                await transport.setRTS(false);
+              }
+            };
+          }
+        }
+      };
+
+    window.resetConstructors = options.resetConstructors; // Asigna globalmente
+    window.baudRate = parseInt(baudRate); // Asigna globalmente
 
     // Crear la instancia de ESPLoader y llamar a main pasando resetMode
     esploader = new ESPLoader(options);
 
-    let resetMode = "default_reset";
+    let resetMode = "hard_reset";
     if (noReset.checked) {
         resetMode = "no_reset";
         try {
@@ -96,6 +122,15 @@ window.espConnect = async (baudRate, noReset) => {
   }
 };
 
+window.testHardReset = async () => {
+    if (window.resetConstructors && typeof window.resetConstructors.hardReset === "function") {
+        // Suponiendo que transport y baudRate están definidos en el ámbito adecuado
+        const resetObj = window.resetConstructors.hardReset(transport, window.baudRate);
+        await resetObj.reset();
+    } else {
+        console.log("No hay función hardReset definida globalmente");
+    }
+};
 
 /**
  * Obtiene el Flash ID del dispositivo.

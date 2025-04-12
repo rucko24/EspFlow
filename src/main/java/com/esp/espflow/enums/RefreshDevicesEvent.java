@@ -16,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 public enum RefreshDevicesEvent {
 
     DISABLE(false),
-    ENABLE(true);
+    ENABLE(true),
+    OPEN_SIDEBAR(true),
+    OPEN_READ_FLASH_WIZARD(true),
+    SCAN(true);
 
     private final boolean value;
 
