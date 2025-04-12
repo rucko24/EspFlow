@@ -107,6 +107,7 @@ public class MainHeader extends HorizontalLayout {
         popover.addOpenedChangeListener(this::rotateTheBellToZeroDegreesIfThePopoverIsNotOpen);
 
         final Button buttonMarkAllRead = new Button("Marks all read");
+        buttonMarkAllRead.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonMarkAllRead.addClickListener(event -> {
             this.removeRedCircleErrorInTheBell();
             messageListItemUnreadList.clear();

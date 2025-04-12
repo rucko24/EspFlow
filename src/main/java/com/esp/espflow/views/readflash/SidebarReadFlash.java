@@ -56,7 +56,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         close.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         close.addClassName(LumoUtility.Padding.Right.NONE);
         close.setAriaLabel("Close sidebar");
-        close.setTooltipText("Close sidebar");
+        close.setTooltipText("Close sidebar - ESC");
 
         final Layout header = new Layout(title, close);
         header.addClassNames(LumoUtility.Padding.End.LARGE, LumoUtility.Padding.Start.LARGE, LumoUtility.Padding.Vertical.SMALL);
