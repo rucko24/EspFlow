@@ -8,6 +8,7 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -44,8 +45,16 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         super.setBackdropVisible(true);
         this.add(sidebar);
         this.sidebar.setId("sidebar");
+        this.sidebar.addClassNames(LumoUtility.Background.BASE,
+                LumoUtility.BoxShadow.MEDIUM,
+                LumoUtility.Display.FLEX,
+                LumoUtility.FlexDirection.COLUMN,
+                LumoUtility.Overflow.HIDDEN,
+                LumoUtility.Position.FIXED, "bottom-0", "top-0", "transition-all", "z-10");
+        this.sidebar.setMaxWidth(100, Unit.PERCENTAGE);
+        this.sidebar.setWidth(480, Unit.PIXELS);
         this.closeSidebar();
-        Shortcuts.addShortcutListener(sidebar, shortcutEvent -> this.closeSidebar(), Key.ESCAPE);
+        Shortcuts.addShortcutListener(this.sidebar, shortcutEvent -> this.closeSidebar(), Key.ESCAPE);
     }
 
     public void createSection(final Div leftFormForAddress) {
@@ -68,7 +77,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         form.setFlexDirection(Layout.FlexDirection.COLUMN);
 
         this.sidebar.add(header, leftFormForAddress);
-        this.sidebar.addClassNames("sidebar-read-flash");
+        //this.sidebar.addClassNames("sidebar-read-flash");
 
     }
 
@@ -82,7 +91,6 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
 
     private void openSidebar() {
         super.setModal(true);
-
         super.getElement().executeJs(
                 """
                         setTimeout(function() {
@@ -94,30 +102,20 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
                           }, { once: true });
                         }, 100);
                         """, this);
-
         Animated.removeAnimations(this);
-        Animated.animate(this.sidebar, Animated.Animation.FADE_IN);
-
+        Animated.animate(this.sidebar, Animated.Animation.FADE_IN_RIGHT);
+        this.sidebar.addClassNames("end-0");
+        this.sidebar.removeClassNames("-end-full");
         this.sidebar.setEnabled(true);
-        this.sidebar.addClassNames(LumoUtility.Border.RIGHT);
-        // Desktop
-        this.sidebar.getStyle().remove("margin-inline-start");
-        // Mobile
-        this.sidebar.addClassNames("start-0");
-        this.sidebar.removeClassName("-start-full");
         super.open();
     }
 
     public void closeSidebar() {
-        Animated.animate(this.sidebar, Animated.Animation.FADE_OUT);
+        Animated.animate(this.sidebar, Animated.Animation.FADE_OUT_RIGHT);
         this.removesClassWithDelay(() -> {
+            this.sidebar.addClassNames("-end-full");
+            this.sidebar.removeClassName("end-0");
             this.sidebar.setEnabled(false);
-            this.sidebar.removeClassName(LumoUtility.Border.RIGHT);
-            // Desktop
-            this.sidebar.getStyle().set("margin-inline-start", "-20rem");
-            // Mobile
-            this.sidebar.addClassNames("-start-full");
-            this.sidebar.removeClassName("start-0");
             super.setModal(false);
             super.close();
         }, this, Duration.ofMillis(1500));

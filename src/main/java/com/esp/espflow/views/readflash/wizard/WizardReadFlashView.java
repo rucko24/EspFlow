@@ -447,7 +447,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         final Paragraph descriptionPermissionDeniedPort = new Paragraph();
         descriptionPermissionDeniedPort.getElement().setProperty(INNER_HTML,
                 """
-                        The unit scan (which is the parameter of <strong>esptool flash_id</strong>)
+                        To scan the devices (which is the parameter of <strong>esptool flash_id</strong>)
                         is done with the <strong>Refresh devices</strong> button, and to configure the reading we use the <strong>Configure</strong> button.
                         """);
         descriptionPermissionDeniedPort.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
