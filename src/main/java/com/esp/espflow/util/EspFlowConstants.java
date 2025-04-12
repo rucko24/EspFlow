@@ -111,10 +111,14 @@ public class EspFlowConstants {
     public static final String INNER_HTML = "innerHTML";
     public static final String AVATAR_STEP_ACTIVE = "avatar-step-active";
     public static final String AVATAR_STEP_INACTIVE = "avatar-step-inactive";
+    public static final String NEXT = "Next";
     public static final String STEP1 = "step1";
     public static final String STEP2 = "step2";
     public static final String STEP3 = "step3";
     public static final String SETTINGS = "settings";
+    public static final String PREVIOUS = "Previous";
+    public static final String HIDE = "Hide";
+
     public static final String VAR_LUMO_PRIMARY_COLOR_10_PCT = "var(--lumo-primary-color-10pct)";
     //Applies only for DARK MODE
     public static final String BLACK_TO_WHITE_ICON = "black-to-white";
