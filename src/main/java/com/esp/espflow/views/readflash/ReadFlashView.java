@@ -39,6 +39,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
@@ -124,7 +125,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final Span spanAutoDetectFlashSize = new Span("Set size address to ALL");
     private final Div divWithPortErrors = new Div();
     private final Button buttonConfigure = new Button("Configure", LineAwesomeIcon.SLIDERS_H_SOLID.create());
-    private final Button buttonMore = new Button(VaadinIcon.INFO_CIRCLE.create());
     /**
      * Console output
      */
@@ -297,17 +297,20 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private HorizontalLayout headerConfigurationButtons() {
         buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         buttonConfigure.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        buttonMore.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonConfigure.addClickListener(event -> this.toggleSidebar());
 
-        buttonMore.setTooltipText("Show dialog");
-        buttonMore.addClickListener(event -> {
+        final Icon infoCircleIcon = VaadinIcon.INFO_CIRCLE.create();
+        infoCircleIcon.getStyle().setCursor(CURSOR_POINTER);
+        infoCircleIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
+        infoCircleIcon.setTooltipText("Show dialog");
+        infoCircleIcon.addClickListener(event -> {
             this.add(this.wizardReadFlashView);
             this.wizardReadFlashView.openAndDisableModeless();
         });
 
-        final HorizontalLayout horizontalLayout = new HorizontalLayout(buttonMore, buttonConfigure, buttonRefreshDevices);
+        final HorizontalLayout horizontalLayout = new HorizontalLayout(infoCircleIcon, buttonConfigure, buttonRefreshDevices);
         horizontalLayout.setWidthFull();
+        horizontalLayout.setVerticalComponentAlignment(Alignment.CENTER, infoCircleIcon);
         horizontalLayout.setJustifyContentMode(JustifyContentMode.END);
         return horizontalLayout;
     }
@@ -628,7 +631,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * @param spansList
      * @param espDeviceWithTotalDevicesRecord
      * @param espDevicesCarousel
-     * @param ui                        the UI
+     * @param ui                              the UI
      * @return A {@link Mono} with EspDevicesCarousel with more configuration
      */
     private Mono<EspDevicesCarousel> configureSlides(final Set<Span> spansList,
