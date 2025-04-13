@@ -19,6 +19,7 @@ import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
  * @param absolutePathEsptool
  * @param esptoolVersion
  * @param isSelected
+ *
  * @author rub'n
  */
 @Builder

@@ -163,5 +163,8 @@ public class EspFlowConstants {
             }, 100);
             """;
     public static final String REMOVE_SIDEBAR_LISTENER = "document.removeEventListener('click', window._sidebarOutsideClickListener);";
+    public static final String LOADED_BUNDLED_ESPTOOL_PY_FROM = "Loaded bundled esptool.py from {}";
+    public static final String LOADED_CUSTOM_ESPTOOL_PY_FROM = "Loaded custom esptool.py from {}";
+    public static final String ENTITY_IS_NOT_PRESENT_LOADED_BUNDLE_ESPTOOL_PY_FROM = "Entity is not present, Loaded bundle esptool.py from {}";
 
 }

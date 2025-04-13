@@ -698,7 +698,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        //Disabled event for buttonRefreshDevices while in use
+
     }
 
     @Override

@@ -48,7 +48,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+import java.time.Duration;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_ACTIVE;
@@ -198,7 +202,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             this.next.setText(CONTINUE);
             this.previous.setVisible(true);
             this.mainContent.removeAll();
-            this.mainContent.add(createReadAndDownloadFlashContent());
+            this.mainContent.add(this.createReadAndDownloadFlashContent());
             avatar1.removeClassNames(AVATAR_STEP_INACTIVE);
             avatar1.addClassName(AVATAR_STEP_ACTIVE);
             avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
@@ -228,7 +232,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                 sNext = STEP2;
                 next.setText(NEXT);
                 this.mainContent.removeAll();
-                this.mainContent.add(this.welcomeContent());
+                this.mainContent.add(this.refreshDevicesContent());
                 avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
                 avatar2.addClassName(AVATAR_STEP_ACTIVE);
                 avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -237,7 +241,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                 Animated.animate(previous, Animation.FADE_IN);
             } else if (sNext.equals(STEP2)) {
                 this.mainContent.removeAll();
-                this.mainContent.add(this.refreshDevicesContent());
+                this.mainContent.add(this.createReadAndDownloadFlashContent());
                 previous.setVisible(true);
                 avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
                 avatar2.addClassName(AVATAR_STEP_ACTIVE);
@@ -249,6 +253,23 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             } else if (sNext.equals(STEP3)) {
                 sNext = STEP1;
                 super.close();
+                Mono.fromRunnable(() -> {
+                            this.next.getUI().ifPresent(ui -> {
+                                ui.access(() -> {
+                                    this.next.setText(NEXT);
+                                    this.previous.setVisible(false);
+                                    this.mainContent.removeAll();
+                                    this.mainContent.add(this.welcomeContent());
+                                    avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
+                                    avatar2.addClassName(AVATAR_STEP_INACTIVE);
+                                    avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
+                                    avatar3.addClassName(AVATAR_STEP_INACTIVE);
+                                });
+                            });
+                        })
+                        .subscribeOn(Schedulers.fromExecutorService(Executors.newSingleThreadExecutor()))
+                        .delaySubscription(Duration.ofMillis(1500))
+                        .subscribe();
             }
         });
         next.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -301,12 +322,14 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                     });
             super.close();
         });
-        super.getFooter().add(hideButton);
+
+        previous.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+        next.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
 
         final HorizontalLayout rowEnd = new HorizontalLayout(previous, next);
         rowEnd.setVerticalComponentAlignment(Alignment.CENTER);
         rowEnd.setAlignSelf(Alignment.END, rowEnd);
-        super.getFooter().add(rowEnd);
+        super.getFooter().add(hideButton, rowEnd);
 
     }
 

@@ -238,7 +238,6 @@ public class MainHeader extends HorizontalLayout {
         final UI ui = attachEvent.getUI();
         this.closeSubscribers();
         this.disposableRefreshEvents = this.subscriberRefreshDevicesEvent.subscribe(refreshDevicesEvent -> {
-
             try {
                 var value = RefreshDevicesEvent.fromEvent(refreshDevicesEvent);
                 ui.access(() -> this.buttonRefreshDevices.setEnabled(value));
@@ -247,7 +246,6 @@ public class MainHeader extends HorizontalLayout {
                 //Do nothing,  It is thrown when you attempt to access closed UI.
                 //https://stackoverflow.com/a/73885127/7267818
             }
-
         });
     }
 }
