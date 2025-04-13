@@ -1,5 +1,6 @@
 package com.esp.espflow.views.flashesp;
 
+import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
 import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.ComPortService;
@@ -59,12 +60,16 @@ import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
 import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
+import static com.esp.espflow.util.EspFlowConstants.ERROR_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_V;
 import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_10_PX;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.util.EspFlowConstants.PORT_FOUND;
+import static com.esp.espflow.util.EspFlowConstants.PORT_NOT_FOUND;
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 
 @Log4j2
 @Getter
@@ -89,6 +94,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
     private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
+    private final Sinks.Many<EspflowMessageListItemEvent> publisherMessage;
     private final EsptoolExecutableService esptoolExecutableService;
     private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
     private Disposable disposableSubscriberEsptoolVersionEvent;
@@ -296,7 +302,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     });
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
-                ConfirmDialogBuilder.showInformation("Port found!");
+                ConfirmDialogBuilder.showInformation(PORT_FOUND);
                 this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
                 this.unlockPort.getIcon().addClassName(BLACK_TO_WHITE_ICON);
                 buttonExecuteFlashId.setEnabled(true);
@@ -308,11 +314,13 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 scanPort.getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
                         if(url.getRef() != null) {
-                            if(!url.getRef().contains("settings")) {
-                                ConfirmDialogBuilder.showWarningUI("Port not found!", ui);
+                            if(!url.getRef().contains(SETTINGS)) {
+                                ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
+                                this.publisherMessage.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                             }
                         } else {
-                            ConfirmDialogBuilder.showWarningUI("Port not found!", ui);
+                            ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
+                            this.publisherMessage.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                         }
                     });
                 });

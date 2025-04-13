@@ -76,6 +76,7 @@ public class EspFlowConstants {
     public static final String FLASH_ON_SVG = "flash-on.svg";
     public static final String COPY_ALT_SVG = "copy-alt.svg";
     public static final String TABLE_SVG = "table.svg";
+    public static final String ERROR_NOT_FOUND = "no-os.svg";
     public static final String WEB_SERIAL_ICON_SVG = "web-serial.svg";
     public static final String FLASH_OFF_SVG = "flash-off.svg";
     public static final String SIZE_25_PX = "25px";
@@ -118,6 +119,8 @@ public class EspFlowConstants {
     public static final String SETTINGS = "settings";
     public static final String PREVIOUS = "Previous";
     public static final String HIDE = "Hide";
+    public static final String PORT_NOT_FOUND = "Port not found!";
+    public static final String PORT_FOUND = "Port found!";
 
     public static final String VAR_LUMO_PRIMARY_COLOR_10_PCT = "var(--lumo-primary-color-10pct)";
     //Applies only for DARK MODE
