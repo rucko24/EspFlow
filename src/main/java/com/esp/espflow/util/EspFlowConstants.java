@@ -146,6 +146,7 @@ public class EspFlowConstants {
             """;
     public static final String CAN_NOT_COMPUTE_SHA_256 = "Can not compute sha256";
     public static final String WINDOW_COPY_TO_CLIPBOARD = "window.copyToClipboard($0)";
+    public static final String COPY_TO_CLIPBOARD = "./scripts/copy_to_clipboard.js";
     public static final String CONTEXT_MENU_ITEM_GRID = "context-menu-item-grid";
     public static final String CONTINUE = "Continue...";
     public static final String SETTINGS_SHARP = "#settings";

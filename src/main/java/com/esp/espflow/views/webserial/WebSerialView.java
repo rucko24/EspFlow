@@ -29,6 +29,8 @@ import lombok.extern.log4j.Log4j2;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
+
 /**
  * @author rubn
  */
@@ -37,7 +39,7 @@ import java.io.InputStream;
 @SpringComponent
 @PageTitle("WebSerial")
 @Route(value = "web-serial-api", layout = MainLayout.class)
-@JsModule("./scripts/copy_to_clipboard.js")
+@JsModule(COPY_TO_CLIPBOARD)
 @JavaScript(value = "./scripts/esptool-wrapper.js", loadMode = LoadMode.EAGER)
 @RolesAllowed("ADMIN")
 public class WebSerialView extends VerticalLayout {

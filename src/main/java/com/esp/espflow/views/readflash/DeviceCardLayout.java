@@ -4,7 +4,9 @@ import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.downloader.FlashDownloadButtonWrapper;
 import com.esp.espflow.util.svgfactory.SvgFactory;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
@@ -20,7 +22,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Left;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin.Right;
 import lombok.Getter;
-import org.vaadin.olli.ClipboardHelper;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -30,14 +31,17 @@ import java.util.stream.Stream;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CHIP_IS;
 import static com.esp.espflow.util.EspFlowConstants.CHIP_TYPE;
+import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
 import static com.esp.espflow.util.EspFlowConstants.CRYSTAL_IS;
 import static com.esp.espflow.util.EspFlowConstants.DETECTED_FLASH_SIZE;
 import static com.esp.espflow.util.EspFlowConstants.MAC;
+import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 
 /**
  * The DeviceCardLayout
  */
 @Getter
+@JsModule(COPY_TO_CLIPBOARD)
 public final class DeviceCardLayout extends Div {
 
     private final Div divToolbarRow = new Div();
@@ -308,6 +312,7 @@ public final class DeviceCardLayout extends Div {
         final Button button = new Button(copyButton);
         button.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         button.addClickListener(event -> {
+            UI.getCurrent().getElement().executeJs(WINDOW_COPY_TO_CLIPBOARD, value.trim());
             Notification.show("Copied " + spanText.getText(), 2500, Position.MIDDLE);
             button.setIcon(VaadinIcon.CHECK.create());
             Mono.just(button)
@@ -319,9 +324,8 @@ public final class DeviceCardLayout extends Div {
                     });
         });
         button.setTooltipText(copyName);
-        final ClipboardHelper clipboardHelper = new ClipboardHelper(value.trim(), button);
         Tooltip.forComponent(spanValue).setText(value.trim());
-        final Div div = new Div(spanText, spanValue, clipboardHelper);
+        final Div div = new Div(spanText, spanValue, button);
         spanValue.addClassName(Right.SMALL);
         div.addClassNames(Display.FLEX, FlexDirection.ROW, JustifyContent.START, AlignItems.CENTER, Right.SMALL);
         return div;

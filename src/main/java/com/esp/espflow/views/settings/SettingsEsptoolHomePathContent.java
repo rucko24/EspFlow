@@ -62,6 +62,7 @@ import java.util.function.Function;
 
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
 import static com.esp.espflow.util.EspFlowConstants.CUSTOM_ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
@@ -77,7 +78,7 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @UIScope
 @SpringComponent
 @RequiredArgsConstructor
-@JsModule("./scripts/copy_to_clipboard.js")
+@JsModule(COPY_TO_CLIPBOARD)
 public class SettingsEsptoolHomePathContent extends Layout implements CreateCustomDirectory, IMakeExecutable {
 
     private final EsptoolService esptoolService;

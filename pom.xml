@@ -163,12 +163,6 @@
             <artifactId>commons-io</artifactId>
             <version>2.14.0</version>
         </dependency>
-        <!-- https://vaadin.com/directory/component/clipboardhelper/overview-->
-        <dependency>
-            <groupId>org.vaadin.olli</groupId>
-            <artifactId>clipboardhelper</artifactId>
-            <version>2.0.0</version>
-        </dependency>
 
         <!-- https://central.sonatype.com/artifact/org.junit-pioneer/junit-pioneer -->
         <dependency>

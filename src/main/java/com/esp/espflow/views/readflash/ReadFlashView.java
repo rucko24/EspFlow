@@ -14,6 +14,7 @@ import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
+import com.esp.espflow.views.MainHeader;
 import com.esp.espflow.views.MainLayout;
 import com.esp.espflow.views.dialog.ChangeSerialPortPermissionDialog;
 import com.esp.espflow.views.readflash.wizard.WizardReadFlashView;
@@ -27,11 +28,14 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -44,6 +48,8 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
@@ -64,6 +70,7 @@ import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -86,6 +93,7 @@ import static com.esp.espflow.util.EspFlowConstants.NO_DEVICES_SHOWN;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
+import static com.esp.espflow.util.EspFlowConstants.RETURN_WINDOW_INNER_WIDTH;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
@@ -99,7 +107,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 @Route(value = "read-flash", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnterObserver {
+public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnterObserver, BeforeLeaveObserver {
 
     private final FlashDownloadButtonService flashDownloadButtonService;
     private final EsptoolService esptoolService;
@@ -115,6 +123,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final ComboBox<BaudRatesEnum> baudRatesComboBox = new ComboBox<>("Baud rate");
     private final Span spanAutoDetectFlashSize = new Span("Set size address to ALL");
     private final Div divWithPortErrors = new Div();
+    private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
+
     /**
      * Console output
      */
@@ -123,6 +133,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final Span spanPortFailure = new Span(PORT_FAILURE);
     private final Span spanTotalDevicesValue = new Span();
 
+    private MainHeader mainHeader;
     /**
      * Registration for button
      */
@@ -140,6 +151,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * Publisher for RefreshDevicesEvent
      */
     private final Sinks.Many<RefreshDevicesEvent> publisherRefreshEvent;
+
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     /*
      * Show initial wizard
@@ -182,6 +195,21 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
          */
         final Div divForRightCarousel = this.divForRightCarousel();
         final var horizontalLayoutToPrimarySection = this.horizontalLayoutToPrimarySection(divForRightCarousel);
+        this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        this.buttonRefreshDevices.setId("button-refresh-device");
+        this.buttonRefreshDevices.setEnabled(true);
+        this.buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        this.buttonRefreshDevices.addClickShortcut(Key.ENTER);
+        this.buttonRefreshDevices.setDisableOnClick(true);
+        this.buttonRefreshDevices.addClickListener(event -> {
+            publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.DISABLE);
+            log.info("Send disable event");
+            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), LOADING);
+            this.divCarousel.removeAll();
+            this.divCarousel.add(espDevicesCarousel);
+            this.buttonRefreshDevices.getUI().ifPresent(ui -> this.showDetectedDevices(ui, espDevicesCarousel));
+        });
 
         this.sidebarReadFlash.createSection(this.leftFormForAddress());
 
@@ -666,6 +694,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
     }
 
+
+    @EventListener
+    public void header(final MainHeader mainHeader) {
+        this.mainHeader = mainHeader;
+    }
+
     /**
      * This method triggers the scanning of the microcontrollers and creates the slides, it also updates the footer badges.
      * <p>
@@ -679,12 +713,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         if (refreshDevicesEvent == RefreshDevicesEvent.SCAN) {
             getUI().ifPresent(ui -> {
                 //Evento de disable para los subscriptores
-                publisherRefreshEvent.tryEmitNext(RefreshDevicesEvent.DISABLE);
-                log.info("Send disable event");
-                final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), LOADING);
-                this.divCarousel.removeAll();
-                this.divCarousel.add(espDevicesCarousel);
-                this.showDetectedDevices(ui, espDevicesCarousel);
+
             });
         }
         if (refreshDevicesEvent == RefreshDevicesEvent.OPEN_SIDEBAR) {
@@ -696,8 +725,35 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         }
     }
 
+    private void detectBrowserSize(final UI ui, final int width) {
+        if (width < 500) {
+            this.mainHeader.remove(this.buttonRefreshDevices);
+            //this.mainHeader.remove(this.confi);
+        } else { // width != 500
+            this.mainHeader.add(this.buttonRefreshDevices);
+        }
+    }
+
+    private void executeJsAndBrowserListener(UI ui) {
+        ui.getPage().executeJs(RETURN_WINDOW_INNER_WIDTH)
+                .then(result -> {
+                    final int width = ((Double) result.asNumber()).intValue();
+                    log.info("Ancho de la pantalla: {}", width);
+                    this.detectBrowserSize(ui, width);
+                });
+
+        ui.getPage().addBrowserWindowResizeListener(event -> this.detectBrowserSize(ui, event.getWidth()));
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        executeJsAndBrowserListener(event.getUI());
+    }
+
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
+        executeJsAndBrowserListener(event.getUI());
+        this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.ENABLE);
 
     }
 
@@ -710,6 +766,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         final UI ui = attachEvent.getUI();
+
+        if(attachEvent.isInitialAttach()) {
+            mainHeader.remove(this.buttonRefreshDevices);
+            mainHeader.add(this.buttonRefreshDevices);
+        }
+
         ui.getPage().executeJs(
                 """
                         if (window.location.hash) {

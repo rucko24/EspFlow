@@ -68,6 +68,7 @@ import java.util.List;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_GRID;
 import static com.esp.espflow.util.EspFlowConstants.COPY_ALT_SVG;
+import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_HEX_DUMP_ANALIZE;
@@ -84,7 +85,7 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @SpringComponent
 @PageTitle("HexDump")
 @Route(value = "hex-dump-viewer", layout = MainLayout.class)
-@JsModule("./scripts/copy_to_clipboard.js")
+@JsModule(COPY_TO_CLIPBOARD)
 @CssImport("./styles/hexdump-grid/grid-message-when-empty.css")
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
