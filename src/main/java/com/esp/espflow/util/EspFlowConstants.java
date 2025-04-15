@@ -169,5 +169,6 @@ public class EspFlowConstants {
     public static final String LOADED_BUNDLED_ESPTOOL_PY_FROM = "Loaded bundled esptool.py from {}";
     public static final String LOADED_CUSTOM_ESPTOOL_PY_FROM = "Loaded custom esptool.py from {}";
     public static final String ENTITY_IS_NOT_PRESENT_LOADED_BUNDLE_ESPTOOL_PY_FROM = "Entity is not present, Loaded bundle esptool.py from {}";
+    public static final String RETURN_WINDOW_INNER_WIDTH = "return window.innerWidth;";
 
 }

@@ -42,5 +42,17 @@
 }
 
 vaadin-dialog-overlay.change-port-permission-dialog::part(backdrop) {
-   backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
+}
+
+.header-read-flash-buttons-display {
+    display: block !important;
+}
+
+.header-read-flash-buttons-display-none {
+    display: none;
+}
+
+.header-read-flash-icons-display-none {
+    display: none;
 }

@@ -244,14 +244,6 @@
        flex-direction: column;
     }
 
-    vaadin-button.header-read-flash-buttons-no-label::part(label) {
-      display: none;
-    }
-
-    vaadin-button.header-read-flash-buttons-no-label {
-        padding: 0.5em;
-    }
-
 }
 
 @media (max-width: 400px) {

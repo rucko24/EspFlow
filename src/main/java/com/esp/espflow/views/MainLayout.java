@@ -42,7 +42,6 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
@@ -186,18 +185,8 @@ public class MainLayout extends AppLayout {
     @Override
     protected void afterNavigation() {
         super.afterNavigation();
-        this.mainHeader.getViewTitle().setText(getCurrentPageTitle());
-        if (getCurrentPageTitle().contains("Read flash")) {
-            this.mainHeader.getButtonRefreshDevices().setVisible(true);
-            this.mainHeader.getButtonConfigure().setVisible(true);
-            this.mainHeader.getInfoCircleIcon().setVisible(true);
-            Stream.of(this.mainHeader.getButtonRefreshDevices(), this.mainHeader.getButtonConfigure(), this.mainHeader.getInfoCircleIcon())
-                    .forEach(item -> Animated.animate(item, Animated.Animation.FADE_IN));
-        } else {
-            this.mainHeader.getButtonRefreshDevices().setVisible(false);
-            this.mainHeader.getButtonConfigure().setVisible(false);
-            this.mainHeader.getInfoCircleIcon().setVisible(false);
-        }
+        this.mainHeader.changeTitle(this.getCurrentPageTitle());
+        this.mainHeader.showHeaderComponents(this.getCurrentPageTitle());
     }
 
     private String getCurrentPageTitle() {
