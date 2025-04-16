@@ -73,7 +73,14 @@ import static com.esp.espflow.util.EspFlowConstants.PORT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.PORT_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_20_PX;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_30_PX;
+import static com.esp.espflow.util.EspFlowConstants.UPDATE_ICON;
 
+/**
+ * @author rubn
+ */
 @Log4j2
 @Getter
 @RequiredArgsConstructor
@@ -171,7 +178,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setWidthFull();
         comboBoxSerialPort.setPlaceholder("port");
-        comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon("30px", null));
+        comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon(SIZE_30_PX, null));
         comboBoxSerialPort.setRenderer(rendererIconUsbForEachItem());
         return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
     }
@@ -179,7 +186,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private ComponentRenderer<Div, String> rendererIconUsbForEachItem() {
         final SerializableBiConsumer<Div, String> serializableBiConsumer = (div, itemName) -> {
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-            final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", "25px", null);
+            final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", SIZE_25_PX, null);
             icon.addClassName(BLACK_TO_WHITE_ICON);
             final Span span = new Span(itemName);
             span.addClassNames(LumoUtility.Padding.Left.SMALL);
@@ -270,7 +277,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createIconItemEsptoolVersionContext(String esptoolVersion) {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-        final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", "20px");
+        final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, SIZE_20_PX, SIZE_20_PX);
         icon.addClassName(BLACK_TO_WHITE_ICON);
         final Span span = new Span(esptoolVersion);
         span.addClassNames(LumoUtility.Padding.Left.SMALL);
@@ -281,7 +288,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createIconItemSettingsContext() {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-        final SvgIcon icon = SvgFactory.createIconFromSvg("upload.svg", "20px", "20px");
+        final SvgIcon icon = SvgFactory.createIconFromSvg(UPDATE_ICON, SIZE_20_PX, SIZE_20_PX);
         icon.addClassName(BLACK_TO_WHITE_ICON);
         final Span span = new Span("Upload a custom esptool");
         Tooltip.forComponent(span).setText("Ctrl+Alt+S");
@@ -334,7 +341,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 ConfirmDialogBuilder.showInformation(PORT_FOUND);
-                this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
+                this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg", SIZE_30_PX, null));
                 this.unlockPort.getIcon().addClassName(BLACK_TO_WHITE_ICON);
                 buttonExecuteFlashId.setEnabled(true);
                 Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
@@ -379,7 +386,9 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         super.onAttach(attachEvent);
         this.closeSubscribers();
         final UI ui = attachEvent.getUI();
-        this.updateH2WithEsptoolVersion(ui);
+        if(attachEvent.isInitialAttach()) {
+            this.updateH2WithEsptoolVersion(ui);
+        }
         this.disposableSubscriberEsptoolVersionEvent = this.subscriberEsptoolVersionEvent
                 .subscribe(esptoolVersionMessageListItemEvent -> {
                     try {

@@ -63,6 +63,7 @@ import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.WINDOWS_LOCATION_REMOVE_HASH;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 
 /**
@@ -390,31 +391,27 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
             this.outputConsole(ui);
         }
         final UI ui = attachEvent.getUI();
-        ui.getPage().executeJs(
-                "if (window.location.hash) { " +
-                        "  var hash = window.location.hash.substring(1); " + // Delete the '#'
-                        "  return hash; " +
-                        "}"
-        ).then(String.class, hash -> {
-            //log.info("Fragmento de URI: {}", hash);
-            if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
-                this.add(this.wizardFlashEspDialog);
-                this.wizardFlashEspDialog.openAndDisableModeless();
-            } else {
-                ui.getPage().fetchCurrentURL(url -> {
-                    final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
-                    if (!ref.contains(SETTINGS)) {
-                        this.wizardFlashEspRepository.findByName(WIZARD_FLASH_ESP_VIEW)
-                                .ifPresent(hide -> {
-                                    if (hide.isWizardEnabled()) {
-                                        this.add(this.wizardFlashEspDialog);
-                                        this.wizardFlashEspDialog.openAndDisableModeless();
-                                    }
-                                });
+        ui.getPage().executeJs(WINDOWS_LOCATION_REMOVE_HASH)
+                .then(String.class, hash -> {
+                    //log.info("Fragmento de URI: {}", hash);
+                    if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
+                        this.add(this.wizardFlashEspDialog);
+                        this.wizardFlashEspDialog.openAndDisableModeless();
+                    } else {
+                        ui.getPage().fetchCurrentURL(url -> {
+                            final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
+                            if (!ref.contains(SETTINGS)) {
+                                this.wizardFlashEspRepository.findByName(WIZARD_FLASH_ESP_VIEW)
+                                        .ifPresent(hide -> {
+                                            if (hide.isWizardEnabled()) {
+                                                this.add(this.wizardFlashEspDialog);
+                                                this.wizardFlashEspDialog.openAndDisableModeless();
+                                            }
+                                        });
+                            }
+                        });
                     }
                 });
-            }
-        });
 
 
     }

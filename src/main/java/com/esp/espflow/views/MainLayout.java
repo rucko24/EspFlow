@@ -9,8 +9,9 @@ import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.hexdump.HexDumpView;
+import com.esp.espflow.views.mainheader.MainHeader;
 import com.esp.espflow.views.readflash.ReadFlashView;
-import com.esp.espflow.views.settings.SettingsDialogView;
+import com.esp.espflow.views.settings.SettingsDialog;
 import com.esp.espflow.views.webserial.WebSerialView;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
@@ -38,6 +39,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
@@ -62,8 +64,6 @@ import static com.esp.espflow.util.EspFlowConstants.WEB_SERIAL_ICON_SVG;
 @Log4j2
 @AnonymousAllowed
 public class MainLayout extends AppLayout {
-
-
     /**
      * Services
      */
@@ -72,7 +72,8 @@ public class MainLayout extends AppLayout {
     private final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems;
     private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
     private final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent;
-    private final SettingsDialogView settingsDialogView;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final SettingsDialog settingsDialog;
     private final MainFooter mainFooter;
     private final MainHeader mainHeader;
     /**
@@ -85,19 +86,21 @@ public class MainLayout extends AppLayout {
     public MainLayout(final AuthenticatedUser authenticatedUser,
                       final AccessAnnotationChecker accessChecker,
                       final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems,
-                      final SettingsDialogView settingsDialogView,
+                      final SettingsDialog settingsDialog,
                       final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems,
                       final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent,
                       final MainFooter mainFooter,
-                      final MainHeader mainHeader) {
+                      final MainHeader mainHeader,
+                      final ApplicationEventPublisher applicationEventPublisher) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
         this.subscribersMessageListItems = subscribersMessageListItems;
-        this.settingsDialogView = settingsDialogView;
+        this.settingsDialog = settingsDialog;
         this.subscribersEsptoolVersionMessageListItems = subscribersEsptoolVersionMessageListItems;
         this.subscribersEspFlowMessageEvent = subscribersEspFlowMessageEvent;
         this.mainFooter = mainFooter;
         this.mainHeader = mainHeader;
+        this.applicationEventPublisher = applicationEventPublisher;
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -107,6 +110,8 @@ public class MainLayout extends AppLayout {
     private void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
         toggle.setAriaLabel("Menu toggle");
+
+        applicationEventPublisher.publishEvent(this.mainHeader);
 
         addToNavbar(true, toggle, this.mainHeader.createHeaderRow());
     }
@@ -152,10 +157,10 @@ public class MainLayout extends AppLayout {
         SideNav nav = new SideNav();
         if (accessChecker.hasAccess(FlashEspView.class)) {
             var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null));
-            this.mainHeader.getInboxCounter().setVisible(false);
-            this.mainHeader.getInboxCounter().getElement().getThemeList().add("badge contrast pill");
-            this.mainHeader.getInboxCounter().getElement().setAttribute("aria-label", "12 unread messages");
-            Tooltip.forComponent(this.mainHeader.getInboxCounter()).setText("unread messages");
+            this.mainHeader.getNotificationBell().getInboxCounter().setVisible(false);
+            this.mainHeader.getNotificationBell().getInboxCounter().getElement().getThemeList().add("badge contrast pill");
+            this.mainHeader.getNotificationBell().getInboxCounter().getElement().setAttribute("aria-label", "12 unread messages");
+            Tooltip.forComponent(this.mainHeader.getNotificationBell().getInboxCounter()).setText("unread messages");
             //itemFlash.setSuffixComponent(inboxCounter);
             Tooltip.forComponent(itemFlash).setText("Flash Esp32-ESP8266, Execute flash_id and write flash");
             nav.addItem(itemFlash);
@@ -202,20 +207,20 @@ public class MainLayout extends AppLayout {
         try {
             ui.access(() -> {
                 log.info("MessageListItem listener {}", messageListItem.getText());
-                this.mainHeader.getMessageListItemUnreadList().add(messageListItem);
-                this.mainHeader.getMessageListItemAllList().add(messageListItem);
-                this.mainHeader.getMessageListRead().setItems(this.mainHeader.getMessageListItemUnreadList());
-                this.mainHeader.getInboxCounter().setText(String.valueOf(this.mainHeader.getMessageListItemUnreadList().size()));
-                this.mainHeader.getMessageListAll().setItems(this.mainHeader.getMessageListItemAllList());
-                this.mainHeader.getInboxCounter().setVisible(true);
+                this.mainHeader.getNotificationBell().getMessageListItemUnreadList().add(messageListItem);
+                this.mainHeader.getNotificationBell().getMessageListItemAllList().add(messageListItem);
+                this.mainHeader.getNotificationBell().getMessageListRead().setItems(this.mainHeader.getNotificationBell().getMessageListItemUnreadList());
+                this.mainHeader.getNotificationBell().getInboxCounter().setText(String.valueOf(this.mainHeader.getNotificationBell().getMessageListItemUnreadList().size()));
+                this.mainHeader.getNotificationBell().getMessageListAll().setItems(this.mainHeader.getNotificationBell().getMessageListItemAllList());
+                this.mainHeader.getNotificationBell().getInboxCounter().setVisible(true);
                 this.showsRedErrorInTheBell();
-                Animated.animate(this.mainHeader.getSpanCircleRed(), Animated.Animation.FADE_IN);
-                Animated.animate(this.mainHeader.getInboxCounter(), Animated.Animation.FADE_IN);
-                if (this.mainHeader.getContentUnread().getElement().getChildCount() == 0) {
-                    this.mainHeader.getBellIcon().getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
-                    Animated.animate(this.mainHeader.getBellIcon(), Animated.Animation.FADE_IN);
+                Animated.animate(this.mainHeader.getNotificationBell().getSpanCircleRed(), Animated.Animation.FADE_IN);
+                Animated.animate(this.mainHeader.getNotificationBell().getInboxCounter(), Animated.Animation.FADE_IN);
+                if (this.mainHeader.getNotificationBell().getContentUnread().getElement().getChildCount() == 0) {
+                    this.mainHeader.getNotificationBell().getBellIcon().getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
+                    Animated.animate(this.mainHeader.getNotificationBell().getBellIcon(), Animated.Animation.FADE_IN);
                     this.showsRedErrorInTheBell();
-                    this.mainHeader.getContentUnread().add(this.mainHeader.getMessageListRead());
+                    this.mainHeader.getNotificationBell().getContentUnread().add(this.mainHeader.getNotificationBell().getMessageListRead());
                 }
             });
         } catch (UIDetachedException ex) {
@@ -227,7 +232,7 @@ public class MainLayout extends AppLayout {
      * When an event notification arrives, we paint a red circle on the bell.
      */
     public void showsRedErrorInTheBell() {
-        this.mainHeader.getSpanCircleRed().getElement().getThemeList().add("badge small error dot primary");
+        this.mainHeader.getNotificationBell().getSpanCircleRed().getElement().getThemeList().add("badge small error dot primary");
     }
 
 
@@ -249,7 +254,7 @@ public class MainLayout extends AppLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        this.settingsDialogView.close();
+        this.settingsDialog.close();
         this.closeSubscribers();
     }
 

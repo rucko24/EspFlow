@@ -9,13 +9,13 @@ import $cssFromFile_4 from 'Frontend/generated/jar-resources/animate.css?inline'
 import $cssFromFile_5 from 'Frontend/generated/jar-resources/styles/vaadin-checkbox.css?inline';
 import 'Frontend/generated/jar-resources/file-download-wrapper.js';
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
-import '@vaadin/horizontal-layout/theme/lumo/vaadin-horizontal-layout.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-app-layout.js';
 import '@vaadin/vertical-layout/theme/lumo/vaadin-vertical-layout.js';
 import '@vaadin/dialog/theme/lumo/vaadin-dialog.js';
 import 'Frontend/generated/jar-resources/flow-component-renderer.js';
 import 'Frontend/generated/jar-resources/scripts/copy_to_clipboard.js';
 import '@vaadin/login/theme/lumo/vaadin-login-overlay.js';
+import '@vaadin/horizontal-layout/theme/lumo/vaadin-horizontal-layout.js';
 import '@vaadin/popover/theme/lumo/vaadin-popover.js';
 import 'Frontend/generated/jar-resources/vaadin-popover/popover.ts';
 import 'Frontend/generated/jar-resources/paper-slider/fc-l2t-paper-slider.js';

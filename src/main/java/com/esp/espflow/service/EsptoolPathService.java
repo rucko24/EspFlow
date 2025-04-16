@@ -39,15 +39,7 @@ public class EsptoolPathService {
     public String esptoolPath() {
 
         this.esptoolExecutableService.findByIsSelectedToTrue()
-                .ifPresentOrElse(esptoolBundleDto -> {
-                    if (esptoolBundleDto.isBundled()) {
-                        this.esptoolPath = this.bundlePath();
-                        log.debug(LOADED_BUNDLED_ESPTOOL_PY_FROM, esptoolPath);
-                    } else {
-                        this.esptoolPath = esptoolBundleDto.absolutePathEsptool();
-                        log.debug(LOADED_CUSTOM_ESPTOOL_PY_FROM, esptoolBundleDto.absolutePathEsptool());
-                    }
-                }, this::loadedBundleEsptoolPy);
+                .ifPresentOrElse(this::isBundleOrGetAbsolutePath, this::loadedBundleEsptoolPy);
 
         return esptoolPath;
     }
@@ -75,17 +67,19 @@ public class EsptoolPathService {
         final String esptoolVersion = esptoolExecutableDto.esptoolVersion();
 
         this.esptoolExecutableService.findByAbsolutePathEsptoolAndIsBundleAndVersion(absolutePath, isbundled, esptoolVersion)
-                .ifPresentOrElse(esptoolBundleDto -> {
-                    if (esptoolBundleDto.isBundled()) {
-                        this.esptoolPath = this.bundlePath();
-                        log.debug(LOADED_BUNDLED_ESPTOOL_PY_FROM, esptoolPath);
-                    } else {
-                        this.esptoolPath = esptoolBundleDto.absolutePathEsptool();
-                        log.debug(LOADED_CUSTOM_ESPTOOL_PY_FROM, esptoolBundleDto.absolutePathEsptool());
-                    }
-                }, this::loadedBundleEsptoolPy);
+                .ifPresentOrElse(this::isBundleOrGetAbsolutePath, this::loadedBundleEsptoolPy);
 
         return esptoolPath;
+    }
+
+    private void isBundleOrGetAbsolutePath(EsptoolExecutableDto esptoolBundleDto) {
+        if (esptoolBundleDto.isBundled()) {
+            this.esptoolPath = this.bundlePath();
+            log.debug(LOADED_BUNDLED_ESPTOOL_PY_FROM, esptoolPath);
+        } else {
+            this.esptoolPath = esptoolBundleDto.absolutePathEsptool();
+            log.debug(LOADED_CUSTOM_ESPTOOL_PY_FROM, esptoolBundleDto.absolutePathEsptool());
+        }
     }
 
     private void loadedBundleEsptoolPy() {

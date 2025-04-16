@@ -14,9 +14,9 @@ import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
-import com.esp.espflow.views.MainHeader;
 import com.esp.espflow.views.MainLayout;
 import com.esp.espflow.views.dialog.ChangeSerialPortPermissionDialog;
+import com.esp.espflow.views.mainheader.MainHeader;
 import com.esp.espflow.views.readflash.wizard.WizardReadFlashView;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
@@ -52,7 +52,6 @@ import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -95,6 +94,7 @@ import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
 import static com.esp.espflow.util.EspFlowConstants.RETURN_WINDOW_INNER_WIDTH;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
+import static com.esp.espflow.util.EspFlowConstants.WINDOWS_LOCATION_REMOVE_HASH;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 
 /**
@@ -134,10 +134,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final Span spanTotalDevicesValue = new Span();
 
     private MainHeader mainHeader;
-    /**
-     * Registration for button
-     */
-    private Registration broadcasterRefreshButton;
     /**
      * Change port permission
      */
@@ -767,36 +763,31 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         super.onAttach(attachEvent);
         final UI ui = attachEvent.getUI();
 
-        if(attachEvent.isInitialAttach()) {
+        if (attachEvent.isInitialAttach()) {
             mainHeader.remove(this.buttonRefreshDevices);
             mainHeader.add(this.buttonRefreshDevices);
         }
 
-        ui.getPage().executeJs(
-                """
-                        if (window.location.hash) {
-                            return window.location.hash.substring(1); // Elimina el '#'
-                        }
-                        """
-        ).then(String.class, hash -> {
-            if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
-                this.add(this.wizardReadFlashView);
-                this.wizardReadFlashView.openAndDisableModeless();
-            } else {
-                ui.getPage().fetchCurrentURL(url -> {
-                    final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
-                    if (!ref.contains(SETTINGS)) {
-                        this.wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
-                                .ifPresent(hide -> {
-                                    if (hide.isWizardEnabled()) {
-                                        this.add(this.wizardReadFlashView);
-                                        this.wizardReadFlashView.openAndDisableModeless();
-                                    }
-                                });
+        ui.getPage().executeJs(WINDOWS_LOCATION_REMOVE_HASH)
+                .then(String.class, hash -> {
+                    if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
+                        this.add(this.wizardReadFlashView);
+                        this.wizardReadFlashView.openAndDisableModeless();
+                    } else {
+                        ui.getPage().fetchCurrentURL(url -> {
+                            final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
+                            if (!ref.contains(SETTINGS)) {
+                                this.wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
+                                        .ifPresent(hide -> {
+                                            if (hide.isWizardEnabled()) {
+                                                this.add(this.wizardReadFlashView);
+                                                this.wizardReadFlashView.openAndDisableModeless();
+                                            }
+                                        });
+                            }
+                        });
                     }
                 });
-            }
-        });
 
     }
 

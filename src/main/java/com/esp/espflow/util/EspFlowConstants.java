@@ -61,6 +61,7 @@ public class EspFlowConstants {
     public static final String META_INF_RESOURCES_ESPTOOL_BUNDLE = "/META-INF/resources/esptool-bundled/";
     public static final String ESPTOOL_BUNDLE_DIR = "/esptool-bundled-dir/";
     public static final String EXECUTABLE_ICON = "executable.svg";
+    public static final String UPDATE_ICON = "upload.svg";
     public static final String SLASH = "/";
     public static final String SET_CHMOD_X = "rwx--x--x";
     public static final String PORT = "--port";
@@ -80,6 +81,7 @@ public class EspFlowConstants {
     public static final String WEB_SERIAL_ICON_SVG = "web-serial.svg";
     public static final String FLASH_OFF_SVG = "flash-off.svg";
     public static final String SIZE_25_PX = "25px";
+    public static final String SIZE_20_PX = "20px";
     public static final String SIZE_30_PX = "30px";
     public static final String ROTATE_0_DEGREE = "rotate(0deg)";
     public static final String TRANSFORM = "transform";
@@ -172,5 +174,10 @@ public class EspFlowConstants {
     public static final String LOADED_CUSTOM_ESPTOOL_PY_FROM = "Loaded custom esptool.py from {}";
     public static final String ENTITY_IS_NOT_PRESENT_LOADED_BUNDLE_ESPTOOL_PY_FROM = "Entity is not present, Loaded bundle esptool.py from {}";
     public static final String RETURN_WINDOW_INNER_WIDTH = "return window.innerWidth;";
+    public static final String WINDOWS_LOCATION_REMOVE_HASH = """
+                    if (window.location.hash) {
+                        return window.location.hash.substring(1);
+                    }
+                    """;
 
 }
