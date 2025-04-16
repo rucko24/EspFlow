@@ -29,7 +29,6 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -282,8 +281,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private Div createIconItemSettingsContext() {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-        final Icon icon = VaadinIcon.ARROW_UP.create();
-        icon.setSize("16px");
+        final SvgIcon icon = SvgFactory.createIconFromSvg("upload.svg", "20px", "20px");
         icon.addClassName(BLACK_TO_WHITE_ICON);
         final Span span = new Span("Upload a custom esptool");
         span.addClassNames(LumoUtility.Padding.Left.SMALL);
