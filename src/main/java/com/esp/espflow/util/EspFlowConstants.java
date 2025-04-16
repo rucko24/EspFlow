@@ -126,6 +126,7 @@ public class EspFlowConstants {
     //Applies only for DARK MODE
     public static final String BLACK_TO_WHITE_ICON = "black-to-white";
     public static final String CONTEXT_MENU_ITEM_NO_CHECKMARK = "context-menu-item-no-checkmark";
+    public static final String CONTEXT_MENU_ITEM_NO_CHECKMARK_BOTTOM = "context-menu-item-no-checkmark-bottom";
     public static final String NAV_SETTINGS = "nav-settings";
     public static final String SCROLLBAR_CUSTOM_STYLE = """
                 const style = document.createElement('style');

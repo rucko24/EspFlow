@@ -64,10 +64,22 @@ vaadin-context-menu-item.context-menu-item-no-checkmark::part(checkmark)::before
   display: none;
 }
 
+vaadin-context-menu-item.context-menu-item-no-checkmark-bottom::part(checkmark)::before {
+  display: none;
+}
+
 /* some indent for the content */
 vaadin-context-menu-item.context-menu-item-no-checkmark {
   padding-left: var(--lumo-space-s);
   justify-content: flex-start;
+}
+
+/* some indent for the content */
+vaadin-context-menu-item.context-menu-item-no-checkmark-bottom {
+  padding-left: var(--lumo-space-s);
+  justify-content: flex-start;
+  border-top: 1px solid lavender;
+  border-radius: 0px;
 }
 
 vaadin-split-layout > [slot="primary"] {

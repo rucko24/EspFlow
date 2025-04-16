@@ -11,6 +11,7 @@ import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.dialog.ChangeSerialPortPermissionDialog;
+import com.esp.espflow.views.settings.SettingsDialog;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.AttachEvent;
@@ -28,6 +29,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -59,6 +61,7 @@ import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
+import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK_BOTTOM;
 import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
 import static com.esp.espflow.util.EspFlowConstants.ERROR_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
@@ -70,6 +73,7 @@ import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 import static com.esp.espflow.util.EspFlowConstants.PORT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.PORT_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
 
 @Log4j2
 @Getter
@@ -85,18 +89,23 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final TextField inputCommand = new TextField();
     private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
     private final Button killProcess = new Button(VaadinIcon.STOP.create());
-    private final ComPortService comPortService;
-    private final CommandService commandService;
-    private final EsptoolService esptoolService;
-    private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
+
     private final H2 h2EsptoolVersion = new H2();
+    private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
     private final ProgressBar progressBarForShowEsptoolVersion = new ProgressBar();
-    private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
+    private final AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
+    /**
+     * Services
+     */
     private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
     private final Sinks.Many<EspflowMessageListItemEvent> publisherMessage;
     private final EsptoolExecutableService esptoolExecutableService;
-    private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
+    private final ComPortService comPortService;
+    private final CommandService commandService;
+    private final EsptoolService esptoolService;
+    private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
+    private final SettingsDialog settingsDialog;
     private Disposable disposableSubscriberEsptoolVersionEvent;
 
     @PostConstruct
@@ -246,6 +255,17 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     String isBundled = esptoolExecutableDto.isBundled() ? "Bundled" : "Custom";
                     this.createToolTip(item, isBundled);
                 });
+
+        contextMenu.addItem(this.createIconItemSettingsContext(), menuItemClickEvent -> {
+                    menuItemClickEvent.getSource().getUI().ifPresent(ui -> {
+                        ui.getPage().fetchCurrentURL(url -> {
+                            String urlWithParameters = url.getPath().concat(SETTINGS_SHARP);
+                            ui.getPage().getHistory().replaceState(null, urlWithParameters);
+                            settingsDialog.open(SETTINGS);
+                        });
+                    });
+                })
+                .addClassName(CONTEXT_MENU_ITEM_NO_CHECKMARK_BOTTOM);
     }
 
     private Div createIconItemEsptoolVersionContext(String esptoolVersion) {
@@ -254,6 +274,18 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", "20px");
         icon.addClassName(BLACK_TO_WHITE_ICON);
         final Span span = new Span(esptoolVersion);
+        span.addClassNames(LumoUtility.Padding.Left.SMALL);
+        div.add(icon, span);
+        return div;
+    }
+
+    private Div createIconItemSettingsContext() {
+        final Div div = new Div();
+        div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
+        final Icon icon = VaadinIcon.ARROW_UP.create();
+        icon.setSize("16px");
+        icon.addClassName(BLACK_TO_WHITE_ICON);
+        final Span span = new Span("Upload a custom esptool");
         span.addClassNames(LumoUtility.Padding.Left.SMALL);
         div.add(icon, span);
         return div;
@@ -313,8 +345,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 comboBoxSerialPort.setItems(List.of());
                 scanPort.getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
-                        if(url.getRef() != null) {
-                            if(!url.getRef().contains(SETTINGS)) {
+                        if (url.getRef() != null) {
+                            if (!url.getRef().contains(SETTINGS)) {
                                 ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
                                 this.publisherMessage.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                             }

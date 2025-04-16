@@ -4,7 +4,7 @@ import com.esp.espflow.entity.User;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.Item;
 import com.esp.espflow.util.svgfactory.SvgFactory;
-import com.esp.espflow.views.settings.SettingsDialogView;
+import com.esp.espflow.views.settings.SettingsDialog;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -52,7 +52,7 @@ import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
 public class MainFooter {
 
     private final AuthenticatedUser authenticatedUser;
-    private final SettingsDialogView settingsDialogView;
+    private final SettingsDialog settingsDialog;
     private String density = "";
 
     /**
@@ -108,7 +108,7 @@ public class MainFooter {
                         log.info("fetchCurrentURL {}", url);
                         String urlWithParameters = url.getPath().concat(SETTINGS_SHARP);
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
-                        settingsDialogView.open(SETTINGS);
+                        settingsDialog.open(SETTINGS);
                     });
                 });
             }).addComponentAsFirst(VaadinIcon.COG.create());
@@ -126,13 +126,13 @@ public class MainFooter {
                     ui.getPage().fetchCurrentURL(url -> {
                         String urlWithParameters = url.getPath().concat(SETTINGS_SHARP);
                         ui.getPage().getHistory().replaceState(null, urlWithParameters);
-                        settingsDialogView.open(SETTINGS);
+                        settingsDialog.open(SETTINGS);
                         log.info("fetchCurrentURL from shortcut {}{}", url, SETTINGS_SHARP);
                     });
                 });
             }, Key.KEY_S, KeyModifier.CONTROL, KeyModifier.ALT);
 
-            footer.add(userMenu, settingsDialogView);
+            footer.add(userMenu, settingsDialog);
         } else {
             Anchor loginLink = new Anchor("login", "Sign in");
             footer.add(loginLink);

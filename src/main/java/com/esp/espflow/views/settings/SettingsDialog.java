@@ -72,7 +72,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
 @Log4j2
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class SettingsDialogView extends Dialog implements AnimationsUtils {
+public class SettingsDialog extends Dialog implements AnimationsUtils {
 
     private static final String PASSWORD = "password";
     private static final String CONTACT_INFORMATION = "contact-information";
@@ -88,6 +88,9 @@ public class SettingsDialogView extends Dialog implements AnimationsUtils {
     private final Button buttonToggle = new Button(VaadinIcon.MENU.create());
     private final Button buttonToggleHelper = new Button(new Icon("lumo", "cross"));
     private final Layout mainLayout = new Layout();
+    /**
+     * Services
+     */
     private final WizardEspService wizardFlashEspRepository;
     private final SettingsEsptoolHomePathContent settingsEsptoolHomePathContent;
 
