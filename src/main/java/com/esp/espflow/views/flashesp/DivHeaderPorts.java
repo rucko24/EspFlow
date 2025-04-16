@@ -284,6 +284,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final SvgIcon icon = SvgFactory.createIconFromSvg("upload.svg", "20px", "20px");
         icon.addClassName(BLACK_TO_WHITE_ICON);
         final Span span = new Span("Upload a custom esptool");
+        Tooltip.forComponent(span).setText("Ctrl+Alt+S");
         span.addClassNames(LumoUtility.Padding.Left.SMALL);
         div.add(icon, span);
         return div;
