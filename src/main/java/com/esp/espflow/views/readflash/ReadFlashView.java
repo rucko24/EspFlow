@@ -2,6 +2,7 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.entity.EspDeviceWithTotalDevicesRecord;
+import com.esp.espflow.entity.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.RefreshDevicesEvent;
@@ -95,7 +96,6 @@ import static com.esp.espflow.util.EspFlowConstants.NO_DEVICES_SHOWN;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
-import static com.esp.espflow.util.EspFlowConstants.RETURN_WINDOW_INNER_WIDTH;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.WINDOWS_LOCATION_REMOVE_HASH;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
@@ -707,7 +707,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
     }
 
-    private void detectBrowserSize(final UI ui, final int width) {
+    private void hideOrShowHeaderComponentsWithThisWidth(final int width) {
         if (width < 500) {
             this.rowMainHeader.remove(this.buttonRefreshDevices);
             this.rowMainHeader.remove(this.buttonConfigure);
@@ -742,15 +742,12 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
     private void subscribingForRefreshButton(final UI ui) {
         this.disposableRefreshEvents = this.subscribersRefreshDevicesEvent
-                .doOnNext(onNext -> log.info("onNext subscribingForRefreshButton {}", onNext))
                 .subscribe(refreshDevicesEvent -> {
                     try {
                         var value = RefreshDevicesEvent.fromEvent(refreshDevicesEvent);
                         log.info("value from event: {}", value);
                         ui.access(() -> this.buttonRefreshDevices.setEnabled(value));
                     } catch (UIDetachedException ex) {
-                        //Do nothing,  It is thrown when you attempt to access closed UI.
-                        //https://stackoverflow.com/a/73885127/7267818
                     }
                 });
     }
@@ -772,34 +769,17 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      * <p>
      * It is also disabled on the first click preventing the user from clicking and another scan is processed to avoid interfering with the previous one.
      *
-     * @param refreshDevicesEvent events to process them in this view
+     * @param event events to process them in this view
      */
     @EventListener
-    public void refreshDevice(RefreshDevicesEvent refreshDevicesEvent) {
-        //Evento de scan, solo uno a la vez
-        if (refreshDevicesEvent == RefreshDevicesEvent.ENABLE) {
-            super.getUI().ifPresent(ui -> {
+    public void refreshDevice(MainHeaderToReadFlashViewEvent event) {
+        //evento de habilitado
+        if (event.refreshDevicesEvent() == RefreshDevicesEvent.ENABLE) {
+            this.rowMainHeader.getUI().ifPresent(ui -> {
                 this.closeSubscribers();
                 this.subscribingForRefreshButton(ui);
-                ui.getPage().executeJs(RETURN_WINDOW_INNER_WIDTH)
-                        .then(result -> {
-                            final int width = ((Double) result.asNumber()).intValue();
-                            log.info("Ancho de la pantalla: {}", width);
-                            this.detectBrowserSize(ui, width);
-                        });
+                this.hideOrShowHeaderComponentsWithThisWidth(event.width());
             });
-        }
-        if (refreshDevicesEvent == RefreshDevicesEvent.SCAN) {
-            getUI().ifPresent(ui -> {
-                //Evento de disable para los subscriptores
-
-            });
-        }
-        if (refreshDevicesEvent == RefreshDevicesEvent.OPEN_SIDEBAR) {
-            this.sidebarReadFlash.toggleSidebar();
-        }
-        if (refreshDevicesEvent == RefreshDevicesEvent.OPEN_READ_FLASH_WIZARD) {
-
         }
     }
 

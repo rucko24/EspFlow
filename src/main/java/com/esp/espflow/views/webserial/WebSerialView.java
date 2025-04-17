@@ -40,7 +40,7 @@ import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
 @PageTitle("WebSerial")
 @Route(value = "web-serial-api", layout = MainLayout.class)
 @JsModule(COPY_TO_CLIPBOARD)
-@JavaScript(value = "./scripts/esptool-wrapper.js", loadMode = LoadMode.EAGER)
+@JavaScript(value = "./scripts/esptool-wrapper.js", loadMode = LoadMode.LAZY)
 @RolesAllowed("ADMIN")
 public class WebSerialView extends VerticalLayout {
 

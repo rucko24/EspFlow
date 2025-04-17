@@ -1,9 +1,8 @@
 package com.esp.espflow.views.mainheader;
 
+import com.esp.espflow.entity.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.views.readflash.ReadFlashView;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -76,19 +75,11 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
 
     private void detectBrowserSize(final UI ui, final int width) {
         if (width < 500) {
-            ui.getPage().fetchCurrentURL(url -> {
-                if (url.getPath().contains(READ_FLASH)) {
-                    log.info(" < 500 read flash");
-                    this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.ENABLE);
-                }
-            });
+            log.info(" < 500 read flash");
+            this.applicationEventPublisher.publishEvent(new MainHeaderToReadFlashViewEvent(ui, RefreshDevicesEvent.ENABLE, width));
         } else { // width != 500
-            ui.getPage().fetchCurrentURL(url -> {
-                if (url.getPath().contains(READ_FLASH)) {
-                    log.info("!= 500 read flash");
-                    this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.ENABLE);
-                }
-            });
+            log.info("!= 500 read flash");
+            this.applicationEventPublisher.publishEvent(new MainHeaderToReadFlashViewEvent(ui, RefreshDevicesEvent.ENABLE, width));
         }
     }
 
@@ -96,7 +87,6 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
         ui.getPage().executeJs(RETURN_WINDOW_INNER_WIDTH)
                 .then(result -> {
                     final int width = ((Double) result.asNumber()).intValue();
-                    log.info("Ancho de la pantalla: {}", width);
                     this.detectBrowserSize(ui, width);
                 });
         ui.getPage().addBrowserWindowResizeListener(event -> this.detectBrowserSize(ui, event.getWidth()));
@@ -107,18 +97,6 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
         final UI ui = event.getUI();
         if (event.getNavigationTarget().equals(ReadFlashView.class)) {
             this.executeJsAndBrowserListener(ui);
-            log.info("Main beforeEnter");
         }
     }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-    }
-
 }
