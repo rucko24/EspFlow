@@ -64,6 +64,10 @@ vaadin-context-menu-item.context-menu-item-no-checkmark::part(checkmark)::before
   display: none;
 }
 
+vaadin-context-menu-item.context-menu-item-no-checkmark[focused] {
+    box-shadow: none;
+}
+
 vaadin-context-menu-item.context-menu-item-no-checkmark-bottom::part(checkmark)::before {
   display: none;
 }
