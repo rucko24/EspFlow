@@ -5,10 +5,7 @@ import com.esp.espflow.views.readflash.ReadFlashView;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -21,11 +18,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
-import org.vaadin.lineawesome.LineAwesomeIcon;
 
-import java.util.stream.Stream;
-
-import static com.esp.espflow.util.EspFlowConstants.CONFIGURE;
 import static com.esp.espflow.util.EspFlowConstants.RETURN_WINDOW_INNER_WIDTH;
 
 /**
@@ -39,10 +32,6 @@ import static com.esp.espflow.util.EspFlowConstants.RETURN_WINDOW_INNER_WIDTH;
 public class MainHeader extends HorizontalLayout implements BeforeEnterObserver {
 
     public static final String READ_FLASH = "read-flash";
-    public static final String REFRESH_DEVICES = "Refresh devices";
-
-    private final Button configureIcon = new Button(LineAwesomeIcon.SLIDERS_H_SOLID.create());
-    private final Button buttonRefreshDevicesIcon = new Button(VaadinIcon.REFRESH.create());
     private final H1 viewTitle = new H1();
     private final HorizontalLayout rowHeaderForComponentsView = new HorizontalLayout();
     /**
@@ -61,19 +50,6 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
      */
     public MainHeader createHeaderRow() {
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-
-
-        this.configureIcon.setTooltipText(CONFIGURE);
-        this.configureIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        this.buttonRefreshDevicesIcon.setTooltipText(CONFIGURE);
-        this.buttonRefreshDevicesIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        //Added listeners here, only once
-        //Envio de scan
-        this.buttonRefreshDevicesIcon.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.SCAN));
-        this.configureIcon.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.OPEN_SIDEBAR));
-
-        this.buttonRefreshDevicesIcon.setVisible(false);
-
         this.rowHeaderForComponentsView.setDefaultVerticalComponentAlignment(Alignment.CENTER);
         final HorizontalLayout rowEnd = new HorizontalLayout();
         rowEnd.add(this.rowHeaderForComponentsView, this.notificationBell.createNotificationBell());
@@ -96,22 +72,6 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
      */
     public void changeTitle(String title) {
         this.viewTitle.setText(title);
-    }
-
-    /**
-     * @param currentPageTitle to match
-     */
-    public void showHeaderComponents(String currentPageTitle) {
-        if (currentPageTitle.contains("Read flash")) {
-//            Stream.of(this.buttonConfigure, this.buttonRefreshDevices)
-//                    .forEach(item -> item.setVisible(true));
-            Stream.of(this.configureIcon, this.buttonRefreshDevicesIcon)
-                    .forEach(item -> item.setVisible(false));
-        } else {
-            //Stream.of(this.buttonConfigure, this.buttonRefreshDevices).forEach(item -> item.setVisible(false));
-            Stream.of(this.configureIcon, this.buttonRefreshDevicesIcon)
-                    .forEach(item -> item.setVisible(false));
-        }
     }
 
     private void detectBrowserSize(final UI ui, final int width) {
@@ -139,7 +99,6 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
                     log.info("Ancho de la pantalla: {}", width);
                     this.detectBrowserSize(ui, width);
                 });
-
         ui.getPage().addBrowserWindowResizeListener(event -> this.detectBrowserSize(ui, event.getWidth()));
     }
 

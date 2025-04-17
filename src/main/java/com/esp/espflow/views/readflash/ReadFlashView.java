@@ -126,6 +126,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
     private final Button buttonConfigure = new Button(CONFIGURE, LineAwesomeIcon.SLIDERS_H_SOLID.create());
     private final Icon shoWizardIcon = VaadinIcon.INFO_CIRCLE.create();
+    private final Button configureIcon = new Button(LineAwesomeIcon.SLIDERS_H_SOLID.create());
+    private final Button buttonRefreshDevicesIcon = new Button(VaadinIcon.REFRESH.create());
     /**
      * Console output
      */
@@ -326,6 +328,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.buttonRefreshDevices.setVisible(false);
         this.shoWizardIcon.setVisible(false);
         this.buttonConfigure.setVisible(false);
+        this.configureIcon.setVisible(false);
+        this.buttonRefreshDevicesIcon.setVisible(false);
         this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         this.buttonRefreshDevices.setId("button-refresh-device");
         this.buttonRefreshDevices.setEnabled(true);
@@ -334,16 +338,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         this.buttonRefreshDevices.addClickShortcut(Key.ENTER);
         this.buttonRefreshDevices.setDisableOnClick(true);
-        this.buttonRefreshDevices.addClickListener(event -> {
-            publishRefreshDevicesEvent.tryEmitNext(RefreshDevicesEvent.DISABLE);
-            log.info("Send disable event");
-            final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), LOADING);
-            this.divCarousel.removeAll();
-            this.divCarousel.add(espDevicesCarousel);
-            this.buttonRefreshDevices.getUI().ifPresent(ui -> this.showDetectedDevices(ui, espDevicesCarousel));
-        });
+        this.buttonRefreshDevices.addClickListener(event -> this.refreshDevice());
         this.buttonConfigure.addClickListener(event -> this.sidebarReadFlash.toggleSidebar());
-
         this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
         this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
         this.shoWizardIcon.setTooltipText("Show dialog");
@@ -351,7 +347,22 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             this.add(this.wizardReadFlashView);
             this.wizardReadFlashView.openAndDisableModeless();
         });
+        this.configureIcon.setTooltipText(CONFIGURE);
+        this.configureIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        this.buttonRefreshDevicesIcon.setTooltipText("Refresh devices");
+        this.buttonRefreshDevicesIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        this.buttonRefreshDevicesIcon.addClickListener(event -> this.refreshDevice());
+        this.configureIcon.addClickListener(event -> this.sidebarReadFlash.toggleSidebar());
+        this.buttonRefreshDevicesIcon.setVisible(false);
+    }
 
+    private void refreshDevice() {
+        publishRefreshDevicesEvent.tryEmitNext(RefreshDevicesEvent.DISABLE);
+        log.info("Send disable event");
+        final EspDevicesCarousel espDevicesCarousel = new EspDevicesCarousel(new ProgressBar(), LOADING);
+        this.divCarousel.removeAll();
+        this.divCarousel.add(espDevicesCarousel);
+        super.getUI().ifPresent(ui -> this.showDetectedDevices(ui, espDevicesCarousel));
     }
 
     /**
@@ -701,12 +712,16 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             this.rowMainHeader.remove(this.buttonRefreshDevices);
             this.rowMainHeader.remove(this.buttonConfigure);
             this.shoWizardIcon.setVisible(true);
+            this.configureIcon.setVisible(true);
+            this.buttonRefreshDevicesIcon.setVisible(true);
         } else { // width != 500
             this.animatedHeaderComponents();
             this.rowMainHeader.add(this.shoWizardIcon, this.buttonConfigure, this.buttonRefreshDevices);
             this.buttonRefreshDevices.setVisible(true);
             this.buttonConfigure.setVisible(true);
             this.shoWizardIcon.setVisible(true);
+            this.configureIcon.setVisible(false);
+            this.buttonRefreshDevicesIcon.setVisible(false);
         }
     }
 
@@ -714,12 +729,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         Animated.animate(this.shoWizardIcon, Animation.FADE_IN);
         Animated.animate(this.buttonConfigure, Animation.FADE_IN);
         Animated.animate(this.buttonRefreshDevices, Animation.FADE_IN);
+        Animated.animate(this.configureIcon, Animation.FADE_IN);
+        Animated.animate(this.buttonRefreshDevicesIcon, Animation.FADE_IN);
     }
 
     private void refreshHeaderComponents() {
         this.rowMainHeader.removeAll();
         this.animatedHeaderComponents();
-        this.rowMainHeader.add(this.shoWizardIcon, this.buttonConfigure, this.buttonRefreshDevices);
+        this.rowMainHeader.add(this.shoWizardIcon, this.configureIcon, this.buttonRefreshDevicesIcon,
+                this.buttonConfigure, this.buttonRefreshDevices);
     }
 
     private void subscribingForRefreshButton(final UI ui) {
@@ -794,7 +812,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        log.info("beforeEnter");
         this.subscribingForRefreshButton(event.getUI());
     }
 

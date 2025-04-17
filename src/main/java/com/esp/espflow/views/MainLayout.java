@@ -191,7 +191,6 @@ public class MainLayout extends AppLayout {
     protected void afterNavigation() {
         super.afterNavigation();
         this.mainHeader.changeTitle(this.getCurrentPageTitle());
-        this.mainHeader.showHeaderComponents(this.getCurrentPageTitle());
     }
 
     private String getCurrentPageTitle() {
