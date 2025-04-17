@@ -2,8 +2,8 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.entity.EspDeviceWithTotalDevicesRecord;
-import com.esp.espflow.entity.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
+import com.esp.espflow.entity.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
@@ -71,6 +71,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
@@ -339,7 +340,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.buttonRefreshDevices.addClickShortcut(Key.ENTER);
         this.buttonRefreshDevices.setDisableOnClick(true);
         this.buttonRefreshDevices.addClickListener(event -> this.refreshDevice());
-        this.buttonConfigure.addClickListener(event -> this.sidebarReadFlash.toggleSidebar());
+        this.buttonConfigure.addClickListener(event -> this.sidebarReadFlash.openSidebar());
         this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
         this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
         this.shoWizardIcon.setTooltipText("Show dialog");
@@ -352,7 +353,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.buttonRefreshDevicesIcon.setTooltipText("Refresh devices");
         this.buttonRefreshDevicesIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         this.buttonRefreshDevicesIcon.addClickListener(event -> this.refreshDevice());
-        this.configureIcon.addClickListener(event -> this.sidebarReadFlash.toggleSidebar());
+        this.configureIcon.addClickListener(event -> this.sidebarReadFlash.openSidebar());
         this.buttonRefreshDevicesIcon.setVisible(false);
     }
 
@@ -708,18 +709,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     }
 
     private void hideOrShowHeaderComponentsWithThisWidth(final int width) {
+        this.shoWizardIcon.setVisible(true);
         if (width < 500) {
-            this.rowMainHeader.remove(this.buttonRefreshDevices);
-            this.rowMainHeader.remove(this.buttonConfigure);
-            this.shoWizardIcon.setVisible(true);
+            this.buttonRefreshDevices.setVisible(false);
+            this.buttonConfigure.setVisible(false);
             this.configureIcon.setVisible(true);
             this.buttonRefreshDevicesIcon.setVisible(true);
         } else { // width != 500
-            this.animatedHeaderComponents();
-            this.rowMainHeader.add(this.shoWizardIcon, this.buttonConfigure, this.buttonRefreshDevices);
             this.buttonRefreshDevices.setVisible(true);
             this.buttonConfigure.setVisible(true);
-            this.shoWizardIcon.setVisible(true);
             this.configureIcon.setVisible(false);
             this.buttonRefreshDevicesIcon.setVisible(false);
         }
@@ -736,7 +734,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private void refreshHeaderComponents() {
         this.rowMainHeader.removeAll();
         this.animatedHeaderComponents();
-        this.rowMainHeader.add(this.shoWizardIcon, this.configureIcon, this.buttonRefreshDevicesIcon,
+        this.rowMainHeader.add(this.configureIcon, this.buttonRefreshDevicesIcon, this.shoWizardIcon,
                 this.buttonConfigure, this.buttonRefreshDevices);
     }
 
@@ -759,6 +757,13 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         }
     }
 
+    /**
+     * This listener is used to receive the HorizontalLayout that is in the <strong>navbar<strong> and to be
+     * able to use it to show in it, components of this view, like the buttons to show the sidebar,
+     * to show the detected devices etc.
+     *
+     * @param rowMainHeader from the navbar
+     */
     @EventListener
     public void listenerFromMainHeader(final HorizontalLayout rowMainHeader) {
         this.rowMainHeader = rowMainHeader;
@@ -771,14 +776,15 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      *
      * @param event events to process them in this view
      */
+    @Async("eventTaskExecutor")
     @EventListener
     public void refreshDevice(MainHeaderToReadFlashViewEvent event) {
-        //evento de habilitado
         if (event.refreshDevicesEvent() == RefreshDevicesEvent.ENABLE) {
-            this.rowMainHeader.getUI().ifPresent(ui -> {
-                this.closeSubscribers();
-                this.subscribingForRefreshButton(ui);
+            this.closeSubscribers();
+            this.subscribingForRefreshButton(event.ui());
+            event.ui().access(() -> {
                 this.hideOrShowHeaderComponentsWithThisWidth(event.width());
+                this.animatedHeaderComponents();
             });
         }
     }
@@ -788,6 +794,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.buttonRefreshDevices.setVisible(false);
         this.shoWizardIcon.setVisible(false);
         this.buttonConfigure.setVisible(false);
+        this.configureIcon.setVisible(false);
+        this.buttonRefreshDevicesIcon.setVisible(false);
     }
 
     @Override

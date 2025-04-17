@@ -83,15 +83,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
 
     }
 
-    public void toggleSidebar() {
-        if (this.sidebar.isEnabled()) {
-            this.closeSidebar();
-        } else {
-            this.openSidebar();
-        }
-    }
-
-    private void openSidebar() {
+    public void openSidebar() {
         super.setModal(true);
         this.sidebar.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, this);
         Animated.removeAnimations(this);
@@ -112,7 +104,6 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
             super.close();
         }, this, Duration.ofMillis(1500));
         getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
-
     }
 
     @ClientCallable

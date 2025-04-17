@@ -2,7 +2,6 @@ package com.esp.espflow.views.mainheader;
 
 import com.esp.espflow.entity.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.enums.RefreshDevicesEvent;
-import com.esp.espflow.views.readflash.ReadFlashView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -17,6 +16,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
+
+import java.util.concurrent.Executor;
 
 import static com.esp.espflow.util.EspFlowConstants.RETURN_WINDOW_INNER_WIDTH;
 
@@ -38,6 +39,7 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
      */
     private final ApplicationEventPublisher applicationEventPublisher;
     private final NotificationBell notificationBell;
+    private final Executor eventTaskExecutor;
 
     @PostConstruct
     public void setup() {
@@ -76,27 +78,34 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
     private void detectBrowserSize(final UI ui, final int width) {
         if (width < 500) {
             log.info(" < 500 read flash");
-            this.applicationEventPublisher.publishEvent(new MainHeaderToReadFlashViewEvent(ui, RefreshDevicesEvent.ENABLE, width));
+            ui.getPage().fetchCurrentURL(url -> {
+                if (url.getPath().contains(READ_FLASH)) {
+                    this.applicationEventPublisher.publishEvent(new MainHeaderToReadFlashViewEvent(ui, RefreshDevicesEvent.ENABLE, width));
+                }
+            });
         } else { // width != 500
             log.info("!= 500 read flash");
-            this.applicationEventPublisher.publishEvent(new MainHeaderToReadFlashViewEvent(ui, RefreshDevicesEvent.ENABLE, width));
+            ui.getPage().fetchCurrentURL(url -> {
+                if (url.getPath().contains(READ_FLASH)) {
+                    this.applicationEventPublisher.publishEvent(new MainHeaderToReadFlashViewEvent(ui, RefreshDevicesEvent.ENABLE, width));
+                }
+            });
         }
     }
 
     private void executeJsAndBrowserListener(UI ui) {
         ui.getPage().executeJs(RETURN_WINDOW_INNER_WIDTH)
-                .then(result -> {
+                .toCompletableFuture()
+                .whenCompleteAsync((result, error) -> {
                     final int width = ((Double) result.asNumber()).intValue();
-                    this.detectBrowserSize(ui, width);
-                });
+                    ui.access(() -> this.detectBrowserSize(ui, width));
+                }, eventTaskExecutor);
         ui.getPage().addBrowserWindowResizeListener(event -> this.detectBrowserSize(ui, event.getWidth()));
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         final UI ui = event.getUI();
-        if (event.getNavigationTarget().equals(ReadFlashView.class)) {
-            this.executeJsAndBrowserListener(ui);
-        }
+        this.executeJsAndBrowserListener(ui);
     }
 }
