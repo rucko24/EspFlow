@@ -111,7 +111,7 @@ public class MainLayout extends AppLayout {
         DrawerToggle toggle = new DrawerToggle();
         toggle.setAriaLabel("Menu toggle");
 
-        applicationEventPublisher.publishEvent(this.mainHeader);
+        this.applicationEventPublisher.publishEvent(this.mainHeader.getRowHeaderForComponentsView());
 
         addToNavbar(true, toggle, this.mainHeader.createHeaderRow());
     }
@@ -234,7 +234,6 @@ public class MainLayout extends AppLayout {
     public void showsRedErrorInTheBell() {
         this.mainHeader.getNotificationBell().getSpanCircleRed().getElement().getThemeList().add("badge small error dot primary");
     }
-
 
     private void closeSubscribers() {
         if (this.disposableSubscribersMessageListItems != null) {

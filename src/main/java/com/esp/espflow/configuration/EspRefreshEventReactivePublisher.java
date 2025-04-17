@@ -17,7 +17,7 @@ public class EspRefreshEventReactivePublisher {
         return Sinks
                 .many()
                 .multicast()
-                .onBackpressureBuffer();
+                .onBackpressureBuffer(10, false);
     }
 
     @Bean(value = "subscribersRefreshDevicesEvent")

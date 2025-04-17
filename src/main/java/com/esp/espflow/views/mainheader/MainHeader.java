@@ -1,17 +1,13 @@
 package com.esp.espflow.views.mainheader;
 
-import com.esp.espflow.entity.event.ReadFlashUpdateEvent;
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -25,16 +21,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.vaadin.lineawesome.LineAwesomeIcon;
-import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
 
 import java.util.stream.Stream;
 
-import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
+import static com.esp.espflow.util.EspFlowConstants.CONFIGURE;
 import static com.esp.espflow.util.EspFlowConstants.RETURN_WINDOW_INNER_WIDTH;
 
 /**
@@ -48,31 +39,21 @@ import static com.esp.espflow.util.EspFlowConstants.RETURN_WINDOW_INNER_WIDTH;
 public class MainHeader extends HorizontalLayout implements BeforeEnterObserver {
 
     public static final String READ_FLASH = "read-flash";
-    public static final String CONFIGURE = "Configure";
+    public static final String REFRESH_DEVICES = "Refresh devices";
 
-    private final Button buttonConfigure = new Button(CONFIGURE, LineAwesomeIcon.SLIDERS_H_SOLID.create());
-    private final Icon shoWizardIcon = VaadinIcon.INFO_CIRCLE.create();
     private final Button configureIcon = new Button(LineAwesomeIcon.SLIDERS_H_SOLID.create());
     private final Button buttonRefreshDevicesIcon = new Button(VaadinIcon.REFRESH.create());
     private final H1 viewTitle = new H1();
-
+    private final HorizontalLayout rowHeaderForComponentsView = new HorizontalLayout();
     /**
      * Services
      */
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final Flux<RefreshDevicesEvent> subscriberRefreshDevicesEvent;
-    private final Sinks.Many<RefreshDevicesEvent> publisherRefreshEvent;
     private final NotificationBell notificationBell;
-
-    private Disposable disposableRefreshEvents;
 
     @PostConstruct
     public void setup() {
         //Do nothing at the moment!
-        ComponentUtil.addListener(UI.getCurrent(), ReadFlashUpdateEvent.class, event -> {
-            // Actualiza, por ejemplo, la visibilidad o el texto del botón según el evento recibido.
-            //updateHeaderBasedOnEvent(event.getInfo());
-        });
     }
 
     /**
@@ -81,11 +62,7 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
     public MainHeader createHeaderRow() {
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
 
-        this.buttonConfigure.addClassName(BOX_SHADOW_VAADIN_BUTTON);
 
-        this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
-        this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
-        this.shoWizardIcon.setTooltipText("Show dialog");
         this.configureIcon.setTooltipText(CONFIGURE);
         this.configureIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         this.buttonRefreshDevicesIcon.setTooltipText(CONFIGURE);
@@ -93,15 +70,13 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
         //Added listeners here, only once
         //Envio de scan
         this.buttonRefreshDevicesIcon.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.SCAN));
-        this.buttonConfigure.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.OPEN_SIDEBAR));
         this.configureIcon.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.OPEN_SIDEBAR));
-        this.shoWizardIcon.addClickListener(event -> this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.OPEN_READ_FLASH_WIZARD));
 
-        final HorizontalLayout rowEnd = new HorizontalLayout(
-                this.shoWizardIcon,
-                this.configureIcon,
-                this.buttonRefreshDevicesIcon,
-                this.buttonConfigure, this.notificationBell.createNotificationBell());
+        this.buttonRefreshDevicesIcon.setVisible(false);
+
+        this.rowHeaderForComponentsView.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        final HorizontalLayout rowEnd = new HorizontalLayout();
+        rowEnd.add(this.rowHeaderForComponentsView, this.notificationBell.createNotificationBell());
         rowEnd.setAlignItems(FlexComponent.Alignment.CENTER);
 
         super.add(viewTitle, rowEnd);
@@ -132,51 +107,28 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
 //                    .forEach(item -> item.setVisible(true));
             Stream.of(this.configureIcon, this.buttonRefreshDevicesIcon)
                     .forEach(item -> item.setVisible(false));
-            this.shoWizardIcon.setVisible(true);
         } else {
-            this.shoWizardIcon.setVisible(false);
             //Stream.of(this.buttonConfigure, this.buttonRefreshDevices).forEach(item -> item.setVisible(false));
             Stream.of(this.configureIcon, this.buttonRefreshDevicesIcon)
                     .forEach(item -> item.setVisible(false));
         }
     }
 
-
     private void detectBrowserSize(final UI ui, final int width) {
-//        if (width < 500) {
-//            ui.getPage().fetchCurrentURL(url -> {
-//                if (url.getPath().contains(READ_FLASH)) {
-//                    Stream.of(this.buttonConfigure, this.buttonRefreshDevices)
-//                            .forEach(item -> {
-//                                //item.setVisible(false);
-//                                log.info("setVisible(false) buttoms");
-//                            });
-//                    Stream.of(this.configureIcon, this.buttonRefreshDevicesIcon)
-//                            .forEach(item -> {
-//                                item.setVisible(true);
-//                            });
-//                }
-//            });
-//        } else { // width != 500
-//            ui.getPage().fetchCurrentURL(url -> {
-//                if (url.getPath().contains(READ_FLASH)) {
-//                    Stream.of(this.buttonConfigure, this.buttonRefreshDevices)
-//                            .forEach(item -> {
-//                                //item.setVisible(true);
-//                            });
-//                    Stream.of(this.configureIcon, this.buttonRefreshDevicesIcon)
-//                            .forEach(item -> {
-//                                item.setVisible(false);
-//                            });
-//                }
-//            });
-//        }
-    }
-
-    private void closeSubscribers() {
-        if (disposableRefreshEvents != null) {
-            disposableRefreshEvents.dispose();
-            disposableRefreshEvents = null;
+        if (width < 500) {
+            ui.getPage().fetchCurrentURL(url -> {
+                if (url.getPath().contains(READ_FLASH)) {
+                    log.info(" < 500 read flash");
+                    this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.ENABLE);
+                }
+            });
+        } else { // width != 500
+            ui.getPage().fetchCurrentURL(url -> {
+                if (url.getPath().contains(READ_FLASH)) {
+                    log.info("!= 500 read flash");
+                    this.applicationEventPublisher.publishEvent(RefreshDevicesEvent.ENABLE);
+                }
+            });
         }
     }
 
@@ -191,45 +143,23 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
         ui.getPage().addBrowserWindowResizeListener(event -> this.detectBrowserSize(ui, event.getWidth()));
     }
 
-    @EventListener
-    public void listenerRefreshEvent(RefreshDevicesEvent refreshDevicesEvent) {
-        if (refreshDevicesEvent == RefreshDevicesEvent.ENABLE) {
-            this.getUI().ifPresent(this::executeJsAndBrowserListener);
-        }
-    }
-
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         final UI ui = event.getUI();
         if (event.getNavigationTarget().equals(ReadFlashView.class)) {
             this.executeJsAndBrowserListener(ui);
-        } else {
-
+            log.info("Main beforeEnter");
         }
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        this.closeSubscribers();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        final UI ui = attachEvent.getUI();
-        this.closeSubscribers();
-        this.disposableRefreshEvents = this.subscriberRefreshDevicesEvent.subscribe(refreshDevicesEvent -> {
-            try {
-                var value = RefreshDevicesEvent.fromEvent(refreshDevicesEvent);
-                //ui.access(() -> this.buttonRefreshDevices.setEnabled(value));
-            } catch (UIDetachedException ex) {
-                //Do nothing,  It is thrown when you attempt to access closed UI.
-                //https://stackoverflow.com/a/73885127/7267818
-            }
-        });
-
-        this.executeJsAndBrowserListener(ui);
     }
 
 }
