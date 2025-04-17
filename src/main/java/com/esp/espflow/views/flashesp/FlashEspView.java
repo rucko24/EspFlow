@@ -47,6 +47,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
@@ -89,31 +90,18 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final RadioButtonGroup<EraseFlashEnum> eraseRadioButtons = new RadioButtonGroup<>();
     private final Button flashButton = new Button(SvgFactory.createIconFromSvg(FLASH_OFF_SVG, SIZE_25_PX, null));
     private final VerticalLayout contentForPrimary = new VerticalLayout();
-
-    /**
-     * This string is updated when an event arrives
-     */
-    private String flashFileName;
-    /**
-     * OutputConsole
-     */
     private final OutPutConsole outPutConsole = new OutPutConsole();
-
-    private String[] commands;
-    /*
-     * Publisher for MessageListItem
+    /**
+     * Services
      */
     private final Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem;
-    /*
-     * initial wizard
-     */
     private final WizardFlashEspDialog wizardFlashEspDialog;
-    /*
-     *
-     */
     private final WizardEspService wizardFlashEspRepository;
-
     private final AccessAnnotationChecker accessChecker;
+    private final Executor eventTaskExecutor;
+
+    private String flashFileName;
+    private String[] commands;
 
     @PostConstruct
     public void init() {
@@ -392,28 +380,28 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         }
         final UI ui = attachEvent.getUI();
         ui.getPage().executeJs(WINDOWS_LOCATION_REMOVE_HASH)
-                .then(String.class, hash -> {
-                    //log.info("Fragmento de URI: {}", hash);
-                    if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
-                        this.add(this.wizardFlashEspDialog);
-                        this.wizardFlashEspDialog.openAndDisableModeless();
-                    } else {
-                        ui.getPage().fetchCurrentURL(url -> {
-                            final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
-                            if (!ref.contains(SETTINGS)) {
-                                this.wizardFlashEspRepository.findByName(WIZARD_FLASH_ESP_VIEW)
-                                        .ifPresent(hide -> {
-                                            if (hide.isWizardEnabled()) {
-                                                this.add(this.wizardFlashEspDialog);
-                                                this.wizardFlashEspDialog.openAndDisableModeless();
-                                            }
-                                        });
-                            }
-                        });
-                    }
-                });
-
-
+                .toCompletableFuture()
+                .whenCompleteAsync((hash, error) -> {
+                    ui.access(() -> {
+                        if (Objects.nonNull(hash) && !hash.asString().contains(SETTINGS)) {
+                            this.add(this.wizardFlashEspDialog);
+                            this.wizardFlashEspDialog.openAndDisableModeless();
+                        } else {
+                            ui.getPage().fetchCurrentURL(url -> {
+                                final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
+                                if (!ref.contains(SETTINGS)) {
+                                    this.wizardFlashEspRepository.findByName(WIZARD_FLASH_ESP_VIEW)
+                                            .ifPresent(hide -> {
+                                                if (hide.isWizardEnabled()) {
+                                                    this.add(this.wizardFlashEspDialog);
+                                                    this.wizardFlashEspDialog.openAndDisableModeless();
+                                                }
+                                            });
+                                }
+                            });
+                        }
+                    });
+                }, eventTaskExecutor);
     }
 
 }
