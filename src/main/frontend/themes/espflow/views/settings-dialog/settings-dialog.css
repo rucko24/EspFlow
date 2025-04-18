@@ -33,7 +33,6 @@ vaadin-dialog-overlay.settings-content-dialog::part(backdrop) {
     display: none;
     display: flex;
     font-size: var(--lumo-font-size-s);
-    position: sticky;
     top: 0;
     transition: 0.5s;
     height: 100%;

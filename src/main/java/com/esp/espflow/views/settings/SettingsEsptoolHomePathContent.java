@@ -382,12 +382,14 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         div1.getElement().getThemeList().add("badge pill");
 
         final Span estoolAbsolutePathSpan = new Span(textAbsolutePathEsptool);
+        estoolAbsolutePathSpan.setId("estoolAbsolutePathSpan");
         estoolAbsolutePathSpan.setWidth("200px");
         estoolAbsolutePathSpan.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
         estoolAbsolutePathSpan.addClassNames(
                 LumoUtility.TextOverflow.ELLIPSIS,
                 LumoUtility.Whitespace.NOWRAP,
-                LumoUtility.Overflow.HIDDEN);
+                LumoUtility.Overflow.HIDDEN,
+                "estool-absolute-path-span");
 
         estoolAbsolutePathSpan.addClickListener(event -> {
             UI.getCurrent().getElement().executeJs(WINDOW_COPY_TO_CLIPBOARD, textAbsolutePathEsptool);

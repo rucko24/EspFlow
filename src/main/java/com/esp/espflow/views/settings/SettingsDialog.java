@@ -55,6 +55,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.esp.espflow.util.EspFlowConstants.BELL_SVG;
+import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.NAV_SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
@@ -93,6 +95,8 @@ public class SettingsDialog extends Dialog implements AnimationsUtils {
      */
     private final WizardEspService wizardFlashEspRepository;
     private final SettingsEsptoolHomePathContent settingsEsptoolHomePathContent;
+
+    private Nav nav;
 
     @PostConstruct
     public void init() {
@@ -141,22 +145,13 @@ public class SettingsDialog extends Dialog implements AnimationsUtils {
         final Hr hr = new Hr();
         hr.addClassName("hr-header-settings");
 
-        var nav = this.createButtonsItemsMenu();
+        this.nav = this.createButtonsItemsMenu();
 
         UI.getCurrent().getPage().addBrowserWindowResizeListener(e -> {
             if (e.getWidth() > 660) {
-                nav.getStyle().setWidth("80%");
-                nav.addClassNames(NAV_SETTINGS);
+                this.hideNav();
                 buttonToggleHelper.setVisible(false);
             } else {
-                buttonToggleHelper.setVisible(true);
-            }
-        });
-
-        buttonToggle.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
-        buttonToggle.addClickListener(buttonClickEvent -> {
-            if (buttonClickEvent.isFromClient()) {
-                nav.getStyle().setWidth("80%");
                 buttonToggleHelper.setVisible(true);
             }
         });
@@ -177,16 +172,6 @@ public class SettingsDialog extends Dialog implements AnimationsUtils {
      * We invoke them within the onAttach, to correctly create the component.
      */
     private void initListeners() {
-        var bell = SvgFactory.createIconFromSvg("bell.svg", ITEM_ICON_SIZE, null);
-        bell.addClassNames("black-to-white", "svg-icon-settings");
-        buttonNotifications.setPrefixComponent(bell);
-        buttonNotifications.addClickListener(event -> {
-            this.mainLayout.removeAll();
-            this.mainLayout.add(this.createNotifications());
-            this.setBackGroundOnClick(buttonNotifications);
-            this.updateFragment(NOTIFICATION);
-        });
-
         var iconEspressifSvg = SvgFactory.createIconFromSvg("espressif-logo.svg", "26px", null);
         iconEspressifSvg.addClassName("svg-icon-settings");
         buttonEsptoolHomePath.setPrefixComponent(iconEspressifSvg);
@@ -195,6 +180,7 @@ public class SettingsDialog extends Dialog implements AnimationsUtils {
             this.mainLayout.add(createEsptoolHomePathContent());
             this.setBackGroundOnClick(buttonEsptoolHomePath);
             this.updateFragment(ESPTOOL_HOMEPATH);
+            this.hideNav();
         });
         buttonManageSettings.setPrefixComponent(VaadinIcon.ARCHIVE.create());
         buttonManageSettings.addClickListener(event -> {
@@ -204,7 +190,24 @@ public class SettingsDialog extends Dialog implements AnimationsUtils {
         buttonPassword.addClickListener(event -> {
             Notification.show(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET, 2000, Notification.Position.MIDDLE);
         });
+        var bell = SvgFactory.createIconFromSvg(BELL_SVG, ITEM_ICON_SIZE, null);
+        bell.addClassNames(BLACK_TO_WHITE_ICON, "svg-icon-settings");
+        buttonNotifications.setPrefixComponent(bell);
+        buttonNotifications.addClickListener(event -> {
+            this.mainLayout.removeAll();
+            this.mainLayout.add(this.createNotifications());
+            this.setBackGroundOnClick(buttonNotifications);
+            this.updateFragment(NOTIFICATION);
+            this.hideNav();
+        });
         buttonCheckUpdates.addClickListener(event -> Notification.show(THIS_FEATURE_HAS_NOT_BEEN_IMPLEMENTED_YET, 2000, Notification.Position.MIDDLE));
+        buttonToggle.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+        buttonToggle.addClickListener(buttonClickEvent -> {
+            if (buttonClickEvent.isFromClient()) {
+                nav.getStyle().setWidth("100%");
+                buttonToggleHelper.setVisible(true);
+            }
+        });
     }
 
     private void updateFragment(String contentName) {
@@ -259,7 +262,7 @@ public class SettingsDialog extends Dialog implements AnimationsUtils {
                 //Do nothing
             }
         }
-        this.mainLayout.addClassNames(BoxSizing.BORDER, MaxWidth.SCREEN_SMALL, Padding.LARGE);
+        this.mainLayout.addClassNames(BoxSizing.BORDER, MaxWidth.SCREEN_SMALL, Padding.LARGE, "main-layout-settings-dialog");
         this.mainLayout.setFlexDirection(Layout.FlexDirection.COLUMN);
         return mainLayout;
     }
@@ -483,7 +486,7 @@ public class SettingsDialog extends Dialog implements AnimationsUtils {
                 });
     }
 
-    public Component createButtonsItemsMenu() {
+    public Nav createButtonsItemsMenu() {
 
         Stream.of(buttonNotifications, buttonPassword, buttonEsptoolHomePath, buttonManageSettings, buttonCheckUpdates)
                 .forEach(button -> {
@@ -508,6 +511,11 @@ public class SettingsDialog extends Dialog implements AnimationsUtils {
         buttonToggleHelper.addClickListener(event -> nav.getStyle().setWidth("0"));
 
         return nav;
+    }
+
+    private void hideNav() {
+        nav.getStyle().remove("width");
+        nav.addClassNames(NAV_SETTINGS);
     }
 
     /**

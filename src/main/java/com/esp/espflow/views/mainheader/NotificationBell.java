@@ -29,6 +29,7 @@ import lombok.extern.log4j.Log4j2;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ROTATE_0_DEGREE;
@@ -66,7 +67,7 @@ public class NotificationBell extends Popover {
     public Div createNotificationBell() {
 
         Tooltip.forComponent(divBell).setText("Notifications");
-        bellIcon.addClassName("black-to-white");
+        bellIcon.addClassName(BLACK_TO_WHITE_ICON);
         divBell.add(bellIcon);
         divBell.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
         divBell.getStyle().setCursor(CURSOR_POINTER);

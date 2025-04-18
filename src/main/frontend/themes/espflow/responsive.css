@@ -244,6 +244,14 @@
        flex-direction: column;
     }
 
+    .main-layout-settings-dialog {
+        overflow-y: auto;
+        padding: 0;
+    }
+
+    .estool-absolute-path-span {
+        width: 150px !important;
+    }
 }
 
 @media (max-width: 400px) {

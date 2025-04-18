@@ -24,37 +24,21 @@ window.setEspTerminalServerRef = function(server) {
  * @returns {string} JSON con el resultado.
  */
 window.espConnect = async (baudRate, noReset) => {
-  try {
     // Modo toggle: desconectar si ya hay conexión
-
-    // Disconnect if connected
-    if (transport !== null) {
-        await transport.disconnect();
-        await transport.waitForUnlock(1500);
-        //toggleUIConnected(false);
-        transport = null;
-        if (device !== null) {
-            await device.close();
-            device = null;
-        }
-        chip = null;
-        return;
+    if (esploader !== null) {
+      await transport.disconnect();
+      await transport.waitForUnlock(1500);
+      if (device) {
+        await device.close();
+        device = null;
+      }
+      esploader = null;
+      transport = null;
+      return JSON.stringify({
+        success: true,
+        message: "Desconectado exitosamente"
+      });
     }
-
-//    if (esploader !== null) {
-//      await transport.disconnect();
-//      await transport.waitForUnlock(1500);
-//      if (device) {
-//        await device.close();
-//        device = null;
-//      }
-//      esploader = null;
-//      transport = null;
-//      return JSON.stringify({
-//        success: true,
-//        message: "Desconectado exitosamente"
-//      });
-//    }
 
     if (device === null) {
         device = await serialLib.requestPort({});
@@ -64,28 +48,14 @@ window.espConnect = async (baudRate, noReset) => {
         transport = new Transport(device, true);
     }
 
-    // await device.open({ baudRate: parseInt(baudRate) });
-
+  try {
     // Opciones para ESPLoader
     const options = {
       transport: transport,
       baudrate: parseInt(baudRate),
       terminal: window.espLoaderTerminal,
-      debugLogging: false,
-      resetConstructors: {
-          hardReset: (transport, baudrate) => {
-            return {
-              reset: async () => {
-                console.log("Hard resetting via RTS pin...");
-                // Usamos el objeto device en lugar de transport para setSignals
-                await transport.setRTS(true);
-                await new Promise(resolve => setTimeout(resolve, 50)); // Pausa de 50 ms
-                await transport.setRTS(false);
-              }
-            };
-          }
-        }
-      };
+      debugLogging: false
+    }
 
     window.resetConstructors = options.resetConstructors; // Asigna globalmente
     window.baudRate = parseInt(baudRate); // Asigna globalmente
@@ -93,16 +63,23 @@ window.espConnect = async (baudRate, noReset) => {
     // Crear la instancia de ESPLoader y llamar a main pasando resetMode
     esploader = new ESPLoader(options);
 
-    let resetMode = "hard_reset";
-    if (noReset.checked) {
-        resetMode = "no_reset";
-        try {
-            // Initiate passthrough serial setup
-            await transport.connect(romBaudrate);
-            await transport.disconnect();
-            await sleep(350);
-        } catch (e) {
-        }
+    // Determinar resetMode y, en caso de ser necesario, realizar pasos extras
+    let resetMode = "default_reset";
+    if (noReset) {
+      resetMode = "no_reset";
+      try {
+        // Iniciar la conexión en modo passthrough
+        await transport.connect(parseInt(baudRate));
+        await transport.disconnect();
+        // Pausa para permitir que se estabilice la conexión
+        await sleep(350);
+      } catch (e) {
+        if (e.name !== "InvalidStateError") {
+              console.error("Error en la fase de no_reset:", e);
+            } else {
+              console.warn("El puerto ya estaba abierto (no_reset). Se continúa la conexión.");
+            }
+      }
     }
 
     const chip = await esploader.main(resetMode);

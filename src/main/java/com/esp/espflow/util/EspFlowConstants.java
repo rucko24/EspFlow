@@ -77,6 +77,7 @@ public class EspFlowConstants {
     public static final String FLASH_ON_SVG = "flash-on.svg";
     public static final String COPY_ALT_SVG = "copy-alt.svg";
     public static final String TABLE_SVG = "table.svg";
+    public static final String BELL_SVG = "bell.svg";
     public static final String ERROR_NOT_FOUND = "no-os.svg";
     public static final String WEB_SERIAL_ICON_SVG = "web-serial.svg";
     public static final String FLASH_OFF_SVG = "flash-off.svg";
