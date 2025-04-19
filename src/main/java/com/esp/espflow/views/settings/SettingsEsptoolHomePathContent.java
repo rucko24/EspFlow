@@ -81,17 +81,22 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @JsModule(COPY_TO_CLIPBOARD)
 public class SettingsEsptoolHomePathContent extends Layout implements CreateCustomDirectory, IMakeExecutable {
 
-    private final EsptoolService esptoolService;
-    private final ComputeSha256Service computeSha256Service;
-    private final EsptoolExecutableService esptoolExecutableService;
-
     private final Layout esptoolLayout = new Layout();
     private final Upload upload = new Upload();
     private final FileBuffer buffer = new FileBuffer();
     private final ComboBox<EsptoolExecutableDto> comboBoxEsptoolHome = new ComboBox<>();
-    private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEsptoolVersionEvent;
     private final TextField textFieldHash = new TextField();
     private final ProgressBar progressBar = new ProgressBar();
+    /**
+     * Services
+     */
+    private final EsptoolService esptoolService;
+    private final ComputeSha256Service computeSha256Service;
+    private final EsptoolExecutableService esptoolExecutableService;
+    private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEsptoolVersionEvent;
+    /**
+     * Mutable properties
+     */
     private String overlay;
 
     @PostConstruct

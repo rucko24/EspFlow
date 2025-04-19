@@ -11,7 +11,6 @@ import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.hexdump.HexDumpView;
 import com.esp.espflow.views.mainheader.MainHeader;
 import com.esp.espflow.views.readflash.ReadFlashView;
-import com.esp.espflow.views.settings.SettingsDialog;
 import com.esp.espflow.views.webserial.WebSerialView;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
@@ -73,7 +72,6 @@ public class MainLayout extends AppLayout {
     private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
     private final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final SettingsDialog settingsDialog;
     private final MainFooter mainFooter;
     private final MainHeader mainHeader;
     /**
@@ -86,7 +84,6 @@ public class MainLayout extends AppLayout {
     public MainLayout(final AuthenticatedUser authenticatedUser,
                       final AccessAnnotationChecker accessChecker,
                       final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems,
-                      final SettingsDialog settingsDialog,
                       final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems,
                       final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent,
                       final MainFooter mainFooter,
@@ -95,7 +92,6 @@ public class MainLayout extends AppLayout {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
         this.subscribersMessageListItems = subscribersMessageListItems;
-        this.settingsDialog = settingsDialog;
         this.subscribersEsptoolVersionMessageListItems = subscribersEsptoolVersionMessageListItems;
         this.subscribersEspFlowMessageEvent = subscribersEspFlowMessageEvent;
         this.mainFooter = mainFooter;
@@ -252,7 +248,6 @@ public class MainLayout extends AppLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        this.settingsDialog.close();
         this.closeSubscribers();
     }
 

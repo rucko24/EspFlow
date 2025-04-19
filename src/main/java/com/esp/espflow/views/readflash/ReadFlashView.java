@@ -82,6 +82,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -117,7 +118,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     //With default espcarousel div
     private final Div divCarousel = new Div(new EspDevicesCarousel(new ProgressBar(), NO_DEVICES_SHOWN));
     private final HorizontalLayout horizontalLayoutForPrimarySection = new HorizontalLayout();
-    //private final Button buttonRefreshDevices = new Button("Refresh devices", VaadinIcon.REFRESH.create());
     private final IntegerField startAddress = new IntegerField("Start address");
     private final IntegerField endAddress = new IntegerField("Set size address to read");
     private final ToggleButton autoDetectFlashSize = new ToggleButton();
@@ -150,6 +150,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final WizardReadFlashView wizardReadFlashView;
     private final WizardEspService wizardEspService;
     private final SidebarReadFlash sidebarReadFlash;
+    private final Executor eventTaskExecutor;
     /**
      * Mutable fields
      */
@@ -818,25 +819,28 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.subscribingForRefreshButton(ui);
         this.refreshHeaderComponents();
         ui.getPage().executeJs(WINDOWS_LOCATION_REMOVE_HASH)
-                .then(String.class, hash -> {
-                    if (Objects.nonNull(hash) && !hash.contains(SETTINGS)) {
-                        this.add(this.wizardReadFlashView);
-                        this.wizardReadFlashView.openAndDisableModeless();
-                    } else {
-                        ui.getPage().fetchCurrentURL(url -> {
-                            final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
-                            if (!ref.contains(SETTINGS)) {
-                                this.wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
-                                        .ifPresent(hide -> {
-                                            if (hide.isWizardEnabled()) {
-                                                this.add(this.wizardReadFlashView);
-                                                this.wizardReadFlashView.openAndDisableModeless();
-                                            }
-                                        });
-                            }
-                        });
-                    }
-                });
+                .toCompletableFuture()
+                .whenCompleteAsync((hash,error) -> {
+                    ui.access(() -> {
+                        if (Objects.nonNull(hash) && !hash.asString().contains(SETTINGS)) {
+                            this.add(this.wizardReadFlashView);
+                            this.wizardReadFlashView.openAndDisableModeless();
+                        } else {
+                            ui.getPage().fetchCurrentURL(url -> {
+                                final String ref = StringUtils.defaultIfEmpty(url.getRef(), StringUtils.EMPTY);
+                                if (!ref.contains(SETTINGS)) {
+                                    this.wizardEspService.findByName(WIZARD_READ_FLASH_ESP_VIEW)
+                                            .ifPresent(hide -> {
+                                                if (hide.isWizardEnabled()) {
+                                                    this.add(this.wizardReadFlashView);
+                                                    this.wizardReadFlashView.openAndDisableModeless();
+                                                }
+                                            });
+                                }
+                            });
+                        }
+                    });
+                }, eventTaskExecutor);
 
     }
 
