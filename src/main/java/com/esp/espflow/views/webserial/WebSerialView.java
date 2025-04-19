@@ -108,10 +108,11 @@ public class WebSerialView extends VerticalLayout {
             UI.getCurrent()
                     .getElement()
                     .executeJs(JS_CONNECT, baudRateField.getValue(), true)
-                    .then(String.class, result -> {
+                    .toCompletableFuture()
+                    .whenCompleteAsync((result, throwable) -> {
                         try {
 
-                            WebSerialClientDto resultValue = objectMapper.readValue(result, WebSerialClientDto.class);
+                            WebSerialClientDto resultValue = objectMapper.readValue(result.asString(), WebSerialClientDto.class);
 
                             String message = resultValue.message();
                             String chip = resultValue.chip();
