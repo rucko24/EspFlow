@@ -1,3 +1,9 @@
+@import url('responsive-flash-view.css');
+@import url('responsive-card-esp-device-info.css');
+
+.div-parent-buttons {
+    display: flex;
+}
 
 @media (max-width: 1155px) {
      .vertical-parent {
@@ -27,31 +33,9 @@
         justify-content: center;
     }
 
-    .baud-rate-flex-wrap {
-      //display: flex;
-      //margin-left: 10px;
-      //width: 100%;
-      //justify-content: center;
-      //flex-wrap: wrap;
-    }
-
-    .baud-rate-h3-div {
-        //display: flex;
-        //width: 100%;
-        //align-items: center;
-        //justify-content: center;
-    }
-
-    .baud-rate-radio-button {
-        //margin-left: 0px !important;
-    }
-
     .firmwareh3-vaadin-upload-div {
         margin-left: 10px;
         display: flex;
-        //width: 100%;
-        //justify-content: center;
-        //flex-wrap: wrap;
     }
 
     .h2-firmware-div {
@@ -59,7 +43,6 @@
         align-items: center;
         justify-content: center;
         margin-right: 10px;
-        //width: 100%;
     }
 
     .vaadin-upload {
@@ -79,7 +62,6 @@
     .child-text-area-console {
        margin-bottom: 10px;
        height: 98%;
-       //maring-right: 20px;
     }
 
     .text-area-console-div {
@@ -88,7 +70,6 @@
     }
 
 }
-
 
 @media (max-width: 800px) {
 
@@ -121,7 +102,6 @@
 
      #div-item-container {
           width: 100%;
-          /*hidden: true;*/
      }
 
      .svg-icon-settings {
@@ -140,73 +120,6 @@
        overflow-x: hidden;
        scrollbar-width: thin;
      }
-
-    .vertical-parent {
-        margin-right: 10px;
-    }
-
-    .vertical-flex-wrap {
-        display: flex;
-        width: 100%;
-        justify-content: space-around;
-        flex-wrap: wrap-reverse;
-    }
-
-    .header-flex-wrap {
-        margin: 10px;
-        display: flex;
-        width: 100%;
-        min-width: 100%;
-        align-items: baseline;
-        flex-wrap: wrap;
-    }
-
-    .serial-port-h3-div {
-        display: flex;
-        width: 100%;
-        margin-left: 10px;
-        justify-content: center;
-    }
-
-    .baud-rate-h3-div {
-        display: flex;
-        width: 100%;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .baud-rate-radio-button {
-        margin-left: 0px !important;
-    }
-
-    .baud-rate-flex-wrap {
-        display: flex;
-        margin-left: 10px;
-        width: 100%;
-        flex-wrap: wrap;
-    }
-
-    .firmwareh3-vaadin-upload-div {
-        margin-left: 10px;
-        display: flex;
-        width: 100%;
-        flex-wrap: wrap;
-    }
-
-    .h2-firmware-div {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 10px;
-        //width: 100%;
-    }
-
-    .vaadin-upload {
-       border: none;
-       padding: 0px;
-       display: flex;
-       margin-left: 0px !important;
-    }
 
     .h3-text-area-div {
         display: flex;
@@ -234,21 +147,20 @@
 }
 
 @media (max-width: 500px) {
-
+    /*Sidebar read flash view*/
     .sidebar-read-flash {
         inset-inline-start: 0em !important;
     }
-
+    /*Hex dump */
     .row-header-hexdump {
        display: flex;
        flex-direction: column;
     }
-
+    /*Settings dialog*/
     .main-layout-settings-dialog {
         overflow-y: auto;
         padding: 0;
     }
-
     .estool-absolute-path-span {
         width: 150px !important;
     }

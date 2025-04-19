@@ -21,7 +21,7 @@ public class EspMessageListItemReactivePublisher {
         return Sinks
                 .many()
                 .multicast()
-                .onBackpressureBuffer();
+                .onBackpressureBuffer(10, false);
     }
 
     @Bean(value = "subscribersMessageListItemsEvent")

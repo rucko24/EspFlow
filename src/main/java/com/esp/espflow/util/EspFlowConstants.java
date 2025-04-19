@@ -22,6 +22,7 @@ public class EspFlowConstants {
     public static final String BOX_SHADOW_VALUE = "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)";
     public static final String BOX_SHADOW_VAADIN_BUTTON = "custom-box-shadow-vaadin-button";
     public static final String MARGIN_TOP = "margin-top";
+    public static final String MARGIN_RIGHT = "margin-right";
     public static final String MARGIN_LEFT = "margin-left";
     public static final String MARGIN = "margin";
     public static final String MARGIN_10_PX = "10px";
@@ -62,6 +63,7 @@ public class EspFlowConstants {
     public static final String ESPTOOL_BUNDLE_DIR = "/esptool-bundled-dir/";
     public static final String EXECUTABLE_ICON = "executable.svg";
     public static final String UPDATE_ICON = "upload.svg";
+    public static final String UNLOCK_BLACK_SVG = "unlock-black.svg";
     public static final String SLASH = "/";
     public static final String SET_CHMOD_X = "rwx--x--x";
     public static final String PORT = "--port";

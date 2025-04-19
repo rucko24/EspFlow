@@ -1,0 +1,116 @@
+@media (max-width: 800px) {
+    .vertical-parent {
+        padding: var(--lumo-space-s);
+    }
+    /*Serial port*/
+    .row-buttons {
+        width: 100%;
+        margin-top: var(--lumo-space-m);
+    }
+    .expand-buttons {
+        flex-grow: 1;
+    }
+    .div-combo-serial-port {
+        margin: 0px !important;
+        margin-right: 0px !important;
+        width: 100%;
+    }
+    .serial-port-h3-div {
+        display: flex;
+        width: 100%;
+        margin-left: 0px !important;
+        justify-content: flex-start;
+    }
+    /*Div buttons read_flash, refresh, change permissions*/
+    .div-parent-buttons {
+        display: flex;
+    }
+    .items-buttons {
+        flex: 1 1 100px !important;
+        width: 100px !important;
+    }
+    /*Baud rate*/
+    .div-baud-rate-flex-wrap {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .div-baud-rate-radio-button {
+        margin-left: 0px !important;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .div-baud-rate-h3-div {
+        display: flex;
+        width: 100%;
+    }
+    .baud-radio-group {
+        width: 60em;
+    }
+    /*Flash mode*/
+    .div-flash-mode-flex-wrap {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .div-flash-mode-h3-div {
+        width: 100%;
+        display: flex;
+    }
+    .div-flash-mode-radio-button {
+        margin-left: 0px !important;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .flash-mode-radio-group {
+        width: 100%;
+    }
+    /*erase flash*/
+    .div-erase-flash-flex-wrap {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .div-erase-radio-group {
+        margin-left: 0px !important;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .erase-flash-radio-group {
+        width: 100%;
+    }
+    .div-erase-flash-h3-div {
+        width: 100%;
+        display: flex;
+    }
+    /*Firmware upload button*/
+    .firmwareh3-vaadin-upload-div {
+        margin-left: 10px;
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .h2-firmware-div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+    }
+    .vaadin-upload {
+       border: none;
+       padding: 0px;
+       display: flex;
+       margin-left: 0px !important;
+    }
+}
+
+
+
+
+

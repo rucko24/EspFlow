@@ -20,7 +20,7 @@ public class EsptoolVersionReactivePublisher {
         return Sinks
                 .many()
                 .multicast()
-                .onBackpressureBuffer();
+                .onBackpressureBuffer(10, false);
     }
 
     @Bean(value = "subscribersEsptoolVersionEvent")

@@ -29,7 +29,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -78,13 +77,8 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-//@PreserveOnRefresh
 public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
-    private final DivFlashUploader divFlashUploader;
-    private final DivHeaderPorts divHeaderPorts;
-    private final EsptoolService esptoolService;
-    private final EsptoolPathService esptoolPathService;
     private final RadioButtonGroup<BaudRatesEnum> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashModeEnum> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<EraseFlashEnum> eraseRadioButtons = new RadioButtonGroup<>();
@@ -97,9 +91,14 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem;
     private final WizardFlashEspDialog wizardFlashEspDialog;
     private final WizardEspService wizardFlashEspRepository;
-    private final AccessAnnotationChecker accessChecker;
+    private final DivFlashUploader divFlashUploader;
+    private final DivHeaderPorts divHeaderPorts;
+    private final EsptoolService esptoolService;
+    private final EsptoolPathService esptoolPathService;
     private final Executor eventTaskExecutor;
-
+    /**
+     * mutable properties
+     */
     private String flashFileName;
     private String[] commands;
 
@@ -193,21 +192,20 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     }
 
     private Div rowBaudRates() {
-        baudRatesRadioButtonGroup.setItems(BaudRatesEnum.values());
-        baudRatesRadioButtonGroup.setValue(BaudRatesEnum.BAUD_RATE_115200);
-        baudRatesRadioButtonGroup.setRenderer(BaudRatesEnum.rendererWithTooltip());
-
         final H3 h3 = new H3("Baud rate");
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divH2BaudRate = new Div(h3);
-        divH2BaudRate.addClassName("baud-rate-h3-div");
+        divH2BaudRate.addClassName("div-baud-rate-h3-div");
+        baudRatesRadioButtonGroup.setItems(BaudRatesEnum.values());
+        baudRatesRadioButtonGroup.setValue(BaudRatesEnum.BAUD_RATE_115200);
+        baudRatesRadioButtonGroup.setRenderer(BaudRatesEnum.rendererWithTooltip());
+        baudRatesRadioButtonGroup.addClassName("baud-radio-group");
         final Div divBaudRateRadioButton = this.createDiv(baudRatesRadioButtonGroup, MARGIN_LEFT, MARGIN_10_PX);
-        divBaudRateRadioButton.addClassName("baud-rate-radio-button");
-
+        divBaudRateRadioButton.addClassName("div-baud-rate-radio-button");
         final Div div = new Div(divH2BaudRate, divBaudRateRadioButton);
         div.addClassNames(Display.FLEX, LumoUtility.Width.FULL);
         div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-        div.addClassName("baud-rate-flex-wrap");
+        div.addClassName("div-baud-rate-flex-wrap");
         return div;
     }
 
@@ -215,17 +213,18 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         final H3 h3 = new H3("Flash mode");
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divh3FlashMode = new Div(h3);
-
+        divh3FlashMode.addClassName("div-flash-mode-h3-div");
         this.flashModeRadioButtonGroup.setItems(FlashModeEnum.values());
         this.flashModeRadioButtonGroup.setValue(FlashModeEnum.DUAL_IO);
         this.flashModeRadioButtonGroup.setRequired(Boolean.TRUE);
         this.flashModeRadioButtonGroup.setRenderer(FlashModeEnum.rendererWithTooltip());
+        this.flashModeRadioButtonGroup.addClassName("flash-mode-radio-group");
         final Div divFlashRadioButton = this.createDiv(flashModeRadioButtonGroup, MARGIN_LEFT, MARGIN_10_PX);
-
+        divFlashRadioButton.addClassName("div-flash-mode-radio-button");
         final Div div = new Div(divh3FlashMode, divFlashRadioButton);
         div.addClassNames(Display.FLEX, LumoUtility.Width.FULL);
         div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-
+        div.addClassName("div-flash-mode-flex-wrap");
         return div;
     }
 
@@ -233,16 +232,17 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         final H3 h3 = new H3("Erase flash");
         h3.getStyle().set(MARGIN_TOP, AUTO);
         final Div divh3EraseFlash = new Div(h3);
-
+        divh3EraseFlash.addClassName("div-erase-flash-h3-div");
         this.eraseRadioButtons.setRenderer(EraseFlashEnum.rendererWithTooltip());
         this.eraseRadioButtons.setItems(EraseFlashEnum.values());
         this.eraseRadioButtons.setValue(EraseFlashEnum.NO);
+        this.eraseRadioButtons.addClassName("erase-flash-radio-group");
         final Div divEraseRadioButton = this.createDiv(eraseRadioButtons, MARGIN_LEFT, MARGIN_10_PX);
-
+        divEraseRadioButton.addClassName("div-erase-radio-group");
         final Div div = new Div(divh3EraseFlash, divEraseRadioButton);
         div.addClassNames(Display.FLEX, LumoUtility.Width.FULL);
         div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
-
+        div.addClassName("div-erase-flash-flex-wrap");
         return div;
     }
 

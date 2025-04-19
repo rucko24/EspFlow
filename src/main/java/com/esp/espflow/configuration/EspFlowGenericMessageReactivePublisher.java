@@ -19,7 +19,7 @@ public class EspFlowGenericMessageReactivePublisher {
         return Sinks
                 .many()
                 .multicast()
-                .onBackpressureBuffer();
+                .onBackpressureBuffer(10, false);
     }
 
     @Bean(value = "subscribersEspflowMessageEvent")

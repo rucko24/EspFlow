@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer;
 import org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import javax.sql.DataSource;
 
@@ -22,6 +23,7 @@ import javax.sql.DataSource;
 @Push
 @SpringBootApplication
 @Theme(value = "espflow")
+@EnableAsync(proxyTargetClass = true)
 @PWA(name = "EspFlow", shortName = "EspFlow", offlineResources = {})
 public class Application implements AppShellConfigurator {
 

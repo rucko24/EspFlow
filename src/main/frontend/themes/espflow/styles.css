@@ -1,11 +1,10 @@
 @import url('./main-layout.css');
-@import url('./responsive.css');
+@import url('./responsive/responsive.css');
 @import url('./popover-notification-panel.css');
 @import url('./fonts/stylesheet.css');
 @import url('components/vaadin-upload-file.css');
 @import url('components/layout.css');
 @import url('themes/compact.css');
-@import url('./views/read-flash/esp-device-info.css');
 @import url('./views/read-flash/sidebar-read-flash.css');
 @import url('./views/flash-view/wizard-dialog/wizard-dialog.css');
 @import url('./views/flash-view/flash-view.css');
@@ -110,4 +109,8 @@ vaadin-context-menu-item.context-menu-item-grid::part(checkmark)::before {
 vaadin-context-menu-item.context-menu-item-grid {
   padding-left: var(--lumo-space-s);
   justify-content: flex-start;
+}
+
+.custom-box-shadow-vaadin-button {
+  box-shadow: var(--custom-box-shadow-vaadin-button);
 }

@@ -190,9 +190,10 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         final var horizontalLayoutToPrimarySection = this.horizontalLayoutToPrimarySection(divForRightCarousel);
         this.sidebarReadFlash.createSection(this.leftFormForAddress());
 
-        final VerticalLayout verticalLayoutPrimarySecction = new VerticalLayout(this.sidebarReadFlash, horizontalLayoutToPrimarySection);
-        verticalLayoutPrimarySecction.setSizeFull();
-        splitLayout.addToPrimary(verticalLayoutPrimarySecction);
+        final VerticalLayout verticalLayoutPrimarySection = new VerticalLayout(this.sidebarReadFlash, horizontalLayoutToPrimarySection);
+        verticalLayoutPrimarySection.addClassName("vertical-layout-primary-section");
+        verticalLayoutPrimarySection.setSizeFull();
+        splitLayout.addToPrimary(verticalLayoutPrimarySection);
         /*
          * Secondary section
          */

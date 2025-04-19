@@ -8,7 +8,6 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -48,14 +47,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         super.setBackdropVisible(true);
         this.add(sidebar);
         this.sidebar.setId("sidebar");
-        this.sidebar.addClassNames(LumoUtility.Background.BASE,
-                LumoUtility.BoxShadow.MEDIUM,
-                LumoUtility.Display.FLEX,
-                LumoUtility.FlexDirection.COLUMN,
-                LumoUtility.Overflow.HIDDEN,
-                LumoUtility.Position.FIXED, "bottom-0", "top-0", "transition-all", "z-10");
-        this.sidebar.setMaxWidth(100, Unit.PERCENTAGE);
-        this.sidebar.setWidth(480, Unit.PIXELS);
+        this.sidebar.addClassName("sidebar-read-flash");
         this.closeSidebar();
         Shortcuts.addShortcutListener(this.sidebar, shortcutEvent -> this.closeSidebar(), Key.ESCAPE);
     }

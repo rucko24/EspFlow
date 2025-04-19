@@ -32,9 +32,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -52,6 +52,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
@@ -76,6 +77,7 @@ import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_20_PX;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_30_PX;
+import static com.esp.espflow.util.EspFlowConstants.UNLOCK_BLACK_SVG;
 import static com.esp.espflow.util.EspFlowConstants.UPDATE_ICON;
 
 /**
@@ -88,15 +90,11 @@ import static com.esp.espflow.util.EspFlowConstants.UPDATE_ICON;
 @SpringComponent
 public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
-    private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
-    private final Button unlockPort = new Button(
-            SvgFactory.createIconFromSvg("unlock-gray.svg", "30px", null));
-    private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
-    private final TextField inputCommand = new TextField();
-    private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
-    private final Button killProcess = new Button(VaadinIcon.STOP.create());
-
     private final H2 h2EsptoolVersion = new H2();
+    private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
+    private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
+    private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
+    private final Button unlockPort = new Button(SvgFactory.createIconFromSvg("unlock-gray.svg", SIZE_30_PX, null));
     private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
     private final ProgressBar progressBarForShowEsptoolVersion = new ProgressBar();
     private final AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
@@ -105,7 +103,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      */
     private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
-    private final Sinks.Many<EspflowMessageListItemEvent> publisherMessage;
+    private final Sinks.Many<EspflowMessageListItemEvent> publisherFlowMessageListItemEvent;
     private final EsptoolExecutableService esptoolExecutableService;
     private final ComPortService comPortService;
     private final CommandService commandService;
@@ -137,15 +135,13 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         divHeader.setWidthFull();
         divHeader.getStyle().set(DISPLAY, "flex");
         divHeader.getStyle().set(MARGIN, "10px 10px");
-        divHeader.getStyle().set("align-items", "baseline");
+        divHeader.addClassName(LumoUtility.AlignItems.BASELINE);
+        Stream.of(buttonExecuteFlashId,scanPort,unlockPort).forEach(button -> button.addClassName("expand-buttons"));
+        final HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.add(buttonExecuteFlashId,scanPort,unlockPort);
+        horizontalLayout.addClassName("row-buttons");
 
-        final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
-        final Div divUnlockPort = this.createDiv(unlockPort, MARGIN, MARGIN_10_PX);
-        //final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
-        final Div divReadCommand = this.createDiv(buttonExecuteFlashId, MARGIN, MARGIN_10_PX);
-        //final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
-
-        divHeader.add(divReadCommand, divScanPort, divUnlockPort);
+        divHeader.add(horizontalLayout);
 
         final Hr hr = new Hr();
         hr.setHeight("6px");
@@ -180,7 +176,9 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         comboBoxSerialPort.setPlaceholder("port");
         comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon(SIZE_30_PX, null));
         comboBoxSerialPort.setRenderer(rendererIconUsbForEachItem());
-        return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
+        var divCombo = this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
+        divCombo.addClassName("div-combo-serial-port");
+        return divCombo;
     }
 
     private ComponentRenderer<Div, String> rendererIconUsbForEachItem() {
@@ -341,7 +339,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
                 ConfirmDialogBuilder.showInformation(PORT_FOUND);
-                this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg", SIZE_30_PX, null));
+                this.unlockPort.setIcon(SvgFactory.createIconFromSvg(UNLOCK_BLACK_SVG, SIZE_30_PX, null));
                 this.unlockPort.getIcon().addClassName(BLACK_TO_WHITE_ICON);
                 buttonExecuteFlashId.setEnabled(true);
                 Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
@@ -354,11 +352,11 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         if (url.getRef() != null) {
                             if (!url.getRef().contains(SETTINGS)) {
                                 ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
-                                this.publisherMessage.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
+                                this.publisherFlowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                             }
                         } else {
                             ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
-                            this.publisherMessage.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
+                            this.publisherFlowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                         }
                     });
                 });
@@ -386,9 +384,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         super.onAttach(attachEvent);
         this.closeSubscribers();
         final UI ui = attachEvent.getUI();
-        if(attachEvent.isInitialAttach()) {
-            this.updateH2WithEsptoolVersion(ui);
-        }
+        this.updateH2WithEsptoolVersion(ui);
         this.disposableSubscriberEsptoolVersionEvent = this.subscriberEsptoolVersionEvent
                 .subscribe(esptoolVersionMessageListItemEvent -> {
                     try {

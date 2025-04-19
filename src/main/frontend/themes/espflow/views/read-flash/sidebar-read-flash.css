@@ -1,4 +1,3 @@
-
 vaadin-popover-overlay.popover-sidebar::part(backdrop) {
     backdrop-filter: blur(1px);
     will-change: backdrop-filter;
@@ -17,14 +16,14 @@ vaadin-popover-overlay.popover-sidebar::part(content) {
 .sidebar-read-flash {
     display: flex;
     flex-direction: column;
-    width: 20rem;
+    width: 480px;
+    max-width: 100%;
     background-color: var(--lumo-base-color);
     box-shadow: var(--lumo-box-shadow-m);
     position: fixed;
     transition: transition-all;
     z-index: 10;
     overflow: hidden;
-    top: 50px;
-    bottom: 40px;
-    inset-inline-start: 16.0em;
+    top: 0px;
+    bottom: 0px;
 }
