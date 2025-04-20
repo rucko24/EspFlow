@@ -45,7 +45,7 @@ import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
 public class WebSerialView extends VerticalLayout {
 
     // Constantes para las llamadas JavaScript
-    private static final String JS_CONNECT = "return window.espConnect($0, $1, $2)";
+    private static final String JS_CONNECT = "return window.espConnect($0, $1)";
     private static final String JS_HARD_RESET = "window.testHardReset()";
     private static final String JS_FLASH_ID = "return window.espFlashId()";
     private static final String JS_READ_FLASH = "return window.espReadFlash($0, $1)";
@@ -103,16 +103,15 @@ public class WebSerialView extends VerticalLayout {
         });
 
         // Botones de operación
-        Button connectButton = new Button("Conectar", e -> {
+        Button connectButton = new Button("Conectar", event -> {
 
             UI.getCurrent()
                     .getElement()
-                    .executeJs(JS_CONNECT, baudRateField.getValue(), true)
-                    .toCompletableFuture()
-                    .whenCompleteAsync((result, throwable) -> {
+                    .executeJs(JS_CONNECT, baudRateField.getValue(), false)
+                    .then(String.class, result -> {
                         try {
 
-                            WebSerialClientDto resultValue = objectMapper.readValue(result.asString(), WebSerialClientDto.class);
+                            WebSerialClientDto resultValue = objectMapper.readValue(result, WebSerialClientDto.class);
 
                             String message = resultValue.message();
                             String chip = resultValue.chip();
