@@ -569,10 +569,6 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                         comboBoxEsptoolPath.setItems(executableDto);
                     });
                 })
-                .doOnTerminate(() -> {
-                    ui.access(() -> {
-                    });
-                })
                 .subscribe(espToolVersion -> {
                     ui.access(() -> {
                         comboBoxEsptoolHome.setItems(this.esptoolExecutableService.findAll());
@@ -637,7 +633,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             this.fillComboBox(ui, comboBoxEsptoolHome);
-            log.info("Attach {}", SettingsEsptoolHomePathContent.class.getSimpleName());
+            //log.info("Attach {}", SettingsEsptoolHomePathContent.class.getSimpleName());
         }
         this.setValueForCombo();
     }

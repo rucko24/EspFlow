@@ -77,14 +77,14 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
 
     private void detectBrowserSize(final UI ui, final int width) {
         if (width < 500) {
-            log.info(" < 500 read flash");
+            //log.info(" < 500 read flash");
             ui.getPage().fetchCurrentURL(url -> {
                 if (url.getPath().contains(READ_FLASH)) {
                     this.applicationEventPublisher.publishEvent(new MainHeaderToReadFlashViewEvent(ui, RefreshDevicesEvent.ENABLE, width));
                 }
             });
         } else { // width != 500
-            log.info("!= 500 read flash");
+            //log.info("!= 500 read flash");
             ui.getPage().fetchCurrentURL(url -> {
                 if (url.getPath().contains(READ_FLASH)) {
                     this.applicationEventPublisher.publishEvent(new MainHeaderToReadFlashViewEvent(ui, RefreshDevicesEvent.ENABLE, width));

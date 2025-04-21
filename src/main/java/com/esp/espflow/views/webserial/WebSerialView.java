@@ -46,6 +46,8 @@ public class WebSerialView extends VerticalLayout {
 
     // Constantes para las llamadas JavaScript
     private static final String JS_CONNECT = "return window.espConnect($0, $1)";
+    private static final String JS_DISCONNECT = "return window.espDisconnect()";
+    private static final String JS_DISCONNECT_AND_FORGET = "return window.espDisconnectAndForget()";
     private static final String JS_HARD_RESET = "window.testHardReset()";
     private static final String JS_FLASH_ID = "return window.espFlashId()";
     private static final String JS_READ_FLASH = "return window.espReadFlash($0, $1)";
@@ -57,7 +59,7 @@ public class WebSerialView extends VerticalLayout {
     private final ComboBox<String> chipTypeComboBox = new ComboBox<>("Tipo de Chip");
     private final NumberField readAddressField = new NumberField("Dirección (hex)");
     private final NumberField readSizeField = new NumberField("Tamaño (bytes)");
-    private final TextArea resultArea = new TextArea("Resultados");
+    private final TextArea resultArea = new TextArea();
 
     private byte[] fileContent = null;
 
@@ -81,9 +83,9 @@ public class WebSerialView extends VerticalLayout {
         readSizeField.setValue(1024d);
 
         // Configuración del área de resultados
-        resultArea.setReadOnly(true);
         resultArea.setWidth("100%");
         resultArea.setHeight("200px");
+        resultArea.setClearButtonVisible(true);
 
         // Configuración de carga de archivos
         Upload fileUpload = new Upload();
@@ -127,25 +129,55 @@ public class WebSerialView extends VerticalLayout {
                                 resultArea.setValue("Error: " + error);
                             }
 
-//                            JsonObject jsonResult = JsonParser.parseString(result).getAsJsonObject();
-//                            if (jsonResult.get("success").getAsBoolean()) {
-//                                log.info("Operación exitosa: {}", (jsonResult.has("message")
-//                                        ? jsonResult.get("message").getAsString()
-//                                        : ""));
-//                                resultArea.setValue(resultArea.getValue().concat("\n") +
-//                                        "Operación exitosa: " + (jsonResult.has("message")
-//                                        ? jsonResult.get("message").getAsString()
-//                                        : ""));
-//                            } else {
-//                                log.error("Error {}", jsonResult.get("error").getAsString());
-//                                resultArea.setValue("Error: " + jsonResult.get("error").getAsString());
-//                            }
                         } catch (Exception ex) {
                             log.error("Error {}", ex.getMessage());
                             resultArea.setValue("Error al procesar el resultado: " + ex.getMessage());
                         }
                     });
 
+        });
+
+
+        Button disconnect = new Button("Disconnect", e -> {
+            getElement().executeJs(JS_DISCONNECT)
+                    .then(String.class, result -> {
+                        try {
+                            WebSerialClientDto resultValue = objectMapper.readValue(result, WebSerialClientDto.class);
+                            String message = resultValue.message();
+                            String error = resultValue.error();
+                            if (resultValue.success()) {
+                                log.info("Desconexion exitosa: {}", message);
+                                resultArea.setValue(resultArea.getValue().concat("\n")+ message);
+                            } else {
+                                log.error("Error {}", error);
+                                resultArea.setValue("Error: " + error);
+                            }
+                        } catch (Exception ex) {
+                            log.error("Error {}", ex.getMessage());
+                            resultArea.setValue("Error al procesar el resultado: " + ex.getMessage());
+                        }
+                    });
+        });
+
+        Button disconnectAndForget = new Button("Disconnect and forget", e -> {
+            getElement().executeJs(JS_DISCONNECT_AND_FORGET)
+                    .then(String.class, result -> {
+                        try {
+                            WebSerialClientDto resultValue = objectMapper.readValue(result, WebSerialClientDto.class);
+                            String message = resultValue.message();
+                            String error = resultValue.error();
+                            if (resultValue.success()) {
+                                log.info("Desconexion y olvidada exitosa: {}", message);
+                                resultArea.setValue(resultArea.getValue().concat("\n")+ message);
+                            } else {
+                                log.error("Error {}", error);
+                                resultArea.setValue("Error: " + error);
+                            }
+                        } catch (Exception ex) {
+                            log.error("Error {}", ex.getMessage());
+                            resultArea.setValue("Error al procesar el resultado: " + ex.getMessage());
+                        }
+                    });
         });
 
         Button hardReset = new Button("Hard reset", e -> {
@@ -176,9 +208,7 @@ public class WebSerialView extends VerticalLayout {
         );
 
         // Layout para operaciones básicas
-        HorizontalLayout operationsLayout = new HorizontalLayout(
-                connectButton, hardReset, flashIdButton
-        );
+        HorizontalLayout operationsLayout = new HorizontalLayout(connectButton, disconnect, disconnectAndForget, hardReset, flashIdButton);
 
         // Layout para lectura
         HorizontalLayout readLayout = new HorizontalLayout(
