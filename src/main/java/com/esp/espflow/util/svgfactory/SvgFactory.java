@@ -9,6 +9,7 @@ import java.util.Objects;
 import static com.esp.espflow.util.EspFlowConstants.COPY_ALT_SVG;
 import static com.esp.espflow.util.EspFlowConstants.FREE_BSD_ICON;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_SVG_ICONS;
+import static com.esp.espflow.util.EspFlowConstants.ICONS_RESPONSIVE_SIZE;
 import static com.esp.espflow.util.EspFlowConstants.LINUX_ICON;
 import static com.esp.espflow.util.EspFlowConstants.MACOS_ICON;
 import static com.esp.espflow.util.EspFlowConstants.NO_OS_ICON;
@@ -31,6 +32,7 @@ public class SvgFactory {
                 () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + "usb-port.svg"));
         final SvgIcon icon = new SvgIcon(iconResource);
         icon.setSize("22px");
+        icon.addClassName(ICONS_RESPONSIVE_SIZE);
         return icon;
     }
 
@@ -45,6 +47,7 @@ public class SvgFactory {
                 () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + COPY_ALT_SVG));
         final SvgIcon icon = new SvgIcon(iconResource);
         icon.setSize("25px");
+        icon.addClassName(ICONS_RESPONSIVE_SIZE);
         return icon;
     }
 
@@ -64,6 +67,7 @@ public class SvgFactory {
         if (Objects.nonNull(customHeight)) {
             icon.getStyle().set("height", customHeight);
         }
+        icon.addClassName(ICONS_RESPONSIVE_SIZE);
         return icon;
     }
 
@@ -88,6 +92,7 @@ public class SvgFactory {
         } else {
             svgIcon = SvgFactory.createIconFromSvg(NO_OS_ICON, size, customHeight);
         }
+        svgIcon.addClassName(ICONS_RESPONSIVE_SIZE);
         return svgIcon;
     }
 

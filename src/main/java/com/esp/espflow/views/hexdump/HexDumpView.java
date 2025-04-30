@@ -1,7 +1,7 @@
 package com.esp.espflow.views.hexdump;
 
-import com.esp.espflow.entity.dto.HexDumpDto;
-import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
+import com.esp.espflow.dto.HexDumpDto;
+import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.service.HexDumpGeneratorService;
 import com.esp.espflow.service.respository.impl.HexDumpService;
 import com.esp.espflow.util.CreateCustomDirectory;

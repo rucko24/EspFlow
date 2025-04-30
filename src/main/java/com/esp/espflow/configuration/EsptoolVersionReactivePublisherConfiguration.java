@@ -1,6 +1,6 @@
 package com.esp.espflow.configuration;
 
-import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
+import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.views.flashesp.DivHeaderPorts;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,7 @@ import reactor.core.publisher.Sinks;
  * @author rub'n
  */
 @Configuration
-public class EsptoolVersionReactivePublisher {
+public class EsptoolVersionReactivePublisherConfiguration {
 
     @Bean(value = "publishEsptoolVersionEvent")
     public Sinks.Many<EsptoolVersionMessageListItemEvent> publisher() {

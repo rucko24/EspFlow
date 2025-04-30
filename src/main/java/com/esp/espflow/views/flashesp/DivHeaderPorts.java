@@ -1,7 +1,7 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
-import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
+import com.esp.espflow.event.EspflowMessageListItemEvent;
+import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.ComPortService;
 import com.esp.espflow.service.CommandService;
@@ -32,6 +32,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
@@ -94,7 +95,8 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
     private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
     private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
-    private final Button unlockPort = new Button(SvgFactory.createIconFromSvg("unlock-gray.svg", SIZE_30_PX, null));
+    private final SvgIcon svgIconUnlock = SvgFactory.createIconFromSvg("unlock-gray.svg", SIZE_30_PX, null);
+    private final Button unlockPort = new Button(svgIconUnlock);
     private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
     private final ProgressBar progressBarForShowEsptoolVersion = new ProgressBar();
     private final AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
@@ -128,7 +130,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         buttonExecuteFlashId.setEnabled(false);
         buttonExecuteFlashId.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setTooltipText("Execute flash_id");
-
+        svgIconUnlock.addClassName("svg-icon-settings");
         this.initListeners();
 
         final Div divHeader = new Div(divh3SerialPort, divCombo);
@@ -136,9 +138,29 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         divHeader.getStyle().set(DISPLAY, "flex");
         divHeader.getStyle().set(MARGIN, "10px 10px");
         divHeader.addClassName(LumoUtility.AlignItems.BASELINE);
-        Stream.of(buttonExecuteFlashId,scanPort,unlockPort).forEach(button -> button.addClassName("expand-buttons"));
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.add(buttonExecuteFlashId,scanPort,unlockPort);
+        Div div1 = createDiv(buttonExecuteFlashId, MARGIN,"0px");
+        final Span spanRefresh = new Span("Refresh");
+        spanRefresh.getStyle().set("visibility","hidden");
+        spanRefresh.getStyle().set("display","none");
+        div1.add(spanRefresh);
+        Div div2 = createDiv(scanPort, MARGIN,"0px");
+        final Span spanScanPorts = new Span("Scan ports");
+        spanScanPorts.getStyle().set("visibility","hidden");
+        spanScanPorts.getStyle().set("display","none");
+        div2.add(spanScanPorts);
+        Div div3 = createDiv(unlockPort, MARGIN,"0px");
+        final Span spanUnlockPorts = new Span("Unlock ports");
+        spanUnlockPorts.getStyle().set("visibility","hidden");
+        spanUnlockPorts.getStyle().set("display","none");
+        div3.add(spanUnlockPorts);
+        Stream.of(spanRefresh,spanUnlockPorts,spanScanPorts).forEach(span -> {
+            span.addClassName("span-text");
+            span.addClassNames(LumoUtility.TextColor.SECONDARY,LumoUtility.FontSize.SMALL);
+        });
+        horizontalLayout.add(div1, div2, div3);
+        Stream.of(div1,div2,div3).forEach(div -> div.addClassName("expand-buttons"));
+        horizontalLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         horizontalLayout.addClassName("row-buttons");
 
         divHeader.add(horizontalLayout);
@@ -175,7 +197,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         comboBoxSerialPort.setWidthFull();
         comboBoxSerialPort.setPlaceholder("port");
         comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon(SIZE_30_PX, null));
-        comboBoxSerialPort.setRenderer(rendererIconUsbForEachItem());
+        comboBoxSerialPort.setRenderer(this.rendererIconUsbForEachItem());
         var divCombo = this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
         divCombo.addClassName("div-combo-serial-port");
         return divCombo;
@@ -216,19 +238,24 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
                 }))
                 .doOnComplete(() -> {
-                    ui.access(() -> {
-                        this.progressBarForShowEsptoolVersion.setVisible(false);
-                        h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
-                    });
+                    try {
+                        ui.access(() -> {
+                            this.progressBarForShowEsptoolVersion.setVisible(false);
+                            h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
+                        });
+                    } catch (UIDetachedException ex){}
                 })
                 .subscribe(espToolVersion -> {
-                    ui.access(() -> {
-                        if (espToolVersion.contains(ESPTOOL_PY_V)) {
-                            esptoolVersionCounter.set(true);
-                        }
-                        h2EsptoolVersion.setText(espToolVersion);
-                        Animated.animate(h2EsptoolVersion, Animation.FADE_IN);
-                    });
+                    try {
+                        ui.access(() -> {
+                            if (espToolVersion.contains(ESPTOOL_PY_V)) {
+                                esptoolVersionCounter.set(true);
+                            }
+                            h2EsptoolVersion.setText(espToolVersion);
+                            Animated.animate(h2EsptoolVersion, Animation.FADE_IN);
+                        });
+                    } catch (UIDetachedException ex) {}
+
                 });
     }
 

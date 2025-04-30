@@ -1,6 +1,6 @@
 package com.esp.espflow.service.provider;
 
-import com.esp.espflow.entity.dto.EsptoolExecutableDto;
+import com.esp.espflow.dto.EsptoolExecutableDto;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;

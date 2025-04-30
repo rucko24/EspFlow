@@ -182,5 +182,9 @@ public class EspFlowConstants {
                         return window.location.hash.substring(1);
                     }
                     """;
+    public static final String ICONS_RESPONSIVE_SIZE = "svg-icon-settings";
+    public static final String TOGGLE_BADGE_PILL_CONTRAST = "toggle badge pill contrast";
+    public static final String SPAN_BADGE_PILL_SHADOW = "span-badge-pill";
+    public static final String RADIO_BUTTON_RIN_NONE = "radio-button-rin-none";
 
 }

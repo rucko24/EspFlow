@@ -2,8 +2,8 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.entity.EspDeviceWithTotalDevicesRecord;
-import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
-import com.esp.espflow.entity.event.MainHeaderToReadFlashViewEvent;
+import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
+import com.esp.espflow.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;

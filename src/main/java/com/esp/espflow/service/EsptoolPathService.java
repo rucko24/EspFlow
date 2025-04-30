@@ -1,6 +1,6 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.entity.dto.EsptoolExecutableDto;
+import com.esp.espflow.dto.EsptoolExecutableDto;
 import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import lombok.RequiredArgsConstructor;

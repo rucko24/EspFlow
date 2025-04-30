@@ -1,4 +1,4 @@
-package com.esp.espflow.entity.dto;
+package com.esp.espflow.dto;
 
 import lombok.Builder;
 

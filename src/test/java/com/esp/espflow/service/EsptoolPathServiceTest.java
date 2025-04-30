@@ -1,6 +1,6 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.entity.dto.EsptoolExecutableDto;
+import com.esp.espflow.dto.EsptoolExecutableDto;
 import com.esp.espflow.service.provider.EsptoolPathServiceArgumentsProvider;
 import com.esp.espflow.service.provider.EsptoolPathServiceBundleVersionArgumentsProvider;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableService;

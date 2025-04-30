@@ -1,7 +1,7 @@
 package com.esp.espflow.mappers;
 
 import com.esp.espflow.entity.HexDumpEntity;
-import com.esp.espflow.entity.dto.HexDumpDto;
+import com.esp.espflow.dto.HexDumpDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

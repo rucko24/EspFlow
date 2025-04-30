@@ -1,7 +1,7 @@
 package com.esp.espflow.generator;
 
 import com.esp.espflow.entity.User;
-import com.esp.espflow.entity.dto.WizardEspDto;
+import com.esp.espflow.dto.WizardEspDto;
 import com.esp.espflow.enums.Role;
 import com.esp.espflow.service.respository.UserRepository;
 import com.esp.espflow.service.respository.impl.WizardEspService;

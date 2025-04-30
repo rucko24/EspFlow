@@ -1,8 +1,8 @@
 package com.esp.espflow.views.settings;
 
-import com.esp.espflow.entity.dto.EsptoolExecutableDto;
-import com.esp.espflow.entity.dto.EsptoolSha256Dto;
-import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
+import com.esp.espflow.dto.EsptoolExecutableDto;
+import com.esp.espflow.dto.EsptoolSha256Dto;
+import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.enums.Breakpoint;
 import com.esp.espflow.mappers.EsptoolExecutableMapper;
 import com.esp.espflow.mappers.EsptoolSha256Mapper;

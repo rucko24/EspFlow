@@ -10,7 +10,7 @@ import reactor.core.publisher.Sinks;
  * @author rubn
  */
 @Configuration
-public class EspRefreshEventReactivePublisher {
+public class EspRefreshEventReactivePublisherConfiguration {
 
     @Bean(value = "publishRefreshDevicesEvent")
     public Sinks.Many<RefreshDevicesEvent> publisher() {

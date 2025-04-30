@@ -1,7 +1,7 @@
 package com.esp.espflow.service.respository.impl;
 
 import com.esp.espflow.entity.EsptoolExecutableEntity;
-import com.esp.espflow.entity.dto.EsptoolExecutableDto;
+import com.esp.espflow.dto.EsptoolExecutableDto;
 import com.esp.espflow.mappers.EsptoolExecutableMapper;
 import com.esp.espflow.service.respository.EsptoolExecutableRepository;
 import jakarta.transaction.Transactional;

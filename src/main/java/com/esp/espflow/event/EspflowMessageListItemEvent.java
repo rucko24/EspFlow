@@ -1,4 +1,4 @@
-package com.esp.espflow.entity.event;
+package com.esp.espflow.event;
 
 import com.vaadin.flow.component.messages.MessageListItem;
 import lombok.extern.log4j.Log4j2;

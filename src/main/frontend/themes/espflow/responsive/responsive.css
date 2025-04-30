@@ -164,6 +164,10 @@
     .estool-absolute-path-span {
         width: 150px !important;
     }
+    .span-circle-red-for-bell {
+        margin-left: 10px;
+        top: 10px;
+    }
 }
 
 @media (max-width: 400px) {

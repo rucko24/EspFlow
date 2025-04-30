@@ -1,4 +1,4 @@
-package com.esp.espflow.entity.event;
+package com.esp.espflow.event;
 
 import com.vaadin.flow.component.messages.MessageListItem;
 import lombok.Getter;

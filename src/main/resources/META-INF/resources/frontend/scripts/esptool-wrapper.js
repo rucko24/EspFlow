@@ -360,14 +360,23 @@ class EspConnectionManager {
               console.log("Ejecutando hard reset...");
               await resetObj.reset();
               console.log("Hard reset completado.");
-              return { success: true, message: "Hard reset ejecutado" };
+              return JSON.stringify({
+                success: true,
+                message: "Hard reset ejecutado"
+              });
           } else {
               console.warn("Función hardReset no disponible en el loader actual o conexión no activa.");
-              return { success: false, error: "Función hardReset no disponible" };
+              return JSON.stringify({
+                success: false,
+                error: "Función hardReset no disponible"
+              });
           }
       } catch (err) {
           console.error("Error durante hard reset:", err);
-          throw new Error(err.message || "Error desconocido durante hard reset");
+          return JSON.stringify({
+            success: false,
+            error: err.message || "Error desconocido durante hard reset"
+          });
       }
   }
 
@@ -507,6 +516,51 @@ window.espHardReset = async () => { // Renombrado de testHardReset a espHardRese
          return await espConnectionManager.hardReset();
      } catch (err) {
          console.error("Error capturado en window.espHardReset:", err);
-         return { success: false, error: err.message || "Error desconocido" };
+         return JSON.stringify({
+            success: false, error: err.message || "Error desconocido"
+         });
      }
+};
+
+// Dentro de la sección 'Instancia de la Clase y Exposición Global...'
+
+/**
+ * Inspecciona el objeto esploader.options si la conexión está activa.
+ * Solo para fines de depuración.
+ * @returns {Promise<string>} - Promesa que resuelve con un JSON string del objeto options o un mensaje de error.
+ */
+window.inspectEspLoaderOptions = async () => {
+    if (espConnectionManager.esploader && espConnectionManager.esploader.options) {
+        try {
+            // Quitamos referencias circulares o no serializables si las hay
+            const optionsToSerialize = { ...espConnectionManager.esploader.options };
+            delete optionsToSerialize.transport; // Transport no es serializable
+            // Puedes añadir otras propiedades no serializables si causan error
+            if (optionsToSerialize.resetConstructors) {
+                 // Clonamos para evitar referencias, pero no podemos serializar las funciones directamente
+                 optionsToSerialize.resetConstructors = { ...optionsToSerialize.resetConstructors };
+                 // Convertimos las funciones a strings o indicadores para serializar
+                 for (const key in optionsToSerialize.resetConstructors) {
+                     if (typeof optionsToSerialize.resetConstructors[key] === 'function') {
+                         optionsToSerialize.resetConstructors[key] = `[Function: ${key}]`;
+                     }
+                 }
+            }
+            return JSON.stringify({
+                success: true,
+                options: optionsToSerialize
+            });
+        } catch (e) {
+             console.error("Error al serializar options:", e);
+             return JSON.stringify({
+                success: false,
+                error: "Error interno al serializar options: " + e.message
+             });
+        }
+    } else {
+        return JSON.stringify({
+            success: false,
+            error: "No hay conexión activa o options no está disponible."
+        });
+    }
 };

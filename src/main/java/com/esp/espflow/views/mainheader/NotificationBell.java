@@ -81,6 +81,7 @@ public class NotificationBell extends Popover {
         spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.ABSOLUTE);
         spanCircleRed.getStyle().set("margin-left", "13px");
         spanCircleRed.getStyle().set("top", "14px");
+        spanCircleRed.addClassName("span-circle-red-for-bell");
         divBell.add(spanCircleRed);
 
         super.setTarget(divBell);

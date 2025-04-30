@@ -1,6 +1,6 @@
 package com.esp.espflow.views.mainheader;
 
-import com.esp.espflow.entity.event.MainHeaderToReadFlashViewEvent;
+import com.esp.espflow.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;

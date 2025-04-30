@@ -1,9 +1,9 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
+import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
@@ -22,6 +22,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
@@ -63,6 +65,7 @@ import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.TOGGLE_BADGE_PILL_CONTRAST;
 import static com.esp.espflow.util.EspFlowConstants.WINDOWS_LOCATION_REMOVE_HASH;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 
@@ -82,9 +85,12 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final RadioButtonGroup<BaudRatesEnum> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashModeEnum> flashModeRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<EraseFlashEnum> eraseRadioButtons = new RadioButtonGroup<>();
-    private final Button flashButton = new Button(SvgFactory.createIconFromSvg(FLASH_OFF_SVG, SIZE_25_PX, null));
+    private final SvgIcon svgIconFlashMe = SvgFactory.createIconFromSvg(FLASH_OFF_SVG, SIZE_25_PX, null);
+    private final Button flashButton = new Button(svgIconFlashMe);
     private final VerticalLayout contentForPrimary = new VerticalLayout();
     private final OutPutConsole outPutConsole = new OutPutConsole();
+    private final Button buttonBack = new Button(VaadinIcon.ARROW_LEFT.create());
+
     /**
      * Services
      */
@@ -104,6 +110,10 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
     @PostConstruct
     public void init() {
+        this.showContent();
+    }
+
+    private void showContent() {
         super.addClassNames(Display.FLEX, FlexDirection.ROW,
                 LumoUtility.Width.FULL,
                 LumoUtility.Height.FULL);
@@ -200,6 +210,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         baudRatesRadioButtonGroup.setValue(BaudRatesEnum.BAUD_RATE_115200);
         baudRatesRadioButtonGroup.setRenderer(BaudRatesEnum.rendererWithTooltip());
         baudRatesRadioButtonGroup.addClassName("baud-radio-group");
+        this.applyRadioButtomTheme(this.baudRatesRadioButtonGroup, LumoUtility.Margin.Right.MEDIUM, TOGGLE_BADGE_PILL_CONTRAST);
         final Div divBaudRateRadioButton = this.createDiv(baudRatesRadioButtonGroup, MARGIN_LEFT, MARGIN_10_PX);
         divBaudRateRadioButton.addClassName("div-baud-rate-radio-button");
         final Div div = new Div(divH2BaudRate, divBaudRateRadioButton);
@@ -219,6 +230,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         this.flashModeRadioButtonGroup.setRequired(Boolean.TRUE);
         this.flashModeRadioButtonGroup.setRenderer(FlashModeEnum.rendererWithTooltip());
         this.flashModeRadioButtonGroup.addClassName("flash-mode-radio-group");
+        this.applyRadioButtomTheme(this.flashModeRadioButtonGroup, LumoUtility.Margin.Right.MEDIUM, TOGGLE_BADGE_PILL_CONTRAST);
         final Div divFlashRadioButton = this.createDiv(flashModeRadioButtonGroup, MARGIN_LEFT, MARGIN_10_PX);
         divFlashRadioButton.addClassName("div-flash-mode-radio-button");
         final Div div = new Div(divh3FlashMode, divFlashRadioButton);
@@ -237,6 +249,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         this.eraseRadioButtons.setItems(EraseFlashEnum.values());
         this.eraseRadioButtons.setValue(EraseFlashEnum.NO);
         this.eraseRadioButtons.addClassName("erase-flash-radio-group");
+        this.applyRadioButtomTheme(this.eraseRadioButtons, LumoUtility.Margin.Right.MEDIUM, TOGGLE_BADGE_PILL_CONTRAST);
         final Div divEraseRadioButton = this.createDiv(eraseRadioButtons, MARGIN_LEFT, MARGIN_10_PX);
         divEraseRadioButton.addClassName("div-erase-radio-group");
         final Div div = new Div(divh3EraseFlash, divEraseRadioButton);
@@ -244,6 +257,13 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
         div.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         div.addClassName("div-erase-flash-flex-wrap");
         return div;
+    }
+
+    public <T> void applyRadioButtomTheme(RadioButtonGroup<T> radioButtonGroup, String marginRight, String theme) {
+        radioButtonGroup.getChildren().forEach(component -> {
+            component.getElement().getThemeList().add(theme);
+            component.addClassName(marginRight);
+        });
     }
 
     private Div rowUploadingFlash() {

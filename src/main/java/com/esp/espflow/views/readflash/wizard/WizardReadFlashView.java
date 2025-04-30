@@ -1,6 +1,6 @@
 package com.esp.espflow.views.readflash.wizard;
 
-import com.esp.espflow.entity.dto.WizardEspDto;
+import com.esp.espflow.dto.WizardEspDto;
 import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.views.Layout;

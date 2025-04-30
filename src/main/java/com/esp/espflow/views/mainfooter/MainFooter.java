@@ -1,12 +1,10 @@
-package com.esp.espflow.views;
+package com.esp.espflow.views.mainfooter;
 
 import com.esp.espflow.entity.User;
 import com.esp.espflow.security.AuthenticatedUser;
-import com.esp.espflow.util.Item;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.settings.SettingsDialog;
 import com.vaadin.componentfactory.ToggleButton;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.Shortcuts;
@@ -25,7 +23,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.flow.server.Command;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.Lumo;
@@ -33,12 +31,12 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.vaadin.lineawesome.LineAwesomeIcon;
 
 import java.util.Optional;
 
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
+import static com.esp.espflow.util.EspFlowConstants.ICONS_RESPONSIVE_SIZE;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
 
@@ -49,6 +47,7 @@ import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
 @RequiredArgsConstructor
 @SpringComponent
 @UIScope
+@PreserveOnRefresh
 public class MainFooter {
 
     private final AuthenticatedUser authenticatedUser;
@@ -143,14 +142,24 @@ public class MainFooter {
 
     public HorizontalLayout sizeMode(Footer footer) {
         // Density
-        final RadioButtonGroup<String> density = new RadioButtonGroup<>();
-        density.setTooltipText("Compact or default mode");
-        density.setWidthFull();
-        density.setItems("default", "compact");
-        density.setValue("default");
-        density.setWidthFull();
-        density.addValueChangeListener(e -> this.setDensity(footer, e.getValue()));
-        final HorizontalLayout rowSizeMode = new HorizontalLayout(density);
+        final RadioButtonGroup<String> densityRadioButtomGroup = new RadioButtonGroup<>();
+        densityRadioButtomGroup.setTooltipText("Compact or default mode");
+        densityRadioButtomGroup.setWidthFull();
+        densityRadioButtomGroup.setItems("default", "compact");
+        densityRadioButtomGroup.setValue("default");
+        densityRadioButtomGroup.setWidthFull();
+        densityRadioButtomGroup.getChildren().forEach(component -> {
+            component.getElement().getThemeList().add("toggle badge pill contrast");
+            component.addClassName(LumoUtility.Margin.Right.MEDIUM);
+        });
+
+        final ToggleButton toggleButton = new ToggleButton("");
+        toggleButton.setTooltipText("Font size");
+        toggleButton.addValueChangeListener(e -> {
+            final String fontSize = toggleButton.getValue() ? "compact" :"default";
+            this.setDensity(footer, fontSize);
+        });
+        final HorizontalLayout rowSizeMode = new HorizontalLayout(toggleButton);
         rowSizeMode.setWidthFull();
         return rowSizeMode;
     }
@@ -161,8 +170,10 @@ public class MainFooter {
         final Span spanDarkOrLight = new Span();
         var moonO = VaadinIcon.MOON_O.create();
         moonO.setSize("20px");
+        moonO.addClassName(ICONS_RESPONSIVE_SIZE);
         spanDarkOrLight.add(moonO);
         spanDarkOrLight.getStyle().setMarginLeft("2px");
+        spanDarkOrLight.getStyle().setMarginBottom("2px");
         toggleButton.setTooltipText("Change to dark theme");
         toggleButton.addClickListener(event -> {
             final ThemeList themeList = UI.getCurrent().getElement().getThemeList();
@@ -192,13 +203,6 @@ public class MainFooter {
         return rowTogle;
     }
 
-    private Component renderDensity(String density) {
-        LineAwesomeIcon icon = density.equals("default") ? LineAwesomeIcon.EXPAND_SOLID : LineAwesomeIcon.COMPRESS_SOLID;
-        Item item = new Item(density, icon);
-        item.addClassNames(LumoUtility.Margin.Horizontal.AUTO);
-        return item;
-    }
-
     private void setDensity(Footer footer, String density) {
         this.density = density.equals("compact") ? "compact" : "";
         updateTheme(footer);
@@ -207,10 +211,6 @@ public class MainFooter {
     private void updateTheme(Footer footer) {
         var js = "document.documentElement.setAttribute('theme', $0)";
         footer.getElement().executeJs(js, Lumo.LIGHT + " " + this.density);
-    }
-
-    private void execute(final Command command, final Footer footer) {
-        footer.getUI().ifPresent(ui -> command.execute());
     }
 
 }

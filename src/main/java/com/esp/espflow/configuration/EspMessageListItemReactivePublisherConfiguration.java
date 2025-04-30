@@ -1,6 +1,6 @@
 package com.esp.espflow.configuration;
 
-import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
+import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
@@ -14,7 +14,7 @@ import reactor.core.publisher.Sinks;
  * @author rubn
  */
 @Configuration
-public class EspMessageListItemReactivePublisher {
+public class EspMessageListItemReactivePublisherConfiguration {
 
     @Bean(value = "publishMessageListItemEvent")
     public Sinks.Many<EsptoolFRWMessageListItemEvent> publisher() {

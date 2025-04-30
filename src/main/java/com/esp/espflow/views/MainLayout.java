@@ -1,14 +1,15 @@
 package com.esp.espflow.views;
 
 import com.esp.espflow.entity.User;
-import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
-import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
-import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
+import com.esp.espflow.event.EspflowMessageListItemEvent;
+import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
+import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.hexdump.HexDumpView;
+import com.esp.espflow.views.mainfooter.MainFooter;
 import com.esp.espflow.views.mainheader.MainHeader;
 import com.esp.espflow.views.readflash.ReadFlashView;
 import com.esp.espflow.views.webserial.WebSerialView;

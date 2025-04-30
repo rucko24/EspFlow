@@ -1,4 +1,4 @@
-package com.esp.espflow.entity.event;
+package com.esp.espflow.event;
 
 import com.esp.espflow.enums.RefreshDevicesEvent;
 import com.vaadin.flow.component.UI;

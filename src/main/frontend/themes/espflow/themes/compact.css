@@ -28,7 +28,16 @@
     --toggle-size: 15px;
     --avatar-size-s: 1.75rem;
     --icon-svg-settings-size: 20px !important;
-
+    .black-to-white {
+        width: 20px !important;
+    }
+    .svg-icon-settings {
+        width: 20px !important;
+    }
+    .span-circle-red-for-bell {
+        margin-left: 10px !important;
+        top: 10px !important;
+    }
     [theme~="dark"] {
        --toggle-size: 15px;
        --avatar-size-s: 1.75rem;

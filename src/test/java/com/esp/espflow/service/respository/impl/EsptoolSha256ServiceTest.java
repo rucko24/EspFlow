@@ -1,7 +1,7 @@
 package com.esp.espflow.service.respository.impl;
 
 import com.esp.espflow.entity.EsptoolSha256Entity;
-import com.esp.espflow.entity.dto.EsptoolSha256Dto;
+import com.esp.espflow.dto.EsptoolSha256Dto;
 import com.esp.espflow.service.respository.EsptoolSha256Repository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

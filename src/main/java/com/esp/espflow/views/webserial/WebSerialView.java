@@ -1,6 +1,6 @@
 package com.esp.espflow.views.webserial;
 
-import com.esp.espflow.entity.dto.WebSerialClientDto;
+import com.esp.espflow.dto.WebSerialClientDto;
 import com.esp.espflow.views.MainLayout;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.ClientCallable;
@@ -48,7 +48,7 @@ public class WebSerialView extends VerticalLayout {
     private static final String JS_CONNECT = "return window.espConnect($0, $1)";
     private static final String JS_DISCONNECT = "return window.espDisconnect()";
     private static final String JS_DISCONNECT_AND_FORGET = "return window.espDisconnectAndForget()";
-    private static final String JS_HARD_RESET = "window.testHardReset()";
+    private static final String JS_HARD_RESET = "window.espHardReset()";
     private static final String JS_FLASH_ID = "return window.espFlashId()";
     private static final String JS_READ_FLASH = "return window.espReadFlash($0, $1)";
     private static final String JS_WRITE_FLASH = "return window.espWriteFlash($0, $1, $2)";
@@ -112,22 +112,37 @@ public class WebSerialView extends VerticalLayout {
                     .executeJs(JS_CONNECT, baudRateField.getValue(), false)
                     .then(String.class, result -> {
                         try {
-
                             WebSerialClientDto resultValue = objectMapper.readValue(result, WebSerialClientDto.class);
-
                             String message = resultValue.message();
                             String chip = resultValue.chip();
                             String error = resultValue.error();
-
                             if (resultValue.success()) {
-
-
                                 log.info("Operación exitosa: {}", message);
                                 resultArea.setValue(resultArea.getValue().concat("\n") + "Operación exitosa: " + message);
                             } else {
                                 log.error("Error {}", error);
                                 resultArea.setValue("Error: " + error);
                             }
+
+//                            UI.getCurrent().getElement()
+//                                    .executeJs("window.inspectEspLoaderOptions()")
+//                                    .then(String.class, result2 -> {
+//                                        try {
+//                                            WebSerialClientDto resultValue2 = objectMapper.readValue(result2, WebSerialClientDto.class);
+//                                            String message2 = resultValue2.message();
+//                                            String error2 = resultValue2.error();
+//                                            if (resultValue.success()) {
+//                                                log.info("inspeccion: {}", message2);
+//                                                resultArea.setValue(resultArea.getValue().concat("\n") + "inspeccion: " + message2);
+//                                            } else {
+//                                                log.error("Error {}", error2);
+//                                                resultArea.setValue("Error: " + error2);
+//                                            }
+//                                        } catch (Exception ex) {
+//                                            log.error("Error {}", ex.getMessage());
+//                                            resultArea.setValue("Error al procesar el resultado: " + ex.getMessage());
+//                                        }
+//                                    });
 
                         } catch (Exception ex) {
                             log.error("Error {}", ex.getMessage());

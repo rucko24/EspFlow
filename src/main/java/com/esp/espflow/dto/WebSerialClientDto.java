@@ -1,4 +1,4 @@
-package com.esp.espflow.entity.dto;
+package com.esp.espflow.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
