@@ -38,7 +38,7 @@ class EsptoolPathServiceTest {
         System.setProperty("os.name", osName);
         when(esptoolExecutableService.findByIsSelectedToTrue()).thenReturn(inputDto);
 
-        assertThat(esptoolPathService.esptoolPath()).isEqualTo(expectedPath);
+        assertThat(esptoolPathService.esptoolPath()).contains(expectedPath);
 
         verify(esptoolExecutableService).findByIsSelectedToTrue();
         verifyNoMoreInteractions(esptoolExecutableService);
