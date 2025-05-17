@@ -21,54 +21,54 @@ public class EsptoolPathServiceArgumentsProvider implements ArgumentsProvider {
         final Arguments argumentsWindowsCustom = Arguments.of("Win custom",
                 "window",
                 Optional.of(EsptoolExecutableDto.builder()
-                        .absolutePathEsptool("/tmp/esptool-bundle-dir/esptool-winx64/esptool.exe")
+                        .absolutePathEsptool("/esptool-bundle-dir/esptool-winx64/esptool.exe")
                         .isBundled(false)
                         .build()),
-                "/tmp/esptool-bundle-dir/esptool-winx64/esptool.exe"
+                "/esptool-bundle-dir/esptool-winx64/esptool.exe"
         );
 
         // Caso Windows, con bundled = true
         final Arguments argumentsWindowsIsBundle = Arguments.of("Win is bundle",
                 "window",
                 Optional.of(EsptoolExecutableDto.builder()
-                        .absolutePathEsptool("/tmp/esptool-bundle-dir/esptool-winx64/esptool.exe")
+                        .absolutePathEsptool("/esptool-bundle-dir/esptool-winx64/esptool.exe")
                         .isBundled(true)
                         .build()),
-                "/tmp/esptool-bundled-dir/esptool-winx64/esptool.exe"
+                "/esptool-bundled-dir/esptool-winx64/esptool.exe"
         );
 
         // Caso Windows (no hay ejecutable seleccionado, se carga el bundle por defecto)
         final Arguments argumentsWindows3Empty = Arguments.of("Win empty loaded default bundle",
                 "window",
                 Optional.empty(),
-                "/tmp/esptool-bundled-dir/esptool-winx64/esptool.exe"
+                "/esptool-bundled-dir/esptool-winx64/esptool.exe"
         );
 
         // Caso Linux con custom esptool
         final Arguments argumentsLinuxCustom = Arguments.of("Linux custom",
                 "linux",
                 Optional.of(EsptoolExecutableDto.builder()
-                        .absolutePathEsptool("/tmp/esptool-custom-dir/esptool-linux-amd64/esptool")
+                        .absolutePathEsptool("/esptool-custom-dir/esptool-linux-amd64/esptool")
                         .isBundled(false)
                         .build()),
-                "/tmp/esptool-custom-dir/esptool-linux-amd64/esptool"
+                "/esptool-custom-dir/esptool-linux-amd64/esptool"
         );
 
         // Caso Linux, con bundled = true
         final Arguments argumentsLinuxIsBundle = Arguments.of("Linux is bundle",
                 "linux",
                 Optional.of(EsptoolExecutableDto.builder()
-                        .absolutePathEsptool("/tmp/esptool-bundled-dir/esptool-linux-amd64/esptool")
+                        .absolutePathEsptool("/esptool-bundled-dir/esptool-linux-amd64/esptool")
                         .isBundled(true)
                         .build()),
-                "/tmp/esptool-bundled-dir/esptool-linux-amd64/esptool"
+                "/esptool-bundled-dir/esptool-linux-amd64/esptool"
         );
 
         // Caso Linux (no hay ejecutable seleccionado, se carga el bundle por defecto)
         final Arguments argumentsLinuxEmpty = Arguments.of("Linux empty loaded default bundle",
                 "linux",
                 Optional.empty(),
-                "/tmp/esptool-bundled-dir/esptool-linux-amd64/esptool"
+                "/esptool-bundled-dir/esptool-linux-amd64/esptool"
         );
 
         // Caso Mac OS: Con esptool.py definido en el DTO

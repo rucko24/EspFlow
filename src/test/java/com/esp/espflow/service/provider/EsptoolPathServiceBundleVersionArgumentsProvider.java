@@ -23,11 +23,11 @@ public class EsptoolPathServiceBundleVersionArgumentsProvider implements Argumen
                 "window",
                 false,
                 Optional.of(EsptoolExecutableDto.builder()
-                        .absolutePathEsptool("/tmp/esptool-bundle-dir/esptool-winx64/esptool.exe")
+                        .absolutePathEsptool("/esptool-bundle-dir/esptool-winx64/esptool.exe")
                         .isBundled(false)
                         .build()),
-                this.createEsptoolExecutableDto("/tmp/esptool-bundle-dir/esptool-winx64/esptool.exe", false, esptoolVersion),
-                "/tmp/esptool-bundle-dir/esptool-winx64/esptool.exe"
+                this.createEsptoolExecutableDto("/esptool-bundle-dir/esptool-winx64/esptool.exe", false, esptoolVersion),
+                "/esptool-bundle-dir/esptool-winx64/esptool.exe"
         );
 
         // Caso Windows, con bundled = true
@@ -35,11 +35,11 @@ public class EsptoolPathServiceBundleVersionArgumentsProvider implements Argumen
                 "window",
                 true,
                 Optional.of(EsptoolExecutableDto.builder()
-                        .absolutePathEsptool("/tmp/esptool-bundle-dir/esptool-winx64/esptool.exe")
+                        .absolutePathEsptool("/esptool-bundle-dir/esptool-winx64/esptool.exe")
                         .isBundled(true)
                         .build()),
-                this.createEsptoolExecutableDto("/tmp/esptool-bundled-dir/esptool-winx64/esptool.exe", true, esptoolVersion),
-                "/tmp/esptool-bundled-dir/esptool-winx64/esptool.exe"
+                this.createEsptoolExecutableDto("/esptool-bundled-dir/esptool-winx64/esptool.exe", true, esptoolVersion),
+                "/esptool-bundled-dir/esptool-winx64/esptool.exe"
         );
 
         // Caso Windows (no hay ejecutable seleccionado, se carga el bundle por defecto)
@@ -47,8 +47,8 @@ public class EsptoolPathServiceBundleVersionArgumentsProvider implements Argumen
                 "window",
                 false,
                 Optional.empty(),
-                this.createEsptoolExecutableDto("/tmp/esptool-bundled-dir/esptool-winx64/esptool.exe", false,esptoolVersion),
-                "/tmp/esptool-bundled-dir/esptool-winx64/esptool.exe"
+                this.createEsptoolExecutableDto("/esptool-bundled-dir/esptool-winx64/esptool.exe", false,esptoolVersion),
+                "/esptool-bundled-dir/esptool-winx64/esptool.exe"
         );
 
         // Caso Linux con custom esptool
@@ -56,11 +56,11 @@ public class EsptoolPathServiceBundleVersionArgumentsProvider implements Argumen
                 "linux",
                 false,
                 Optional.of(EsptoolExecutableDto.builder()
-                        .absolutePathEsptool("/tmp/esptool-custom-dir/esptool-linux-amd64/esptool")
+                        .absolutePathEsptool("/esptool-custom-dir/esptool-linux-amd64/esptool")
                         .isBundled(false)
                         .build()),
-                this.createEsptoolExecutableDto("/tmp/esptool-custom-dir/esptool-linux-amd64/esptool", false, esptoolVersion),
-                "/tmp/esptool-custom-dir/esptool-linux-amd64/esptool"
+                this.createEsptoolExecutableDto("/esptool-custom-dir/esptool-linux-amd64/esptool", false, esptoolVersion),
+                "/esptool-custom-dir/esptool-linux-amd64/esptool"
         );
 
         // Caso Linux, con bundled = true
@@ -68,11 +68,11 @@ public class EsptoolPathServiceBundleVersionArgumentsProvider implements Argumen
                 "linux",
                 true,
                 Optional.of(EsptoolExecutableDto.builder()
-                        .absolutePathEsptool("/tmp/esptool-bundled-dir/esptool-linux-amd64/esptool")
+                        .absolutePathEsptool("/esptool-bundled-dir/esptool-linux-amd64/esptool")
                         .isBundled(true)
                         .build()),
-                this.createEsptoolExecutableDto("/tmp/esptool-bundled-dir/esptool-linux-amd64/esptool", true, esptoolVersion),
-                "/tmp/esptool-bundled-dir/esptool-linux-amd64/esptool"
+                this.createEsptoolExecutableDto("/esptool-bundled-dir/esptool-linux-amd64/esptool", true, esptoolVersion),
+                "/esptool-bundled-dir/esptool-linux-amd64/esptool"
         );
 
         // Caso Linux (no hay ejecutable seleccionado, se carga el bundle por defecto)
@@ -80,8 +80,8 @@ public class EsptoolPathServiceBundleVersionArgumentsProvider implements Argumen
                 "linux",
                 false,
                 Optional.empty(),
-                this.createEsptoolExecutableDto("/tmp/esptool-bundled-dir/esptool-linux-amd64/esptool", false, esptoolVersion),
-                "/tmp/esptool-bundled-dir/esptool-linux-amd64/esptool"
+                this.createEsptoolExecutableDto("/esptool-bundled-dir/esptool-linux-amd64/esptool", false, esptoolVersion),
+                "/esptool-bundled-dir/esptool-linux-amd64/esptool"
         );
 
         // Caso Mac OS: Con esptool.py definido en el DTO

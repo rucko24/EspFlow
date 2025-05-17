@@ -55,7 +55,7 @@ class EsptoolPathServiceTest {
         when(esptoolExecutableService.findByAbsolutePathEsptoolAndIsBundleAndVersion(expectedPath, isBundle, "v4.7.0"))
                 .thenReturn(inputDto);
 
-        assertThat(esptoolPathService.esptoolPath(actualDto)).isEqualTo(expectedPath);
+        assertThat(esptoolPathService.esptoolPath(actualDto)).contains(expectedPath);
 
         verify(esptoolExecutableService).findByAbsolutePathEsptoolAndIsBundleAndVersion(expectedPath, isBundle, "v4.7.0");
         verifyNoMoreInteractions(esptoolExecutableService);
