@@ -39,7 +39,7 @@ Backup of the microcontroller firmware with, with the possibility to set the mem
 esptool.py --port /dev/ttyUSB1 --baud 11500 read_flash 0 ALL /tmp/esp-backup-flash-dir/ESP8266EX-1720865320370-backup.bin
 ----
 
-image::https://github.com/user-attachments/assets/9a4631f4-d5ad-4d33-9d87-6909a38fd5ad[]
+image::images-for-asciidoctor/readfirmwareview.png[]
 
 == *New features*, will be coming soon ⚒
 
