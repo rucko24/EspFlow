@@ -86,7 +86,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         super.open();
     }
 
-    public void closeSidebar() {
+    private void closeSidebar() {
         Animated.animate(this.sidebar, Animated.Animation.FADE_OUT_RIGHT);
         this.removesClassWithDelay(() -> {
             this.sidebar.addClassNames("-end-full");
