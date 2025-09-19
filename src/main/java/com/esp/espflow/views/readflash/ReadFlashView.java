@@ -158,6 +158,8 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     private HorizontalLayout rowMainHeader;
     private Disposable disposableRefreshEvents;
+    private boolean comboAbierto = false;
+    private boolean comboSeleccionado = false;
 
     @PostConstruct
     public void init() {
@@ -268,17 +270,25 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.baudRatesComboBox.setValue(BaudRatesEnum.BAUD_RATE_115200);
         this.baudRatesComboBox.setItemLabelGenerator(BaudRatesEnum::toString);
         // Detectar cambios en el estado de apertura
+        this.baudRatesComboBox.addValueChangeListener(event -> {
+            //comboSeleccionado = event.getValue() != null;
+            if (comboSeleccionado) {
+                System.out.println("Item seleccionado, sidebar puede cerrarse normalmente");
+            }
+        });
         this.baudRatesComboBox.getElement().addEventListener("opened-changed", event -> {
             boolean isOpened = event.getEventData().getBoolean("event.detail.value");
-            if (isOpened) {
+            comboAbierto = isOpened;
+            if (comboAbierto) {
                 System.out.println("ComboBox se ha abierto");
                 this.sidebarReadFlash.getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
             } else {
                 System.out.println("ComboBox se ha cerrado");
-                this.sidebarReadFlash.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, sidebarReadFlash);
+                if(!comboSeleccionado) {
+                    this.sidebarReadFlash.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, sidebarReadFlash);
+                }
             }
         }).addEventData("event.detail.value");
-
 
         final Div parent = new Div(formLayout);
         parent.setId("parent-sidebar-content-div");
@@ -349,7 +359,10 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.buttonRefreshDevices.addClickShortcut(Key.ENTER);
         this.buttonRefreshDevices.setDisableOnClick(true);
         this.buttonRefreshDevices.addClickListener(event -> this.refreshDevice());
-        this.buttonConfigure.addClickListener(event -> this.sidebarReadFlash.openSidebar());
+        this.buttonConfigure.addClickListener(event -> {
+            this.sidebarReadFlash.openSidebar();
+
+        });
         this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
         this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
         this.shoWizardIcon.setTooltipText("Show dialog");
