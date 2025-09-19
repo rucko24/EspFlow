@@ -2,10 +2,10 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.entity.EspDeviceWithTotalDevicesRecord;
-import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
-import com.esp.espflow.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.RefreshDevicesEvent;
+import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
+import com.esp.espflow.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.mappers.EspDeviceWithTotalDevicesMapper;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
@@ -89,6 +89,7 @@ import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.CLOSE_SIDEBAR_OUTSIDE_CLICK;
 import static com.esp.espflow.util.EspFlowConstants.CONFIGURE;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
@@ -98,6 +99,7 @@ import static com.esp.espflow.util.EspFlowConstants.NO_DEVICES_SHOWN;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
+import static com.esp.espflow.util.EspFlowConstants.REMOVE_SIDEBAR_LISTENER;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.WINDOWS_LOCATION_REMOVE_HASH;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
@@ -261,18 +263,23 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
             textField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
         });
         Tooltip.forComponent(autoDetectFlashSize).setText("Set custom flash size to ALL");
-        autoDetectFlashSize.addValueChangeListener(event -> {
-            if (event.getValue()) {
-                endAddress.setValue(0);
-                endAddress.setEnabled(false);
-            } else {
-                endAddress.setEnabled(true);
-            }
-        });
         this.baudRatesComboBox.setTooltipText("Serial port baud rate default 115200");
         this.baudRatesComboBox.setItems(BaudRatesEnum.values());
         this.baudRatesComboBox.setValue(BaudRatesEnum.BAUD_RATE_115200);
         this.baudRatesComboBox.setItemLabelGenerator(BaudRatesEnum::toString);
+        // Detectar cambios en el estado de apertura
+        this.baudRatesComboBox.getElement().addEventListener("opened-changed", event -> {
+            boolean isOpened = event.getEventData().getBoolean("event.detail.value");
+            if (isOpened) {
+                System.out.println("ComboBox se ha abierto");
+                this.sidebarReadFlash.getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
+            } else {
+                System.out.println("ComboBox se ha cerrado");
+                this.sidebarReadFlash.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, sidebarReadFlash);
+            }
+        }).addEventData("event.detail.value");
+
+
         final Div parent = new Div(formLayout);
         parent.setId("parent-sidebar-content-div");
         parent.addClassNames(Display.FLEX, AlignItems.CENTER, Padding.End.LARGE, Padding.Start.LARGE, Padding.Vertical.SMALL);

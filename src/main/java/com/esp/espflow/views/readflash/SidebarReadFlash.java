@@ -3,6 +3,7 @@ package com.esp.espflow.views.readflash;
 import com.esp.espflow.util.animations.AnimationsUtils;
 import com.esp.espflow.views.Layout;
 import com.infraleap.animatecss.Animated;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasTheme;
@@ -41,6 +42,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
     @PostConstruct
     public void setup() {
         super.addClassNames("popover-sidebar");
+        super.setId("popover-sidebar");
         super.setCloseOnEsc(true);
         // IMPORTANTE: desactivar el cierre automático al hacer clic fuera
         super.setCloseOnOutsideClick(false);
@@ -48,7 +50,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         this.add(sidebar);
         this.sidebar.setId("sidebar");
         this.sidebar.addClassName("sidebar-read-flash");
-        this.closeSidebar();
+        //this.closeSidebar();
         Shortcuts.addShortcutListener(this.sidebar, shortcutEvent -> this.closeSidebar(), Key.ESCAPE);
     }
 
@@ -56,7 +58,9 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         final H2 title = new H2("Configure");
         title.addClassNames(LumoUtility.FontSize.MEDIUM);
 
-        final Button close = new Button(LineAwesomeIcon.TIMES_SOLID.create(), e -> closeSidebar());
+        final Button close = new Button(LineAwesomeIcon.TIMES_SOLID.create(), e -> {
+            closeSidebar();
+        });
         close.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         close.addClassName(LumoUtility.Padding.Right.NONE);
         close.setAriaLabel("Close sidebar");
@@ -103,4 +107,11 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         this.closeSidebar();
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if(attachEvent.isInitialAttach()) {
+            //this.closeSidebar();;
+        }
+    }
 }

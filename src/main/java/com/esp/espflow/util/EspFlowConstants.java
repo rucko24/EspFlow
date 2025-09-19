@@ -178,10 +178,10 @@ public class EspFlowConstants {
     public static final String ENTITY_IS_NOT_PRESENT_LOADED_BUNDLE_ESPTOOL_PY_FROM = "Entity is not present, Loaded bundle esptool.py from {}";
     public static final String RETURN_WINDOW_INNER_WIDTH = "return window.innerWidth;";
     public static final String WINDOWS_LOCATION_REMOVE_HASH = """
-                    if (window.location.hash) {
-                        return window.location.hash.substring(1);
-                    }
-                    """;
+            if (window.location.hash) {
+                return window.location.hash.substring(1);
+            }
+            """;
     public static final String ICONS_RESPONSIVE_SIZE = "svg-icon-settings";
     public static final String TOGGLE_BADGE_PILL_CONTRAST = "toggle badge pill contrast";
     public static final String SPAN_BADGE_PILL_SHADOW = "span-badge-pill";
