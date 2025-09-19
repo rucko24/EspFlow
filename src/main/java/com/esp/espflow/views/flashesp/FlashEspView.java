@@ -22,12 +22,16 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
+import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -53,6 +57,7 @@ import java.util.concurrent.Executor;
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.util.EspFlowConstants.BAUD_RATE;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.DEFAULT_INIT_ADDRESS_SIZE_TO_WRITE_0x_00000;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_ID;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_OFF_SVG;
@@ -80,7 +85,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class FlashEspView extends Div implements ResponsiveHeaderDiv {
+public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeaveObserver {
 
     private final RadioButtonGroup<BaudRatesEnum> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashModeEnum> flashModeRadioButtonGroup = new RadioButtonGroup<>();
@@ -90,6 +95,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final VerticalLayout contentForPrimary = new VerticalLayout();
     private final OutPutConsole outPutConsole = new OutPutConsole();
     private final Button buttonBack = new Button(VaadinIcon.ARROW_LEFT.create());
+    private final Icon shoWizardIcon = VaadinIcon.INFO_CIRCLE.create();
 
     /**
      * Services
@@ -103,10 +109,11 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     private final EsptoolPathService esptoolPathService;
     private final Executor eventTaskExecutor;
     /**
-     * mutable properties
+     * Mutable fields
      */
     private String flashFileName;
     private String[] commands;
+    private HorizontalLayout rowMainHeader;
 
     @PostConstruct
     public void init() {
@@ -114,6 +121,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
     }
 
     private void showContent() {
+        this.configureHeaderComponents();
         super.addClassNames(Display.FLEX, FlexDirection.ROW,
                 LumoUtility.Width.FULL,
                 LumoUtility.Height.FULL);
@@ -381,9 +389,47 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
 
     }
 
+    private void configureHeaderComponents() {
+        this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
+        this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
+        this.shoWizardIcon.setTooltipText("Show dialog");
+        this.shoWizardIcon.addClickListener(event -> {
+            this.add(this.wizardFlashEspDialog);
+            this.wizardFlashEspDialog.openAndDisableModeless();
+        });
+    }
+
+    private void animatedHeaderComponents() {
+        Animated.animate(this.shoWizardIcon, Animation.FADE_IN);
+    }
+
+    private void refreshHeaderComponents() {
+        this.rowMainHeader.removeAll();
+        this.animatedHeaderComponents();
+        this.shoWizardIcon.setVisible(true);
+        this.rowMainHeader.add(this.shoWizardIcon);
+    }
+
+    /**
+     * This listener is used to receive the HorizontalLayout that is in the <strong>navbar<strong> and to be
+     * able to use it to show in it, components of this view, like the buttons to show the sidebar,
+     * to show the detected devices etc.
+     *
+     * @param rowMainHeader from the navbar
+     */
+    @EventListener
+    public void listenerFromMainHeader(final HorizontalLayout rowMainHeader) {
+        this.rowMainHeader = rowMainHeader;
+    }
+
     @EventListener
     public void updateFlashFileName(String flashFileName) {
         this.flashFileName = flashFileName;
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        this.shoWizardIcon.setVisible(false);
     }
 
     @Override
@@ -398,6 +444,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv {
             final UI ui = attachEvent.getUI();
             this.outputConsole(ui);
         }
+        this.refreshHeaderComponents();
         final UI ui = attachEvent.getUI();
         ui.getPage().executeJs(WINDOWS_LOCATION_REMOVE_HASH)
                 .toCompletableFuture()
