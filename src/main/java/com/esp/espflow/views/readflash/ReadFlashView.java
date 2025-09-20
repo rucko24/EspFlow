@@ -83,7 +83,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -157,7 +156,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     private HorizontalLayout rowMainHeader;
     private Disposable disposableRefreshEvents;
-    private final AtomicBoolean comboBoxInitialized = new AtomicBoolean(false);
 
     @PostConstruct
     public void init() {
