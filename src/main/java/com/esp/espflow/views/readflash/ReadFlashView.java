@@ -90,7 +90,6 @@ import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
-import static com.esp.espflow.util.EspFlowConstants.CLOSE_SIDEBAR_OUTSIDE_CLICK;
 import static com.esp.espflow.util.EspFlowConstants.CONFIGURE;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
@@ -100,7 +99,6 @@ import static com.esp.espflow.util.EspFlowConstants.NO_DEVICES_SHOWN;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_X;
 import static com.esp.espflow.util.EspFlowConstants.OVERFLOW_Y;
 import static com.esp.espflow.util.EspFlowConstants.PORT_FAILURE;
-import static com.esp.espflow.util.EspFlowConstants.REMOVE_SIDEBAR_LISTENER;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
 import static com.esp.espflow.util.EspFlowConstants.WINDOWS_LOCATION_REMOVE_HASH;
 import static com.esp.espflow.util.EspFlowConstants.WIZARD_READ_FLASH_ESP_VIEW;
@@ -271,21 +269,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.baudRatesComboBox.setItemLabelGenerator(BaudRatesEnum::toString);
 
         // En tu configuración del ComboBox:
-        this.baudRatesComboBox.getElement().addEventListener("opened-changed", event -> {
-            boolean isOpened = event.getEventData().getBoolean("event.detail.value");
-            // Solo procesar si el sidebar está realmente abierto
-            if (!this.sidebarReadFlash.isOpened()) {
-                log.info("Sidebar no está abierto - ignorando evento de ComboBox");
-                return;
-            }
-            if (isOpened) {
-                log.info("ComboBox se ha abierto");
-                this.sidebarReadFlash.getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
-            } else {
-                log.info("ComboBox se ha cerrado");
-                this.sidebarReadFlash.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, sidebarReadFlash);
-            }
-        }).addEventData("event.detail.value");
+        this.baudRatesComboBox.getElement().addEventListener("opened-changed", this.sidebarReadFlash.domEventListener).addEventData("event.detail.value");
 
         final Div parent = new Div(formLayout);
         parent.setId("parent-sidebar-content-div");

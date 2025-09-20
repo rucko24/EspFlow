@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Section;
 import com.vaadin.flow.component.popover.Popover;
+import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -78,7 +79,7 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
 
     public void openSidebar() {
         super.setModal(true);
-        this.sidebar.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, this);
+        this.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, this);
         Animated.removeAnimations(this);
         Animated.animate(this.sidebar, Animated.Animation.FADE_IN_RIGHT);
         this.sidebar.addClassNames("end-0");
@@ -96,8 +97,27 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
             super.setModal(false);
             super.close();
         }, this, Duration.ofMillis(1500));
-        getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
+        this.getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
     }
+
+    /**
+     * Used for components that also open an overlay, Combo, MultiCombo etc...
+     */
+    public DomEventListener domEventListener = event -> {
+        boolean isOpened = event.getEventData().getBoolean("event.detail.value");
+        // Solo procesar si el sidebar está realmente abierto
+        if (!this.isOpened()) {
+            log.info("Sidebar no está abierto - ignorando evento de ComboBox");
+            return;
+        }
+        if (isOpened) {
+            log.info("ComboBox se ha abierto");
+            this.getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
+        } else {
+            log.info("ComboBox se ha cerrado");
+            this.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, this);
+        }
+    };
 
     @ClientCallable
     public void closeFromOutsideClick() {
