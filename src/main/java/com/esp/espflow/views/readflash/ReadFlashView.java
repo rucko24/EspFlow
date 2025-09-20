@@ -83,6 +83,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -158,8 +159,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      */
     private HorizontalLayout rowMainHeader;
     private Disposable disposableRefreshEvents;
-    private boolean comboAbierto = false;
-    private boolean comboSeleccionado = false;
+    private final AtomicBoolean comboBoxInitialized = new AtomicBoolean(false);
 
     @PostConstruct
     public void init() {
@@ -269,24 +269,21 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.baudRatesComboBox.setItems(BaudRatesEnum.values());
         this.baudRatesComboBox.setValue(BaudRatesEnum.BAUD_RATE_115200);
         this.baudRatesComboBox.setItemLabelGenerator(BaudRatesEnum::toString);
-        // Detectar cambios en el estado de apertura
-        this.baudRatesComboBox.addValueChangeListener(event -> {
-            //comboSeleccionado = event.getValue() != null;
-            if (comboSeleccionado) {
-                System.out.println("Item seleccionado, sidebar puede cerrarse normalmente");
-            }
-        });
+
+        // En tu configuración del ComboBox:
         this.baudRatesComboBox.getElement().addEventListener("opened-changed", event -> {
             boolean isOpened = event.getEventData().getBoolean("event.detail.value");
-            comboAbierto = isOpened;
-            if (comboAbierto) {
-                System.out.println("ComboBox se ha abierto");
+            // Solo procesar si el sidebar está realmente abierto
+            if (!this.sidebarReadFlash.isOpened()) {
+                log.info("Sidebar no está abierto - ignorando evento de ComboBox");
+                return;
+            }
+            if (isOpened) {
+                log.info("ComboBox se ha abierto");
                 this.sidebarReadFlash.getElement().executeJs(REMOVE_SIDEBAR_LISTENER);
             } else {
-                System.out.println("ComboBox se ha cerrado");
-                if(!comboSeleccionado) {
-                    this.sidebarReadFlash.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, sidebarReadFlash);
-                }
+                log.info("ComboBox se ha cerrado");
+                this.sidebarReadFlash.getElement().executeJs(CLOSE_SIDEBAR_OUTSIDE_CLICK, sidebarReadFlash);
             }
         }).addEventData("event.detail.value");
 
@@ -840,7 +837,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.refreshHeaderComponents();
         ui.getPage().executeJs(WINDOWS_LOCATION_REMOVE_HASH)
                 .toCompletableFuture()
-                .whenCompleteAsync((hash,error) -> {
+                .whenCompleteAsync((hash, error) -> {
                     ui.access(() -> {
                         if (Objects.nonNull(hash) && !hash.asString().contains(SETTINGS)) {
                             this.add(this.wizardReadFlashView);

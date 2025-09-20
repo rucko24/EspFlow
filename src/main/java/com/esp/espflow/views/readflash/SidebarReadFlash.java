@@ -3,7 +3,6 @@ package com.esp.espflow.views.readflash;
 import com.esp.espflow.util.animations.AnimationsUtils;
 import com.esp.espflow.views.Layout;
 import com.infraleap.animatecss.Animated;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasTheme;
@@ -50,7 +49,6 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         this.add(sidebar);
         this.sidebar.setId("sidebar");
         this.sidebar.addClassName("sidebar-read-flash");
-        //this.closeSidebar();
         Shortcuts.addShortcutListener(this.sidebar, shortcutEvent -> this.closeSidebar(), Key.ESCAPE);
     }
 
@@ -76,7 +74,6 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         form.setFlexDirection(Layout.FlexDirection.COLUMN);
 
         this.sidebar.add(header, leftFormForAddress);
-
     }
 
     public void openSidebar() {
@@ -107,11 +104,4 @@ public class SidebarReadFlash extends Popover implements HasEnabled, HasTheme, A
         this.closeSidebar();
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        if(attachEvent.isInitialAttach()) {
-            //this.closeSidebar();;
-        }
-    }
 }
