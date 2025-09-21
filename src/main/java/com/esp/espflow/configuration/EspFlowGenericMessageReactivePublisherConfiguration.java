@@ -14,17 +14,17 @@ import reactor.core.publisher.Sinks;
 @Configuration
 public class EspFlowGenericMessageReactivePublisherConfiguration {
 
-    @Bean(value = "publishEspflowMessageEvent")
-    public Sinks.Many<EspflowMessageListItemEvent> publisher() {
+    @Bean(value = "publishEspflowMessageListItemEvent")
+    public Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent() {
         return Sinks
                 .many()
                 .multicast()
                 .onBackpressureBuffer(10, false);
     }
 
-    @Bean(value = "subscribersEspflowMessageEvent")
-    public Flux<EspflowMessageListItemEvent> subscribers(Sinks.Many<EspflowMessageListItemEvent> publisher) {
-        return publisher
+    @Bean(value = "subscribersEspflowMessageListItemEvent")
+    public Flux<EspflowMessageListItemEvent> subscribersEspflowMessageListItemEvent(Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent) {
+        return publishEspflowMessageListItemEvent
                 .asFlux();
     }
 

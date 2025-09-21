@@ -105,7 +105,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      */
     private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
     private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
-    private final Sinks.Many<EspflowMessageListItemEvent> publisherFlowMessageListItemEvent;
+    private final Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent;
     private final EsptoolExecutableService esptoolExecutableService;
     private final ComPortService comPortService;
     private final CommandService commandService;
@@ -379,11 +379,11 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                         if (url.getRef() != null) {
                             if (!url.getRef().contains(SETTINGS)) {
                                 ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
-                                this.publisherFlowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
+                                this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                             }
                         } else {
                             ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
-                            this.publisherFlowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
+                            this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                         }
                     });
                 });

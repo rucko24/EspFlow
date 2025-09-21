@@ -96,7 +96,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
     private final HexDumpGeneratorService hexDumpGeneratorService;
     private final HexDumpService hexDumpService;
-    private final Sinks.Many<EspflowMessageListItemEvent> publisher;
+    private final Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent;
     private final Upload upload = new Upload();
     private final FileBuffer buffer = new FileBuffer();
     private final PagingGrid<HexDumpDto> grid = new PagingGrid<>();
@@ -140,7 +140,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
             this.addPaginationOnGrid(StringUtils.EMPTY);
 
-            this.publisher.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
+            this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
         });
 
     }
@@ -331,9 +331,9 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
         final Popover popover = new Popover();
         popover.setModal(true);
-        popover.setWidth("340px");
         popover.setTarget(icon);
-        popover.add(setRowNumbersField);
+        final VerticalLayout verticalLayoutPopOver = new VerticalLayout(setRowNumbersField);
+        popover.add(verticalLayoutPopOver);
 
         this.searchTextField.setPlaceholder("Search");
         this.searchTextField.setTooltipText("Filter by: offset or ascii/text");
@@ -343,12 +343,14 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         this.searchTextField.getStyle().set("max-width", "100%");
         this.searchTextField.addValueChangeListener(valueChangeEvent -> this.addPaginationOnGrid(valueChangeEvent.getValue()));
 
-        this.setRowNumbersField.setPlaceholder("Set row numbers");
-        this.setRowNumbersField.setTooltipText("Set row numbers");
+        this.setRowNumbersField.setLabel("Row numbers per page");
+        this.setRowNumbersField.setStepButtonsVisible(true);
+        this.setRowNumbersField.setTooltipText("Row numbers per page");
         this.setRowNumbersField.setClearButtonVisible(true);
+        this.setRowNumbersField.setValue(15);
         this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
         this.setRowNumbersField.addValueChangeListener(event -> {
-            if (event.isFromClient() && event.getValue() != null) {
+            if (event.isFromClient() && event.getValue() != null && gridListDataView.getItems().findAny().isPresent()) {
                 final Integer reconfigureNumberOfRecords = event.getValue();
                 this.grid.setPageSize(reconfigureNumberOfRecords);
                 this.addPaginationOnGrid(StringUtils.EMPTY);
