@@ -332,7 +332,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         final Popover popover = new Popover();
         popover.setModal(true);
         popover.setWidth("340px");
-        popover.setTarget(searchTextField);
+        popover.setTarget(icon);
         popover.add(setRowNumbersField);
 
         this.searchTextField.setPlaceholder("Search");
