@@ -51,6 +51,15 @@ public class ConfirmDialogBuilder {
         ui.addToModalComponent(confirmDialog);
     }
 
+    public static void showInformationUI(String text, final UI ui) {
+        final var confirmDialog = ConfirmDialogBuilder.builder()
+                .withHeaderIconAndHeaderText(VaadinIcon.INFO, EspFlowConstants.INFORMATION)
+                .withText(text)
+                .withComponent(null)
+                .make();
+        ui.addToModalComponent(confirmDialog);
+    }
+
     public static void showInformation(final String text) {
         ConfirmDialogBuilder.builder()
                 .withHeaderIconAndHeaderText(VaadinIcon.INFO, EspFlowConstants.INFORMATION)

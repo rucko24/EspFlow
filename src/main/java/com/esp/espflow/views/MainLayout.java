@@ -26,6 +26,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.shared.Tooltip;
@@ -153,7 +154,12 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
         if (accessChecker.hasAccess(FlashEspView.class)) {
-            var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null));
+            var iconWebSerial = SvgFactory.createIconFromSvg(WEB_SERIAL_ICON_SVG, SIZE_30_PX, null);
+            var flameON = SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null);
+            final var rowTwoIcons = new HorizontalLayout(flameON, iconWebSerial);
+            rowTwoIcons.setSpacing(false);
+            rowTwoIcons.setAlignItems(FlexComponent.Alignment.CENTER);
+            var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class,rowTwoIcons);
             this.mainHeader.getNotificationBell().getInboxCounter().setVisible(false);
             this.mainHeader.getNotificationBell().getInboxCounter().getElement().getThemeList().add("badge contrast pill");
             this.mainHeader.getNotificationBell().getInboxCounter().getElement().setAttribute("aria-label", "12 unread messages");

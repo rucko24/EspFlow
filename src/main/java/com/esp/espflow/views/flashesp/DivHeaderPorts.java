@@ -91,8 +91,12 @@ import static com.esp.espflow.util.EspFlowConstants.UPDATE_ICON;
 @SpringComponent
 public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
+    public static final String VISIBILITY = "visibility";
+    public static final String HIDDEN = "hidden";
+    public static final String DISPLAY1 = "display";
     private final H2 h2EsptoolVersion = new H2();
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
+    private final Button buttonDebugPort = new Button(VaadinIcon.SEARCH.create());
     private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
     private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
     private final SvgIcon svgIconUnlock = SvgFactory.createIconFromSvg("unlock-gray.svg", SIZE_30_PX, null);
@@ -112,6 +116,9 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final EsptoolService esptoolService;
     private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final SettingsDialog settingsDialog;
+    /**
+     * Mutable fields
+     */
     private Disposable disposableSubscriberEsptoolVersionEvent;
 
     @PostConstruct
@@ -127,10 +134,13 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS.concat(" - SPACE"));
         unlockPort.addClickShortcut(Key.SPACE);
         unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonDebugPort.setTooltipText("Debug serial port");
+        buttonDebugPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setEnabled(false);
         buttonExecuteFlashId.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setTooltipText("Execute flash_id");
         svgIconUnlock.addClassName("svg-icon-settings");
+        this.buttonDebugPort.setEnabled(false);
         this.initListeners();
 
         final Div divHeader = new Div(divh3SerialPort, divCombo);
@@ -139,27 +149,32 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         divHeader.getStyle().set(MARGIN, "10px 10px");
         divHeader.addClassName(LumoUtility.AlignItems.BASELINE);
         final HorizontalLayout horizontalLayout = new HorizontalLayout();
-        Div div1 = createDiv(buttonExecuteFlashId, MARGIN,"0px");
+        final Div div1 = createDiv(buttonExecuteFlashId, MARGIN,"0px");
         final Span spanRefresh = new Span("Refresh");
-        spanRefresh.getStyle().set("visibility","hidden");
-        spanRefresh.getStyle().set("display","none");
+        spanRefresh.getStyle().set(VISIBILITY, HIDDEN);
+        spanRefresh.getStyle().set(DISPLAY1,"none");
         div1.add(spanRefresh);
-        Div div2 = createDiv(scanPort, MARGIN,"0px");
+        final Div div2 = createDiv(scanPort, MARGIN,"0px");
         final Span spanScanPorts = new Span("Scan ports");
-        spanScanPorts.getStyle().set("visibility","hidden");
-        spanScanPorts.getStyle().set("display","none");
+        spanScanPorts.getStyle().set(VISIBILITY, HIDDEN);
+        spanScanPorts.getStyle().set(DISPLAY1,"none");
         div2.add(spanScanPorts);
-        Div div3 = createDiv(unlockPort, MARGIN,"0px");
+        final Div div3 = createDiv(unlockPort, MARGIN,"0px");
         final Span spanUnlockPorts = new Span("Unlock ports");
-        spanUnlockPorts.getStyle().set("visibility","hidden");
-        spanUnlockPorts.getStyle().set("display","none");
+        spanUnlockPorts.getStyle().set(VISIBILITY, HIDDEN);
+        spanUnlockPorts.getStyle().set(DISPLAY1,"none");
         div3.add(spanUnlockPorts);
-        Stream.of(spanRefresh,spanUnlockPorts,spanScanPorts).forEach(span -> {
+        final Div div4 = createDiv(buttonDebugPort, MARGIN,"0px");
+        final Span spanDebugPort = new Span("Debug port");
+        spanDebugPort.getStyle().set(VISIBILITY, HIDDEN);
+        spanDebugPort.getStyle().set(DISPLAY1,"none");
+
+        Stream.of(spanRefresh,spanUnlockPorts,spanScanPorts,spanDebugPort).forEach(span -> {
             span.addClassName("span-text");
             span.addClassNames(LumoUtility.TextColor.SECONDARY,LumoUtility.FontSize.SMALL);
         });
-        horizontalLayout.add(div1, div2, div3);
-        Stream.of(div1,div2,div3).forEach(div -> div.addClassName("expand-buttons"));
+        horizontalLayout.add(div1,div2,div3,div4);
+        Stream.of(div1,div2,div3,div4).forEach(div -> div.addClassName("expand-buttons"));
         horizontalLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         horizontalLayout.addClassName("row-buttons");
 
@@ -365,15 +380,20 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     });
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
-                ConfirmDialogBuilder.showInformation(PORT_FOUND);
+                scanPort.getUI().ifPresent(ui -> {
+                   ui.access(() -> ConfirmDialogBuilder.showInformationUI(PORT_FOUND, ui));
+                });
                 this.unlockPort.setIcon(SvgFactory.createIconFromSvg(UNLOCK_BLACK_SVG, SIZE_30_PX, null));
                 this.unlockPort.getIcon().addClassName(BLACK_TO_WHITE_ICON);
-                buttonExecuteFlashId.setEnabled(true);
+                this.buttonExecuteFlashId.setEnabled(true);
+                this.buttonDebugPort.setEnabled(true);
                 Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
                 Animated.animate(unlockPort, Animation.FADE_IN);
+                Animated.animate(buttonDebugPort, Animation.FADE_IN);
             } else {
-                buttonExecuteFlashId.setEnabled(false);
-                comboBoxSerialPort.setItems(List.of());
+                this.buttonDebugPort.setEnabled(true);
+                this.buttonExecuteFlashId.setEnabled(false);
+                this.comboBoxSerialPort.setItems(List.of());
                 scanPort.getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
                         if (url.getRef() != null) {

@@ -49,6 +49,7 @@ public class WebSerialView extends VerticalLayout {
     private static final String JS_DISCONNECT = "return window.espDisconnect()";
     private static final String JS_DISCONNECT_AND_FORGET = "return window.espDisconnectAndForget()";
     private static final String JS_HARD_RESET = "window.espHardReset()";
+    private static final String JS_TRANSPORT_HARD_RESET = "window.espTransportReset";
     private static final String JS_FLASH_ID = "return window.espFlashId()";
     private static final String JS_READ_FLASH = "return window.espReadFlash($0, $1)";
     private static final String JS_WRITE_FLASH = "return window.espWriteFlash($0, $1, $2)";
@@ -199,6 +200,10 @@ public class WebSerialView extends VerticalLayout {
             getElement().executeJs(JS_HARD_RESET);
         });
 
+        Button transportHardReset = new Button("Transport hard reset", e -> {
+            getElement().executeJs(JS_TRANSPORT_HARD_RESET);
+        });
+
         Button flashIdButton = new Button("Obtener Flash ID", e -> {
             //executeJsFunction(JS_FLASH_ID);
         });
@@ -223,7 +228,10 @@ public class WebSerialView extends VerticalLayout {
         );
 
         // Layout para operaciones básicas
-        HorizontalLayout operationsLayout = new HorizontalLayout(connectButton, disconnect, disconnectAndForget, hardReset, flashIdButton);
+        HorizontalLayout operationsLayout = new HorizontalLayout(connectButton, disconnect, disconnectAndForget,
+                hardReset,
+                transportHardReset,
+                flashIdButton);
 
         // Layout para lectura
         HorizontalLayout readLayout = new HorizontalLayout(

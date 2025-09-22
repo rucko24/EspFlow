@@ -148,6 +148,9 @@ class EspConnectionManager {
       const chip = await this.esploader.main(resetMode);
       console.log(`Chip detectado: ${chip}`);
 
+      // Temporarily broken
+      // await this.esploader.flashId();
+
       return JSON.stringify({
         success: true,
         message: `Conectado exitosamente al dispositivo ${chip}`,
@@ -350,36 +353,72 @@ class EspConnectionManager {
    *
    * @returns {Promise<{success: boolean, message?: string, error?: string}>}
    */
-  async hardReset() {
-      try {
-          this._checkConnected();
-          // Accedemos a resetConstructors a través de las opciones del loader
-          if (this.esploader.options && this.esploader.options.resetConstructors && typeof this.esploader.options.resetConstructors.hardReset === "function") {
-              // Usamos el transport y el baudrate de las opciones del loader
-              const resetObj = this.esploader.options.resetConstructors.hardReset(this.transport, this.esploader.options.baudrate);
-              console.log("Ejecutando hard reset...");
-              await resetObj.reset();
-              console.log("Hard reset completado.");
-              return JSON.stringify({
-                success: true,
-                message: "Hard reset ejecutado"
-              });
-          } else {
-              console.warn("Función hardReset no disponible en el loader actual o conexión no activa.");
-              return JSON.stringify({
-                success: false,
-                error: "Función hardReset no disponible"
-              });
-          }
-      } catch (err) {
-          console.error("Error durante hard reset:", err);
-          return JSON.stringify({
-            success: false,
-            error: err.message || "Error desconocido durante hard reset"
-          });
-      }
-  }
+//  async hardReset() {
+//      try {
+//          this._checkConnected();
+//          // Accedemos a resetConstructors a través de las opciones del loader
+//          if (this.esploader.options && this.esploader.options.resetConstructors && typeof this.esploader.options.resetConstructors.hardReset === "function") {
+//              // Usamos el transport y el baudrate de las opciones del loader
+//              const resetObj = this.esploader.options.resetConstructors.hardReset(this.transport, this.esploader.options.baudrate);
+//              console.log("Ejecutando hard reset...");
+//              await resetObj.reset();
+//              console.log("Hard reset completado.");
+//              return JSON.stringify({
+//                success: true,
+//                message: "Hard reset ejecutado"
+//              });
+//          } else {
+//              console.warn("Función hardReset no disponible en el loader actual o conexión no activa.");
+//              return JSON.stringify({
+//                success: false,
+//                error: "Función hardReset no disponible"
+//              });
+//          }
+//      } catch (err) {
+//          console.error("Error durante hard reset:", err);
+//          return JSON.stringify({
+//            success: false,
+//            error: err.message || "Error desconocido durante hard reset"
+//          });
+//      }
+//  }
+    // Corrección en el método hardReset de la clase EspConnectionManager
+    async hardReset() {
+        try {
+            this._checkConnected();
 
+            // Verificar si resetConstructors está disponible
+            if (!this.esploader.options?.resetConstructors?.hardReset) {
+                console.warn("Función hardReset no disponible en el loader actual o conexión no activa.");
+                return {
+                    success: false,
+                    error: "Función hardReset no disponible"
+                };
+            }
+
+            // Crear el objeto reset usando el transport y baudrate actuales
+            const resetObj = this.esploader.options.resetConstructors.hardReset(
+                this.transport,
+                this.esploader.options.baudrate
+            );
+
+            console.log("Ejecutando hard reset...");
+            await resetObj.reset();
+            console.log("Hard reset completado.");
+
+            return {
+                success: true,
+                message: "Hard reset ejecutado exitosamente"
+            };
+
+        } catch (err) {
+            console.error("Error durante hard reset:", err);
+            return {
+                success: false,
+                error: err.message || "Error desconocido durante hard reset"
+            };
+        }
+    }
 }
 
 // --- Instancia de la Clase y Exposición Global ---
@@ -513,13 +552,69 @@ window.espChangeBaudrate = async (newBaudRate) => {
  */
 window.espHardReset = async () => { // Renombrado de testHardReset a espHardReset para consistencia
      try {
-         return await espConnectionManager.hardReset();
+         espConnectionManager.hardReset();
+         console.log("hard reset executado");
      } catch (err) {
          console.error("Error capturado en window.espHardReset:", err);
          return JSON.stringify({
             success: false, error: err.message || "Error desconocido"
          });
      }
+};
+
+// Función alternativa usando transport directamente
+window.espTransportReset = async () => {
+    try {
+        if (!espConnectionManager.esploader || !espConnectionManager.transport) {
+            return {
+                success: false,
+                error: "No hay conexión activa"
+            };
+        }
+
+        const transport = espConnectionManager.transport;
+
+        // Implementación manual del reset usando DTR/RTS
+        console.log("Ejecutando reset usando transport...");
+
+        // Secuencia de reset típica para ESP32/ESP8266
+        await transport.setDTR(false);
+        await transport.setRTS(true);
+        await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay
+        await transport.setDTR(true);
+        await transport.setRTS(false);
+        await new Promise(resolve => setTimeout(resolve, 50)); // 50ms delay
+        await transport.setDTR(false);
+
+        console.log("Reset completado usando transport.");
+
+        return {
+            success: true,
+            message: "Reset ejecutado usando transport"
+        };
+
+    } catch (err) {
+        console.error("Error durante reset con transport:", err);
+        return {
+            success: false,
+            error: err.message || "Error desconocido durante reset con transport"
+        };
+    }
+};
+
+// Corrección en la función window.espHardReset
+window.espHardReset = async () => {
+    try {
+        const result = await espConnectionManager.hardReset(); // Añadir await
+        console.log("Hard reset ejecutado:", result);
+        return result; // Retornar objeto directamente para consistencia
+    } catch (err) {
+        console.error("Error capturado en window.espHardReset:", err);
+        return {
+            success: false,
+            error: err.message || "Error desconocido"
+        };
+    }
 };
 
 // Dentro de la sección 'Instancia de la Clase y Exposición Global...'
