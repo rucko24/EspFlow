@@ -364,7 +364,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
             if (event.isFromClient() && this.divHeaderPorts.getComboBoxSerialPort().getValue() != null) {
                 final String port = this.divHeaderPorts.getComboBoxSerialPort().getValue().trim();
                 this.outPutConsole.clear();
-                this.eventBasedSerialRead(ui, port);
+                this.debugSerialPortWithJSerialComm(ui, port);
             } else {
                 ConfirmDialogBuilder.showWarningUI("Selecciona un puerto", ui);
             }
@@ -372,9 +372,8 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
 
     }
 
-    // Método 3: Lectura basada en eventos
-    public void eventBasedSerialRead(final UI ui, final String portParam) {
-        System.out.println("\n=== Lectura Serial con Eventos ===");
+    private void debugSerialPortWithJSerialComm(final UI ui, final String portParam) {
+        log.info("\n=== Lectura Serial con Eventos ===");
 
         final SerialPort port = SerialPort.getCommPort(portParam); // Primer puerto disponible
 
@@ -383,7 +382,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
         port.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
 
         if (port.openPort()) {
-            System.out.println("Puerto abierto para lectura con eventos");
+            log.info("Puerto abierto para lectura con eventos");
 
             // Agregar listener para datos
             port.addDataListener(new SerialPortDataListener() {
@@ -402,7 +401,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
                     int bytesRead = comPort.readBytes(buffer, buffer.length);
                     if (bytesRead > 0) {
                         String data = new String(buffer, 0, bytesRead);
-                        System.out.println("Evento - Datos: " + data);
+                        log.info("Evento - Datos: {}", data);
                         ui.access(() -> outPutConsole.writeln(data));
                     }
                 }
