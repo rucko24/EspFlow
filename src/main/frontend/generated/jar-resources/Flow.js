@@ -13,6 +13,10 @@ function getClients() {
 function sendEvent(eventName, data) {
     getClients().forEach((client) => client.sendEventMessage(ROOT_NODE_ID, eventName, data));
 }
+// In the future could be replaced with RegExp.escape()
+function escapeRegExp(pattern) {
+    return pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 /**
  * Client API for flow UI operations.
  */
@@ -39,7 +43,7 @@ export class Flow {
         const elm = document.head.querySelector('base');
         this.baseRegex = new RegExp(`^${
         // IE11 does not support document.baseURI
-        (document.baseURI || (elm && elm.href) || '/').replace(/^https?:\/\/[^/]+/i, '')}`);
+        escapeRegExp(decodeURIComponent((document.baseURI || (elm && elm.href) || '/').replace(/^https?:\/\/[^/]+/i, '')))}`);
         this.appShellTitle = document.title;
         // Put a vaadin-connection-indicator in the dom
         this.addConnectionIndicator();
@@ -253,7 +257,7 @@ export class Flow {
             script.onload = () => resolve();
             script.onerror = reject;
             script.src = url;
-            const nonce = $wnd.Vaadin.Flow.nonce;
+            const { nonce } = $wnd.Vaadin.Flow;
             if (nonce !== undefined) {
                 script.setAttribute('nonce', nonce);
             }
@@ -276,7 +280,7 @@ export class Flow {
         const scriptAppId = document.createElement('script');
         scriptAppId.type = 'module';
         scriptAppId.setAttribute('data-app-id', appIdWithoutHashCode);
-        const nonce = $wnd.Vaadin.Flow.nonce;
+        const { nonce } = $wnd.Vaadin.Flow;
         if (nonce !== undefined) {
             scriptAppId.setAttribute('nonce', nonce);
         }
