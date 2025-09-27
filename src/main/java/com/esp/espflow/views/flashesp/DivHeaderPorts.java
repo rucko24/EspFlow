@@ -63,6 +63,7 @@ import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK_BOTTOM;
+import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
 import static com.esp.espflow.util.EspFlowConstants.ERROR_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
@@ -189,6 +190,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         this.progressBarForShowEsptoolVersion.setVisible(false);
         this.progressBarForShowEsptoolVersion.setIndeterminate(true);
         this.progressBarForShowEsptoolVersion.setWidth("200px");
+        this.h2EsptoolVersion.getStyle().setCursor(CURSOR_POINTER);
         final Div divH2espToolVersion = new Div(h2EsptoolVersion, this.progressBarForShowEsptoolVersion, hr);
         divH2espToolVersion.getStyle().set(MARGIN_TOP, AUTO);
 

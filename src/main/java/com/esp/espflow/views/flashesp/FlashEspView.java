@@ -5,6 +5,7 @@ import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
 import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
+import com.esp.espflow.service.DebugSerialPortService;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.respository.impl.WizardEspService;
@@ -15,9 +16,6 @@ import com.esp.espflow.util.console.OutPutConsole;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
 import com.esp.espflow.views.flashesp.wizards.WizardFlashEspDialog;
-import com.fazecast.jSerialComm.SerialPort;
-import com.fazecast.jSerialComm.SerialPortDataListener;
-import com.fazecast.jSerialComm.SerialPortEvent;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.componentfactory.ToggleButton;
@@ -102,7 +100,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
     private final Button flashButton = new Button(svgIconFlashMe);
     private final VerticalLayout contentForPrimary = new VerticalLayout();
     private final OutPutConsole outPutConsole = new OutPutConsole();
-    private final Button buttonBack = new Button(VaadinIcon.ARROW_LEFT.create());
     private final Icon shoWizardIcon = VaadinIcon.INFO_CIRCLE.create();
     private final ToggleButton toggleButtonEnableWebSerial = new ToggleButton();
     private final SvgIcon iconWebSerial = SvgFactory.createIconFromSvg(WEB_SERIAL_ICON_SVG, SIZE_30_PX, null);
@@ -118,6 +115,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
     private final EsptoolService esptoolService;
     private final EsptoolPathService esptoolPathService;
     private final Executor eventTaskExecutor;
+    private final DebugSerialPortService debugPortService;
     /**
      * Mutable fields
      */
@@ -364,7 +362,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
             if (event.isFromClient() && this.divHeaderPorts.getComboBoxSerialPort().getValue() != null) {
                 final String port = this.divHeaderPorts.getComboBoxSerialPort().getValue().trim();
                 this.outPutConsole.clear();
-                this.debugSerialPortWithJSerialComm(ui, port);
+                this.debugPortService.debugSerialPort(ui, outPutConsole, port);
             } else {
                 ConfirmDialogBuilder.showWarningUI("Selecciona un puerto", ui);
             }
@@ -372,52 +370,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
 
     }
 
-    private void debugSerialPortWithJSerialComm(final UI ui, final String portParam) {
-        log.info("\n=== Lectura Serial con Eventos ===");
-
-        final SerialPort port = SerialPort.getCommPort(portParam); // Primer puerto disponible
-
-        // Configurar el puerto
-        port.setBaudRate(BaudRatesEnum.BAUD_RATE_115200.getBaudRate());
-        port.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
-
-        if (port.openPort()) {
-            log.info("Puerto abierto para lectura con eventos");
-
-            // Agregar listener para datos
-            port.addDataListener(new SerialPortDataListener() {
-                @Override
-                public int getListeningEvents() {
-                    return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
-                }
-
-                @Override
-                public void serialEvent(SerialPortEvent event) {
-                    if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE) {
-                        return;
-                    }
-                    final SerialPort comPort = event.getSerialPort();
-                    byte[] buffer = new byte[comPort.bytesAvailable()];
-                    int bytesRead = comPort.readBytes(buffer, buffer.length);
-                    if (bytesRead > 0) {
-                        String data = new String(buffer, 0, bytesRead);
-                        log.info("Evento - Datos: {}", data);
-                        ui.access(() -> outPutConsole.writeln(data));
-                    }
-                }
-            });
-
-            // Mantener el programa corriendo por 15 segundos
-            try {
-                Thread.sleep(15000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            port.closePort();
-            System.out.println("\nPuerto cerrado");
-        }
-    }
 
     /**
      * @param reactiveLines

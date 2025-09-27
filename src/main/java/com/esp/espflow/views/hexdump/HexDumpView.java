@@ -138,6 +138,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
             this.hexDumpGeneratorService.generateHexDump(fileBytes);
 
+            //The grid will be filled based on the predefined page layout.
             this.addPaginationOnGrid(StringUtils.EMPTY);
 
             this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
