@@ -48,6 +48,7 @@ image::images-for-asciidoctor/readfirmwareview.png[]
 - parttool.py support
 - Remote serial Ports RFC2217 (Telnet) protocol.
 - Web serial communication.
+- Debug serial port, in progress.
 
 == Running the application
 
