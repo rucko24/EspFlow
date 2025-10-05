@@ -27,8 +27,7 @@ public class SecurityConfiguration {
         return http.with(VaadinSecurityConfigurer.vaadin(), configurer -> configurer.loginView(LoginView.class))
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png").permitAll())
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.svg").permitAll())
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/line-awesome/**/*.svg").permitAll())
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png").permitAll())
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/line-awesome/**").permitAll())
                 .build();
     }
 }
