@@ -2,8 +2,8 @@ package com.esp.espflow.views.readflash;
 
 import com.esp.espflow.entity.AddressRecord;
 import com.esp.espflow.entity.EspDeviceInfoRecord;
-import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.enums.BaudRatesEnum;
+import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.exceptions.CreateEspBackUpFlashDirException;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.EsptoolPathService;

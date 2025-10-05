@@ -1,7 +1,6 @@
 package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.util.ConfirmDialogBuilder;
-import com.esp.espflow.util.CreateCustomDirectory;
 import com.esp.espflow.util.FlashUploadHandler;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -35,7 +34,7 @@ import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 @Log4j2
 @SpringComponent
 @RequiredArgsConstructor
-public class DivFlashUploader extends Div implements CreateCustomDirectory {
+public class DivFlashUploader extends Div {
 
     private final Upload upload = new Upload();
     private final UploadExamplesI18N uploadI18N = new UploadExamplesI18N();

@@ -1,8 +1,8 @@
 package com.esp.espflow.views.flashesp;
 
+import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
-import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.service.ComPortService;
 import com.esp.espflow.service.CommandService;
 import com.esp.espflow.service.EsptoolService;

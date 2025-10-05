@@ -1,10 +1,9 @@
 package com.esp.espflow.views.mainheader;
 
-import com.esp.espflow.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.enums.RefreshDevicesEvent;
+import com.esp.espflow.event.MainHeaderToReadFlashViewEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;

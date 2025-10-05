@@ -1,8 +1,8 @@
 package com.esp.espflow.mappers;
 
-import com.esp.espflow.entity.EsptoolSha256Entity;
 import com.esp.espflow.dto.EsptoolExecutableDto;
 import com.esp.espflow.dto.EsptoolSha256Dto;
+import com.esp.espflow.entity.EsptoolSha256Entity;
 
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL;
 

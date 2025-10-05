@@ -4,7 +4,6 @@ import com.esp.espflow.dto.HexDumpDto;
 import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.service.HexDumpGeneratorService;
 import com.esp.espflow.service.respository.impl.HexDumpService;
-import com.esp.espflow.util.CreateCustomDirectory;
 import com.esp.espflow.util.FlashUploadHandler;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
@@ -89,7 +88,7 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @CssImport("./styles/hexdump-grid/grid-message-when-empty.css")
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class HexDumpView extends VerticalLayout implements CreateCustomDirectory, BeforeEnterObserver {
+public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
 
     private static final int DEBOUNCE_MS = 500;
     private static final String INDEX_PARAM_NAME = "i";

@@ -1,7 +1,7 @@
 package com.esp.espflow.mappers;
 
-import com.esp.espflow.entity.WizardEspEntity;
 import com.esp.espflow.dto.WizardEspDto;
+import com.esp.espflow.entity.WizardEspEntity;
 
 /**
  * @author rub'n
