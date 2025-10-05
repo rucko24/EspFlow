@@ -16,17 +16,17 @@ import reactor.core.publisher.Sinks;
 @Configuration
 public class EspMessageListItemReactivePublisherConfiguration {
 
-    @Bean(value = "publishMessageListItemEvent")
-    public Sinks.Many<EsptoolFRWMessageListItemEvent> publisher() {
+    @Bean(value = "publishEsptoolFRWMessageListItemEvent")
+    public Sinks.Many<EsptoolFRWMessageListItemEvent> publishEsptoolFRWMessageListItemEvent() {
         return Sinks
                 .many()
                 .multicast()
                 .onBackpressureBuffer(10, false);
     }
 
-    @Bean(value = "subscribersMessageListItemsEvent")
-    public Flux<EsptoolFRWMessageListItemEvent> subscribers(Sinks.Many<EsptoolFRWMessageListItemEvent> publisher) {
-        return publisher
+    @Bean(value = "subscribersEsptoolFRWMessageListItemEvent")
+    public Flux<EsptoolFRWMessageListItemEvent> subscribers(Sinks.Many<EsptoolFRWMessageListItemEvent> publishEsptoolFRWMessageListItemEvent) {
+        return publishEsptoolFRWMessageListItemEvent
                 .asFlux();
     }
 

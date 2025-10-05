@@ -15,7 +15,7 @@ import reactor.core.publisher.Sinks;
 @Configuration
 public class EsptoolVersionReactivePublisherConfiguration {
 
-    @Bean(value = "publishEsptoolVersionEvent")
+    @Bean(value = "publishEsptoolVersionMessageListItemEvent")
     public Sinks.Many<EsptoolVersionMessageListItemEvent> publisher() {
         return Sinks
                 .many()
@@ -23,9 +23,9 @@ public class EsptoolVersionReactivePublisherConfiguration {
                 .onBackpressureBuffer(10, false);
     }
 
-    @Bean(value = "subscribersEsptoolVersionEvent")
-    public Flux<EsptoolVersionMessageListItemEvent> subscribers(Sinks.Many<EsptoolVersionMessageListItemEvent> publisher) {
-        return publisher
+    @Bean(value = "subscribersEsptoolVersionMessageListItemEvent")
+    public Flux<EsptoolVersionMessageListItemEvent> subscribers(Sinks.Many<EsptoolVersionMessageListItemEvent> publishEsptoolVersionMessageListItemEvent) {
+        return publishEsptoolVersionMessageListItemEvent
                 .asFlux();
     }
 
