@@ -54,14 +54,14 @@ public class MainHeader extends HorizontalLayout implements BeforeEnterObserver 
         this.rowHeaderForComponentsView.setDefaultVerticalComponentAlignment(Alignment.CENTER);
         final HorizontalLayout rowEnd = new HorizontalLayout();
         rowEnd.add(this.rowHeaderForComponentsView, this.notificationBell.createNotificationBell());
-        rowEnd.setAlignItems(FlexComponent.Alignment.CENTER);
+        rowEnd.setAlignItems(Alignment.CENTER);
 
         super.add(viewTitle, rowEnd);
         super.setWidthFull();
         super.addClassNames(LumoUtility.Margin.Right.MEDIUM);
-        super.setAlignItems(FlexComponent.Alignment.CENTER);
-        super.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        super.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+        super.setAlignItems(Alignment.CENTER);
+        super.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        super.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
         return this;
     }

@@ -1,11 +1,12 @@
 package com.esp.espflow.util;
 
-import com.esp.espflow.exceptions.ExecutableCannotBeLoadedException;
 import com.vaadin.flow.server.streams.TransferContext;
 import com.vaadin.flow.server.streams.TransferProgressAwareHandler;
 import com.vaadin.flow.server.streams.TransferUtil;
 import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -15,23 +16,16 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CountDownLatch;
 
 /**
- *
+ * @author rubn
  */
-public class FlashUploadHandler extends TransferProgressAwareHandler<UploadEvent, FlashUploadHandler> implements UploadHandler, CreateCustomDirectory {
+@Log4j2
+@RequiredArgsConstructor
+public class FlashUploadHandler extends TransferProgressAwareHandler<UploadEvent, FlashUploadHandler> implements UploadHandler {
 
     private final String fixedDir;
 
-    public FlashUploadHandler(String fixedDir) {
-        this.fixedDir = fixedDir;
-    }
-
-    /**
-     * Versión completamente asíncrona (no bloquea el thread)
-     * Útil si la API de Vaadin permite callbacks asíncronos
-     */
     @Override
     public void handleUploadRequest(UploadEvent event) {
         final Path targetDir = Path.of(fixedDir);
@@ -40,35 +34,23 @@ public class FlashUploadHandler extends TransferProgressAwareHandler<UploadEvent
         this.transferFileAsync(event, safeFilePath)
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnError(error -> {
-                    log.severe(() -> "Upload failed: " + error.getMessage());
-                    //notifyError(event, error);
-                    event.getUI().access(() -> {
-                        ConfirmDialogBuilder.showWarningUI("Upload failed: " + error.getMessage(), event.getUI());
-                    });
+                    log.error(() -> "Upload failed: " + error.getMessage());
+                    event.getUI().access(() -> ConfirmDialogBuilder.showWarningUI("Upload failed: " + error.getMessage(), event.getUI()));
                 })
                 .doOnSuccess(bytesTransferred -> {
                     log.info(() -> String.format("File uploaded: %s (%d bytes)",
                             safeFilePath.getFileName(), bytesTransferred));
-                    // Si usas Vaadin UI, actualízala aquí:
-                    event.getUI().access(() -> {
-                        ConfirmDialogBuilder.showWarningUI("Upload completed: " + safeFilePath.getFileName(), event.getUI());
-                    });
-
+                    event.getUI().access(() -> ConfirmDialogBuilder.showInformationUI("Upload completed: " + safeFilePath.getFileName(), event.getUI()));
                 })
-                .subscribe(); // Fire and forget
+                .subscribe();
     }
 
     private Mono<Long> transferFileAsync(UploadEvent event, Path targetPath) {
         return Mono.fromCallable(() -> {
-            try (InputStream inputStream = event.getInputStream();
-                 BufferedOutputStream outputStream = new BufferedOutputStream(
-                         Files.newOutputStream(targetPath))) {
+            try (final InputStream inputStream = event.getInputStream();
+                 final BufferedOutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(targetPath))) {
 
-                return TransferUtil.transfer(
-                        inputStream,
-                        outputStream,
-                        getTransferContext(event),
-                        getListeners()
+                return TransferUtil.transfer(inputStream, outputStream, getTransferContext(event), getListeners()
                 );
 
             } catch (IOException e) {

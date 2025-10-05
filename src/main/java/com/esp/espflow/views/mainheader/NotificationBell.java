@@ -149,7 +149,7 @@ public class NotificationBell extends Popover {
      *
      * @param event a Popover.OpenedChangeEvent
      */
-    private void rotateTheBellToZeroDegreesIfThePopoverIsNotOpen(Popover.OpenedChangeEvent event) {
+    private void rotateTheBellToZeroDegreesIfThePopoverIsNotOpen(OpenedChangeEvent event) {
         if (!event.getSource().isOpened()) {
             bellIcon.getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
             Animated.removeAnimations(bellIcon);

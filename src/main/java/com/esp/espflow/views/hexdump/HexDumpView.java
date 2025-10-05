@@ -5,6 +5,7 @@ import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.service.HexDumpGeneratorService;
 import com.esp.espflow.service.respository.impl.HexDumpService;
 import com.esp.espflow.util.CreateCustomDirectory;
+import com.esp.espflow.util.FlashUploadHandler;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
@@ -35,7 +36,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -98,7 +98,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
     private final HexDumpService hexDumpService;
     private final Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent;
     private final Upload upload = new Upload();
-    private final FileBuffer buffer = new FileBuffer();
+
     private final PagingGrid<HexDumpDto> grid = new PagingGrid<>();
     private final TextField searchTextField = new TextField();
     private final IntegerField setRowNumbersField = new IntegerField();
@@ -125,31 +125,37 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
     private void initListeners() {
 
-        this.upload.addSucceededListener(event -> {
-            final String initCustomFileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE).concat(event.getFileName());
-            log.info("addSucceededListener flash-hex-dump-analize/ {}", initCustomFileName);
-            this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE), event.getFileName());
-            byte[] fileBytes = new byte[0];
-            try {
-                fileBytes = Files.readAllBytes(Path.of(initCustomFileName));
-            } catch (IOException e) {
-                log.error("readAllBytes failed ");
-            }
+        final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE);
 
-            this.hexDumpGeneratorService.generateHexDump(fileBytes);
-
-            //The grid will be filled based on the predefined page layout.
-            this.addPaginationOnGrid(StringUtils.EMPTY);
-
-            this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
-        });
-
+        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir)
+                .whenStart((transferContext) -> {
+                    final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                    log.info("Upload started flash-hex-dump-analize/ {}", initCustomFileName);
+                })
+                .whenComplete((transferContext, success) -> {
+                    if (success) {
+                        log.info("Upload completed successfully");
+                        try {
+                            final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                            byte[] fileBytes = Files.readAllBytes(Path.of(initCustomFileName));
+                            this.hexDumpGeneratorService.generateHexDump(fileBytes);
+                            log.info("generate hexdump file completed successfully");
+                            //The grid will be filled based on the predefined page layout.
+                            this.addPaginationOnGrid(StringUtils.EMPTY);
+                            this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
+                        } catch (IOException e) {
+                            log.error("readAllBytes failed {}", e.getMessage());
+                        }
+                    } else {
+                        log.error("Upload failed");
+                    }
+                });
+        this.upload.setUploadHandler(uploadHandler);
     }
 
     private HorizontalLayout configureUpload() {
         upload.setDropAllowed(true);
         upload.setMaxFiles(1);
-        upload.setReceiver(buffer);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
         Tooltip.forComponent(upload).setText("Drop .bin here!");
         this.i18N(upload);

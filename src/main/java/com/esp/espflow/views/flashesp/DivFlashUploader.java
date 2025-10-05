@@ -2,13 +2,14 @@ package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.CreateCustomDirectory;
+import com.esp.espflow.util.FlashUploadHandler;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.PostConstruct;
@@ -36,7 +37,6 @@ import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 @RequiredArgsConstructor
 public class DivFlashUploader extends Div implements CreateCustomDirectory {
 
-    private final FileBuffer buffer = new FileBuffer();
     private final Upload upload = new Upload();
     private final UploadExamplesI18N uploadI18N = new UploadExamplesI18N();
     /**
@@ -57,7 +57,6 @@ public class DivFlashUploader extends Div implements CreateCustomDirectory {
 
         super.add(divH3Firmware, divUploader);
         super.setWidthFull();
-        //super.setSizeFull();
         super.getStyle().set(DISPLAY, "flex");
         super.getStyle().set(MARGIN_LEFT, MARGIN_10_PX);
         super.addClassName("firmwareh3-vaadin-upload-div");
@@ -68,7 +67,6 @@ public class DivFlashUploader extends Div implements CreateCustomDirectory {
      */
     private void uploadInitialConfig() {
         upload.setDropAllowed(true);
-        upload.setReceiver(buffer);
         upload.setMaxFiles(1);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
     }
@@ -77,42 +75,21 @@ public class DivFlashUploader extends Div implements CreateCustomDirectory {
      * Adding listeners here
      */
     private void addListeners() {
+        final FlashUploadHandler uploadHandler = new FlashUploadHandler(JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"))
+                .whenStart(() -> log.info("Upload started"))
+                .whenComplete((transferContext, success) -> {
+                    final UI ui = transferContext.getUI();
+                    if (success) {
+                        log.info("Upload completed successfully");
+                        ConfirmDialogBuilder.showInformationUI("Upload completed successfully", ui);
+                        publisher.publishEvent(transferContext.fileName());
+                    } else {
+                        log.info("Upload failed");
+                        ConfirmDialogBuilder.showWarningUI(transferContext.exception().getMessage(), ui);
+                    }
+                });
+        this.upload.setUploadHandler(uploadHandler);
 
-        upload.addSucceededListener(event -> {
-            upload.getElement()
-                    .executeJs("this.shadowRoot.querySelector('vaadin-upload-file').className = 'meta'");
-
-            log.debug("New file uploaded {}", event.getFileName());
-            long contentLength = event.getContentLength();
-            String mimeType = event.getMIMEType();
-
-            publisher.publishEvent(event.getFileName());
-            this.createUploadDir(buffer, event.getFileName());
-
-        });
-
-        upload.addStartedListener(event -> {
-            log.debug("Handling upload of " + event.getFileName() + " ("
-                    + event.getContentLength() + " bytes) started");
-        });
-
-        upload.addFileRejectedListener(event -> {
-            ConfirmDialogBuilder.showWarning(event.getErrorMessage());
-        });
-
-        upload.addFailedListener(failedEvent -> {
-            log.error("Error addFailed Listernet {}", failedEvent.getReason().getMessage());
-            ConfirmDialogBuilder.showWarning(failedEvent.getReason().getMessage());
-        });
-
-    }
-
-    /**
-     * The flash is written to the temporary directory of the operating system once it has been uploaded from the front-end and then read from this directory.
-     *
-     */
-    private void createUploadDir(FileBuffer buffer, String fileName) {
-        this.createCustomDirectory(buffer, JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"), fileName);
     }
 
     private void uploadStyles() {

@@ -2,16 +2,16 @@ package com.esp.espflow.views.settings;
 
 import com.esp.espflow.dto.EsptoolExecutableDto;
 import com.esp.espflow.dto.EsptoolSha256Dto;
-import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.enums.Breakpoint;
+import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.mappers.EsptoolExecutableMapper;
 import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.hashservice.ComputeSha256Service;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
-import com.esp.espflow.util.CreateCustomDirectory;
 import com.esp.espflow.util.EspFlowConstants;
+import com.esp.espflow.util.FlashUploadHandler;
 import com.esp.espflow.util.IMakeExecutable;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
@@ -34,12 +34,11 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.SucceededEvent;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.streams.TransferContext;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -79,11 +78,10 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @SpringComponent
 @RequiredArgsConstructor
 @JsModule(COPY_TO_CLIPBOARD)
-public class SettingsEsptoolHomePathContent extends Layout implements CreateCustomDirectory, IMakeExecutable {
+public class SettingsEsptoolHomePathContent extends Layout implements IMakeExecutable {
 
     private final Layout esptoolLayout = new Layout();
     private final Upload upload = new Upload();
-    private final FileBuffer buffer = new FileBuffer();
     private final ComboBox<EsptoolExecutableDto> comboBoxEsptoolHome = new ComboBox<>();
     private final TextField textFieldHash = new TextField();
     private final ProgressBar progressBar = new ProgressBar();
@@ -110,20 +108,31 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      * Add listeners
      */
     private void initListeners() {
-        this.upload.addSucceededListener(event -> {
-            this.upload.clearFileList();
-            final String initCustomFileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL).concat(event.getFileName());
-            log.info("addSucceededListener custom initial path {}", initCustomFileName);
-            this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL), event.getFileName());
-            this.progressBar.setVisible(true);
-            this.computeSha256Service.computeSha256(initCustomFileName)/*To differentiate from an incorrect executable*/
-                    .doOnError(this.errorProcessingWhenComputingSha256(initCustomFileName))
-                    .map(this.esptoolSha256DtoToEsptoolExecutableDto(initCustomFileName))
-                    .flatMap(this::returnEmptyIfVersionAlreadyExists)
-                    .switchIfEmpty(this.fallback())
-                    .flatMap(this.configureNewDirectoryAndMakeExecutable(event, initCustomFileName))
-                    .subscribe(this.subscribeSaveAndUpdate());
-        });
+        final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL);
+
+        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir)
+                .whenStart((transferContext) -> {
+                    this.upload.clearFileList();
+                    final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                    log.info("Upload started custom initial path {}", initCustomFileName);
+                })
+                .whenComplete((transferContext, success) -> {
+                    if (success) {
+                        log.info("Upload completed successfully");
+                        this.progressBar.setVisible(true);
+                        final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                        this.computeSha256Service.computeSha256(initCustomFileName)/*To differentiate from an incorrect executable*/
+                                .doOnError(this.errorProcessingWhenComputingSha256(initCustomFileName))
+                                .map(this.esptoolSha256DtoToEsptoolExecutableDto(initCustomFileName))
+                                .flatMap(this::returnEmptyIfVersionAlreadyExists)
+                                .switchIfEmpty(this.fallback())
+                                .flatMap(this.configureNewDirectoryAndMakeExecutable(transferContext, initCustomFileName))
+                                .subscribe(this.subscribeSaveAndUpdate());
+                    } else {
+                        log.error("Upload failed");
+                    }
+                });
+        this.upload.setUploadHandler(uploadHandler);
         var executableIcon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", null);
         executableIcon.addClassName(BLACK_TO_WHITE_ICON);
         this.comboBoxEsptoolHome.setPrefixComponent(executableIcon);
@@ -144,11 +153,11 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     /**
      * <p>The new directory is configured with the uploaded esptool version.</p>
      *
-     * @param event    the event when uploading
+     * @param transferContext    the event when uploading
      * @param fileName the current filename
      * @return a {@link Function} with newEsptoolVersionDir, set to "rwx--x--x"
      */
-    private Function<EsptoolExecutableDto, Mono<EsptoolExecutableDto>> configureNewDirectoryAndMakeExecutable(SucceededEvent event, String fileName) {
+    private Function<EsptoolExecutableDto, Mono<EsptoolExecutableDto>> configureNewDirectoryAndMakeExecutable(final TransferContext transferContext, String fileName) {
         return esptoolExecutableDto -> {
             if (esptoolExecutableDto.esptoolVersion().isEmpty()) {
                 return Mono.empty();
@@ -158,7 +167,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
             try {
                 version = esptoolExecutableDto.esptoolVersion().split(" ")[1];
                 newEsptoolVersionDir = Path.of(JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR)
-                        .concat(CUSTOM_ESPTOOL) + version + "/" + event.getFileName());
+                        .concat(CUSTOM_ESPTOOL) + version + "/" + transferContext.fileName());
             } catch (ArrayIndexOutOfBoundsException ex) {
                 log.error("Error parsing version! {}", ex.getMessage());
                 return Mono.empty();
@@ -308,7 +317,6 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
 
         upload.setDropAllowed(true);
         upload.setMaxFiles(1);
-        upload.setReceiver(buffer);
         upload.addClassName("esptool-homepath-upload");
         Tooltip.forComponent(upload).setText("Drop executable here!");
         this.i18N(upload);

@@ -70,9 +70,9 @@ public class MainLayout extends AppLayout {
      */
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
-    private final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems;
-    private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
-    private final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent;
+    private final Flux<EsptoolFRWMessageListItemEvent> subscribersEsptoolFRWMessageListItemEvent;
+    private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItemEvent;
+    private final Flux<EspflowMessageListItemEvent> subscribersEspflowMessageListItemEvent;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MainFooter mainFooter;
     private final MainHeader mainHeader;
@@ -85,17 +85,17 @@ public class MainLayout extends AppLayout {
 
     public MainLayout(final AuthenticatedUser authenticatedUser,
                       final AccessAnnotationChecker accessChecker,
-                      final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems,
-                      final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems,
-                      final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent,
+                      final Flux<EsptoolFRWMessageListItemEvent> subscribersEsptoolFRWMessageListItemEvent,
+                      final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItemEvent,
+                      final Flux<EspflowMessageListItemEvent> subscribersEspflowMessageListItemEvent,
                       final MainFooter mainFooter,
                       final MainHeader mainHeader,
                       final ApplicationEventPublisher applicationEventPublisher) {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
-        this.subscribersMessageListItems = subscribersMessageListItems;
-        this.subscribersEsptoolVersionMessageListItems = subscribersEsptoolVersionMessageListItems;
-        this.subscribersEspFlowMessageEvent = subscribersEspFlowMessageEvent;
+        this.subscribersEsptoolFRWMessageListItemEvent = subscribersEsptoolFRWMessageListItemEvent;
+        this.subscribersEsptoolVersionMessageListItemEvent = subscribersEsptoolVersionMessageListItemEvent;
+        this.subscribersEspflowMessageListItemEvent = subscribersEspflowMessageListItemEvent;
         this.mainFooter = mainFooter;
         this.mainHeader = mainHeader;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -264,16 +264,16 @@ public class MainLayout extends AppLayout {
         this.closeSubscribers();
         final UI ui = attachEvent.getUI();
         //Subscription to flash_id, read_flash, write_flash events
-        this.disposableSubscribersMessageListItems = this.subscribersMessageListItems
+        this.disposableSubscribersMessageListItems = this.subscribersEsptoolFRWMessageListItemEvent
                 .subscribe(messageListItem -> {
                     this.subscribe(ui, messageListItem);
                 });
         //Subscription to esptool version events
-        this.disposableSubscribersEsptoolVersionMessageListItems = this.subscribersEsptoolVersionMessageListItems
+        this.disposableSubscribersEsptoolVersionMessageListItems = this.subscribersEsptoolVersionMessageListItemEvent
                 .subscribe(esptoolVersionMessageListItemEvent -> {
                     this.subscribe(ui, esptoolVersionMessageListItemEvent);
                 });
-        this.subscribersEspFlowMessageEvent
+        this.subscribersEspflowMessageListItemEvent
                 .subscribe(espflowMessageListItemEvent -> {
                     this.subscribe(ui, espflowMessageListItemEvent);
                 });
