@@ -16,6 +16,7 @@ public final class WizardEspMapper {
         final WizardEspEntity entity = new WizardEspEntity();
         entity.setId(dto.id());
         entity.setName(dto.name());
+        entity.setVersion(dto.version());
         entity.setWizardEnabled(dto.isWizardEnabled());
         return entity;
     }
@@ -25,6 +26,7 @@ public final class WizardEspMapper {
                 .id(entity.getId())
                 .name(entity.getName())
                 .isWizardEnabled(entity.isWizardEnabled())
+                .version(entity.getVersion())
                 .build();
     }
 }

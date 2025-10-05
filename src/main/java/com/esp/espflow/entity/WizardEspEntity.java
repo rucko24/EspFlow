@@ -30,12 +30,12 @@ public class WizardEspEntity {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "isWizardEnabled")
+    @Column(name = "is_wizard_enabled")
     private boolean isWizardEnabled;
 
     private String name;
 
     @Version
-    private Long version = 0L;
+    private Long version;
 
 }
