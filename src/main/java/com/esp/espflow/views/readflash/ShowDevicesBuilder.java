@@ -172,7 +172,7 @@ public class ShowDevicesBuilder {
      * 12
      */
     public interface PublishMessageListItemStage {
-        StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem);
+        StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EsptoolFRWMessageListItemEvent> publishEsptoolFRWMessageListItemEvent);
     }
 
     /**
@@ -207,7 +207,7 @@ public class ShowDevicesBuilder {
         private ComboBox<BaudRatesEnum> baudRatesComboBox;
         private EsptoolPathService esptoolPathService;
         private FlashDownloadButtonService flashDownloadButtonService;
-        private Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem;
+        private Sinks.Many<EsptoolFRWMessageListItemEvent> publishEsptoolFRWMessageListItemEvent;
 
         /**
          * To bind {@link AddressRecord}
@@ -295,8 +295,8 @@ public class ShowDevicesBuilder {
         }
 
         @Override
-        public StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem) {
-            this.publishMessageListItem = publishMessageListItem;
+        public StrategiesPlusCustomContentCreationPerSlideStage withPublisher(Sinks.Many<EsptoolFRWMessageListItemEvent> publishEsptoolFRWMessageListItemEvent) {
+            this.publishEsptoolFRWMessageListItemEvent = publishEsptoolFRWMessageListItemEvent;
             return this;
         }
 
@@ -625,7 +625,7 @@ public class ShowDevicesBuilder {
                                         chipIs.concat(" Flash successfully read!!!"),
                                         espDeviceInfoRecord.port());
 
-                                this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
+                                this.publishEsptoolFRWMessageListItemEvent.tryEmitNext(esptoolFRWMessageListItemEvent);
 
                             } else {
                                 ConfirmDialogBuilder.showWarning("The flash does not exist in the tmp " + writFileToTempDir);

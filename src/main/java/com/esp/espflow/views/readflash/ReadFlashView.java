@@ -144,7 +144,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
     private final EsptoolPathService esptoolPathService;
     private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
     private final Set<Span> spansList = new CopyOnWriteArraySet<>();
-    private final Sinks.Many<EsptoolFRWMessageListItemEvent> publishMessageListItem;
+    private final Sinks.Many<EsptoolFRWMessageListItemEvent> publishEsptoolFRWMessageListItemEvent;
     private final Sinks.Many<RefreshDevicesEvent> publishRefreshDevicesEvent;
     private final Flux<RefreshDevicesEvent> subscribersRefreshDevicesEvent;
     private final WizardReadFlashView wizardReadFlashView;
@@ -612,7 +612,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 .withBaudRatesComboBox(this.baudRatesComboBox)
                 .withEsptoolPathService(this.esptoolPathService)
                 .withFlashDownloadButton(this.flashDownloadButtonService)
-                .withPublisher(this.publishMessageListItem)
+                .withPublisher(this.publishEsptoolFRWMessageListItemEvent)
                 .applyStrategiesWithCustomContentCreationPerSlide()
                 .make();
 
@@ -675,7 +675,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
                             final EsptoolFRWMessageListItemEvent esptoolFRWMessageListItemEvent = new EsptoolFRWMessageListItemEvent(
                                     "This chip cannot be parsed executed flash_id failed.", port);
-                            this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
+                            this.publishEsptoolFRWMessageListItemEvent.tryEmitNext(esptoolFRWMessageListItemEvent);
 
                         });
 
@@ -706,7 +706,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 .concat(concatResultMessage),
                 espDeviceInfoRecord.port());
 
-        this.publishMessageListItem.tryEmitNext(esptoolFRWMessageListItemEvent);
+        this.publishEsptoolFRWMessageListItemEvent.tryEmitNext(esptoolFRWMessageListItemEvent);
     }
 
     private void hideOrShowHeaderComponentsWithThisWidth(final int width) {
