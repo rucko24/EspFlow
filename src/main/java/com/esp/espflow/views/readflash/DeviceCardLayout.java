@@ -136,14 +136,12 @@ public final class DeviceCardLayout extends Div {
     private Div createDivControls() {
         Div divControls = new Div();
         divControls.addClassName("div-controls");
-
+        if (Objects.nonNull(flashDownloadButtonWrapper)) {
+            divControls.add(flashDownloadButtonWrapper.getAnchorDownload());
+        }
         if (Objects.nonNull(downloadFlashButton)) {
             divControls.add(downloadFlashButton);
         }
-        if (Objects.nonNull(flashDownloadButtonWrapper)) {
-            divControls.add(flashDownloadButtonWrapper);
-        }
-
         return divControls;
     }
 

@@ -4,20 +4,18 @@ import com.esp.espflow.util.EspFlowConstants;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.InputStreamDownloadHandler;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.util.FastByteArrayOutputStream;
-import org.springframework.util.FileCopyUtils;
-import org.vaadin.olli.FileDownloadWrapper;
+import org.springframework.http.MediaType;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>This class allows to generate an anchor to download the microcontroller firmware from a location in the temporary directory of the OS.  </p>
@@ -27,9 +25,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author rubn
  */
 @Log4j2
-public class FlashDownloadButtonWrapper extends FileDownloadWrapper {
+public class FlashDownloadButtonWrapper {
 
+    @Getter
+    private final Anchor anchorDownload = new Anchor();
     private final Button download = new Button(VaadinIcon.DOWNLOAD.create());
+
+    public FlashDownloadButtonWrapper() {
+        anchorDownload.setVisible(false);
+        download.setVisible(false);
+    }
 
     /**
      * This method enables the anchor, and each time it is invoked a name is set by the Content-Disposition
@@ -38,20 +43,14 @@ public class FlashDownloadButtonWrapper extends FileDownloadWrapper {
      * @param writFileToTempDir the name of the file located in the temporary OS directory
      */
     public void enableAnchorForDownloadTheFirmware(final String writFileToTempDir) {
-        download.setTooltipText("Download flash backup");
-        final var streamResource = new StreamResource("-", () -> this.firmwareToByteArray(writFileToTempDir)) {
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new ConcurrentHashMap<>(super.getHeaders());
-                headers.put("Content-Disposition", "attachment; filename=\"" + writFileToTempDir + "\"");
-                return headers;
-            }
-        };
-        streamResource.setCacheTime(0);
-        super.setResource(streamResource);
-        super.wrapComponent(download);
-        download.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+        this.download.setVisible(true);
+        this.download.getStyle().setMarginRight("var(--lumo-space-m");
+        this.anchorDownload.setVisible(true);
+        this.download.setTooltipText("Download flash backup");
+        this.download.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
         Animated.animate(download, Animation.FADE_IN);
+        this.anchorDownload.setHref(this.createInputStreamDownloadHandler(writFileToTempDir));
+        this.anchorDownload.add(download);
     }
 
     /**
@@ -59,20 +58,18 @@ public class FlashDownloadButtonWrapper extends FileDownloadWrapper {
      *
      * @param writFileToTempFile the name of the file located in the temporary OS directory
      *
-     * @return A {@link ByteArrayInputStream} with firmware read from tmp
+     * @return A {@link InputStreamDownloadHandler} with firmware read from tmp
      */
-    private ByteArrayInputStream firmwareToByteArray(final String writFileToTempFile) {
+    private InputStreamDownloadHandler createInputStreamDownloadHandler(final String writFileToTempFile) {
         final Path path = Path.of(writFileToTempFile);
         path.toFile().deleteOnExit();
-        try (final var bin = new BufferedInputStream(Files.newInputStream(path));
-             final var baos = new FastByteArrayOutputStream(FileCopyUtils.BUFFER_SIZE)) {
-            //transfer
-            bin.transferTo(baos);
-            return new ByteArrayInputStream(baos.toByteArray());
-        } catch (IOException ex) {
-            log.error(ex.getMessage());
-        }
-        return new ByteArrayInputStream(new byte[0]);
+        return DownloadHandler.fromInputStream(event -> {
+                    event.getResponse().setHeader("Content-Disposition", "attachment; filename=\"" + writFileToTempFile + "\"");
+                    return new DownloadResponse(new BufferedInputStream(Files.newInputStream(path)),
+                            Path.of(writFileToTempFile).getFileName().toString(),
+                            MediaType.APPLICATION_OCTET_STREAM_VALUE,
+                            Files.size(path));
+                });
     }
 
 }

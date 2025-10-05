@@ -50,11 +50,11 @@ public class FlashUploadHandler extends TransferProgressAwareHandler<UploadEvent
             try (final InputStream inputStream = event.getInputStream();
                  final BufferedOutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(targetPath))) {
 
-                return TransferUtil.transfer(inputStream, outputStream, getTransferContext(event), getListeners()
-                );
+                return TransferUtil.transfer(inputStream, outputStream, getTransferContext(event), getListeners());
 
-            } catch (IOException e) {
-                throw new UncheckedIOException("File transfer failed", e);
+            } catch (IOException error) {
+                this.notifyError(event, error);
+                throw new UncheckedIOException("File transfer failed", error);
             }
         });
     }
