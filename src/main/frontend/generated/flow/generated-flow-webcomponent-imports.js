@@ -9,7 +9,6 @@ import $cssFromFile_2 from 'Frontend/styles/carousel/carousel-devices.css?inline
 import $cssFromFile_3 from 'xterm/css/xterm.css?inline';
 import $cssFromFile_4 from 'Frontend/generated/jar-resources/animate.css?inline';
 import $cssFromFile_5 from 'Frontend/generated/jar-resources/styles/vaadin-checkbox.css?inline';
-import 'Frontend/generated/jar-resources/file-download-wrapper.js';
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-app-layout.js';
 import '@vaadin/vertical-layout/theme/lumo/vaadin-vertical-layout.js';
@@ -118,6 +117,7 @@ import '@vaadin/vaadin-lumo-styles/sizing.js';
 import '@vaadin/vaadin-lumo-styles/spacing.js';
 import '@vaadin/vaadin-lumo-styles/style.js';
 import '@vaadin/vaadin-lumo-styles/vaadin-iconset.js';
+import 'Frontend/generated/jar-resources/file-download-wrapper.js';
 import 'Frontend/generated/jar-resources/copilot-version.js';
 import 'Frontend/generated/jar-resources/scripts/esptool-wrapper.js';
 

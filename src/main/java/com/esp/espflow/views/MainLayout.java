@@ -5,6 +5,7 @@ import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
+import com.esp.espflow.service.respository.impl.CurrentThemeService;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
@@ -39,6 +40,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.Disposable;
@@ -64,6 +67,7 @@ import static com.esp.espflow.util.EspFlowConstants.WEB_SERIAL_ICON_SVG;
  */
 @Log4j2
 @AnonymousAllowed
+@RequiredArgsConstructor
 public class MainLayout extends AppLayout {
     /**
      * Services
@@ -76,6 +80,7 @@ public class MainLayout extends AppLayout {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MainFooter mainFooter;
     private final MainHeader mainHeader;
+    private final CurrentThemeService currentThemeService;
     /**
      * Mutable properties
      */
@@ -83,22 +88,8 @@ public class MainLayout extends AppLayout {
     private Disposable disposableSubscribersEsptoolVersionMessageListItems;
     private Disposable disposableSubscribersEspflowMessageEvent;
 
-    public MainLayout(final AuthenticatedUser authenticatedUser,
-                      final AccessAnnotationChecker accessChecker,
-                      final Flux<EsptoolFRWMessageListItemEvent> subscribersEsptoolFRWMessageListItemEvent,
-                      final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItemEvent,
-                      final Flux<EspflowMessageListItemEvent> subscribersEspflowMessageListItemEvent,
-                      final MainFooter mainFooter,
-                      final MainHeader mainHeader,
-                      final ApplicationEventPublisher applicationEventPublisher) {
-        this.authenticatedUser = authenticatedUser;
-        this.accessChecker = accessChecker;
-        this.subscribersEsptoolFRWMessageListItemEvent = subscribersEsptoolFRWMessageListItemEvent;
-        this.subscribersEsptoolVersionMessageListItemEvent = subscribersEsptoolVersionMessageListItemEvent;
-        this.subscribersEspflowMessageListItemEvent = subscribersEspflowMessageListItemEvent;
-        this.mainFooter = mainFooter;
-        this.mainHeader = mainHeader;
-        this.applicationEventPublisher = applicationEventPublisher;
+    @PostConstruct
+    public void setup() {
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -230,6 +221,10 @@ public class MainLayout extends AppLayout {
         }
     }
 
+    private void applyCurrentTheme() {
+        this.mainFooter.loadThemeFromDatabase();
+    }
+
     /**
      * When an event notification arrives, we paint a red circle on the bell.
      */
@@ -262,6 +257,7 @@ public class MainLayout extends AppLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.closeSubscribers();
+        this.applyCurrentTheme();
         final UI ui = attachEvent.getUI();
         //Subscription to flash_id, read_flash, write_flash events
         this.disposableSubscribersMessageListItems = this.subscribersEsptoolFRWMessageListItemEvent

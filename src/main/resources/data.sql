@@ -17,3 +17,6 @@ insert into esptool_sha256 (id, os_arch, sha_256, esptool_version) values (16, '
 -- Wizard enable by default
 insert into wizards_dialogs (id, name, is_wizard_enabled, version) values (1, 'wizardReadFlashEspView', true, 0)
 insert into wizards_dialogs (id, name, is_wizard_enabled, version) values (2, 'wizardFlashEspView', true, 0)
+
+-- Current theme
+insert into current_theme (id, current_theme, is_enabled) values (1, 'light', true)

@@ -1,7 +1,9 @@
 package com.esp.espflow.views.mainfooter;
 
+import com.esp.espflow.dto.CurrentThemeDto;
 import com.esp.espflow.entity.User;
 import com.esp.espflow.security.AuthenticatedUser;
+import com.esp.espflow.service.respository.impl.CurrentThemeService;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.settings.SettingsDialog;
 import com.vaadin.componentfactory.ToggleButton;
@@ -50,9 +52,32 @@ import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
 @PreserveOnRefresh
 public class MainFooter {
 
+    private final Span spanDarkOrLight = new Span();
+    private final ToggleButton toggleButtonTheme = new ToggleButton();
+    private final Icon moonO = VaadinIcon.MOON_O.create();
+    /**
+     * Services
+     */
     private final AuthenticatedUser authenticatedUser;
     private final SettingsDialog settingsDialog;
+    private final CurrentThemeService currentThemeService;
+    /**
+     * Mutable field
+     */
     private String density = "";
+
+    // Load from db
+    public void loadThemeFromDatabase() {
+        var currentTheme = this.currentThemeService.getActiveTheme();
+        boolean isDark = currentTheme != null && Lumo.DARK.equals(currentTheme.getCurrentTheme());
+        toggleButtonTheme.setValue(isDark);
+        this.applyTheme(isDark, false);
+        toggleButtonTheme.addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                this.applyTheme(event.getValue(), true);
+            }
+        });
+    }
 
     /**
      * @return A Custom Footer
@@ -153,54 +178,71 @@ public class MainFooter {
             component.addClassName(LumoUtility.Margin.Right.MEDIUM);
         });
 
-        final ToggleButton toggleButton = new ToggleButton("");
-        toggleButton.setTooltipText("Font size");
-        toggleButton.addValueChangeListener(e -> {
-            final String fontSize = toggleButton.getValue() ? "compact" :"default";
+        densityRadioButtomGroup.addValueChangeListener(event -> {
+            final String fontSize = event.getValue().equals("compact") ? "compact" : "default";
             this.setDensity(footer, fontSize);
         });
-        final HorizontalLayout rowSizeMode = new HorizontalLayout(toggleButton);
-        rowSizeMode.setWidthFull();
+
+        final ToggleButton toggleButtonFontSize = new ToggleButton();
+        toggleButtonFontSize.setTooltipText("Font size");
+        toggleButtonFontSize.addValueChangeListener(e -> {
+            final String fontSize = toggleButtonFontSize.getValue() ? "compact" : "default";
+            this.setDensity(footer, fontSize);
+        });
+
+        final Span spanFontSize = new Span("Compact or default");
+        spanFontSize.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
+        final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButtonFontSize, spanFontSize);
+        rowToggleSpan.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW,
+                LumoUtility.Width.FULL, LumoUtility.JustifyContent.BETWEEN, LumoUtility.AlignItems.CENTER);
+        final HorizontalLayout rowSizeMode = new HorizontalLayout(spanDarkOrLight, rowToggleSpan);
+        rowSizeMode.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
+        rowSizeMode.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
         return rowSizeMode;
     }
 
     private HorizontalLayout changeTheme() {
-        final ToggleButton toggleButton = new ToggleButton();
-        toggleButton.addClassName(LumoUtility.Margin.Left.XSMALL);
-        final Span spanDarkOrLight = new Span();
-        var moonO = VaadinIcon.MOON_O.create();
+        toggleButtonTheme.addClassName(LumoUtility.Margin.Left.XSMALL);
         moonO.setSize("20px");
         moonO.addClassName(ICONS_RESPONSIVE_SIZE);
         spanDarkOrLight.add(moonO);
         spanDarkOrLight.getStyle().setMarginLeft("2px");
         spanDarkOrLight.getStyle().setMarginBottom("2px");
-        toggleButton.setTooltipText("Change to dark theme");
-        toggleButton.addClickListener(event -> {
-            final ThemeList themeList = UI.getCurrent().getElement().getThemeList();
-            if (themeList.contains(Lumo.DARK)) {
-                toggleButton.setTooltipText("Change to dark theme");
-                spanDarkOrLight.removeAll();
-                spanDarkOrLight.add(moonO);
-                themeList.remove(Lumo.DARK);
-            } else {
-                toggleButton.setTooltipText("Change to light theme");
-                spanDarkOrLight.removeAll();
-                var icon = SvgFactory.createIconFromSvg("brightness.svg", "20px", "");
-                icon.addClassName(BLACK_TO_WHITE_ICON);
-                spanDarkOrLight.add(icon);
-                themeList.add(Lumo.DARK);
-            }
-        });
+        toggleButtonTheme.setTooltipText("Change to dark theme");
 
         final Span spanTheme = new Span("Theme");
         spanTheme.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
-        final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButton, spanTheme);
+        final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButtonTheme, spanTheme);
         rowToggleSpan.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Width.FULL, LumoUtility.JustifyContent.BETWEEN,
                 LumoUtility.AlignItems.CENTER);
         final HorizontalLayout rowTogle = new HorizontalLayout(spanDarkOrLight, rowToggleSpan);
         rowTogle.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
         rowTogle.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
         return rowTogle;
+    }
+
+    private void applyTheme(boolean isDark, boolean saveToDatabase) {
+        final ThemeList themeList = UI.getCurrent().getElement().getThemeList();
+        if (isDark) {
+            toggleButtonTheme.setTooltipText("Change to light theme");
+            spanDarkOrLight.removeAll();
+            var icon = SvgFactory.createIconFromSvg("brightness.svg", "20px", "");
+            icon.addClassName(BLACK_TO_WHITE_ICON);
+            spanDarkOrLight.add(icon);
+            themeList.add(Lumo.DARK);
+        } else {
+            toggleButtonTheme.setTooltipText("Change to dark theme");
+            spanDarkOrLight.removeAll();
+            spanDarkOrLight.add(moonO);
+            themeList.remove(Lumo.DARK);
+        }
+        if (saveToDatabase) {
+            var dto = CurrentThemeDto
+                    .builder()
+                    .currentTheme(isDark ? Lumo.DARK : Lumo.LIGHT)
+                    .build();
+            this.currentThemeService.update(dto);
+        }
     }
 
     private void setDensity(Footer footer, String density) {
@@ -210,7 +252,8 @@ public class MainFooter {
 
     private void updateTheme(Footer footer) {
         var js = "document.documentElement.setAttribute('theme', $0)";
-        footer.getElement().executeJs(js, Lumo.LIGHT + " " + this.density);
+        var currentTheme = Lumo.LIGHT + " " + this.density;
+        footer.getElement().executeJs(js, currentTheme);
     }
 
 }
