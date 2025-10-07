@@ -5,7 +5,6 @@ import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
-import com.esp.espflow.service.respository.impl.CurrentThemeService;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
@@ -80,7 +79,6 @@ public class MainLayout extends AppLayout {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MainFooter mainFooter;
     private final MainHeader mainHeader;
-    private final CurrentThemeService currentThemeService;
     /**
      * Mutable properties
      */
@@ -150,7 +148,7 @@ public class MainLayout extends AppLayout {
             final var rowTwoIcons = new HorizontalLayout(flameON, iconWebSerial);
             rowTwoIcons.setSpacing(false);
             rowTwoIcons.setAlignItems(FlexComponent.Alignment.CENTER);
-            var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class,rowTwoIcons);
+            var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, rowTwoIcons);
             this.mainHeader.getNotificationBell().getInboxCounter().setVisible(false);
             this.mainHeader.getNotificationBell().getInboxCounter().getElement().getThemeList().add("badge contrast pill");
             this.mainHeader.getNotificationBell().getInboxCounter().getElement().setAttribute("aria-label", "12 unread messages");
