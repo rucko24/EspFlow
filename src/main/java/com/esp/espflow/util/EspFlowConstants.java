@@ -187,4 +187,6 @@ public class EspFlowConstants {
     public static final String SPAN_BADGE_PILL_SHADOW = "span-badge-pill";
     public static final String RADIO_BUTTON_RIN_NONE = "radio-button-rin-none";
 
+    public static final String DEFAULT = "default";
+    public static final String COMPACT = "compact";
 }

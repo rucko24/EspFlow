@@ -4,6 +4,7 @@ import com.esp.espflow.dto.CurrentThemeDto;
 import com.esp.espflow.entity.User;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.service.respository.impl.CurrentThemeService;
+import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.settings.SettingsDialog;
 import com.vaadin.componentfactory.ToggleButton;
@@ -21,9 +22,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Optional;
 
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
+import static com.esp.espflow.util.EspFlowConstants.COMPACT;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ICONS_RESPONSIVE_SIZE;
 import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
@@ -54,6 +55,7 @@ public class MainFooter {
 
     private final Span spanDarkOrLight = new Span();
     private final ToggleButton toggleButtonTheme = new ToggleButton();
+    private final ToggleButton toggleButtonFontSize = new ToggleButton();
     private final Icon moonO = VaadinIcon.MOON_O.create();
     /**
      * Services
@@ -136,7 +138,7 @@ public class MainFooter {
                     });
                 });
             }).addComponentAsFirst(VaadinIcon.COG.create());
-            userName.getSubMenu().add(new Hr());
+            userName.getSubMenu().addComponent(new Hr());
 
             final Span spanSignOut = new Span("Sign out");
             spanSignOut.addClassName(LumoUtility.Margin.Left.MEDIUM);
@@ -167,38 +169,34 @@ public class MainFooter {
 
     public HorizontalLayout sizeMode(Footer footer) {
         // Density
-        final RadioButtonGroup<String> densityRadioButtomGroup = new RadioButtonGroup<>();
-        densityRadioButtomGroup.setTooltipText("Compact or default mode");
-        densityRadioButtomGroup.setWidthFull();
-        densityRadioButtomGroup.setItems("default", "compact");
-        densityRadioButtomGroup.setValue("default");
-        densityRadioButtomGroup.setWidthFull();
-        densityRadioButtomGroup.getChildren().forEach(component -> {
-            component.getElement().getThemeList().add("toggle badge pill contrast");
-            component.addClassName(LumoUtility.Margin.Right.MEDIUM);
-        });
+//        final RadioButtonGroup<String> densityRadioButtomGroup = new RadioButtonGroup<>();
+//        densityRadioButtomGroup.setTooltipText("Compact or default mode");
+//        densityRadioButtomGroup.setWidthFull();
+//        densityRadioButtomGroup.setItems(EspFlowConstants.DEFAULT, COMPACT);
+//        densityRadioButtomGroup.setValue(EspFlowConstants.DEFAULT);
+//        densityRadioButtomGroup.setWidthFull();
+//        densityRadioButtomGroup.getChildren().forEach(component -> {
+//            component.getElement().getThemeList().add("toggle badge pill contrast");
+//            component.addClassName(LumoUtility.Margin.Right.MEDIUM);
+//        });
+//
+//        densityRadioButtomGroup.addValueChangeListener(event -> {
+//            final String fontSize = event.getValue().equals(COMPACT) ? COMPACT : EspFlowConstants.DEFAULT;
+//            this.setDensity(footer, fontSize);
+//        });
 
-        densityRadioButtomGroup.addValueChangeListener(event -> {
-            final String fontSize = event.getValue().equals("compact") ? "compact" : "default";
-            this.setDensity(footer, fontSize);
-        });
-
-        final ToggleButton toggleButtonFontSize = new ToggleButton();
         toggleButtonFontSize.setTooltipText("Font size");
         toggleButtonFontSize.addValueChangeListener(e -> {
-            final String fontSize = toggleButtonFontSize.getValue() ? "compact" : "default";
+            final String fontSize = toggleButtonFontSize.getValue() ? COMPACT : EspFlowConstants.DEFAULT;
             this.setDensity(footer, fontSize);
         });
 
         final Span spanFontSize = new Span("Compact or default");
+        var toolTipFontSize = Tooltip.forComponent(spanFontSize);
+        toolTipFontSize.setPosition(Tooltip.TooltipPosition.TOP);
+        toolTipFontSize.setText("Font size...");
         spanFontSize.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
-        final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButtonFontSize, spanFontSize);
-        rowToggleSpan.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW,
-                LumoUtility.Width.FULL, LumoUtility.JustifyContent.BETWEEN, LumoUtility.AlignItems.CENTER);
-        final HorizontalLayout rowSizeMode = new HorizontalLayout(spanDarkOrLight, rowToggleSpan);
-        rowSizeMode.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
-        rowSizeMode.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
-        return rowSizeMode;
+        return this.createRow(toggleButtonFontSize, spanFontSize);
     }
 
     private HorizontalLayout changeTheme() {
@@ -209,16 +207,21 @@ public class MainFooter {
         spanDarkOrLight.getStyle().setMarginLeft("2px");
         spanDarkOrLight.getStyle().setMarginBottom("2px");
         toggleButtonTheme.setTooltipText("Change to dark theme");
-
         final Span spanTheme = new Span("Theme");
+        return this.createRow(toggleButtonTheme, spanTheme);
+    }
+
+    private HorizontalLayout createRow(final ToggleButton toggleButton, final Span spanTheme) {
         spanTheme.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontSize.SMALL);
-        final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButtonTheme, spanTheme);
-        rowToggleSpan.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Width.FULL, LumoUtility.JustifyContent.BETWEEN,
+        final HorizontalLayout rowToggleSpan = new HorizontalLayout(toggleButton, spanTheme);
+        rowToggleSpan.addClassNames(LumoUtility.Display.FLEX,
+                LumoUtility.FlexDirection.ROW,
+                LumoUtility.Width.FULL,
+                LumoUtility.JustifyContent.BETWEEN,
                 LumoUtility.AlignItems.CENTER);
-        final HorizontalLayout rowTogle = new HorizontalLayout(spanDarkOrLight, rowToggleSpan);
-        rowTogle.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
-        rowTogle.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
-        return rowTogle;
+        final HorizontalLayout row = new HorizontalLayout(spanDarkOrLight, rowToggleSpan);
+        row.addClassNames(LumoUtility.Width.FULL, LumoUtility.Gap.SMALL);
+        return row;
     }
 
     private void applyTheme(boolean isDark, boolean saveToDatabase) {
@@ -246,7 +249,7 @@ public class MainFooter {
     }
 
     private void setDensity(Footer footer, String density) {
-        this.density = density.equals("compact") ? "compact" : "";
+        this.density = density.equals(COMPACT) ? COMPACT : "";
         updateTheme(footer);
     }
 

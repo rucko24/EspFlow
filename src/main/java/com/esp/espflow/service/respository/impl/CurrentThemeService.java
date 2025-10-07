@@ -37,7 +37,7 @@ public class CurrentThemeService {
                             .currentTheme(dto.getCurrentTheme())
                             .build();
                     currentThemeRepository.save(newEntity);
-                    log.info("Entity saved: {}", newEntity);
+                    log.info("Entity saved: {}", newEntity.getCurrentTheme());
                 });
     }
 
