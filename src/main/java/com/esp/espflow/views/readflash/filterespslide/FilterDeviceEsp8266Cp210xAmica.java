@@ -1,15 +1,15 @@
-package com.esp.espflow.service.strategy.filterespslide;
+package com.esp.espflow.views.readflash.filterespslide;
 
-import com.esp.espflow.entity.EspDeviceInfoRecord;
 import com.esp.espflow.enums.GetOsName;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The FilterEsp8266Cp210x
+ * The FilterDeviceEsp8266Cp210xAmica
  * @author rubn
  */
-public class FilterEsp8266Cp210xAmica implements FilterEspDeviceStrategy {
+public class FilterDeviceEsp8266Cp210xAmica {
 
+    private FilterDeviceEsp8266Cp210xAmica() {}
     /**
      * <ul>
      *     <li>
@@ -26,30 +26,22 @@ public class FilterEsp8266Cp210xAmica implements FilterEspDeviceStrategy {
      *     </li>
      * </ul>
      *
-     * @param espDeviceInfoRecord
      * @return boolean
      */
-    @Override
-    public boolean filter(EspDeviceInfoRecord espDeviceInfoRecord) {
-
+    public static String amicaDescriptivePortName() {
         String usbSerial = StringUtils.EMPTY;
-        String chipIs = StringUtils.EMPTY;
         if (GetOsName.getOsName() == GetOsName.WINDOWS) {
             usbSerial = "CP210x";
         } else if (GetOsName.getOsName() == GetOsName.LINUX) {
             usbSerial = "CP21";
-            chipIs = "ESP8266EX";
         } else if (GetOsName.getOsName() == GetOsName.MAC) {
             usbSerial = "USB Serial";
         } else if(GetOsName.getOsName() == GetOsName.FREEBSD){
             usbSerial = "Serial Port (Dial-In)";
-            chipIs = "ESP8266EX";
         } else {
             //Do nothing
         }
-
-        return espDeviceInfoRecord.chipType().endsWith("8266")
-                && espDeviceInfoRecord.detectedFlashSize().equals("4MB")
-                && espDeviceInfoRecord.descriptivePortName().contains(usbSerial);
+        return usbSerial;
     }
+
 }

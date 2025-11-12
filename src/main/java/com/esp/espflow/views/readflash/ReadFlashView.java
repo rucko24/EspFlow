@@ -613,7 +613,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
                 .withEsptoolPathService(this.esptoolPathService)
                 .withFlashDownloadButton(this.flashDownloadButtonService)
                 .withPublisher(this.publishEsptoolFRWMessageListItemEvent)
-                .applyStrategiesWithCustomContentCreationPerSlide()
+                .createSlideForEspDeviceCarousel()
                 .make();
 
         return Mono.just(resultCarousel);
