@@ -1,7 +1,9 @@
 import { routes } from "Frontend/generated/routes.js";
+import { registerGlobalClickHandler } from "Frontend/generated/flow/Flow.js";
 
 (window as any).Vaadin ??= {};
 (window as any).Vaadin.routesConfig = routes;
+registerGlobalClickHandler();
 
 export { routes as forHMROnly };
 
@@ -9,6 +11,8 @@ export { routes as forHMROnly };
 if (import.meta.hot) {
    // @ts-ignore
    import.meta.hot.accept((module) => {
-     (window as any).Vaadin.routesConfig = module.forHMROnly;
+     if (module?.forHMROnly) {
+       (window as any).Vaadin.routesConfig = module.forHMROnly;
+     }
   });
 }

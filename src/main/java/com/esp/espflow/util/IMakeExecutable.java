@@ -21,15 +21,21 @@ public interface IMakeExecutable {
 
     default boolean makeExecutable(String esptoolPath) {
         boolean isExecutable = false;
-        if (GetOsName.getOsName() == GetOsName.LINUX) {
+        if (GetOsName.getOsName() == GetOsName.LINUX
+                || GetOsName.getOsName() == GetOsName.MAC
+                || GetOsName.getOsName() == GetOsName.FREEBSD) {
             if (this.setPosixFilePermissions(Path.of(esptoolPath))) {
-                log.info("esptool is executable: " + esptoolPath);
+                log.info("esptool is executable: %s".formatted(esptoolPath));
                 isExecutable = true;
             } else {
                 log.info("Error when setting permissions in the esptool executable " + esptoolPath);
-                isExecutable = false;
             }
         }
+
+        if(GetOsName.getOsName() == GetOsName.WINDOWS) {
+            isExecutable = true;
+        }
+
         return isExecutable;
     }
 

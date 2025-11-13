@@ -1,7 +1,7 @@
 package com.esp.espflow.service.respository.impl;
 
+import com.esp.espflow.dto.WizardEspDto;
 import com.esp.espflow.entity.WizardEspEntity;
-import com.esp.espflow.entity.dto.WizardEspDto;
 import com.esp.espflow.mappers.WizardEspMapper;
 import com.esp.espflow.service.respository.WizardEspRepository;
 import jakarta.transaction.Transactional;

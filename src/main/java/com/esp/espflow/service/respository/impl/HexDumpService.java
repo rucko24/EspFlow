@@ -1,6 +1,6 @@
 package com.esp.espflow.service.respository.impl;
 
-import com.esp.espflow.entity.dto.HexDumpDto;
+import com.esp.espflow.dto.HexDumpDto;
 import com.esp.espflow.mappers.HexDumpMapper;
 import com.esp.espflow.service.respository.HexDumpRepository;
 import lombok.RequiredArgsConstructor;

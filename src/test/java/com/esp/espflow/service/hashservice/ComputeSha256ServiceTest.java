@@ -1,7 +1,7 @@
 package com.esp.espflow.service.hashservice;
 
 import com.esp.espflow.configuration.ComputeDigestAlgorithmConfiguration;
-import com.esp.espflow.entity.dto.EsptoolSha256Dto;
+import com.esp.espflow.dto.EsptoolSha256Dto;
 import com.esp.espflow.service.respository.impl.EsptoolSha256Service;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

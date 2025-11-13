@@ -1,7 +1,8 @@
 package com.esp.espflow.views.flashesp;
 
-import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.enums.GetOsName;
+import com.esp.espflow.event.EspflowMessageListItemEvent;
+import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.service.ComPortService;
 import com.esp.espflow.service.CommandService;
 import com.esp.espflow.service.EsptoolService;
@@ -10,6 +11,7 @@ import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.ResponsiveHeaderDiv;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.dialog.ChangeSerialPortPermissionDialog;
+import com.esp.espflow.views.settings.SettingsDialog;
 import com.infraleap.animatecss.Animated;
 import com.infraleap.animatecss.Animated.Animation;
 import com.vaadin.flow.component.AttachEvent;
@@ -30,9 +32,10 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -50,6 +53,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.AUTO;
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
@@ -58,14 +62,29 @@ import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.CHANGE_SERIAL_PORT_PERMISSIONS;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
+import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK_BOTTOM;
+import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.DISPLAY;
+import static com.esp.espflow.util.EspFlowConstants.ERROR_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_V;
 import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_10_PX;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
+import static com.esp.espflow.util.EspFlowConstants.PORT_FOUND;
+import static com.esp.espflow.util.EspFlowConstants.PORT_NOT_FOUND;
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS;
+import static com.esp.espflow.util.EspFlowConstants.SETTINGS_SHARP;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_20_PX;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_30_PX;
+import static com.esp.espflow.util.EspFlowConstants.UNLOCK_BLACK_SVG;
+import static com.esp.espflow.util.EspFlowConstants.UPDATE_ICON;
 
+/**
+ * @author rubn
+ */
 @Log4j2
 @Getter
 @RequiredArgsConstructor
@@ -73,24 +92,34 @@ import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
 @SpringComponent
 public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
 
-    private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
-    private final Button unlockPort = new Button(
-            SvgFactory.createIconFromSvg("unlock-gray.svg", "30px", null));
+    public static final String VISIBILITY = "visibility";
+    public static final String HIDDEN = "hidden";
+    public static final String DISPLAY1 = "display";
+    private final H2 h2EsptoolVersion = new H2();
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
-    private final TextField inputCommand = new TextField();
+    private final Button buttonDebugPort = new Button(VaadinIcon.SEARCH.create());
+    private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
     private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
-    private final Button killProcess = new Button(VaadinIcon.STOP.create());
+    private final SvgIcon svgIconUnlock = SvgFactory.createIconFromSvg("unlock-gray.svg", SIZE_30_PX, null);
+    private final Button unlockPort = new Button(svgIconUnlock);
+    private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
+    private final ProgressBar progressBarForShowEsptoolVersion = new ProgressBar();
+    private final AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
+    /**
+     * Services
+     */
+    private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
+    private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
+    private final Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent;
+    private final EsptoolExecutableService esptoolExecutableService;
     private final ComPortService comPortService;
     private final CommandService commandService;
     private final EsptoolService esptoolService;
     private final ChangeSerialPortPermissionDialog changeSerialPortPermissionDialog;
-    private final H2 h2EsptoolVersion = new H2();
-    private final ProgressBar progressBarForShowEsptoolVersion = new ProgressBar();
-    private AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
-    private final Flux<EsptoolVersionMessageListItemEvent> subscriberEsptoolVersionEvent;
-    private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEstoolVersionEvent;
-    private final EsptoolExecutableService esptoolExecutableService;
-    private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
+    private final SettingsDialog settingsDialog;
+    /**
+     * Mutable fields
+     */
     private Disposable disposableSubscriberEsptoolVersionEvent;
 
     @PostConstruct
@@ -106,25 +135,51 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS.concat(" - SPACE"));
         unlockPort.addClickShortcut(Key.SPACE);
         unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        buttonDebugPort.setTooltipText("Debug serial port");
+        buttonDebugPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setEnabled(false);
         buttonExecuteFlashId.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setTooltipText("Execute flash_id");
-
+        svgIconUnlock.addClassName("svg-icon-settings");
+        this.buttonDebugPort.setEnabled(false);
         this.initListeners();
 
         final Div divHeader = new Div(divh3SerialPort, divCombo);
         divHeader.setWidthFull();
         divHeader.getStyle().set(DISPLAY, "flex");
         divHeader.getStyle().set(MARGIN, "10px 10px");
-        divHeader.getStyle().set("align-items", "baseline");
+        divHeader.addClassName(LumoUtility.AlignItems.BASELINE);
+        final HorizontalLayout horizontalLayout = new HorizontalLayout();
+        final Div div1 = createDiv(buttonExecuteFlashId, MARGIN,"0px");
+        final Span spanRefresh = new Span("Refresh");
+        spanRefresh.getStyle().set(VISIBILITY, HIDDEN);
+        spanRefresh.getStyle().set(DISPLAY1,"none");
+        div1.add(spanRefresh);
+        final Div div2 = createDiv(scanPort, MARGIN,"0px");
+        final Span spanScanPorts = new Span("Scan ports");
+        spanScanPorts.getStyle().set(VISIBILITY, HIDDEN);
+        spanScanPorts.getStyle().set(DISPLAY1,"none");
+        div2.add(spanScanPorts);
+        final Div div3 = createDiv(unlockPort, MARGIN,"0px");
+        final Span spanUnlockPorts = new Span("Unlock ports");
+        spanUnlockPorts.getStyle().set(VISIBILITY, HIDDEN);
+        spanUnlockPorts.getStyle().set(DISPLAY1,"none");
+        div3.add(spanUnlockPorts);
+        final Div div4 = createDiv(buttonDebugPort, MARGIN,"0px");
+        final Span spanDebugPort = new Span("Debug port");
+        spanDebugPort.getStyle().set(VISIBILITY, HIDDEN);
+        spanDebugPort.getStyle().set(DISPLAY1,"none");
 
-        final Div divScanPort = this.createDiv(scanPort, MARGIN, MARGIN_10_PX);
-        final Div divUnlockPort = this.createDiv(unlockPort, MARGIN, MARGIN_10_PX);
-        //final Div divInputCommand = this.createDiv(inputCommand, MARGIN, MARGIN_10_PX);
-        final Div divReadCommand = this.createDiv(buttonExecuteFlashId, MARGIN, MARGIN_10_PX);
-        //final Div divKillProcess = this.createDiv(killProcess, MARGIN, MARGIN_10_PX);
+        Stream.of(spanRefresh,spanUnlockPorts,spanScanPorts,spanDebugPort).forEach(span -> {
+            span.addClassName("span-text");
+            span.addClassNames(LumoUtility.TextColor.SECONDARY,LumoUtility.FontSize.SMALL);
+        });
+        horizontalLayout.add(div1,div2,div3,div4);
+        Stream.of(div1,div2,div3,div4).forEach(div -> div.addClassName("expand-buttons"));
+        horizontalLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        horizontalLayout.addClassName("row-buttons");
 
-        divHeader.add(divReadCommand, divScanPort, divUnlockPort);
+        divHeader.add(horizontalLayout);
 
         final Hr hr = new Hr();
         hr.setHeight("6px");
@@ -135,6 +190,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         this.progressBarForShowEsptoolVersion.setVisible(false);
         this.progressBarForShowEsptoolVersion.setIndeterminate(true);
         this.progressBarForShowEsptoolVersion.setWidth("200px");
+        this.h2EsptoolVersion.getStyle().setCursor(CURSOR_POINTER);
         final Div divH2espToolVersion = new Div(h2EsptoolVersion, this.progressBarForShowEsptoolVersion, hr);
         divH2espToolVersion.getStyle().set(MARGIN_TOP, AUTO);
 
@@ -157,15 +213,17 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setWidthFull();
         comboBoxSerialPort.setPlaceholder("port");
-        comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon("30px", null));
-        comboBoxSerialPort.setRenderer(rendererIconUsbForEachItem());
-        return this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
+        comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon(SIZE_30_PX, null));
+        comboBoxSerialPort.setRenderer(this.rendererIconUsbForEachItem());
+        var divCombo = this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
+        divCombo.addClassName("div-combo-serial-port");
+        return divCombo;
     }
 
     private ComponentRenderer<Div, String> rendererIconUsbForEachItem() {
         final SerializableBiConsumer<Div, String> serializableBiConsumer = (div, itemName) -> {
             div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-            final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", "25px", null);
+            final SvgIcon icon = SvgFactory.createIconFromSvg("usb-port-black.svg", SIZE_25_PX, null);
             icon.addClassName(BLACK_TO_WHITE_ICON);
             final Span span = new Span(itemName);
             span.addClassNames(LumoUtility.Padding.Left.SMALL);
@@ -197,19 +255,24 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
                 }))
                 .doOnComplete(() -> {
-                    ui.access(() -> {
-                        this.progressBarForShowEsptoolVersion.setVisible(false);
-                        h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
-                    });
+                    try {
+                        ui.access(() -> {
+                            this.progressBarForShowEsptoolVersion.setVisible(false);
+                            h2EsptoolVersion.addClassNames("pulse", "pulse-dark");
+                        });
+                    } catch (UIDetachedException ex){}
                 })
                 .subscribe(espToolVersion -> {
-                    ui.access(() -> {
-                        if (espToolVersion.contains(ESPTOOL_PY_V)) {
-                            esptoolVersionCounter.set(true);
-                        }
-                        h2EsptoolVersion.setText(espToolVersion);
-                        Animated.animate(h2EsptoolVersion, Animation.FADE_IN);
-                    });
+                    try {
+                        ui.access(() -> {
+                            if (espToolVersion.contains(ESPTOOL_PY_V)) {
+                                esptoolVersionCounter.set(true);
+                            }
+                            h2EsptoolVersion.setText(espToolVersion);
+                            Animated.animate(h2EsptoolVersion, Animation.FADE_IN);
+                        });
+                    } catch (UIDetachedException ex) {}
+
                 });
     }
 
@@ -240,14 +303,37 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     String isBundled = esptoolExecutableDto.isBundled() ? "Bundled" : "Custom";
                     this.createToolTip(item, isBundled);
                 });
+
+        contextMenu.addItem(this.createIconItemSettingsContext(), menuItemClickEvent -> {
+                    menuItemClickEvent.getSource().getUI().ifPresent(ui -> {
+                        ui.getPage().fetchCurrentURL(url -> {
+                            String urlWithParameters = url.getPath().concat(SETTINGS_SHARP);
+                            ui.getPage().getHistory().replaceState(null, urlWithParameters);
+                            settingsDialog.open(SETTINGS);
+                        });
+                    });
+                })
+                .addClassName(CONTEXT_MENU_ITEM_NO_CHECKMARK_BOTTOM);
     }
 
     private Div createIconItemEsptoolVersionContext(String esptoolVersion) {
         final Div div = new Div();
         div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
-        final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", "20px");
+        final SvgIcon icon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, SIZE_20_PX, SIZE_20_PX);
         icon.addClassName(BLACK_TO_WHITE_ICON);
         final Span span = new Span(esptoolVersion);
+        span.addClassNames(LumoUtility.Padding.Left.SMALL);
+        div.add(icon, span);
+        return div;
+    }
+
+    private Div createIconItemSettingsContext() {
+        final Div div = new Div();
+        div.addClassNames(LumoUtility.Display.FLEX, LumoUtility.AlignItems.CENTER);
+        final SvgIcon icon = SvgFactory.createIconFromSvg(UPDATE_ICON, SIZE_20_PX, SIZE_20_PX);
+        icon.addClassName(BLACK_TO_WHITE_ICON);
+        final Span span = new Span("Upload a custom esptool");
+        Tooltip.forComponent(span).setText("Ctrl+Alt+S");
         span.addClassNames(LumoUtility.Padding.Left.SMALL);
         div.add(icon, span);
         return div;
@@ -296,23 +382,30 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                     });
                 }
                 comboBoxSerialPort.setItems(ports); //set port items to combo
-                ConfirmDialogBuilder.showInformation("Port found!");
-                this.unlockPort.setIcon(SvgFactory.createIconFromSvg("unlock-black.svg", "30px", null));
+                scanPort.getUI().ifPresent(ui -> {
+                   ui.access(() -> ConfirmDialogBuilder.showInformationUI(PORT_FOUND, ui));
+                });
+                this.unlockPort.setIcon(SvgFactory.createIconFromSvg(UNLOCK_BLACK_SVG, SIZE_30_PX, null));
                 this.unlockPort.getIcon().addClassName(BLACK_TO_WHITE_ICON);
-                buttonExecuteFlashId.setEnabled(true);
+                this.buttonExecuteFlashId.setEnabled(true);
+                this.buttonDebugPort.setEnabled(true);
                 Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
                 Animated.animate(unlockPort, Animation.FADE_IN);
+                Animated.animate(buttonDebugPort, Animation.FADE_IN);
             } else {
-                buttonExecuteFlashId.setEnabled(false);
-                comboBoxSerialPort.setItems(List.of());
+                this.buttonDebugPort.setEnabled(true);
+                this.buttonExecuteFlashId.setEnabled(false);
+                this.comboBoxSerialPort.setItems(List.of());
                 scanPort.getUI().ifPresent(ui -> {
                     ui.getPage().fetchCurrentURL(url -> {
-                        if(url.getRef() != null) {
-                            if(!url.getRef().contains("settings")) {
-                                ConfirmDialogBuilder.showWarningUI("Port not found!", ui);
+                        if (url.getRef() != null) {
+                            if (!url.getRef().contains(SETTINGS)) {
+                                ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
+                                this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                             }
                         } else {
-                            ConfirmDialogBuilder.showWarningUI("Port not found!", ui);
+                            ConfirmDialogBuilder.showWarningUI(PORT_NOT_FOUND, ui);
+                            this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent(PORT_NOT_FOUND, "Flash-View", ERROR_NOT_FOUND));
                         }
                     });
                 });

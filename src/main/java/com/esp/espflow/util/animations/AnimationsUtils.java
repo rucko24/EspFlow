@@ -1,6 +1,7 @@
 package com.esp.espflow.util.animations;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.server.Command;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -29,7 +30,11 @@ public interface AnimationsUtils {
     }
 
     private void execute(final Component component, final Command command) {
-        component.getUI().ifPresent(ui -> ui.access(command));
+        component.getUI().ifPresent(ui -> {
+            try {
+                ui.access(command);
+            } catch (UIDetachedException ex) {}
+        });
     }
 
 }

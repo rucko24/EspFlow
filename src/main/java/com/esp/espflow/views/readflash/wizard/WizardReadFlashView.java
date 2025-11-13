@@ -1,6 +1,6 @@
 package com.esp.espflow.views.readflash.wizard;
 
-import com.esp.espflow.entity.dto.WizardEspDto;
+import com.esp.espflow.dto.WizardEspDto;
 import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.views.Layout;
@@ -48,7 +48,11 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+import java.time.Duration;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 import static com.esp.espflow.util.EspFlowConstants.AVATAR_STEP_ACTIVE;
@@ -57,7 +61,10 @@ import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_PROPERTY;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VALUE;
 import static com.esp.espflow.util.EspFlowConstants.CONTINUE;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_CUSTOM;
+import static com.esp.espflow.util.EspFlowConstants.HIDE;
 import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
+import static com.esp.espflow.util.EspFlowConstants.NEXT;
+import static com.esp.espflow.util.EspFlowConstants.PREVIOUS;
 import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.STEP1;
 import static com.esp.espflow.util.EspFlowConstants.STEP2;
@@ -77,17 +84,13 @@ import static com.infraleap.animatecss.Animated.Modifier.INFINITE;
 @RequiredArgsConstructor
 public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
 
-    private HorizontalLayout step1 = new HorizontalLayout();
-    private HorizontalLayout step2 = new HorizontalLayout();
-    private HorizontalLayout step3 = new HorizontalLayout();
-
     private final Avatar avatar1 = new Avatar();
     private final Avatar avatar2 = new Avatar();
     private final Avatar avatar3 = new Avatar();
 
-    private final Button next = new Button("Next");
-    private final Button previous = new Button("Previous");
-    private final Button hideButton = new Button("Hide");
+    private final Button next = new Button(NEXT);
+    private final Button previous = new Button(PREVIOUS);
+    private final Button hideButton = new Button(HIDE);
     /**
      * It will contain each step content
      */
@@ -103,7 +106,6 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
 
     @PostConstruct
     public void init() {
-
         this.initConfiguration();
     }
 
@@ -141,7 +143,6 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
     /**
      * You must disable the server-side modality each time after opening the dialog
      * https://github.com/vaadin/web-components/issues/7778#issuecomment-2334597476
-     *
      */
     public void openAndDisableModeless() {
         getUI().ifPresent(ui -> {
@@ -152,15 +153,17 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
 
     @Override
     @SuppressWarnings("donotuse")
-    public void open() {}
+    public void open() {
+        throw new IllegalCallerException("Do not use me!");
+    }
 
     /**
      * Configure the dialog header here
      */
     private void configureHeader() {
-        this.step1 = this.rowStepAvatar(avatar1, "1", "1", new H4("Welcome"));
-        this.step2 = this.rowStepAvatar(avatar2, "2", "2", new H4("Refresh devices"));
-        this.step3 = this.rowStepAvatar(avatar3, "3", "3", new H4("Read and Download flash"));
+        final HorizontalLayout step1 = this.rowStepAvatar(avatar1, "1", "1", new H4("Welcome"));
+        final HorizontalLayout step2 = this.rowStepAvatar(avatar2, "2", "2", new H4("Refresh devices"));
+        final HorizontalLayout step3 = this.rowStepAvatar(avatar3, "3", "3", new H4("Read and Download flash"));
         step3.remove(step3.getComponentAt(2));
 
         Stream.of(step1, step2, step3, avatar1, avatar2, avatar3)
@@ -172,10 +175,10 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
 
         step1.addClickListener(event -> {
             this.sNext = STEP1;
-            this.next.setText("Next");
+            this.next.setText(NEXT);
             this.previous.setVisible(false);
             this.mainContent.removeAll();
-            this.mainContent.add(refreshDevices());
+            this.mainContent.add(this.welcomeContent());
             avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
             avatar2.addClassName(AVATAR_STEP_INACTIVE);
             avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -185,9 +188,9 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         step2.addClickListener(event -> {
             this.sNext = STEP2;
             this.previous.setVisible(true);
-            this.next.setText("Next");
+            this.next.setText(NEXT);
             this.mainContent.removeAll();
-            this.mainContent.add(incorrectFlashSize());
+            this.mainContent.add(this.refreshDevicesContent());
             avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
             avatar2.addClassName(AVATAR_STEP_ACTIVE);
             avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -199,7 +202,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             this.next.setText(CONTINUE);
             this.previous.setVisible(true);
             this.mainContent.removeAll();
-            this.mainContent.add(createDownloadFlashContent());
+            this.mainContent.add(this.createReadAndDownloadFlashContent());
             avatar1.removeClassNames(AVATAR_STEP_INACTIVE);
             avatar1.addClassName(AVATAR_STEP_ACTIVE);
             avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
@@ -217,8 +220,8 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
     private void configureFooter() {
         this.previous.setVisible(false);
         this.next.addClickListener(event -> {
-            if(!next.getText().contains(CONTINUE)) {
-                next.setText("Next");
+            if (!next.getText().contains(CONTINUE)) {
+                next.setText(NEXT);
             }
             getUI().ifPresent(ui -> {
                 ui.getPage().fetchCurrentURL(url -> {
@@ -227,9 +230,9 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             });
             if (sNext.equals(STEP1)) {
                 sNext = STEP2;
-                next.setText("Next");
+                next.setText(NEXT);
                 this.mainContent.removeAll();
-                this.mainContent.add(incorrectFlashSize());
+                this.mainContent.add(this.refreshDevicesContent());
                 avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
                 avatar2.addClassName(AVATAR_STEP_ACTIVE);
                 avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -238,7 +241,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                 Animated.animate(previous, Animation.FADE_IN);
             } else if (sNext.equals(STEP2)) {
                 this.mainContent.removeAll();
-                this.mainContent.add(createDownloadFlashContent());
+                this.mainContent.add(this.createReadAndDownloadFlashContent());
                 previous.setVisible(true);
                 avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
                 avatar2.addClassName(AVATAR_STEP_ACTIVE);
@@ -247,9 +250,26 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                 Animated.removeAnimations(previous);
                 sNext = STEP3;
                 next.setText(CONTINUE);
-            } else if (sNext.equals("step3")) {
+            } else if (sNext.equals(STEP3)) {
                 sNext = STEP1;
                 super.close();
+                Mono.fromRunnable(() -> {
+                            this.next.getUI().ifPresent(ui -> {
+                                ui.access(() -> {
+                                    this.next.setText(NEXT);
+                                    this.previous.setVisible(false);
+                                    this.mainContent.removeAll();
+                                    this.mainContent.add(this.welcomeContent());
+                                    avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
+                                    avatar2.addClassName(AVATAR_STEP_INACTIVE);
+                                    avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
+                                    avatar3.addClassName(AVATAR_STEP_INACTIVE);
+                                });
+                            });
+                        })
+                        .subscribeOn(Schedulers.fromExecutorService(Executors.newSingleThreadExecutor()))
+                        .delaySubscription(Duration.ofMillis(1500))
+                        .subscribe();
             }
         });
         next.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -263,7 +283,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             if (sNext.equals(STEP2)) {
                 sNext = STEP1;
                 this.mainContent.removeAll();
-                this.mainContent.add(this.refreshDevices());
+                this.mainContent.add(this.welcomeContent());
                 avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
                 avatar2.addClassName(AVATAR_STEP_INACTIVE);
                 avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
@@ -273,7 +293,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
             } else if (sNext.equals(STEP3)) {
                 sNext = STEP2;
                 this.mainContent.removeAll();
-                this.mainContent.add(incorrectFlashSize());
+                this.mainContent.add(this.refreshDevicesContent());
                 previous.setVisible(true);
                 Animated.animate(previous, Animation.FADE_IN);
                 avatar2.removeClassNames(AVATAR_STEP_INACTIVE);
@@ -281,7 +301,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                 avatar3.removeClassNames(AVATAR_STEP_ACTIVE);
                 avatar3.addClassName(AVATAR_STEP_INACTIVE);
                 Animated.removeAnimations(previous);
-                next.setText("Next");
+                next.setText(NEXT);
             } else if (sNext.equals(STEP1)) {
                 sNext = STEP1;
                 previous.setVisible(false);
@@ -302,12 +322,14 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
                     });
             super.close();
         });
-        super.getFooter().add(hideButton);
+
+        previous.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
+        next.addClassName(EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON);
 
         final HorizontalLayout rowEnd = new HorizontalLayout(previous, next);
         rowEnd.setVerticalComponentAlignment(Alignment.CENTER);
         rowEnd.setAlignSelf(Alignment.END, rowEnd);
-        super.getFooter().add(rowEnd);
+        super.getFooter().add(hideButton, rowEnd);
 
     }
 
@@ -350,7 +372,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      */
     private Main createReadFlashDevices() {
         mainContent.addClassNames(Display.FLEX, LumoUtility.FlexDirection.ROW, LumoUtility.Height.FULL);
-        mainContent.add(this.refreshDevices());
+        mainContent.add(this.welcomeContent());
         return mainContent;
     }
 
@@ -360,7 +382,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      *
      * @return A {@link Component}
      */
-    private Component refreshDevices() {
+    private Component welcomeContent() {
         final StepRefreshDevicesContent stepRefreshDevices = new StepRefreshDevicesContent();
         final Layout layout = new Layout(stepRefreshDevices);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
@@ -374,12 +396,20 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      *
      * @return A {@link Component}
      */
-    private Component incorrectFlashSize() {
+    private Component refreshDevicesContent() {
+
+        final H2 titleRefreshDevicesOrConfigureButton = new H2("Refresh devices and Configure button");
+        titleRefreshDevicesOrConfigureButton.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
+
+        final Component descriptionAboutHeader = this.showImageWithInformationAboutRefreshDevicesOrConfigureButton();
+
+        final Hr separatorHeaderButtons = this.createSeparator();
+
         final H2 titleIncorrectSizeAddress = new H2("Incorrect size address");
         titleIncorrectSizeAddress.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         titleIncorrectSizeAddress.setId(titleIncorrectSizeAddress.getText().replace(" ", "-").toLowerCase());
 
-        final Component descriptionIncorrectFinalFlashSize = showImageWithInformationAboutToggleButton();
+        final Component descriptionIncorrectFinalFlashSize = this.showImageWithInformationAboutToggleButton();
 
         final Hr separator = this.createSeparator();
 
@@ -413,10 +443,12 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         Stream.of(changePermissionsImage)
                 .forEach(image -> image.getStyle().setAlignSelf(AlignSelf.CENTER));
 
-        final Layout layout = new Layout(titleIncorrectSizeAddress, descriptionIncorrectFinalFlashSize, separator, rowPermisson, descriptionPermissionDeniedPort, unorderedListPorts, changePermissionsImage);
+        final Layout layout = new Layout(titleRefreshDevicesOrConfigureButton, descriptionAboutHeader, separatorHeaderButtons,
+                titleIncorrectSizeAddress, descriptionIncorrectFinalFlashSize, separator, rowPermisson, descriptionPermissionDeniedPort, unorderedListPorts, changePermissionsImage);
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);
         layout.setColumnGap(Layout.Gap.MEDIUM);
-        layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, titleIncorrectSizeAddress, descriptionIncorrectFinalFlashSize, separator, changePermissionsImage, descriptionPermissionDeniedPort);
+        layout.setColumnSpan(Layout.ColumnSpan.COLUMN_SPAN_FULL, titleRefreshDevicesOrConfigureButton, descriptionAboutHeader, separatorHeaderButtons,
+                titleIncorrectSizeAddress, descriptionIncorrectFinalFlashSize, separator, changePermissionsImage, descriptionPermissionDeniedPort);
 
         final Scroller scroller = new Scroller(layout);
         scroller.setScrollDirection(ScrollDirection.VERTICAL);
@@ -424,6 +456,41 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         Animated.animate(scroller, Animation.FADE_IN);
 
         return scroller;
+    }
+
+    /**
+     * The content for step 2
+     *
+     * @return A {@link Component}
+     */
+    private Component showImageWithInformationAboutRefreshDevicesOrConfigureButton() {
+        final Image image = new Image(FRONTEND_IMAGES_CUSTOM + "configure-button.png", "alt");
+        image.getStyle().set(BOX_SHADOW_PROPERTY, BOX_SHADOW_VALUE);
+
+        final Paragraph descriptionPermissionDeniedPort = new Paragraph();
+        descriptionPermissionDeniedPort.getElement().setProperty(INNER_HTML,
+                """
+                        To scan the devices (which is the parameter of <strong>esptool flash_id</strong>)
+                        is done with the <strong>Refresh devices</strong> button, and to configure the reading we use the <strong>Configure</strong> button.
+                        """);
+        descriptionPermissionDeniedPort.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+
+        final VerticalLayout content = new VerticalLayout(descriptionPermissionDeniedPort);
+        content.setPadding(false);
+        content.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
+
+        final Icon iconArrowRight = VaadinIcon.ARROW_RIGHT.create();
+        Tooltip.forComponent(iconArrowRight).setText("Header!!!");
+        iconArrowRight.setSize("30px");
+        Animated.animate(iconArrowRight, Animation.HEART_BEAT, INFINITE);
+
+        final HorizontalLayout row = new HorizontalLayout(iconArrowRight, image);
+        row.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        row.setVerticalComponentAlignment(Alignment.END, iconArrowRight);
+        content.add(row);
+        content.setHorizontalComponentAlignment(Alignment.CENTER, row);
+
+        return content;
     }
 
     /**
@@ -442,6 +509,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
         final Icon iconArrowRight = VaadinIcon.ARROW_RIGHT.create();
         Tooltip.forComponent(iconArrowRight).setText("Enable the toggle button!!!");
         iconArrowRight.setSize("30px");
+        iconArrowRight.addClassName(Bottom.LARGE);
         Animated.animate(iconArrowRight, Animation.HEART_BEAT, INFINITE);
 
         final HorizontalLayout row = new HorizontalLayout(iconArrowRight, image);
@@ -470,7 +538,7 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
      *
      * @return A {@link Component}
      */
-    private Component createDownloadFlashContent() {
+    private Component createReadAndDownloadFlashContent() {
         final H2 selectingTheFirmwareTitle = new H2("Read flash and Download flash backup");
         selectingTheFirmwareTitle.addClassNames(LumoUtility.FontSize.XLARGE, Top.MEDIUM);
         selectingTheFirmwareTitle.setId(selectingTheFirmwareTitle.getText().replace(" ", "-").toLowerCase());
@@ -514,11 +582,11 @@ public class WizardReadFlashView extends Dialog implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        sNext = "step1";
-        next.setText("Next");
+        sNext = STEP1;
+        next.setText(NEXT);
         this.previous.setVisible(false);
         this.mainContent.removeAll();
-        this.mainContent.add(refreshDevices());
+        this.mainContent.add(welcomeContent());
         avatar2.removeClassNames(AVATAR_STEP_ACTIVE);
         avatar2.addClassName(AVATAR_STEP_INACTIVE);
         avatar3.removeClassNames(AVATAR_STEP_ACTIVE);

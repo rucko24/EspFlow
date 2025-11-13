@@ -1,17 +1,17 @@
 package com.esp.espflow.views.settings;
 
-import com.esp.espflow.entity.dto.EsptoolExecutableDto;
-import com.esp.espflow.entity.dto.EsptoolSha256Dto;
-import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
+import com.esp.espflow.dto.EsptoolExecutableDto;
+import com.esp.espflow.dto.EsptoolSha256Dto;
 import com.esp.espflow.enums.Breakpoint;
+import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.mappers.EsptoolExecutableMapper;
 import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.hashservice.ComputeSha256Service;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
-import com.esp.espflow.util.CreateCustomDirectory;
 import com.esp.espflow.util.EspFlowConstants;
+import com.esp.espflow.util.FlashUploadHandler;
 import com.esp.espflow.util.IMakeExecutable;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
@@ -21,6 +21,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
@@ -33,12 +34,11 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.SucceededEvent;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.streams.TransferContext;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -46,7 +46,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
-import org.vaadin.olli.ClipboardHelper;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -54,6 +53,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -61,34 +61,40 @@ import java.util.function.Function;
 
 import static com.esp.espflow.util.EspFlowConstants.BLACK_TO_WHITE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
+import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
 import static com.esp.espflow.util.EspFlowConstants.CUSTOM_ESPTOOL;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
 import static com.esp.espflow.util.EspFlowConstants.INNER_HTML;
 import static com.esp.espflow.util.EspFlowConstants.JAVA_IO_USER_HOME_DIR_OS;
+import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 
 /**
- *
  * @author rub'n
  */
 @Log4j2
 @UIScope
 @SpringComponent
 @RequiredArgsConstructor
-public class SettingsEsptoolHomePathContent extends Layout implements CreateCustomDirectory, IMakeExecutable {
-
-    private final EsptoolService esptoolService;
-    private final ComputeSha256Service computeSha256Service;
-    private final EsptoolExecutableService esptoolExecutableService;
+@JsModule(COPY_TO_CLIPBOARD)
+public class SettingsEsptoolHomePathContent extends Layout implements IMakeExecutable {
 
     private final Layout esptoolLayout = new Layout();
     private final Upload upload = new Upload();
-    private final FileBuffer buffer = new FileBuffer();
     private final ComboBox<EsptoolExecutableDto> comboBoxEsptoolHome = new ComboBox<>();
-    private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEsptoolVersionEvent;
     private final TextField textFieldHash = new TextField();
     private final ProgressBar progressBar = new ProgressBar();
+    /**
+     * Services
+     */
+    private final EsptoolService esptoolService;
+    private final ComputeSha256Service computeSha256Service;
+    private final EsptoolExecutableService esptoolExecutableService;
+    private final Sinks.Many<EsptoolVersionMessageListItemEvent> publishEsptoolVersionEvent;
+    /**
+     * Mutable properties
+     */
     private String overlay;
 
     @PostConstruct
@@ -102,20 +108,31 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      * Add listeners
      */
     private void initListeners() {
-        this.upload.addSucceededListener(event -> {
-            this.upload.clearFileList();
-            final String initCustomFileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL).concat(event.getFileName());
-            log.info("addSucceededListener custom initial path {}", initCustomFileName);
-            this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL), event.getFileName());
-            this.progressBar.setVisible(true);
-            this.computeSha256Service.computeSha256(initCustomFileName)/*To differentiate from an incorrect executable*/
-                    .doOnError(this.errorProcessingWhenComputingSha256(initCustomFileName))
-                    .map(this.esptoolSha256DtoToEsptoolExecutableDto(initCustomFileName))
-                    .flatMap(this::returnEmptyIfVersionAlreadyExists)
-                    .switchIfEmpty(this.fallback())
-                    .flatMap(this.configureNewDirectoryAndMakeExecutable(event, initCustomFileName))
-                    .subscribe(this.subscribeSaveAndUpdate());
-        });
+        final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL);
+
+        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir)
+                .whenStart((transferContext) -> {
+                    this.upload.clearFileList();
+                    final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                    log.info("Upload started custom initial path {}", initCustomFileName);
+                })
+                .whenComplete((transferContext, success) -> {
+                    if (success) {
+                        log.info("Upload completed successfully");
+                        this.progressBar.setVisible(true);
+                        final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                        this.computeSha256Service.computeSha256(initCustomFileName)/*To differentiate from an incorrect executable*/
+                                .doOnError(this.errorProcessingWhenComputingSha256(initCustomFileName))
+                                .map(this.esptoolSha256DtoToEsptoolExecutableDto(initCustomFileName))
+                                .flatMap(this::returnEmptyIfVersionAlreadyExists)
+                                .switchIfEmpty(this.fallback())
+                                .flatMap(this.configureNewDirectoryAndMakeExecutable(transferContext, initCustomFileName))
+                                .subscribe(this.subscribeSaveAndUpdate());
+                    } else {
+                        log.error("Upload failed");
+                    }
+                });
+        this.upload.setUploadHandler(uploadHandler);
         var executableIcon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", null);
         executableIcon.addClassName(BLACK_TO_WHITE_ICON);
         this.comboBoxEsptoolHome.setPrefixComponent(executableIcon);
@@ -134,17 +151,15 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     }
 
     /**
-     *
      * <p>The new directory is configured with the uploaded esptool version.</p>
      *
-     * @param event the event when uploading
+     * @param transferContext    the event when uploading
      * @param fileName the current filename
-     *
      * @return a {@link Function} with newEsptoolVersionDir, set to "rwx--x--x"
      */
-    private Function<EsptoolExecutableDto, Mono<EsptoolExecutableDto>> configureNewDirectoryAndMakeExecutable(SucceededEvent event, String fileName) {
+    private Function<EsptoolExecutableDto, Mono<EsptoolExecutableDto>> configureNewDirectoryAndMakeExecutable(final TransferContext transferContext, String fileName) {
         return esptoolExecutableDto -> {
-            if(esptoolExecutableDto.esptoolVersion().isEmpty()) {
+            if (esptoolExecutableDto.esptoolVersion().isEmpty()) {
                 return Mono.empty();
             }
             String version = "";
@@ -152,7 +167,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
             try {
                 version = esptoolExecutableDto.esptoolVersion().split(" ")[1];
                 newEsptoolVersionDir = Path.of(JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR)
-                        .concat(CUSTOM_ESPTOOL) + version + "/" + event.getFileName());
+                        .concat(CUSTOM_ESPTOOL) + version + "/" + transferContext.fileName());
             } catch (ArrayIndexOutOfBoundsException ex) {
                 log.error("Error parsing version! {}", ex.getMessage());
                 return Mono.empty();
@@ -237,25 +252,25 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      * @return A {@link Function}
      */
     private Mono<EsptoolExecutableDto> returnEmptyIfVersionAlreadyExists(EsptoolExecutableDto esptoolExecutableParam) {
-            final EsptoolExecutableDto esptoolExecutableDto = this.esptoolExecutableService
-                    .findByEsptoolVersionWithBundle(esptoolExecutableParam.esptoolVersion(), false)
-                    .orElse(null);
-            if (Objects.nonNull(esptoolExecutableDto)) {
+        final EsptoolExecutableDto esptoolExecutableDto = this.esptoolExecutableService
+                .findByEsptoolVersionWithBundle(esptoolExecutableParam.esptoolVersion(), false)
+                .orElse(null);
+        if (Objects.nonNull(esptoolExecutableDto)) {
+            this.executeCommandIfPresent(() -> {
+                ConfirmDialogBuilder.showWarning("This version of the executable has already been loaded. " +
+                        esptoolExecutableParam.esptoolVersion());
+            });
+            try {
+                Files.deleteIfExists(Path.of(esptoolExecutableParam.absolutePathEsptool()));
+            } catch (IOException e) {
+                log.info("Error when trying to delete invalid loaded executable! {}", e.getMessage());
                 this.executeCommandIfPresent(() -> {
-                    ConfirmDialogBuilder.showWarning("This version of the executable has already been loaded. " +
-                            esptoolExecutableParam.esptoolVersion());
+                    ConfirmDialogBuilder.showWarning("Error when trying to delete invalid loaded executable!");
                 });
-                try {
-                    Files.deleteIfExists(Path.of(esptoolExecutableParam.absolutePathEsptool()));
-                } catch (IOException e) {
-                    log.info("Error when trying to delete invalid loaded executable! {}", e.getMessage());
-                    this.executeCommandIfPresent(() -> {
-                        ConfirmDialogBuilder.showWarning("Error when trying to delete invalid loaded executable!");
-                    });
-                }
-                return Mono.empty();
             }
-            return Mono.just(this.esptoolExecutableService.save(esptoolExecutableParam));
+            return Mono.empty();
+        }
+        return Mono.just(this.esptoolExecutableService.save(esptoolExecutableParam));
     }
 
     /**
@@ -302,7 +317,6 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
 
         upload.setDropAllowed(true);
         upload.setMaxFiles(1);
-        upload.setReceiver(buffer);
         upload.addClassName("esptool-homepath-upload");
         Tooltip.forComponent(upload).setText("Drop executable here!");
         this.i18N(upload);
@@ -372,32 +386,37 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
      */
     private Component createHelperText(final String textEsptoolVersion, final String textAbsolutePathEsptool) {
         final Span estoolVersionSpan = new Span(textEsptoolVersion);
-        estoolVersionSpan.addClickListener(event -> Notification.show("Copied " + textEsptoolVersion, 2000, Notification.Position.MIDDLE));
+        estoolVersionSpan.addClickListener(event -> {
+            UI.getCurrent().getElement().executeJs(WINDOW_COPY_TO_CLIPBOARD, textAbsolutePathEsptool);
+            Notification.show("Copied " + textEsptoolVersion, 2000, Notification.Position.MIDDLE);
+        });
         Tooltip.forComponent(estoolVersionSpan).setText(textEsptoolVersion);
-        final ClipboardHelper clipboard1 = new ClipboardHelper(textEsptoolVersion, estoolVersionSpan);
-        final Div div1 = new Div(clipboard1);
+        final Div div1 = new Div(estoolVersionSpan);
         div1.getElement().getThemeList().add("badge pill");
 
         final Span estoolAbsolutePathSpan = new Span(textAbsolutePathEsptool);
+        estoolAbsolutePathSpan.setId("estoolAbsolutePathSpan");
         estoolAbsolutePathSpan.setWidth("200px");
         estoolAbsolutePathSpan.getStyle().setDisplay(Style.Display.INLINE_BLOCK);
         estoolAbsolutePathSpan.addClassNames(
                 LumoUtility.TextOverflow.ELLIPSIS,
                 LumoUtility.Whitespace.NOWRAP,
-                LumoUtility.Overflow.HIDDEN);
+                LumoUtility.Overflow.HIDDEN,
+                "estool-absolute-path-span");
 
-        estoolAbsolutePathSpan.addClickListener(event -> Notification.show("Copied " + textAbsolutePathEsptool, 2000, Notification.Position.MIDDLE));
+        estoolAbsolutePathSpan.addClickListener(event -> {
+            UI.getCurrent().getElement().executeJs(WINDOW_COPY_TO_CLIPBOARD, textAbsolutePathEsptool);
+            Notification.show("Copied " + textAbsolutePathEsptool, 2000, Notification.Position.MIDDLE);
+        });
         Tooltip.forComponent(estoolAbsolutePathSpan).setText(textAbsolutePathEsptool);
 
-        final ClipboardHelper clipboard2 = new ClipboardHelper(textAbsolutePathEsptool, estoolAbsolutePathSpan);
-
-        clipboard2.getStyle().setWidth("200px");
-        clipboard2.addClassNames(LumoUtility.Display.INLINE_BLOCK,
+        estoolAbsolutePathSpan.getStyle().setWidth("200px");
+        estoolAbsolutePathSpan.addClassNames(LumoUtility.Display.INLINE_BLOCK,
                 LumoUtility.TextOverflow.ELLIPSIS,
                 LumoUtility.Whitespace.NOWRAP,
                 LumoUtility.Overflow.HIDDEN);
 
-        final Div div2 = new Div(clipboard2);
+        final Div div2 = new Div(estoolAbsolutePathSpan);
         div2.getElement().getThemeList().add("badge pill");
 
         final HorizontalLayout row = new HorizontalLayout(div1, div2);
@@ -443,13 +462,24 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
     private void showSpanSha256Result(String sha256, String spanText, VaadinIcon icon, String textColor) {
         var copyButtonFromSvg = SvgFactory.createCopyButtonFromSvg();
         final Span span = new Span(copyButtonFromSvg);
-        final ClipboardHelper clipboardHelper = new ClipboardHelper(sha256, span);
+        span.getStyle().setCursor(EspFlowConstants.CURSOR_POINTER);
         span.addClickListener(event -> {
+            span.removeAll();
+            span.add(VaadinIcon.CHECK.create());
+            UI.getCurrent().getElement().executeJs(WINDOW_COPY_TO_CLIPBOARD, sha256);
             Notification.show("Copied sha256: " + sha256, 2500, Notification.Position.MIDDLE);
+            Mono.just(span)
+                    .delayElement(Duration.ofMillis(1500))
+                    .subscribe(btn -> {
+                        span.getUI().ifPresent(ui -> ui.access(() -> {
+                            span.removeAll();
+                            span.add(copyButtonFromSvg);
+                        }));
+                    });
         });
         Tooltip.forComponent(span).setText("Copy sha256");
         this.progressBar.setVisible(false);
-        this.textFieldHash.setSuffixComponent(clipboardHelper);
+        this.textFieldHash.setSuffixComponent(span);
         this.textFieldHash.setValue(sha256);
         this.textFieldHash.removeClassName(LumoUtility.TextColor.ERROR);
         this.textFieldHash.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.SECONDARY);
@@ -469,13 +499,13 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         this.executeCommandIfPresent(() -> {
             var icon = SvgFactory.createCopyButtonFromSvg();
             final Span span = new Span(icon);
-            final ClipboardHelper clipboardHelper = new ClipboardHelper("Error ".concat(error), span);
             span.addClickListener(event -> {
+                UI.getCurrent().getElement().executeJs(WINDOW_COPY_TO_CLIPBOARD, error);
                 Notification.show("Copied error: " + error, 2500, Notification.Position.MIDDLE);
             });
             Tooltip.forComponent(span).setText("Copy error");
             this.progressBar.setVisible(false);
-            this.textFieldHash.setSuffixComponent(clipboardHelper);
+            this.textFieldHash.setSuffixComponent(span);
             this.textFieldHash.setValue(error);
             this.textFieldHash.removeClassName(LumoUtility.TextColor.ERROR);
             this.textFieldHash.addClassNames(LumoUtility.FontSize.SMALL, LumoUtility.TextColor.ERROR);
@@ -547,10 +577,6 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
                         comboBoxEsptoolPath.setItems(executableDto);
                     });
                 })
-                .doOnTerminate(() -> {
-                    ui.access(() -> {
-                    });
-                })
                 .subscribe(espToolVersion -> {
                     ui.access(() -> {
                         comboBoxEsptoolHome.setItems(this.esptoolExecutableService.findAll());
@@ -615,7 +641,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements CreateCust
         if (attachEvent.isInitialAttach()) {
             final UI ui = attachEvent.getUI();
             this.fillComboBox(ui, comboBoxEsptoolHome);
-            log.info("Attach {}", SettingsEsptoolHomePathContent.class.getSimpleName());
+            //log.info("Attach {}", SettingsEsptoolHomePathContent.class.getSimpleName());
         }
         this.setValueForCombo();
     }

@@ -1,0 +1,77 @@
+@import url('../views/read-flash/card-esp-device-info.css');
+
+/* MEDIA QUERY: APILAR COLUMNAS EN <600px */
+@media (max-width: 600px) {
+
+   .vertical-layout-primary-section {
+       padding: 0;
+   }
+   .div-overlay {
+       position: relative;
+   }
+   #div-carousel {
+      padding: 0;
+      width: 100%;
+   }
+   .carousel-border-dark {
+       max-width: 100%;
+   }
+  .div-controls {
+    top: 9.7em;
+  }
+  .div-left,
+  .div-right-parent {
+    flex: 0 0 100%;
+    max-width: 100%;
+    min-width: 0;
+    border-left: none;
+  }
+  .div-left {
+    border-radius: 6px 6px 0 0;
+  }
+  .div-right-parent {
+    padding: 0px !important;
+    border-radius: 0 0 6px 6px;
+  }
+  /* Ajuste de padding si quieres más aire en móvil */
+  .div-left,
+  .div-right-parent {
+    padding: 16px;
+  }
+  .toolbar-row {
+    padding: 0 4px 0 16px;
+  }
+
+/*1) Forzar un aspect‑ratio o min‑height para que no se encoja en vertical */
+.div-left {
+  flex: 0 0 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  /* altura fija mínima, ajústala a tu gusto */
+  min-height: 200px;
+
+  /* o bien un aspect‑ratio (soporte moderno) */
+  aspect-ratio: 16/9;
+
+  /* céntralo mejor */
+  background-size: cover;
+  background-position: center;
+}
+
+/* 2) Reducir padding vertical del overlay para que el texto quede más grande */
+.div-overlay {
+  padding: 24px 0;  /* antes era 48px */
+}
+
+/* Contenido interno de la izquierda */
+.div-left-content {
+  max-height: 100%;
+}
+
+/* 3) Aumentar un poco el tamaño del título principal */
+.div-left-content-inside-title1 {
+  font-size: 250%;  /* antes 200% */
+}
+
+}

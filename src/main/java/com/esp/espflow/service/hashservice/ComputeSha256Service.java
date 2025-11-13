@@ -1,7 +1,7 @@
 package com.esp.espflow.service.hashservice;
 
 import com.esp.espflow.configuration.ComputeDigestAlgorithmConfiguration;
-import com.esp.espflow.entity.dto.EsptoolSha256Dto;
+import com.esp.espflow.dto.EsptoolSha256Dto;
 import com.esp.espflow.exceptions.CanNotComputeSha256Exception;
 import com.esp.espflow.service.respository.impl.EsptoolSha256Service;
 import lombok.RequiredArgsConstructor;
@@ -67,9 +67,9 @@ public class ComputeSha256Service {
             }
             final byte[] bytesDigest = messageDigest.digest();
             final StringBuilder stringBuffer = new StringBuilder();
-            for (final byte b : bytesDigest) {
+            for (final byte tmpByte : bytesDigest) {
                 stringBuffer.append(
-                        Integer.toString((b & 0xFF) + 0x100, 16).substring(1)
+                        Integer.toString((tmpByte & 0xFF) + 0x100, 16).substring(1)
                 );
             }
             final String processedSha256 = stringBuffer.toString();

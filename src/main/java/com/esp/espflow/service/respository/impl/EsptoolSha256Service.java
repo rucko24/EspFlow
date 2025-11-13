@@ -1,6 +1,6 @@
 package com.esp.espflow.service.respository.impl;
 
-import com.esp.espflow.entity.dto.EsptoolSha256Dto;
+import com.esp.espflow.dto.EsptoolSha256Dto;
 import com.esp.espflow.mappers.EsptoolSha256Mapper;
 import com.esp.espflow.service.respository.EsptoolSha256Repository;
 import lombok.RequiredArgsConstructor;

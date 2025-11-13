@@ -1,16 +1,17 @@
 package com.esp.espflow.views;
 
 import com.esp.espflow.entity.User;
-import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
-import com.esp.espflow.entity.event.EsptoolFRWMessageListItemEvent;
-import com.esp.espflow.entity.event.EsptoolVersionMessageListItemEvent;
+import com.esp.espflow.event.EspflowMessageListItemEvent;
+import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
+import com.esp.espflow.event.EsptoolVersionMessageListItemEvent;
 import com.esp.espflow.security.AuthenticatedUser;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.about.AboutView;
 import com.esp.espflow.views.flashesp.FlashEspView;
 import com.esp.espflow.views.hexdump.HexDumpView;
+import com.esp.espflow.views.mainfooter.MainFooter;
+import com.esp.espflow.views.mainheader.MainHeader;
 import com.esp.espflow.views.readflash.ReadFlashView;
-import com.esp.espflow.views.settings.SettingsDialogView;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -19,28 +20,17 @@ import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.popover.Popover;
-import com.vaadin.flow.component.popover.PopoverPosition;
-import com.vaadin.flow.component.popover.PopoverVariant;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -48,13 +38,14 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.context.ApplicationEventPublisher;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_SOURCE_CODE;
@@ -64,54 +55,38 @@ import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_LOGO;
 import static com.esp.espflow.util.EspFlowConstants.ROTATE_0_DEGREE;
 import static com.esp.espflow.util.EspFlowConstants.SCROLLBAR_CUSTOM_STYLE;
 import static com.esp.espflow.util.EspFlowConstants.SIZE_25_PX;
+import static com.esp.espflow.util.EspFlowConstants.SIZE_30_PX;
 import static com.esp.espflow.util.EspFlowConstants.TABLE_SVG;
 import static com.esp.espflow.util.EspFlowConstants.TRANSFORM;
+import static com.esp.espflow.util.EspFlowConstants.WEB_SERIAL_ICON_SVG;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
 @Log4j2
 @AnonymousAllowed
+@RequiredArgsConstructor
 public class MainLayout extends AppLayout {
-
-    private final Popover popover = new Popover();
-    private final Div contentUnread = new Div();
-    private final Div divBell = new Div();
-    private final SvgIcon bellIcon = SvgFactory.createIconFromSvg("bell.svg", "24px", null);
-    private final Span spanCircleRed = new Span();
-    private final Span inboxCounter = new Span("0");
-    private final Div contentAll = new Div();
-    private final MessageList messageListRead = new MessageList();
-    private final MessageList messageListAll = new MessageList();
-    private final List<MessageListItem> messageListItemUnreadList = new CopyOnWriteArrayList<>();
-    private final List<MessageListItem> messageListItemAllList = new CopyOnWriteArrayList<>();
-    private H1 viewTitle;
-
+    /**
+     * Services
+     */
     private final AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
-    private final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems;
-    private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems;
-    private final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent;
-    private final SettingsDialogView settingsDialogView;
+    private final Flux<EsptoolFRWMessageListItemEvent> subscribersEsptoolFRWMessageListItemEvent;
+    private final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItemEvent;
+    private final Flux<EspflowMessageListItemEvent> subscribersEspflowMessageListItemEvent;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final MainFooter mainFooter;
+    private final MainHeader mainHeader;
+    /**
+     * Mutable properties
+     */
     private Disposable disposableSubscribersMessageListItems;
     private Disposable disposableSubscribersEsptoolVersionMessageListItems;
     private Disposable disposableSubscribersEspflowMessageEvent;
 
-    public MainLayout(final AuthenticatedUser authenticatedUser,
-                      final AccessAnnotationChecker accessChecker,
-                      final Flux<EsptoolFRWMessageListItemEvent> subscribersMessageListItems,
-                      final SettingsDialogView settingsDialogView,
-                      final Flux<EsptoolVersionMessageListItemEvent> subscribersEsptoolVersionMessageListItems,
-                      final Flux<EspflowMessageListItemEvent> subscribersEspFlowMessageEvent,
-                      final MainFooter mainFooter) {
-        this.authenticatedUser = authenticatedUser;
-        this.accessChecker = accessChecker;
-        this.subscribersMessageListItems = subscribersMessageListItems;
-        this.settingsDialogView = settingsDialogView;
-        this.subscribersEsptoolVersionMessageListItems = subscribersEsptoolVersionMessageListItems;
-        this.subscribersEspFlowMessageEvent = subscribersEspFlowMessageEvent;
-        this.mainFooter = mainFooter;
+    @PostConstruct
+    public void setup() {
 
         setPrimarySection(Section.DRAWER);
         addDrawerContent();
@@ -122,90 +97,9 @@ public class MainLayout extends AppLayout {
         DrawerToggle toggle = new DrawerToggle();
         toggle.setAriaLabel("Menu toggle");
 
-        addToNavbar(true, toggle, this.headerRow());
-    }
+        this.applicationEventPublisher.publishEvent(this.mainHeader.getRowHeaderForComponentsView());
 
-    /**
-     * @return A {@link HorizontalLayout}
-     */
-    private HorizontalLayout headerRow() {
-        Tooltip.forComponent(divBell).setText("Notifications");
-        bellIcon.addClassName("black-to-white");
-        divBell.add(bellIcon);
-        divBell.addClassNames(LumoUtility.Display.FLEX, LumoUtility.FlexDirection.ROW);
-        divBell.getStyle().setCursor(CURSOR_POINTER);
-
-        divBell.addClickListener(event -> {
-            Animated.animate(bellIcon, Animated.Animation.FADE_IN);
-            bellIcon.getStyle().set(TRANSFORM, "rotate(20deg)");
-            this.removeRedCircleErrorInTheBell();
-            Animated.removeAnimations(spanCircleRed);
-        });
-        spanCircleRed.addClassNames(LumoUtility.Display.INLINE_BLOCK, LumoUtility.Position.ABSOLUTE);
-        spanCircleRed.getStyle().set("margin-left", "13px");
-        spanCircleRed.getStyle().set("top", "14px");
-        divBell.add(spanCircleRed);
-
-        popover.setTarget(divBell);
-        popover.setWidth("340px");
-        popover.addThemeVariants(PopoverVariant.ARROW, PopoverVariant.LUMO_NO_PADDING);
-        popover.setPosition(PopoverPosition.BOTTOM);
-        popover.setAriaLabelledBy("notifications-heading");
-        popover.setModal(true);
-        popover.setBackdropVisible(true);
-        popover.addOpenedChangeListener(this::rotateTheBellToZeroDegreesIfThePopoverIsNotOpen);
-
-        final Button buttonMarkAllRead = new Button("Marks all read");
-        buttonMarkAllRead.addClickListener(event -> {
-            this.removeRedCircleErrorInTheBell();
-            messageListItemUnreadList.clear();
-            bellIcon.getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
-            contentUnread.removeAll();
-            this.inboxCounter.setVisible(false);
-            Animated.removeAnimations(spanCircleRed);
-        });
-
-        final Button buttonSettings = new Button(VaadinIcon.COG.create());
-        buttonSettings.setTooltipText("Open notifications settings - Ctrl+Alt+S");
-        buttonSettings.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        buttonSettings.addClickListener(event -> {
-            getUI().ifPresent(ui -> {
-                ui.getPage().fetchCurrentURL(url -> {
-                    log.info("fetchCurrentURL {}", url);
-                    String urlWithParameters = url.getPath().concat("#settings/notifications");
-                    ui.getPage().getHistory().replaceState(null, urlWithParameters);
-                    settingsDialogView.open("settings/notifications");
-                });
-            });
-        });
-
-        var headerRow = new HorizontalLayout(new H4("Notifications"), buttonMarkAllRead, buttonSettings);
-        headerRow.addClassNames(JustifyContent.AROUND, AlignItems.CENTER);
-        headerRow.getStyle().set("padding", "var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-xs)");
-        popover.add(headerRow);
-
-        final TabSheet tabSheet = new TabSheet();
-        tabSheet.addClassName("notifications");
-
-        messageListRead.setItems(messageListItemUnreadList);
-        contentUnread.add(messageListRead);
-        contentAll.add(messageListAll);
-
-        tabSheet.add("Unread", contentUnread);
-        tabSheet.add("All", contentAll);
-        popover.add(tabSheet);
-
-        viewTitle = new H1();
-        viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
-
-        final var row = new HorizontalLayout(viewTitle, divBell);
-        row.setWidthFull();
-        row.addClassNames(LumoUtility.Margin.Right.MEDIUM);
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        row.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-
-        return row;
+        addToNavbar(true, toggle, this.mainHeader.createHeaderRow());
     }
 
     private void addDrawerContent() {
@@ -248,11 +142,16 @@ public class MainLayout extends AppLayout {
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
         if (accessChecker.hasAccess(FlashEspView.class)) {
-            var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null));
-            inboxCounter.setVisible(false);
-            inboxCounter.getElement().getThemeList().add("badge contrast pill");
-            inboxCounter.getElement().setAttribute("aria-label", "12 unread messages");
-            Tooltip.forComponent(inboxCounter).setText("unread messages");
+            var iconWebSerial = SvgFactory.createIconFromSvg(WEB_SERIAL_ICON_SVG, SIZE_30_PX, null);
+            var flameON = SvgFactory.createIconFromSvg(FLASH_ON_SVG, SIZE_25_PX, null);
+            final var rowTwoIcons = new HorizontalLayout(flameON, iconWebSerial);
+            rowTwoIcons.setSpacing(false);
+            rowTwoIcons.setAlignItems(FlexComponent.Alignment.CENTER);
+            var itemFlash = new SideNavItem("Flash Esp32-ESP8266", FlashEspView.class, rowTwoIcons);
+            this.mainHeader.getNotificationBell().getInboxCounter().setVisible(false);
+            this.mainHeader.getNotificationBell().getInboxCounter().getElement().getThemeList().add("badge contrast pill");
+            this.mainHeader.getNotificationBell().getInboxCounter().getElement().setAttribute("aria-label", "12 unread messages");
+            Tooltip.forComponent(this.mainHeader.getNotificationBell().getInboxCounter()).setText("unread messages");
             //itemFlash.setSuffixComponent(inboxCounter);
             Tooltip.forComponent(itemFlash).setText("Flash Esp32-ESP8266, Execute flash_id and write flash");
             nav.addItem(itemFlash);
@@ -278,7 +177,7 @@ public class MainLayout extends AppLayout {
     @Override
     protected void afterNavigation() {
         super.afterNavigation();
-        viewTitle.setText(getCurrentPageTitle());
+        this.mainHeader.changeTitle(this.getCurrentPageTitle());
     }
 
     private String getCurrentPageTitle() {
@@ -294,20 +193,20 @@ public class MainLayout extends AppLayout {
         try {
             ui.access(() -> {
                 log.info("MessageListItem listener {}", messageListItem.getText());
-                messageListItemUnreadList.add(messageListItem);
-                messageListItemAllList.add(messageListItem);
-                this.messageListRead.setItems(messageListItemUnreadList);
-                this.inboxCounter.setText(String.valueOf(messageListItemUnreadList.size()));
-                this.messageListAll.setItems(messageListItemAllList);
-                this.inboxCounter.setVisible(true);
+                this.mainHeader.getNotificationBell().getMessageListItemUnreadList().add(messageListItem);
+                this.mainHeader.getNotificationBell().getMessageListItemAllList().add(messageListItem);
+                this.mainHeader.getNotificationBell().getMessageListRead().setItems(this.mainHeader.getNotificationBell().getMessageListItemUnreadList());
+                this.mainHeader.getNotificationBell().getInboxCounter().setText(String.valueOf(this.mainHeader.getNotificationBell().getMessageListItemUnreadList().size()));
+                this.mainHeader.getNotificationBell().getMessageListAll().setItems(this.mainHeader.getNotificationBell().getMessageListItemAllList());
+                this.mainHeader.getNotificationBell().getInboxCounter().setVisible(true);
                 this.showsRedErrorInTheBell();
-                Animated.animate(spanCircleRed, Animated.Animation.FADE_IN);
-                Animated.animate(inboxCounter, Animated.Animation.FADE_IN);
-                if (this.contentUnread.getElement().getChildCount() == 0) {
-                    bellIcon.getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
-                    Animated.animate(bellIcon, Animated.Animation.FADE_IN);
+                Animated.animate(this.mainHeader.getNotificationBell().getSpanCircleRed(), Animated.Animation.FADE_IN);
+                Animated.animate(this.mainHeader.getNotificationBell().getInboxCounter(), Animated.Animation.FADE_IN);
+                if (this.mainHeader.getNotificationBell().getContentUnread().getElement().getChildCount() == 0) {
+                    this.mainHeader.getNotificationBell().getBellIcon().getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
+                    Animated.animate(this.mainHeader.getNotificationBell().getBellIcon(), Animated.Animation.FADE_IN);
                     this.showsRedErrorInTheBell();
-                    contentUnread.add(messageListRead);
+                    this.mainHeader.getNotificationBell().getContentUnread().add(this.mainHeader.getNotificationBell().getMessageListRead());
                 }
             });
         } catch (UIDetachedException ex) {
@@ -315,30 +214,15 @@ public class MainLayout extends AppLayout {
         }
     }
 
-    /**
-     * We rotate the bell to zero if the notification panel is closed.
-     *
-     * @param event a Popover.OpenedChangeEvent
-     */
-    public void rotateTheBellToZeroDegreesIfThePopoverIsNotOpen(Popover.OpenedChangeEvent event) {
-        if (!event.getSource().isOpened()) {
-            bellIcon.getStyle().set(TRANSFORM, ROTATE_0_DEGREE);
-            Animated.removeAnimations(bellIcon);
-        }
+    private void applyCurrentTheme() {
+        this.mainFooter.loadThemeFromDatabase();
     }
 
     /**
      * When an event notification arrives, we paint a red circle on the bell.
      */
     public void showsRedErrorInTheBell() {
-        spanCircleRed.getElement().getThemeList().add("badge small error dot primary");
-    }
-
-    /**
-     * When the bell is clicked, and when we mark messages as read, we remove the style in the red circle, so that we can set it again to give the correct effect.
-     */
-    public void removeRedCircleErrorInTheBell() {
-        spanCircleRed.getElement().removeAttribute("theme");
+        this.mainHeader.getNotificationBell().getSpanCircleRed().getElement().getThemeList().add("badge small error dot primary");
     }
 
     private void closeSubscribers() {
@@ -350,7 +234,7 @@ public class MainLayout extends AppLayout {
             disposableSubscribersEsptoolVersionMessageListItems.dispose();
             disposableSubscribersEsptoolVersionMessageListItems = null;
         }
-        if(this.disposableSubscribersEspflowMessageEvent != null) {
+        if (this.disposableSubscribersEspflowMessageEvent != null) {
             disposableSubscribersEspflowMessageEvent.dispose();
             disposableSubscribersEspflowMessageEvent = null;
         }
@@ -359,7 +243,6 @@ public class MainLayout extends AppLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        this.settingsDialogView.close();
         this.closeSubscribers();
     }
 
@@ -367,18 +250,19 @@ public class MainLayout extends AppLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.closeSubscribers();
+        this.applyCurrentTheme();
         final UI ui = attachEvent.getUI();
         //Subscription to flash_id, read_flash, write_flash events
-        this.disposableSubscribersMessageListItems = this.subscribersMessageListItems
+        this.disposableSubscribersMessageListItems = this.subscribersEsptoolFRWMessageListItemEvent
                 .subscribe(messageListItem -> {
                     this.subscribe(ui, messageListItem);
                 });
         //Subscription to esptool version events
-        this.disposableSubscribersEsptoolVersionMessageListItems = this.subscribersEsptoolVersionMessageListItems
+        this.disposableSubscribersEsptoolVersionMessageListItems = this.subscribersEsptoolVersionMessageListItemEvent
                 .subscribe(esptoolVersionMessageListItemEvent -> {
                     this.subscribe(ui, esptoolVersionMessageListItemEvent);
                 });
-        this.subscribersEspFlowMessageEvent
+        this.subscribersEspflowMessageListItemEvent
                 .subscribe(espflowMessageListItemEvent -> {
                     this.subscribe(ui, espflowMessageListItemEvent);
                 });

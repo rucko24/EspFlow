@@ -1,6 +1,6 @@
 package com.esp.espflow.views.flashesp.wizards;
 
-import com.esp.espflow.entity.dto.WizardEspDto;
+import com.esp.espflow.dto.WizardEspDto;
 import com.esp.espflow.service.respository.impl.WizardEspService;
 import com.esp.espflow.util.EspFlowConstants;
 import com.esp.espflow.util.svgfactory.SvgFactory;
@@ -392,7 +392,12 @@ public class WizardFlashEspDialog extends Dialog implements BeforeEnterObserver 
 
         final InitialInformationFlashEspView welcome = new InitialInformationFlashEspView();
 
-        final Layout layout = new Layout(welcome);
+        final Scroller scroller = new Scroller(welcome);
+        scroller.setScrollDirection(ScrollDirection.VERTICAL);
+        scroller.getElement().executeJs(SCROLLBAR_CUSTOM_STYLE);
+        Animated.animate(scroller, Animation.FADE_IN);
+
+        final Layout layout = new Layout(scroller);
         layout.setId("welcome-id");
         // Viewport < 1024px
         layout.setFlexDirection(Layout.FlexDirection.COLUMN);

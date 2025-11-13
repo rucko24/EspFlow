@@ -1,7 +1,7 @@
 package com.esp.espflow.mappers;
 
+import com.esp.espflow.dto.WizardEspDto;
 import com.esp.espflow.entity.WizardEspEntity;
-import com.esp.espflow.entity.dto.WizardEspDto;
 
 /**
  * @author rub'n
@@ -16,6 +16,7 @@ public final class WizardEspMapper {
         final WizardEspEntity entity = new WizardEspEntity();
         entity.setId(dto.id());
         entity.setName(dto.name());
+        entity.setVersion(dto.version());
         entity.setWizardEnabled(dto.isWizardEnabled());
         return entity;
     }
@@ -25,6 +26,7 @@ public final class WizardEspMapper {
                 .id(entity.getId())
                 .name(entity.getName())
                 .isWizardEnabled(entity.isWizardEnabled())
+                .version(entity.getVersion())
                 .build();
     }
 }

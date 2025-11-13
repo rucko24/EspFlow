@@ -1,7 +1,7 @@
 package com.esp.espflow.mappers;
 
+import com.esp.espflow.dto.HexDumpDto;
 import com.esp.espflow.entity.HexDumpEntity;
-import com.esp.espflow.entity.dto.HexDumpDto;
 
 /**
  * @author rubn

@@ -121,6 +121,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
      * Initial configuration for the Dialog
      */
     private void config() {
+        super.addClassNames("change-port-permission-dialog");
         super.setHeaderTitle(CHANGE_SERIAL_PORT_PERMISSIONS);
         super.setModal(true);
         super.setCloseOnEsc(true);

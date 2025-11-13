@@ -68,7 +68,7 @@ window.Vaadin.Flow.dndConnector = {
     if (element['__active']) {
       element.addEventListener('dragenter', this.__ondragenterListener, false);
       element.addEventListener('dragover', this.__ondragoverListener, false);
-      element.addEventListener('dragleave', this.__ondragleaveListener, true);
+      element.addEventListener('dragleave', this.__ondragleaveListener, false);
       element.addEventListener('drop', this.__ondropListener, false);
     } else {
       element.removeEventListener('dragenter', this.__ondragenterListener, false);
@@ -92,10 +92,24 @@ window.Vaadin.Flow.dndConnector = {
       }
       event.currentTarget.classList.add('v-dragged');
     }
+    if(event.currentTarget.__dragImage) {
+      if(event.currentTarget.__dragImage.style.display === "none") {
+        event.currentTarget.__dragImage.style.display = "block";
+        event.currentTarget.classList.add('shown');
+      }
+      event.dataTransfer.setDragImage(
+        event.currentTarget.__dragImage,
+        event.currentTarget.__dragImageOffsetX,
+        event.currentTarget.__dragImageOffsetY);
+    }
   },
 
   __dragendListener: function (event) {
     event.currentTarget.classList.remove('v-dragged');
+    if(event.currentTarget.classList.contains('shown')) {
+      event.currentTarget.classList.remove('shown');
+      event.currentTarget.__dragImage.style.display = "none";
+    }
   },
 
   updateDragSource: function (element) {
@@ -106,5 +120,11 @@ window.Vaadin.Flow.dndConnector = {
       element.removeEventListener('dragstart', this.__dragstartListener, false);
       element.removeEventListener('dragend', this.__dragendListener, false);
     }
+  },
+
+  setDragImage: function (dragImage, offsetX, offsetY, dragSource) {
+    dragSource.__dragImage = dragImage;
+    dragSource.__dragImageOffsetX = offsetX;
+    dragSource.__dragImageOffsetY = offsetY;
   }
 };

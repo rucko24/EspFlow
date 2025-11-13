@@ -1,6 +1,6 @@
 package com.esp.espflow.service;
 
-import com.esp.espflow.entity.dto.HexDumpDto;
+import com.esp.espflow.dto.HexDumpDto;
 import com.esp.espflow.service.respository.impl.HexDumpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

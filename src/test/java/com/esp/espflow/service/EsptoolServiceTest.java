@@ -1,7 +1,7 @@
 package com.esp.espflow.service;
 
 import com.esp.espflow.entity.EspDeviceInfoRecord;
-import com.esp.espflow.entity.dto.EsptoolExecutableDto;
+import com.esp.espflow.dto.EsptoolExecutableDto;
 import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.GetOsName;
 import com.esp.espflow.exceptions.CanNotBeReadDeviceException;

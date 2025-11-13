@@ -72,7 +72,7 @@ public class ComPortServiceArgumentsProvider implements ArgumentsProvider {
 
     private Arguments linuxSerialPorts() {
 
-        final SerialPort serialPort1 = SerialPort.getCommPort("/dev/ttyUSB0");
+        final SerialPort serialPort1 = SerialPort.getCommPort("");
         /*
          * Set custom port
          */
@@ -80,7 +80,7 @@ public class ComPortServiceArgumentsProvider implements ArgumentsProvider {
         ReflectionTestUtils.setField(serialPort1, PORT_DESCRIPTION, "/dev/ttyUSB1");
         ReflectionTestUtils.setField(serialPort1, FRIENDLY_NAME, "Serial-1");
 
-        final SerialPort serialPort2 = SerialPort.getCommPort("/dev/ttyUSB0");
+        final SerialPort serialPort2 = SerialPort.getCommPort("");
         /*
          * Set custom port
          */

@@ -1,10 +1,10 @@
 package com.esp.espflow.views.hexdump;
 
-import com.esp.espflow.entity.dto.HexDumpDto;
-import com.esp.espflow.entity.event.EspflowMessageListItemEvent;
+import com.esp.espflow.dto.HexDumpDto;
+import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.service.HexDumpGeneratorService;
 import com.esp.espflow.service.respository.impl.HexDumpService;
-import com.esp.espflow.util.CreateCustomDirectory;
+import com.esp.espflow.util.FlashUploadHandler;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
@@ -35,7 +35,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -68,6 +67,7 @@ import java.util.List;
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_GRID;
 import static com.esp.espflow.util.EspFlowConstants.COPY_ALT_SVG;
+import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
 import static com.esp.espflow.util.EspFlowConstants.ESPFLOW_DIR;
 import static com.esp.espflow.util.EspFlowConstants.FLASH_HEX_DUMP_ANALIZE;
@@ -84,20 +84,20 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @SpringComponent
 @PageTitle("HexDump")
 @Route(value = "hex-dump-viewer", layout = MainLayout.class)
-@JsModule("./scripts/copy_to_clipboard.js")
+@JsModule(COPY_TO_CLIPBOARD)
 @CssImport("./styles/hexdump-grid/grid-message-when-empty.css")
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class HexDumpView extends VerticalLayout implements CreateCustomDirectory, BeforeEnterObserver {
+public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
 
     private static final int DEBOUNCE_MS = 500;
     private static final String INDEX_PARAM_NAME = "i";
 
     private final HexDumpGeneratorService hexDumpGeneratorService;
     private final HexDumpService hexDumpService;
-    private final Sinks.Many<EspflowMessageListItemEvent> publisher;
+    private final Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent;
     private final Upload upload = new Upload();
-    private final FileBuffer buffer = new FileBuffer();
+
     private final PagingGrid<HexDumpDto> grid = new PagingGrid<>();
     private final TextField searchTextField = new TextField();
     private final IntegerField setRowNumbersField = new IntegerField();
@@ -124,36 +124,44 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
     private void initListeners() {
 
-        this.upload.addSucceededListener(event -> {
-            final String initCustomFileName = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE).concat(event.getFileName());
-            log.info("addSucceededListener flash-hex-dump-analize/ {}", initCustomFileName);
-            this.createCustomDirectory(buffer, JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE), event.getFileName());
-            byte[] fileBytes = new byte[0];
-            try {
-                fileBytes = Files.readAllBytes(Path.of(initCustomFileName));
-            } catch (IOException e) {
-                log.error("readAllBytes failed ");
-            }
+        final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE);
 
-            this.hexDumpGeneratorService.generateHexDump(fileBytes);
-
-            this.addPaginationOnGrid(StringUtils.EMPTY);
-
-            this.publisher.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
-        });
-
+        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir)
+                .whenStart((transferContext) -> {
+                    final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                    log.info("Upload started flash-hex-dump-analize/ {}", initCustomFileName);
+                })
+                .whenComplete((transferContext, success) -> {
+                    if (success) {
+                        log.info("Upload completed successfully");
+                        try {
+                            final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                            byte[] fileBytes = Files.readAllBytes(Path.of(initCustomFileName));
+                            this.hexDumpGeneratorService.generateHexDump(fileBytes);
+                            log.info("generate hexdump file completed successfully");
+                            //The grid will be filled based on the predefined page layout.
+                            this.addPaginationOnGrid(StringUtils.EMPTY);
+                            this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
+                        } catch (IOException e) {
+                            log.error("readAllBytes failed {}", e.getMessage());
+                        }
+                    } else {
+                        log.error("Upload failed");
+                    }
+                });
+        this.upload.setUploadHandler(uploadHandler);
     }
 
     private HorizontalLayout configureUpload() {
         upload.setDropAllowed(true);
         upload.setMaxFiles(1);
-        upload.setReceiver(buffer);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
         Tooltip.forComponent(upload).setText("Drop .bin here!");
         this.i18N(upload);
 
         final HorizontalLayout filterRow = this.configureFilterRow();
         final HorizontalLayout row = new HorizontalLayout(upload, filterRow);
+        row.addClassNames("row-header-hexdump");
         row.setWidthFull();
         row.setJustifyContentMode(JustifyContentMode.BETWEEN);
         return row;
@@ -258,7 +266,7 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         final GridMenuItem<HexDumpDto> gridContextMenuRow = contextMenu.addItem("Copy entire row");
 
         final Div gridRoot = new Div();
-        gridRoot.addClassName("grid-root");
+        gridRoot.addClassNames("grid-root", LumoUtility.Border.ALL, LumoUtility.BorderRadius.LARGE);
         var tableIcon = SvgFactory.createIconFromSvg("table.svg", SIZE_30_PX, null);
         tableIcon.getStyle().setMarginRight("10px");
         final Div warning = new Div(tableIcon, new Text("Empty grid!"));
@@ -329,9 +337,9 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
 
         final Popover popover = new Popover();
         popover.setModal(true);
-        popover.setWidth("340px");
-        popover.setTarget(searchTextField);
-        popover.add(setRowNumbersField);
+        popover.setTarget(icon);
+        final VerticalLayout verticalLayoutPopOver = new VerticalLayout(setRowNumbersField);
+        popover.add(verticalLayoutPopOver);
 
         this.searchTextField.setPlaceholder("Search");
         this.searchTextField.setTooltipText("Filter by: offset or ascii/text");
@@ -341,12 +349,14 @@ public class HexDumpView extends VerticalLayout implements CreateCustomDirectory
         this.searchTextField.getStyle().set("max-width", "100%");
         this.searchTextField.addValueChangeListener(valueChangeEvent -> this.addPaginationOnGrid(valueChangeEvent.getValue()));
 
-        this.setRowNumbersField.setPlaceholder("Set row numbers");
-        this.setRowNumbersField.setTooltipText("Set row numbers");
+        this.setRowNumbersField.setLabel("Row numbers per page");
+        this.setRowNumbersField.setStepButtonsVisible(true);
+        this.setRowNumbersField.setTooltipText("Row numbers per page");
         this.setRowNumbersField.setClearButtonVisible(true);
+        this.setRowNumbersField.setValue(15);
         this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
         this.setRowNumbersField.addValueChangeListener(event -> {
-            if (event.isFromClient() && event.getValue() != null) {
+            if (event.isFromClient() && event.getValue() != null && gridListDataView.getItems().findAny().isPresent()) {
                 final Integer reconfigureNumberOfRecords = event.getValue();
                 this.grid.setPageSize(reconfigureNumberOfRecords);
                 this.addPaginationOnGrid(StringUtils.EMPTY);

@@ -1,17 +1,15 @@
 package com.esp.espflow;
 
-import com.esp.espflow.service.respository.UserRepository;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.LoadingIndicatorConfiguration;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.server.ServiceInitEvent;
+import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.sql.init.SqlDataSourceScriptDatabaseInitializer;
-import org.springframework.boot.autoconfigure.sql.init.SqlInitializationProperties;
-import org.springframework.context.annotation.Bean;
-
-import javax.sql.DataSource;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * The entry point of the Spring Boot application.
@@ -22,26 +20,19 @@ import javax.sql.DataSource;
 @Push
 @SpringBootApplication
 @Theme(value = "espflow")
+@EnableAsync(proxyTargetClass = true)
 @PWA(name = "EspFlow", shortName = "EspFlow", offlineResources = {})
-public class Application implements AppShellConfigurator {
+public class Application implements AppShellConfigurator, VaadinServiceInitListener {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
-    @Bean
-    SqlDataSourceScriptDatabaseInitializer dataSourceScriptDatabaseInitializer(DataSource dataSource,
-                                                                               SqlInitializationProperties properties, UserRepository repository) {
-        // This bean ensures the database is only initialized when empty
-        return new SqlDataSourceScriptDatabaseInitializer(dataSource, properties) {
-            @Override
-            public boolean initializeDatabase() {
-                if (repository.count() == 0L) {
-                    return super.initializeDatabase();
-                }
-                return false;
-            }
-        };
+    @Override
+    public void serviceInit(ServiceInitEvent event) {
+        event.getSource().addUIInitListener(ui -> {
+            LoadingIndicatorConfiguration conf = ui.getUI().getLoadingIndicatorConfiguration();
+            conf.setApplyDefaultTheme(false);
+        });
     }
-
 }

@@ -2,13 +2,14 @@ package com.esp.espflow.util.svgfactory;
 
 import com.esp.espflow.enums.GetOsName;
 import com.vaadin.flow.component.icon.SvgIcon;
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import java.util.Objects;
 
 import static com.esp.espflow.util.EspFlowConstants.COPY_ALT_SVG;
 import static com.esp.espflow.util.EspFlowConstants.FREE_BSD_ICON;
 import static com.esp.espflow.util.EspFlowConstants.FRONTEND_IMAGES_SVG_ICONS;
+import static com.esp.espflow.util.EspFlowConstants.ICONS_RESPONSIVE_SIZE;
 import static com.esp.espflow.util.EspFlowConstants.LINUX_ICON;
 import static com.esp.espflow.util.EspFlowConstants.MACOS_ICON;
 import static com.esp.espflow.util.EspFlowConstants.NO_OS_ICON;
@@ -27,10 +28,10 @@ public class SvgFactory {
      */
     public static SvgIcon createUsbIconFromSvg() {
         //usb-port-icon.svg
-        final StreamResource iconResource = new StreamResource("usb-port.svg",
-                () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + "usb-port.svg"));
-        final SvgIcon icon = new SvgIcon(iconResource);
+        final DownloadHandler downloadHandler = DownloadHandler.forClassResource(SvgFactory.class, FRONTEND_IMAGES_SVG_ICONS + "usb-port.svg");
+        final SvgIcon icon = new SvgIcon(downloadHandler);
         icon.setSize("22px");
+        icon.addClassName(ICONS_RESPONSIVE_SIZE);
         return icon;
     }
 
@@ -41,10 +42,10 @@ public class SvgFactory {
      */
     public static SvgIcon createCopyButtonFromSvg() {
         //copy-alt.svg
-        final StreamResource iconResource = new StreamResource(COPY_ALT_SVG,
-                () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + COPY_ALT_SVG));
-        final SvgIcon icon = new SvgIcon(iconResource);
+        final DownloadHandler downloadHandler = DownloadHandler.forClassResource(SvgFactory.class, FRONTEND_IMAGES_SVG_ICONS + COPY_ALT_SVG);
+        final SvgIcon icon = new SvgIcon(downloadHandler);
         icon.setSize("25px");
+        icon.addClassName(ICONS_RESPONSIVE_SIZE);
         return icon;
     }
 
@@ -57,13 +58,13 @@ public class SvgFactory {
      */
     public static SvgIcon createIconFromSvg(String fileName, String size, String customHeight) {
         Objects.requireNonNull(fileName, "fileName is null, we must put it in the svg-icons folder");
-        final StreamResource iconResource = new StreamResource(fileName,
-                () -> SvgFactory.class.getResourceAsStream(FRONTEND_IMAGES_SVG_ICONS + fileName));
-        var icon = new SvgIcon(iconResource);
+        final DownloadHandler downloadHandler = DownloadHandler.forClassResource(SvgFactory.class, FRONTEND_IMAGES_SVG_ICONS + fileName);
+        var icon = new SvgIcon(downloadHandler);
         icon.setSize(size);
         if (Objects.nonNull(customHeight)) {
             icon.getStyle().set("height", customHeight);
         }
+        icon.addClassName(ICONS_RESPONSIVE_SIZE);
         return icon;
     }
 
@@ -88,6 +89,7 @@ public class SvgFactory {
         } else {
             svgIcon = SvgFactory.createIconFromSvg(NO_OS_ICON, size, customHeight);
         }
+        svgIcon.addClassName(ICONS_RESPONSIVE_SIZE);
         return svgIcon;
     }
 

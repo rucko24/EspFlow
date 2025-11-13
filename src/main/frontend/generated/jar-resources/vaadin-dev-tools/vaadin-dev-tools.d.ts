@@ -62,6 +62,7 @@ type DevToolsConf = {
 export declare class VaadinDevTools extends LitElement {
     unhandledMessages: ServerMessage[];
     conf: DevToolsConf;
+    bodyShadowRoot: ShadowRoot | null;
     static get styles(): import("lit").CSSResult[];
     static DISMISSED_NOTIFICATIONS_IN_LOCAL_STORAGE: string;
     static ACTIVE_KEY_IN_SESSION_STORAGE: string;
@@ -92,6 +93,8 @@ export declare class VaadinDevTools extends LitElement {
     initPlugin(plugin: DevToolsPlugin): Promise<void>;
     format(o: any): string;
     checkLicense(productInfo: Product): void;
+    startPreTrial(): void;
+    downloadLicense(productInfo: Product): void;
     setActive(yes: boolean): void;
     render(): import("lit-html").TemplateResult<1>;
     setJavaLiveReloadActive(active: boolean): void;

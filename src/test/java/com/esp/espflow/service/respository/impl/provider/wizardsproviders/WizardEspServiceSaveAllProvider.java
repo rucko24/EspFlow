@@ -1,7 +1,7 @@
 package com.esp.espflow.service.respository.impl.provider.wizardsproviders;
 
 import com.esp.espflow.entity.WizardEspEntity;
-import com.esp.espflow.entity.dto.WizardEspDto;
+import com.esp.espflow.dto.WizardEspDto;
 import com.esp.espflow.mappers.WizardEspMapper;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
