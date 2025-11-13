@@ -1,7 +1,7 @@
 package com.esp.espflow.service.respository.impl;
 
-import com.esp.espflow.entity.WizardEspEntity;
 import com.esp.espflow.dto.WizardEspDto;
+import com.esp.espflow.entity.WizardEspEntity;
 import com.esp.espflow.service.respository.WizardEspRepository;
 import com.esp.espflow.service.respository.impl.provider.wizardsproviders.WizardEspServiceFindByNameProvider;
 import com.esp.espflow.service.respository.impl.provider.wizardsproviders.WizardEspServiceSaveAllProvider;
@@ -53,8 +53,8 @@ class WizardEspServiceTest {
         assertThatCode(() -> wizardEspService.saveAll(List.of(wizardFlashViewDto, wizardReadFlashViewDto)))
                 .doesNotThrowAnyException();
 
-        verify(repository, times(2)).save(entityReadViewToReturn);
-        verify(repository, times(2)).save(entityFlashViewToReturn);
+        verify(repository).save(entityReadViewToReturn);
+        verify(repository).save(entityFlashViewToReturn);
         verifyNoMoreInteractions(repository);
     }
 
