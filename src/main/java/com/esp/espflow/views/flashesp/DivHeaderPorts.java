@@ -69,6 +69,7 @@ import static com.esp.espflow.util.EspFlowConstants.ERROR_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_NOT_FOUND;
 import static com.esp.espflow.util.EspFlowConstants.ESPTOOL_PY_V;
 import static com.esp.espflow.util.EspFlowConstants.EXECUTABLE_ICON;
+import static com.esp.espflow.util.EspFlowConstants.ICONS_RESPONSIVE_SIZE;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_10_PX;
 import static com.esp.espflow.util.EspFlowConstants.MARGIN_TOP;
@@ -131,6 +132,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         scanPort.setTooltipText("Refresh/Scan ports! - ENTER");
         scanPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         scanPort.addClickShortcut(Key.ENTER);
+        svgIconUnlock.addClassName(ICONS_RESPONSIVE_SIZE);
         unlockPort.setEnabled(false);
         unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS.concat(" - SPACE"));
         unlockPort.addClickShortcut(Key.SPACE);
@@ -140,7 +142,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         buttonExecuteFlashId.setEnabled(false);
         buttonExecuteFlashId.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setTooltipText("Execute flash_id");
-        svgIconUnlock.addClassName("svg-icon-settings");
         this.buttonDebugPort.setEnabled(false);
         this.initListeners();
 
@@ -213,7 +214,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         comboBoxSerialPort.setClearButtonVisible(true);
         comboBoxSerialPort.setWidthFull();
         comboBoxSerialPort.setPlaceholder("port");
-        comboBoxSerialPort.setPrefixComponent(SvgFactory.OsIcon(SIZE_30_PX, null));
+        comboBoxSerialPort.setPrefixComponent(SvgFactory.osIcon(SIZE_30_PX, null));
         comboBoxSerialPort.setRenderer(this.rendererIconUsbForEachItem());
         var divCombo = this.createDiv(this.comboBoxSerialPort, MARGIN, MARGIN_10_PX);
         divCombo.addClassName("div-combo-serial-port");

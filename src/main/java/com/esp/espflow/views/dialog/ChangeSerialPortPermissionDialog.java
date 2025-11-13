@@ -99,7 +99,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
         copyComboBox.setClearButtonVisible(true);
         copyComboBox.setPlaceholder("port");
         copyComboBox.setWidthFull();
-        copyComboBox.setPrefixComponent(SvgFactory.OsIcon("30px", null));
+        copyComboBox.setPrefixComponent(SvgFactory.osIcon("30px", null));
         copyComboBox.setItems(comboBoxSerialPort.getListDataView().getItems().toList());
         copyComboBox.setRenderer(rendererIconUsbForEachItem());
         return copyComboBox;
@@ -138,7 +138,7 @@ public class ChangeSerialPortPermissionDialog extends Dialog {
      */
     private VerticalLayout createContent() {
 
-        final SvgIcon icon = SvgFactory.OsIcon("50px", null);
+        final SvgIcon icon = SvgFactory.osIcon("50px", null);
         Div divIcon = new Div(icon);
         divIcon.setWidth("50px");
         divIcon.setHeight("50px");

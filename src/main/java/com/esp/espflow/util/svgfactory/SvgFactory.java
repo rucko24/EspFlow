@@ -76,7 +76,7 @@ public class SvgFactory {
      *
      * @return {@link SvgIcon}
      */
-    public static SvgIcon OsIcon(String size, String customHeight) {
+    public static SvgIcon osIcon(String size, String customHeight) {
         SvgIcon svgIcon;
         if (GetOsName.WINDOWS == GetOsName.getOsName()) {
             svgIcon = SvgFactory.createIconFromSvg(WINDOWS_ICON, size, customHeight);
