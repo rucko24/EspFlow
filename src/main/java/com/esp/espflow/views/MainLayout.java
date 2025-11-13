@@ -12,7 +12,6 @@ import com.esp.espflow.views.hexdump.HexDumpView;
 import com.esp.espflow.views.mainfooter.MainFooter;
 import com.esp.espflow.views.mainheader.MainHeader;
 import com.esp.espflow.views.readflash.ReadFlashView;
-import com.esp.espflow.views.webserial.WebSerialView;
 import com.infraleap.animatecss.Animated;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -166,10 +165,6 @@ public class MainLayout extends AppLayout {
 
         if (accessChecker.hasAccess(HexDumpView.class)) {
             nav.addItem(new SideNavItem("HexDump", HexDumpView.class, SvgFactory.createIconFromSvg(TABLE_SVG, SIZE_25_PX, null)));
-        }
-
-        if (accessChecker.hasAccess(WebSerialView.class)) {
-            nav.addItem(new SideNavItem("Web-Serial", WebSerialView.class, SvgFactory.createIconFromSvg(WEB_SERIAL_ICON_SVG, SIZE_30_PX, null)));
         }
 
         if (accessChecker.hasAccess(AboutView.class)) {
