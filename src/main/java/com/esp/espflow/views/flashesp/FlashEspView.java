@@ -4,6 +4,7 @@ import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
 import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
+import com.esp.espflow.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.DebugSerialPortService;
 import com.esp.espflow.service.EsptoolPathService;
@@ -34,6 +35,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -52,6 +55,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -91,7 +95,7 @@ import static com.esp.espflow.util.EspFlowConstants.WIZARD_FLASH_ESP_VIEW;
 @RouteAlias(value = "", layout = MainLayout.class)
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
-public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeaveObserver {
+public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeaveObserver, BeforeEnterObserver {
 
     private final RadioButtonGroup<BaudRatesEnum> baudRatesRadioButtonGroup = new RadioButtonGroup<>();
     private final RadioButtonGroup<FlashModeEnum> flashModeRadioButtonGroup = new RadioButtonGroup<>();
@@ -409,11 +413,14 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
     }
 
     private void configureHeaderComponents() {
+        this.shoWizardIcon.setVisible(false);
+//        this.toggleButtonEnableWebSerial.setValue(false);
+//        this.iconWebSerial.setVisible(false);
         this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
         this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
         this.shoWizardIcon.setTooltipText("Show dialog");
         this.toggleButtonEnableWebSerial.setTooltipText("Enable WebSerial");
-        iconWebSerial.setTooltipText("WebSerial API");
+        this.iconWebSerial.setTooltipText("WebSerial API");
         this.rowForWebSerialIcon.add(toggleButtonEnableWebSerial, iconWebSerial);
         this.rowForWebSerialIcon.getStyle().setBorder("1px solid lightgray");
         this.rowForWebSerialIcon.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -426,21 +433,34 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
         });
     }
 
+    private void hideOrShowHeaderComponentsWithThisWidth(final int width) {
+        this.shoWizardIcon.setVisible(true);
+        if (width < 500) {
+            this.shoWizardIcon.setVisible(false);
+            this.toggleButtonEnableWebSerial.setValue(false);
+            this.iconWebSerial.setVisible(false);
+        } else { // width != 500
+            this.shoWizardIcon.setVisible(true);
+            this.toggleButtonEnableWebSerial.setValue(true);
+            this.iconWebSerial.setVisible(true);
+        }
+    }
+
     private void animatedHeaderComponents() {
         Animated.animate(this.shoWizardIcon, Animation.FADE_IN);
+        Animated.animate(this.iconWebSerial, Animation.FADE_IN);
+        Animated.animate(this.toggleButtonEnableWebSerial, Animation.FADE_IN);
     }
 
     private void refreshHeaderComponents() {
         this.rowMainHeader.removeAll();
         this.animatedHeaderComponents();
-        this.shoWizardIcon.setVisible(true);
         this.rowMainHeader.add(this.rowForWebSerialIcon, this.shoWizardIcon);
     }
 
     /**
      * This listener is used to receive the HorizontalLayout that is in the <strong>navbar<strong> and to be
-     * able to use it to show in it, components of this view, like the buttons to show the sidebar,
-     * to show the detected devices etc.
+     * able to use it to show in it, components of this view, like the buttons ********
      *
      * @param rowMainHeader from the navbar
      */
@@ -454,9 +474,39 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
         this.flashFileName = flashFileName;
     }
 
+    /**
+     * This method triggers the scanning of the microcontrollers and creates the slides, it also updates the footer badges.
+     * <p>
+     * It is also disabled on the first click preventing the user from clicking and another scan is processed to avoid interfering with the previous one.
+     *
+     * @param event events to process them in this view
+     */
+    @Async("eventTaskExecutor")
+    //@EventListener
+    public void refreshDevice(MainHeaderToReadFlashViewEvent event) {
+        event.ui().access(() -> {
+            this.hideOrShowHeaderComponentsWithThisWidth(event.width());
+            this.animatedHeaderComponents();
+        });
+    }
+
+    /**
+     *
+     * @param event before navigation event with event details
+     */
     @Override
     public void beforeLeave(BeforeLeaveEvent event) {
         this.shoWizardIcon.setVisible(false);
+        this.toggleButtonEnableWebSerial.setValue(false);
+        this.iconWebSerial.setVisible(false);
+        this.rowForWebSerialIcon.setVisible(false);
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        this.shoWizardIcon.setVisible(true);
+        this.iconWebSerial.setVisible(true);
+        this.rowForWebSerialIcon.setVisible(true);
     }
 
     @Override

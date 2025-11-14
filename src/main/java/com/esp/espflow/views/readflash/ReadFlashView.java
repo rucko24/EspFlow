@@ -173,6 +173,40 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
 
     }
 
+    private void configureHeaderComponents() {
+        this.buttonRefreshDevices.setVisible(false);
+        this.shoWizardIcon.setVisible(false);
+        this.buttonConfigure.setVisible(false);
+        this.configureIcon.setVisible(false);
+        this.buttonRefreshDevicesIcon.setVisible(false);
+        this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        this.buttonRefreshDevices.setId("button-refresh-device");
+        this.buttonRefreshDevices.setEnabled(true);
+        this.buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        this.buttonConfigure.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+        this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        this.buttonRefreshDevices.addClickShortcut(Key.ENTER);
+        this.buttonRefreshDevices.setDisableOnClick(true);
+        this.buttonRefreshDevices.addClickListener(event -> this.refreshDevice());
+        this.buttonConfigure.addClickListener(event -> {
+            this.sidebarReadFlash.openSidebar();
+
+        });
+        this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
+        this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
+        this.shoWizardIcon.setTooltipText("Show dialog");
+        this.shoWizardIcon.addClickListener(event -> {
+            this.add(this.wizardReadFlashView);
+            this.wizardReadFlashView.openAndDisableModeless();
+        });
+        this.configureIcon.setTooltipText(CONFIGURE);
+        this.configureIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        this.buttonRefreshDevicesIcon.setTooltipText("Refresh devices");
+        this.buttonRefreshDevicesIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        this.buttonRefreshDevicesIcon.addClickListener(event -> this.refreshDevice());
+        this.configureIcon.addClickListener(event -> this.sidebarReadFlash.openSidebar());
+    }
+
     /**
      * The SplitLayout
      *
@@ -321,41 +355,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         divRowToSecondary.add(divColumnItems, outPutConsole);
 
         return divRowToSecondary;
-    }
-
-    private void configureHeaderComponents() {
-        this.buttonRefreshDevices.setVisible(false);
-        this.shoWizardIcon.setVisible(false);
-        this.buttonConfigure.setVisible(false);
-        this.configureIcon.setVisible(false);
-        this.buttonRefreshDevicesIcon.setVisible(false);
-        this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        this.buttonRefreshDevices.setId("button-refresh-device");
-        this.buttonRefreshDevices.setEnabled(true);
-        this.buttonRefreshDevices.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        this.buttonConfigure.addClassName(BOX_SHADOW_VAADIN_BUTTON);
-        this.buttonRefreshDevices.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        this.buttonRefreshDevices.addClickShortcut(Key.ENTER);
-        this.buttonRefreshDevices.setDisableOnClick(true);
-        this.buttonRefreshDevices.addClickListener(event -> this.refreshDevice());
-        this.buttonConfigure.addClickListener(event -> {
-            this.sidebarReadFlash.openSidebar();
-
-        });
-        this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
-        this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
-        this.shoWizardIcon.setTooltipText("Show dialog");
-        this.shoWizardIcon.addClickListener(event -> {
-            this.add(this.wizardReadFlashView);
-            this.wizardReadFlashView.openAndDisableModeless();
-        });
-        this.configureIcon.setTooltipText(CONFIGURE);
-        this.configureIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        this.buttonRefreshDevicesIcon.setTooltipText("Refresh devices");
-        this.buttonRefreshDevicesIcon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        this.buttonRefreshDevicesIcon.addClickListener(event -> this.refreshDevice());
-        this.configureIcon.addClickListener(event -> this.sidebarReadFlash.openSidebar());
-        this.buttonRefreshDevicesIcon.setVisible(false);
     }
 
     private void refreshDevice() {
@@ -548,17 +547,6 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      *
      * <p>Each Slide at the end of this reactive stream, will have a button in the upper right corner, which will allow to execute the <strong>read_flash<strong>
      * command and extract the firmware from the device.
-     * </p>
-     *
-     * <ul>
-     *     <li>showEsp01s();</li>
-     *     <li>showEsp8266340G4MB();</li>
-     *     <li>showEsp82664Cp201x4MB();</li>
-     *     <li>showEsp8285();</li>
-     *     <li>showEsp32S3();</li>
-     * </ul>
-     *
-     *
      * </p>
      *
      * @param spansList

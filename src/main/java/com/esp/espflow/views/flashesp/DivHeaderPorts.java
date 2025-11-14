@@ -133,7 +133,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         scanPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         scanPort.addClickShortcut(Key.ENTER);
         svgIconUnlock.addClassName(ICONS_RESPONSIVE_SIZE);
-        unlockPort.setEnabled(false);
         unlockPort.setTooltipText(CHANGE_SERIAL_PORT_PERMISSIONS.concat(" - SPACE"));
         unlockPort.addClickShortcut(Key.SPACE);
         unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
