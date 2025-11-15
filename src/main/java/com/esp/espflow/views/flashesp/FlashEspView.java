@@ -4,7 +4,6 @@ import com.esp.espflow.enums.BaudRatesEnum;
 import com.esp.espflow.enums.EraseFlashEnum;
 import com.esp.espflow.enums.FlashModeEnum;
 import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
-import com.esp.espflow.event.MainHeaderToReadFlashViewEvent;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.DebugSerialPortService;
 import com.esp.espflow.service.EsptoolPathService;
@@ -55,7 +54,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -129,11 +127,12 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
 
     @PostConstruct
     public void init() {
+        this.configureHeaderComponents();
         this.showContent();
     }
 
     private void showContent() {
-        this.configureHeaderComponents();
+
         super.addClassNames(Display.FLEX, FlexDirection.ROW,
                 LumoUtility.Width.FULL,
                 LumoUtility.Height.FULL);
@@ -413,9 +412,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
     }
 
     private void configureHeaderComponents() {
-        this.shoWizardIcon.setVisible(false);
-//        this.toggleButtonEnableWebSerial.setValue(false);
-//        this.iconWebSerial.setVisible(false);
         this.shoWizardIcon.getStyle().setCursor(CURSOR_POINTER);
         this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
         this.shoWizardIcon.setTooltipText("Show dialog");
@@ -431,19 +427,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
             this.add(this.wizardFlashEspDialog);
             this.wizardFlashEspDialog.openAndDisableModeless();
         });
-    }
-
-    private void hideOrShowHeaderComponentsWithThisWidth(final int width) {
-        this.shoWizardIcon.setVisible(true);
-        if (width < 500) {
-            this.shoWizardIcon.setVisible(false);
-            this.toggleButtonEnableWebSerial.setValue(false);
-            this.iconWebSerial.setVisible(false);
-        } else { // width != 500
-            this.shoWizardIcon.setVisible(true);
-            this.toggleButtonEnableWebSerial.setValue(true);
-            this.iconWebSerial.setVisible(true);
-        }
     }
 
     private void animatedHeaderComponents() {
@@ -472,22 +455,6 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
     @EventListener
     public void updateFlashFileName(String flashFileName) {
         this.flashFileName = flashFileName;
-    }
-
-    /**
-     * This method triggers the scanning of the microcontrollers and creates the slides, it also updates the footer badges.
-     * <p>
-     * It is also disabled on the first click preventing the user from clicking and another scan is processed to avoid interfering with the previous one.
-     *
-     * @param event events to process them in this view
-     */
-    @Async("eventTaskExecutor")
-    //@EventListener
-    public void refreshDevice(MainHeaderToReadFlashViewEvent event) {
-        event.ui().access(() -> {
-            this.hideOrShowHeaderComponentsWithThisWidth(event.width());
-            this.animatedHeaderComponents();
-        });
     }
 
     /**
