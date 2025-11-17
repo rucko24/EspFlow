@@ -9,7 +9,6 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * The entry point of the Spring Boot application.
@@ -20,7 +19,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Push
 @SpringBootApplication
 @Theme(value = "espflow")
-@EnableAsync(proxyTargetClass = true)
 @PWA(name = "EspFlow", shortName = "EspFlow", offlineResources = {})
 public class Application implements AppShellConfigurator, VaadinServiceInitListener {
 

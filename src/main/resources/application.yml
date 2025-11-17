@@ -37,4 +37,4 @@ compute:
   digest-algorithm: SHA-256
 
 blockhound:
-  enable: true
+  enable: false
