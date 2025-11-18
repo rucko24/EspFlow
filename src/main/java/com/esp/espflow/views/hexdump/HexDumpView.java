@@ -126,7 +126,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
 
         final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE);
 
-        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir)
+        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir, this.upload)
                 .whenStart((transferContext) -> {
                     final String initCustomFileName = fixedDir.concat(transferContext.fileName());
                     log.info("Upload started flash-hex-dump-analize/ {}", initCustomFileName);

@@ -37,6 +37,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.streams.TransferContext;
 import com.vaadin.flow.spring.annotation.SpringComponent;
@@ -110,28 +111,14 @@ public class SettingsEsptoolHomePathContent extends Layout implements IMakeExecu
     private void initListeners() {
         final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL);
 
-        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir)
+        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir, this.upload)
                 .whenStart((transferContext) -> {
                     this.upload.clearFileList();
                     final String initCustomFileName = fixedDir.concat(transferContext.fileName());
                     log.info("Upload started custom initial path {}", initCustomFileName);
                 })
-                .whenComplete((transferContext, success) -> {
-                    if (success) {
-                        log.info("Upload completed successfully");
-                        this.progressBar.setVisible(true);
-                        final String initCustomFileName = fixedDir.concat(transferContext.fileName());
-                        this.computeSha256Service.computeSha256(initCustomFileName)/*To differentiate from an incorrect executable*/
-                                .doOnError(this.errorProcessingWhenComputingSha256(initCustomFileName))
-                                .map(this.esptoolSha256DtoToEsptoolExecutableDto(initCustomFileName))
-                                .flatMap(this::returnEmptyIfVersionAlreadyExists)
-                                .switchIfEmpty(this.fallback())
-                                .flatMap(this.configureNewDirectoryAndMakeExecutable(transferContext, initCustomFileName))
-                                .subscribe(this.subscribeSaveAndUpdate());
-                    } else {
-                        log.error("Upload failed");
-                    }
-                });
+                .whenComplete(whenCompleteUpload(fixedDir));
+
         this.upload.setUploadHandler(uploadHandler);
         var executableIcon = SvgFactory.createIconFromSvg(EXECUTABLE_ICON, "20px", null);
         executableIcon.addClassName(BLACK_TO_WHITE_ICON);
@@ -148,6 +135,34 @@ public class SettingsEsptoolHomePathContent extends Layout implements IMakeExecu
                 }
             }
         });
+    }
+
+    private SerializableBiConsumer<TransferContext, Boolean> whenCompleteUpload(String fixedDir) {
+        return (transferContext, success) -> {
+            if (success) {
+                this.progressBar.setVisible(true);
+                final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                this.computeSha256Service.computeSha256(initCustomFileName)/*To differentiate from an incorrect executable*/
+                        .doOnError(this.errorProcessingWhenComputingSha256(initCustomFileName))
+                        .map(this.esptoolSha256DtoToEsptoolExecutableDto(initCustomFileName))
+                        .flatMap(this::returnEmptyIfVersionAlreadyExists)
+                        .switchIfEmpty(this.fallback())
+                        .flatMap(this.configureNewDirectoryAndMakeExecutable(transferContext, initCustomFileName))
+                        .doOnTerminate(this.uploadCompletedSuccessFully(transferContext))
+                        .subscribe(this.subscribeSaveAndUpdate());
+            } else {
+                log.error("Upload failed");
+                transferContext.getUI().access(() -> ConfirmDialogBuilder.showWarningUI("Upload failed", transferContext.getUI()));
+                this.upload.clearFileList();
+            }
+        };
+    }
+
+    private Runnable uploadCompletedSuccessFully(TransferContext transferContext) {
+        return () -> {
+            log.info("Upload completed successfully");
+            transferContext.getUI().access(() -> ConfirmDialogBuilder.showInformationUI("Upload completed successfully", transferContext.getUI()));
+        };
     }
 
     /**

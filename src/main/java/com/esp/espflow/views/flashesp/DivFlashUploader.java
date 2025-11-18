@@ -74,7 +74,7 @@ public class DivFlashUploader extends Div {
      * Adding listeners here
      */
     private void addListeners() {
-        final FlashUploadHandler uploadHandler = new FlashUploadHandler(JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"))
+        final FlashUploadHandler uploadHandler = new FlashUploadHandler(JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"), this.upload)
                 .whenStart(() -> log.info("Upload started"))
                 .whenComplete((transferContext, success) -> {
                     final UI ui = transferContext.getUI();
