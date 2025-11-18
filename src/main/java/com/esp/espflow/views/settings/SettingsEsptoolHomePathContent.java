@@ -11,7 +11,7 @@ import com.esp.espflow.service.hashservice.ComputeSha256Service;
 import com.esp.espflow.service.respository.impl.EsptoolExecutableService;
 import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.EspFlowConstants;
-import com.esp.espflow.util.FlashUploadHandler;
+import com.esp.espflow.util.FileUploadHandler;
 import com.esp.espflow.util.IMakeExecutable;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.Layout;
@@ -111,7 +111,7 @@ public class SettingsEsptoolHomePathContent extends Layout implements IMakeExecu
     private void initListeners() {
         final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(CUSTOM_ESPTOOL);
 
-        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir, this.upload)
+        final FileUploadHandler uploadHandler = new FileUploadHandler(fixedDir, this.upload)
                 .whenStart((transferContext) -> {
                     this.upload.clearFileList();
                     final String initCustomFileName = fixedDir.concat(transferContext.fileName());

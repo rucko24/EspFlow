@@ -24,7 +24,7 @@ import java.util.function.Function;
  */
 @Log4j2
 @RequiredArgsConstructor
-public class FlashUploadHandler extends TransferProgressAwareHandler<UploadEvent, FlashUploadHandler> implements UploadHandler {
+public class FileUploadHandler extends TransferProgressAwareHandler<UploadEvent, FileUploadHandler> implements UploadHandler {
 
     private final String fixedDir;
     private final Upload upload;
@@ -39,16 +39,6 @@ public class FlashUploadHandler extends TransferProgressAwareHandler<UploadEvent
                 .subscribe();
     }
 
-    private Consumer<Throwable> onErrorUploadFailed(UploadEvent event) {
-        return error -> {
-            log.error("Upload failed: {}", error.getMessage());
-            event.getUI().access(() -> {
-                ConfirmDialogBuilder.showWarningUI("Upload failed: " + error.getMessage(), event.getUI());
-                this.upload.clearFileList(); //renable the upload button
-            });
-        };
-    }
-
     private Function<Path, Mono<? extends Path>> validateAndPreparePath(UploadEvent event) {
         return targetDir -> this.validateAndPreparePath(targetDir, event.getFileName())
                 .doOnError(error -> {
@@ -56,6 +46,7 @@ public class FlashUploadHandler extends TransferProgressAwareHandler<UploadEvent
                     event.getUI().access(() -> {
                         ConfirmDialogBuilder.showWarningUI("ValidateAndPreparePath failed: " + error.getMessage(), event.getUI());
                         this.upload.clearFileList(); //renable the upload button
+                        //this.getElement().setPropertyJson("files", Json.createArray());
                     });
                 });
     }
@@ -104,6 +95,16 @@ public class FlashUploadHandler extends TransferProgressAwareHandler<UploadEvent
             this.notifyError(event, error);
             return Mono.error(new IOException("File transfer failed: ", error));
         }
+    }
+
+    private Consumer<Throwable> onErrorUploadFailed(UploadEvent event) {
+        return error -> {
+            log.error("Upload failed: {}", error.getMessage());
+            event.getUI().access(() -> {
+                ConfirmDialogBuilder.showWarningUI("Upload failed: " + error.getMessage(), event.getUI());
+                this.upload.clearFileList(); //renable the upload button
+            });
+        };
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.esp.espflow.views.flashesp;
 
 import com.esp.espflow.util.ConfirmDialogBuilder;
-import com.esp.espflow.util.FlashUploadHandler;
+import com.esp.espflow.util.FileUploadHandler;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -74,7 +74,7 @@ public class DivFlashUploader extends Div {
      * Adding listeners here
      */
     private void addListeners() {
-        final FlashUploadHandler uploadHandler = new FlashUploadHandler(JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"), this.upload)
+        final FileUploadHandler uploadHandler = new FileUploadHandler(JAVA_IO_TEMPORAL_DIR_OS.concat("/flash-esptool-write-dir/"), this.upload)
                 .whenStart(() -> log.info("Upload started"))
                 .whenComplete((transferContext, success) -> {
                     final UI ui = transferContext.getUI();

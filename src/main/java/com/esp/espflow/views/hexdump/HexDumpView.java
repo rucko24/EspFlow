@@ -4,7 +4,7 @@ import com.esp.espflow.dto.HexDumpDto;
 import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.service.HexDumpGeneratorService;
 import com.esp.espflow.service.respository.impl.HexDumpService;
-import com.esp.espflow.util.FlashUploadHandler;
+import com.esp.espflow.util.FileUploadHandler;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
 import com.infraleap.animatecss.Animated;
@@ -126,7 +126,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
 
         final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE);
 
-        final FlashUploadHandler uploadHandler = new FlashUploadHandler(fixedDir, this.upload)
+        final FileUploadHandler uploadHandler = new FileUploadHandler(fixedDir, this.upload)
                 .whenStart((transferContext) -> {
                     final String initCustomFileName = fixedDir.concat(transferContext.fileName());
                     log.info("Upload started flash-hex-dump-analize/ {}", initCustomFileName);
