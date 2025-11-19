@@ -79,9 +79,9 @@ public class FileUploadHandler extends TransferProgressAwareHandler<UploadEvent,
     }
 
     private Function<Path, Mono<? extends Mono<Long>>> transferFile(UploadEvent event) {
-        return safeFilePath -> Mono.fromCallable(() -> this.transferFile(event, safeFilePath)
+        return safeFilePath -> Mono.fromCallable(() -> this.transferFile(event, safeFilePath))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(Function.identity())
+                .map(Function.identity()
         );
     }
 
