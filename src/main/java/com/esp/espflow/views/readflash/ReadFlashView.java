@@ -454,7 +454,7 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
         this.leftPrimarySectionProgressBar.setVisible(true);
 
         this.esptoolService.readAllDevices()
-                .flatMap(this.countAllDevices())
+                .flatMap(this::countAllDevices)
                 .flatMap(this.configureSlides(ui, paramEspDevicesCarousel, spansList))
                 .doOnError(canNotBeReadDevice -> this.onError(ui, canNotBeReadDevice))
                 .doOnComplete(() -> this.onComplete(ui, paramEspDevicesCarousel, spansList))
@@ -476,11 +476,10 @@ public class ReadFlashView extends Div implements ResponsiveHeaderDiv, BeforeEnt
      *
      * @return A {@link Function} <EspDeviceInfo, Mono<EspDeviceWithTotalDevices>>}
      */
-    private Function<EspDeviceInfoRecord, Mono<EspDeviceWithTotalDevicesRecord>> countAllDevices() {
-
-        return item -> this.esptoolService.countAllDevices()
+    private Mono<EspDeviceWithTotalDevicesRecord> countAllDevices(EspDeviceInfoRecord espDeviceInfoRecord) {
+        return this.esptoolService.countAllDevices()
                 .map(count ->
-                        EspDeviceWithTotalDevicesMapper.INSTANCE.espDeviceWithTotalDevices(item, count)
+                        EspDeviceWithTotalDevicesMapper.INSTANCE.espDeviceWithTotalDevices(espDeviceInfoRecord, count)
                 );
     }
 
