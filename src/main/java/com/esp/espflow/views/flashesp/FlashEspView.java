@@ -371,6 +371,15 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
             }
         });
 
+        this.divHeaderPorts.getButtonStopDebugPort().addClickListener(event -> {
+            if(this.debugPortService.closePort()) {
+                log.info("Port is closed ");
+                ConfirmDialogBuilder.showInformationUI("Port is closed!", ui);
+            } else {
+                log.info("Port can not be closed");
+                ConfirmDialogBuilder.showWarningUI("Port can not be closed!", ui);
+            }
+        });
     }
 
 

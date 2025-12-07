@@ -99,6 +99,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final H2 h2EsptoolVersion = new H2();
     private final ComboBox<String> comboBoxSerialPort = new ComboBox<>();
     private final Button buttonDebugPort = new Button(VaadinIcon.SEARCH.create());
+    private final Button buttonStopDebugPort = new Button(VaadinIcon.STOP.create());
     private final Button scanPort = new Button(VaadinIcon.REFRESH.create());
     private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
     private final SvgIcon svgIconUnlock = SvgFactory.createIconFromSvg("unlock-gray.svg", SIZE_30_PX, null);
@@ -138,10 +139,15 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         unlockPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonDebugPort.setTooltipText("Debug serial port");
         buttonDebugPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+
+        buttonStopDebugPort.setTooltipText("Stop debug serial por");
+        buttonStopDebugPort.addClassName(BOX_SHADOW_VAADIN_BUTTON);
+
         buttonExecuteFlashId.setEnabled(false);
         buttonExecuteFlashId.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonExecuteFlashId.setTooltipText("Execute flash_id");
         this.buttonDebugPort.setEnabled(false);
+        this.buttonStopDebugPort.setEnabled(false);
         this.initListeners();
 
         final Div divHeader = new Div(divh3SerialPort, divCombo);
@@ -169,13 +175,17 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         final Span spanDebugPort = new Span("Debug port");
         spanDebugPort.getStyle().set(VISIBILITY, HIDDEN);
         spanDebugPort.getStyle().set(DISPLAY1,"none");
+        final Div div5 = createDiv(buttonStopDebugPort, MARGIN,"0px");
+        final Span spanStopDebugPort = new Span("Stop Debug port");
+        spanStopDebugPort.getStyle().set(VISIBILITY, HIDDEN);
+        spanStopDebugPort.getStyle().set(DISPLAY1,"none");
 
-        Stream.of(spanRefresh,spanUnlockPorts,spanScanPorts,spanDebugPort).forEach(span -> {
+        Stream.of(spanRefresh,spanUnlockPorts,spanScanPorts,spanDebugPort, spanStopDebugPort).forEach(span -> {
             span.addClassName("span-text");
             span.addClassNames(LumoUtility.TextColor.SECONDARY,LumoUtility.FontSize.SMALL);
         });
-        horizontalLayout.add(div1,div2,div3,div4);
-        Stream.of(div1,div2,div3,div4).forEach(div -> div.addClassName("expand-buttons"));
+        horizontalLayout.add(div1,div2,div3,div4,div5);
+        Stream.of(div1,div2,div3,div4,div5).forEach(div -> div.addClassName("expand-buttons"));
         horizontalLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         horizontalLayout.addClassName("row-buttons");
 
@@ -389,11 +399,13 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
                 this.unlockPort.getIcon().addClassName(BLACK_TO_WHITE_ICON);
                 this.buttonExecuteFlashId.setEnabled(true);
                 this.buttonDebugPort.setEnabled(true);
+                this.buttonStopDebugPort.setEnabled(true);
                 Animated.animate(buttonExecuteFlashId, Animation.FADE_IN);
                 Animated.animate(unlockPort, Animation.FADE_IN);
                 Animated.animate(buttonDebugPort, Animation.FADE_IN);
             } else {
                 this.buttonDebugPort.setEnabled(true);
+                this.buttonStopDebugPort.setEnabled(true);
                 this.buttonExecuteFlashId.setEnabled(false);
                 this.comboBoxSerialPort.setItems(List.of());
                 scanPort.getUI().ifPresent(ui -> {
