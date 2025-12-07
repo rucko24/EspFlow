@@ -4,6 +4,7 @@ import com.esp.espflow.dto.HexDumpDto;
 import com.esp.espflow.event.EspflowMessageListItemEvent;
 import com.esp.espflow.service.HexDumpGeneratorService;
 import com.esp.espflow.service.respository.impl.HexDumpService;
+import com.esp.espflow.util.ConfirmDialogBuilder;
 import com.esp.espflow.util.FileUploadHandler;
 import com.esp.espflow.util.svgfactory.SvgFactory;
 import com.esp.espflow.views.MainLayout;
@@ -105,54 +106,27 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
      * Only to use the icon, when the Grid is empty.
      */
     private GridListDataView<HexDumpDto> gridListDataView;
+    private ProgressBar progressBarHexDump;
 
     @PostConstruct
     public void postConstruct() {
         super.setSizeFull();
         super.addClassName("grid-message-example");
 
-        this.initListeners();
         final Component uploadAndFilterRow = this.configureUpload();
         final Component componentGrid = this.configureGrid();
 
-        super.add(uploadAndFilterRow, componentGrid);
+        super.add(uploadAndFilterRow, progressBarHexDump, componentGrid);
         Animated.animate(this, Animated.Animation.FADE_IN);
 
         this.addPaginationOnGrid(StringUtils.EMPTY);
 
     }
 
-    private void initListeners() {
-
-        final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE);
-
-        final FileUploadHandler uploadHandler = new FileUploadHandler(fixedDir, this.upload)
-                .whenStart((transferContext) -> {
-                    final String initCustomFileName = fixedDir.concat(transferContext.fileName());
-                    log.info("Upload started flash-hex-dump-analize/ {}", initCustomFileName);
-                })
-                .whenComplete((transferContext, success) -> {
-                    if (success) {
-                        log.info("Upload completed successfully");
-                        try {
-                            final String initCustomFileName = fixedDir.concat(transferContext.fileName());
-                            byte[] fileBytes = Files.readAllBytes(Path.of(initCustomFileName));
-                            this.hexDumpGeneratorService.generateHexDump(fileBytes);
-                            log.info("generate hexdump file completed successfully");
-                            //The grid will be filled based on the predefined page layout.
-                            this.addPaginationOnGrid(StringUtils.EMPTY);
-                            this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
-                        } catch (IOException e) {
-                            log.error("readAllBytes failed {}", e.getMessage());
-                        }
-                    } else {
-                        log.error("Upload failed");
-                    }
-                });
-        this.upload.setUploadHandler(uploadHandler);
-    }
-
     private HorizontalLayout configureUpload() {
+        this.progressBarHexDump = this.createProgressBar();
+        this.progressBarHexDump.setWidthFull();
+        this.configureFileUploadHandler();
         upload.setDropAllowed(true);
         upload.setMaxFiles(1);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
@@ -167,16 +141,45 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         return row;
     }
 
+    private void configureFileUploadHandler() {
+
+        final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE);
+
+        final FileUploadHandler uploadHandler = new FileUploadHandler(fixedDir, this.upload)
+                .whenStart((transferContext) -> {
+                    this.progressBarHexDump.setVisible(true);
+                    final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                    log.info("Upload started flash-hex-dump-analize/ {}", initCustomFileName);
+                })
+                .whenComplete((transferContext, success) -> {
+                    if (success) {
+                        try {
+                            final String initCustomFileName = fixedDir.concat(transferContext.fileName());
+                            byte[] fileBytes = Files.readAllBytes(Path.of(initCustomFileName));
+                            this.hexDumpGeneratorService.generateHexDump(fileBytes);
+                            log.info("generate hexdump file completed successfully");
+                            //The grid will be filled based on the predefined page layout.
+                            this.addPaginationOnGrid(StringUtils.EMPTY);
+                            this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
+                            this.progressBarHexDump.setVisible(false);
+                            ConfirmDialogBuilder.showInformationUI("Generated hexdump completed.", transferContext.getUI());
+                        } catch (IOException e) {
+                            log.error("whenComplete failed {}", e.getMessage());
+                        }
+                    } else {
+                        log.error("Upload failed");
+                    }
+                });
+        this.upload.setUploadHandler(uploadHandler);
+    }
+
     private HorizontalLayout configureFilterRow() {
         final HorizontalLayout row = new HorizontalLayout();
         final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
         buttonClearGrid.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonClearGrid.setTooltipText("Clear grid");
         buttonClearGrid.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        final ProgressBar progressBar = new ProgressBar();
-        progressBar.setWidth("50px");
-        progressBar.setIndeterminate(true);
-        progressBar.setVisible(false);
+        final ProgressBar progressBar = this.createProgressBar();
         buttonClearGrid.addClickListener(event -> {
             if (event.isFromClient() && this.gridListDataView.getItems().findAny().isPresent()) {
                 progressBar.setVisible(true);
@@ -425,6 +428,14 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
                 this.getElement() // or wherever receiveScrollPosition(index) is implemented in the
                 // backend
         );
+    }
+
+    private ProgressBar createProgressBar() {
+        final ProgressBar progressBar = new ProgressBar();
+        progressBar.setWidth("50px");
+        progressBar.setIndeterminate(true);
+        progressBar.setVisible(false);
+        return progressBar;
     }
 
     @ClientCallable
