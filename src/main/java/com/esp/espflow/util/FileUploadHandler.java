@@ -64,7 +64,7 @@ public class FileUploadHandler extends TransferProgressAwareHandler<UploadEvent,
             try {
                 Files.createDirectories(targetDir);
             } catch (IOException ex) {
-                return Mono.error(new IOException("Failed to create directory", ex));
+                return Mono.error(new IOException("Failed to create directory ", ex));
             }
         }
 
@@ -81,8 +81,7 @@ public class FileUploadHandler extends TransferProgressAwareHandler<UploadEvent,
     private Function<Path, Mono<? extends Mono<Long>>> transferFile(UploadEvent event) {
         return safeFilePath -> Mono.fromCallable(() -> this.transferFile(event, safeFilePath))
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(Function.identity()
-        );
+                .map(Function.identity());
     }
 
     private Mono<Long> transferFile(UploadEvent event, Path targetPath) {
