@@ -68,6 +68,19 @@ public class ConfirmDialogBuilder {
                 .make();
     }
 
+    public static ConfirmDialog showConfirmInformation(final String text, UI ui) {
+        var confirmDialog = ConfirmDialogBuilder.builder()
+                .withHeaderIconAndHeaderText(VaadinIcon.WARNING, EspFlowConstants.WARNING)
+                .withText(text)
+                .withComponent(null)
+                .make();
+        confirmDialog.setCancelable(true);
+        confirmDialog.setConfirmText("Delete");
+        confirmDialog.setConfirmButtonTheme("error primary");
+        ui.addToModalComponent(confirmDialog);
+        return confirmDialog;
+    }
+
     private static WithIconAndHeaderText builder() {
         return new InnerBuilder();
     }

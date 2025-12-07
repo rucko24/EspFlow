@@ -15,6 +15,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.ColumnRendering;
@@ -67,6 +68,7 @@ import java.util.List;
 
 import static com.esp.espflow.util.EspFlowConstants.BOX_SHADOW_VAADIN_BUTTON;
 import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_GRID;
+import static com.esp.espflow.util.EspFlowConstants.CONTEXT_MENU_ITEM_NO_CHECKMARK;
 import static com.esp.espflow.util.EspFlowConstants.COPY_ALT_SVG;
 import static com.esp.espflow.util.EspFlowConstants.COPY_TO_CLIPBOARD;
 import static com.esp.espflow.util.EspFlowConstants.CURSOR_POINTER;
@@ -182,13 +184,21 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         final ProgressBar progressBar = this.createProgressBar();
         buttonClearGrid.addClickListener(event -> {
             if (event.isFromClient() && this.gridListDataView.getItems().findAny().isPresent()) {
-                progressBar.setVisible(true);
-                buttonClearGrid.setVisible(false);
-                Animated.animate(buttonClearGrid, Animated.Animation.FADE_IN);
-                Mono.fromRunnable(this.runnableMe(buttonClearGrid))
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .doOnTerminate(this.onTerminate(buttonClearGrid, progressBar))
-                        .subscribe();
+                buttonClearGrid.getUI().ifPresent(ui -> {
+                    ConfirmDialog confirmDialog = ConfirmDialogBuilder.showConfirmInformation("You want to delete this hexdump ?", ui);
+                    confirmDialog.addConfirmListener(e -> {
+                        progressBar.setVisible(true);
+                        Tooltip.forComponent(progressBar).setText("In process");
+                        buttonClearGrid.setVisible(false);
+                        Animated.animate(buttonClearGrid, Animated.Animation.FADE_IN);
+                        Mono.fromRunnable(this.runnableMe(buttonClearGrid))
+                                .subscribeOn(Schedulers.boundedElastic())
+                                .doOnTerminate(this.onTerminate(buttonClearGrid, progressBar))
+                                .subscribe();
+                    });
+                });
+            } else {
+                ConfirmDialogBuilder.showInformation("Empty grid, load a .bin first");
             }
         });
         row.add(progressBar, buttonClearGrid, searchTextField);
@@ -294,6 +304,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
 
         gridContextMeuOffset.addComponentAsFirst(SvgFactory.createIconFromSvg(COPY_ALT_SVG, SIZE_30_PX, null));
         gridContextMeuOffset.addClassName(CONTEXT_MENU_ITEM_GRID);
+        gridContextMeuOffset.addClassName(CONTEXT_MENU_ITEM_NO_CHECKMARK);
         gridContextMeuOffset.addMenuItemClickListener(event -> {
             event.getItem().ifPresent(userCookieDto -> {
                 UI.getCurrent().getElement().executeJs(WINDOW_COPY_TO_CLIPBOARD, userCookieDto.getOffset());
