@@ -16,7 +16,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.ColumnRendering;
 import com.vaadin.flow.component.grid.Grid;
@@ -44,9 +43,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +50,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.vaadin.firitin.components.grid.PagingGrid;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -63,6 +58,7 @@ import reactor.core.scheduler.Schedulers;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -88,12 +84,12 @@ import static com.esp.espflow.util.EspFlowConstants.WINDOW_COPY_TO_CLIPBOARD;
 @PageTitle("HexDump")
 @Route(value = "hex-dump-viewer", layout = MainLayout.class)
 @JsModule(COPY_TO_CLIPBOARD)
-@CssImport("./styles/hexdump-grid/grid-message-when-empty.css")
 @RolesAllowed("ADMIN")
 @RequiredArgsConstructor
 public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
 
     private static final int DEBOUNCE_MS = 500;
+    private static final int DEFAULT_GRID_PAGE_SIZE = 15;
     private static final String INDEX_PARAM_NAME = "i";
 
     private final HexDumpGeneratorService hexDumpGeneratorService;
@@ -101,41 +97,42 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
     private final Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent;
     private final Upload upload = new Upload();
 
-    private final PagingGrid<HexDumpDto> grid = new PagingGrid<>();
-    private final TextField searchTextField = new TextField();
-    private final IntegerField setRowNumbersField = new IntegerField();
+    private final PagingGridv2<HexDumpDto> grid = new PagingGridv2<>();
     /**
      * Only to use the icon, when the Grid is empty.
      */
     private GridListDataView<HexDumpDto> gridListDataView;
     private ProgressBar progressBarHexDump;
+    private ProgressBar deleteItemsGridProgressBar;
+    private final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
 
     @PostConstruct
     public void postConstruct() {
         super.setSizeFull();
-        super.addClassName("grid-message-example");
 
-        final Component uploadAndFilterRow = this.configureUpload();
-        final Component componentGrid = this.configureGrid();
+        final Component headerRow = this.buildHeaderRow();
+        final Component gridComponent = this.buildGrid();
 
-        super.add(uploadAndFilterRow, progressBarHexDump, componentGrid);
+        super.add(headerRow, progressBarHexDump, gridComponent);
         Animated.animate(this, Animated.Animation.FADE_IN);
 
         this.addPaginationOnGrid(StringUtils.EMPTY);
 
     }
 
-    private HorizontalLayout configureUpload() {
-        this.progressBarHexDump = this.createProgressBar();
+    private HorizontalLayout buildHeaderRow() {
+        this.progressBarHexDump = this.buildProgressBar("Generating hexdump please wait...");
         this.progressBarHexDump.setWidthFull();
-        this.configureFileUploadHandler();
+        final FileUploadHandler fileUploadHandler = this.buildFileUploadHandler();
+        this.upload.setUploadHandler(fileUploadHandler);
+
         upload.setDropAllowed(true);
         upload.setMaxFiles(1);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
         Tooltip.forComponent(upload).setText("Drop .bin here!");
         this.i18N(upload);
 
-        final HorizontalLayout filterRow = this.configureFilterRow();
+        final HorizontalLayout filterRow = this.buildFilterRow();
         final HorizontalLayout row = new HorizontalLayout(upload, filterRow);
         row.addClassNames("row-header-hexdump");
         row.setWidthFull();
@@ -143,11 +140,9 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         return row;
     }
 
-    private void configureFileUploadHandler() {
-
+    private FileUploadHandler buildFileUploadHandler() {
         final String fixedDir = JAVA_IO_USER_HOME_DIR_OS.concat(ESPFLOW_DIR).concat(FLASH_HEX_DUMP_ANALIZE);
-
-        final FileUploadHandler uploadHandler = new FileUploadHandler(fixedDir, this.upload)
+        return new FileUploadHandler(fixedDir, this.upload)
                 .whenStart((transferContext) -> {
                     this.progressBarHexDump.setVisible(true);
                     final String initCustomFileName = fixedDir.concat(transferContext.fileName());
@@ -172,28 +167,25 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
                         log.error("Upload failed");
                     }
                 });
-        this.upload.setUploadHandler(uploadHandler);
     }
 
-    private HorizontalLayout configureFilterRow() {
+    private HorizontalLayout buildFilterRow() {
         final HorizontalLayout row = new HorizontalLayout();
-        final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
         buttonClearGrid.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonClearGrid.setTooltipText("Clear grid");
         buttonClearGrid.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        final ProgressBar progressBar = this.createProgressBar();
-        buttonClearGrid.addClickListener(event -> {
+        this.deleteItemsGridProgressBar = this.buildProgressBar("Deleting in progress...");
+        this.buttonClearGrid.addClickListener(event -> {
             if (event.isFromClient() && this.gridListDataView.getItems().findAny().isPresent()) {
-                buttonClearGrid.getUI().ifPresent(ui -> {
+                getUI().ifPresent(ui -> {
                     ConfirmDialog confirmDialog = ConfirmDialogBuilder.showConfirmInformation("You want to delete this hexdump ?", ui);
                     confirmDialog.addConfirmListener(e -> {
-                        progressBar.setVisible(true);
-                        Tooltip.forComponent(progressBar).setText("In process");
-                        buttonClearGrid.setVisible(false);
-                        Animated.animate(buttonClearGrid, Animated.Animation.FADE_IN);
-                        Mono.fromRunnable(this.runnableMe(buttonClearGrid))
+                        this.buttonClearGrid.setVisible(false);
+                        this.deleteItemsGridProgressBar.setVisible(true);
+                        Mono.fromRunnable(this::clearGridAndRecords)
                                 .subscribeOn(Schedulers.boundedElastic())
-                                .doOnTerminate(this.onTerminate(buttonClearGrid, progressBar))
+                                .delaySubscription(Duration.ofMillis(400))
+                                .doOnTerminate(this::afterTerminate)
                                 .subscribe();
                     });
                 });
@@ -201,32 +193,27 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
                 ConfirmDialogBuilder.showInformation("Empty grid, load a .bin first");
             }
         });
-        row.add(progressBar, buttonClearGrid, searchTextField);
-        row.setAlignSelf(Alignment.CENTER, searchTextField);
-        row.setAlignSelf(Alignment.CENTER, buttonClearGrid);
-        row.setAlignSelf(Alignment.CENTER, progressBar);
+        final TextField searchTextField = this.buildSearchTextField();
+        row.add(deleteItemsGridProgressBar, buttonClearGrid, searchTextField);
+        row.setAlignSelf(Alignment.CENTER, searchTextField, buttonClearGrid, deleteItemsGridProgressBar);
         return row;
     }
 
-    private Runnable onTerminate(Button buttonClearGrid, ProgressBar progressBar) {
-        return () -> {
-            buttonClearGrid.getUI().ifPresent(ui -> ui.access(() -> {
-                progressBar.setVisible(false);
-                buttonClearGrid.setVisible(true);
-            }));
-        };
+    private void clearGridAndRecords() {
+        getUI().ifPresent(ui -> {
+            ui.access(() -> {
+                this.hexDumpService.deleteAll();
+                this.grid.setItems(List.of());
+                this.upload.clearFileList();
+            });
+        });
     }
 
-    private Runnable runnableMe(Button buttonClearGrid) {
-        return () -> {
-            buttonClearGrid.getUI().ifPresent(ui -> {
-                ui.access(() -> {
-                    this.hexDumpService.deleteAll();
-                    this.grid.setItems(List.of());
-                    this.upload.clearFileList();
-                });
-            });
-        };
+    private void afterTerminate() {
+        getUI().ifPresent(ui -> ui.access(() -> {
+            this.deleteItemsGridProgressBar.setVisible(false);
+            this.buttonClearGrid.setVisible(true);
+        }));
     }
 
     /**
@@ -240,9 +227,46 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         upload.getUploadButton().addClassName(BOX_SHADOW_VAADIN_BUTTON);
     }
 
-    private Component configureGrid() {
+    private TextField buildSearchTextField() {
+        final TextField searchTextField = new TextField();
+        searchTextField.setWidthFull();
+        SvgIcon icon = LineAwesomeIcon.SLIDERS_H_SOLID.create();
+        icon.setTooltipText("Advanced search");
+        icon.getStyle().setCursor(CURSOR_POINTER);
+        searchTextField.setSuffixComponent(icon);
 
-        this.registerScrollEventListener();
+        final Popover popover = new Popover();
+        popover.setModal(true);
+        popover.setTarget(icon);
+        final IntegerField setRowNumbersField = new IntegerField();
+        final VerticalLayout verticalLayoutPopOver = new VerticalLayout(setRowNumbersField);
+        popover.add(verticalLayoutPopOver);
+
+        searchTextField.setPlaceholder("Search");
+        searchTextField.setTooltipText("Filter by: offset or ascii/text");
+        searchTextField.setPrefixComponent(VaadinIcon.SEARCH.create());
+        searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
+        searchTextField.setClearButtonVisible(true);
+        searchTextField.getStyle().set("max-width", "100%");
+        searchTextField.addValueChangeListener(valueChangeEvent -> this.addPaginationOnGrid(valueChangeEvent.getValue()));
+
+        setRowNumbersField.setLabel("Row numbers per page");
+        setRowNumbersField.setStepButtonsVisible(true);
+        setRowNumbersField.setTooltipText("Row numbers per page");
+        setRowNumbersField.setClearButtonVisible(true);
+        setRowNumbersField.setValue(DEFAULT_GRID_PAGE_SIZE);
+        searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
+        setRowNumbersField.addValueChangeListener(event -> {
+            if (event.isFromClient() && event.getValue() != null && gridListDataView.getItems().findAny().isPresent()) {
+                final Integer reconfigureNumberOfRecords = event.getValue();
+                this.grid.setPageSize(reconfigureNumberOfRecords);
+                this.addPaginationOnGrid(StringUtils.EMPTY);
+            }
+        });
+        return searchTextField;
+    }
+
+    private Component buildGrid() {
 
         this.grid.addColumn(HexDumpDto::getOffset)
                 .setKey("offset")
@@ -261,36 +285,34 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
                 .setAutoWidth(true)
                 .setHeader("Ascii / Text");
 
-        this.grid.setWidthFull();
-        this.grid.addClassName("grid");
+        this.grid.setSizeFull();
+        this.grid.setAllRowsVisible(false);
         this.grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         this.grid.setColumnRendering(ColumnRendering.LAZY);
         this.grid.setColumnReorderingAllowed(true);
         this.grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
-        this.grid.setPageSize(15);
+        this.grid.setPageSize(DEFAULT_GRID_PAGE_SIZE);
         this.gridListDataView = this.grid.setItems(List.of());
         this.grid.getColumns().forEach(e -> e.setResizable(Boolean.TRUE));
-        this.grid.setPaginationBarMode(PagingGrid.PaginationBarMode.TOP);
+        this.grid.setPaginationBarMode(PagingGridv2.PaginationBarMode.BOTTOM);
 
+        var tableIcon = SvgFactory.createIconFromSvg("table.svg", SIZE_30_PX, null);
+        tableIcon.getStyle().setMarginRight("10px");
+        final Div warningEmptyGrid = new Div(tableIcon, new Text("Empty grid!"));
+        warningEmptyGrid.addClassNames("warning-empty-grid");
+        this.grid.setEmptyStateComponent(warningEmptyGrid);
+
+        this.buildGridContextMenu(warningEmptyGrid);
+
+        return grid;
+    }
+
+    private void buildGridContextMenu(Div warning) {
         final GridContextMenu<HexDumpDto> contextMenu = grid.addContextMenu();
         final GridMenuItem<HexDumpDto> gridContextMeuOffset = contextMenu.addItem("Copy Offset");
         final GridMenuItem<HexDumpDto> gridContextMenuAscii = contextMenu.addItem("Copy Ascii text");
         final GridMenuItem<HexDumpDto> gridContextMenuHex = contextMenu.addItem("Copy Hex columns");
         final GridMenuItem<HexDumpDto> gridContextMenuRow = contextMenu.addItem("Copy entire row");
-
-        final Div gridRoot = new Div();
-        gridRoot.addClassNames("grid-root", LumoUtility.Border.ALL, LumoUtility.BorderRadius.LARGE);
-        var tableIcon = SvgFactory.createIconFromSvg("table.svg", SIZE_30_PX, null);
-        tableIcon.getStyle().setMarginRight("10px");
-        final Div warning = new Div(tableIcon, new Text("Empty grid!"));
-
-        warning.addClassNames(Display.FLEX,
-                FlexDirection.ROW,
-                LumoUtility.JustifyContent.CENTER,
-                LumoUtility.AlignItems.CENTER);
-
-        warning.addClassName("warning");
-        gridRoot.add(grid, warning);
 
         /*Only enable the context menu when there are records*/
         this.gridListDataView.addItemCountChangeListener(itemCountChangeEvent -> {
@@ -342,46 +364,6 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
 
             });
         });
-
-        this.searchTextField.setWidthFull();
-        SvgIcon icon = LineAwesomeIcon.SLIDERS_H_SOLID.create();
-        icon.setTooltipText("Advanced search");
-        icon.getStyle().setCursor(CURSOR_POINTER);
-        searchTextField.setSuffixComponent(icon);
-
-        final Popover popover = new Popover();
-        popover.setModal(true);
-        popover.setTarget(icon);
-        final VerticalLayout verticalLayoutPopOver = new VerticalLayout(setRowNumbersField);
-        popover.add(verticalLayoutPopOver);
-
-        this.searchTextField.setPlaceholder("Search");
-        this.searchTextField.setTooltipText("Filter by: offset or ascii/text");
-        this.searchTextField.setPrefixComponent(VaadinIcon.SEARCH.create());
-        this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
-        this.searchTextField.setClearButtonVisible(true);
-        this.searchTextField.getStyle().set("max-width", "100%");
-        this.searchTextField.addValueChangeListener(valueChangeEvent -> this.addPaginationOnGrid(valueChangeEvent.getValue()));
-
-        this.setRowNumbersField.setLabel("Row numbers per page");
-        this.setRowNumbersField.setStepButtonsVisible(true);
-        this.setRowNumbersField.setTooltipText("Row numbers per page");
-        this.setRowNumbersField.setClearButtonVisible(true);
-        this.setRowNumbersField.setValue(15);
-        this.searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
-        this.setRowNumbersField.addValueChangeListener(event -> {
-            if (event.isFromClient() && event.getValue() != null && gridListDataView.getItems().findAny().isPresent()) {
-                final Integer reconfigureNumberOfRecords = event.getValue();
-                this.grid.setPageSize(reconfigureNumberOfRecords);
-                this.addPaginationOnGrid(StringUtils.EMPTY);
-            }
-        });
-
-        final VerticalLayout verticalLayout = new VerticalLayout(gridRoot);
-        verticalLayout.setPadding(false);
-        verticalLayout.setId("verticallayout-gridroot");
-        verticalLayout.setSizeFull();
-        return verticalLayout;
     }
 
     private void addPaginationOnGrid(String filterText) {
@@ -426,6 +408,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         }
     }
 
+    @SuppressWarnings("unused")
     private void registerScrollEventListener() {
         // grid._firstVisibleIndex is not public api of the vaadin grid. I hope this will not be
         // removed.
@@ -441,15 +424,17 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         );
     }
 
-    private ProgressBar createProgressBar() {
+    private ProgressBar buildProgressBar(String text) {
         final ProgressBar progressBar = new ProgressBar();
         progressBar.setWidth("50px");
         progressBar.setIndeterminate(true);
         progressBar.setVisible(false);
+        Tooltip.forComponent(progressBar).setText(text);
         return progressBar;
     }
 
     @ClientCallable
+    @SuppressWarnings("unused")
     public void receiveScrollPosition(int index) {
         getUI().ifPresent(ui -> {
             ui.getPage().fetchCurrentURL(url -> {
@@ -462,6 +447,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
     }
 
     @Override
+    @SuppressWarnings("unused")
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         final List<String> index = beforeEnterEvent.getLocation().getQueryParameters().getParameters().get(INDEX_PARAM_NAME);
         if (index != null && index.size() > 0) {
