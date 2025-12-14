@@ -103,8 +103,6 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
      */
     private GridListDataView<HexDumpDto> gridListDataView;
     private ProgressBar progressBarHexDump;
-    private ProgressBar deleteItemsGridProgressBar;
-    private final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
 
     @PostConstruct
     public void postConstruct() {
@@ -171,21 +169,22 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
 
     private HorizontalLayout buildFilterRow() {
         final HorizontalLayout row = new HorizontalLayout();
+        final ProgressBar deleteItemsGridProgressBar = this.buildProgressBar("Deleting in progress...");
+        final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
         buttonClearGrid.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonClearGrid.setTooltipText("Clear grid");
         buttonClearGrid.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        this.deleteItemsGridProgressBar = this.buildProgressBar("Deleting in progress...");
-        this.buttonClearGrid.addClickListener(event -> {
+        buttonClearGrid.addClickListener(event -> {
             if (event.isFromClient() && this.gridListDataView.getItems().findAny().isPresent()) {
                 getUI().ifPresent(ui -> {
                     ConfirmDialog confirmDialog = ConfirmDialogBuilder.showConfirmInformation("You want to delete this hexdump ?", ui);
                     confirmDialog.addConfirmListener(e -> {
-                        this.buttonClearGrid.setVisible(false);
-                        this.deleteItemsGridProgressBar.setVisible(true);
+                        buttonClearGrid.setVisible(false);
+                        deleteItemsGridProgressBar.setVisible(true);
                         Mono.fromRunnable(this::clearGridAndRecords)
                                 .subscribeOn(Schedulers.boundedElastic())
                                 .delaySubscription(Duration.ofMillis(400))
-                                .doOnTerminate(this::afterTerminate)
+                                .doOnTerminate(this.doOnTerminate(buttonClearGrid, deleteItemsGridProgressBar))
                                 .subscribe();
                     });
                 });
@@ -209,11 +208,13 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         });
     }
 
-    private void afterTerminate() {
-        getUI().ifPresent(ui -> ui.access(() -> {
-            this.deleteItemsGridProgressBar.setVisible(false);
-            this.buttonClearGrid.setVisible(true);
-        }));
+    private Runnable doOnTerminate(Button buttonClearGrid, ProgressBar deleteItemsGridProgressBar) {
+        return () -> {
+            getUI().ifPresent(ui -> ui.access(() -> {
+                deleteItemsGridProgressBar.setVisible(false);
+                buttonClearGrid.setVisible(true);
+            }));
+        };
     }
 
     /**
