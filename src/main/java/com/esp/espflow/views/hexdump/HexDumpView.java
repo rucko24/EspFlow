@@ -50,6 +50,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.vaadin.firitin.components.grid.PagingGrid;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -97,7 +98,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
     private final Sinks.Many<EspflowMessageListItemEvent> publishEspflowMessageListItemEvent;
     private final Upload upload = new Upload();
 
-    private final PagingGridv2<HexDumpDto> grid = new PagingGridv2<>();
+    private final PagingGrid<HexDumpDto> grid = new PagingGrid<>();
     /**
      * Only to use the icon, when the Grid is empty.
      */
@@ -295,7 +296,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         this.grid.setPageSize(DEFAULT_GRID_PAGE_SIZE);
         this.gridListDataView = this.grid.setItems(List.of());
         this.grid.getColumns().forEach(e -> e.setResizable(Boolean.TRUE));
-        this.grid.setPaginationBarMode(PagingGridv2.PaginationBarMode.BOTTOM);
+        this.grid.setPaginationBarMode(PagingGrid.PaginationBarMode.BOTTOM);
 
         var tableIcon = SvgFactory.createIconFromSvg("table.svg", SIZE_30_PX, null);
         tableIcon.getStyle().setMarginRight("10px");
