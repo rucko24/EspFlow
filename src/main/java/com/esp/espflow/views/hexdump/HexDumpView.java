@@ -24,6 +24,7 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -31,11 +32,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -43,12 +46,16 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.vaadin.firitin.components.grid.PagingGrid;
 import org.vaadin.lineawesome.LineAwesomeIcon;
@@ -115,7 +122,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         super.add(headerRow, progressBarHexDump, gridComponent);
         Animated.animate(this, Animated.Animation.FADE_IN);
 
-        this.addPaginationOnGrid(StringUtils.EMPTY);
+        this.addPaginationOnGrid(StringUtils.EMPTY, Sort.Direction.ASC);
 
     }
 
@@ -132,11 +139,42 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         this.i18N(upload);
 
         final HorizontalLayout filterRow = this.buildFilterRow();
+
+        extracted();
+
         final HorizontalLayout row = new HorizontalLayout(upload, filterRow);
         row.addClassNames("row-header-hexdump");
         row.setWidthFull();
         row.setJustifyContentMode(JustifyContentMode.BETWEEN);
         return row;
+    }
+
+    private RadioButtonGroup extracted() {
+        RadioButtonGroup<String> viewMode = new RadioButtonGroup<>();
+        viewMode.addClassNames(LumoUtility.Padding.NONE, LumoUtility.Width.FULL, "md:w-auto");
+        viewMode.addThemeNames(RadioButtonTheme.EQUAL_WIDTH, RadioButtonTheme.TOGGLE);
+
+        viewMode.setAriaLabel("View mode");
+        viewMode.setTooltipText("View mode");
+
+        viewMode.setItems("List", "Columns", "Gallery");
+        viewMode.setRenderer(new ComponentRenderer<>(item -> {
+            Span span = new Span(item);
+            span.addClassNames(LumoUtility.FontWeight.MEDIUM, LumoUtility.Margin.Horizontal.AUTO, LumoUtility.Padding.Horizontal.SMALL, LumoUtility.Whitespace.NOWRAP);
+            return span;
+        }));
+        viewMode.setValue("List");
+        return viewMode;
+    }
+
+    public class RadioButtonTheme {
+
+        public static final String DIVIDERS = "dividers";
+        public static final String EQUAL_WIDTH = "equal-width";
+        public static final String PRIMARY = "primary";
+        public static final String SEGMENTED = "segmented";
+        public static final String TOGGLE = "toggle";
+
     }
 
     private FileUploadHandler buildFileUploadHandler() {
@@ -155,7 +193,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
                             this.hexDumpGeneratorService.generateHexDump(fileBytes);
                             log.info("generate hexdump file completed successfully");
                             //The grid will be filled based on the predefined page layout.
-                            this.addPaginationOnGrid(StringUtils.EMPTY);
+                            this.addPaginationOnGrid(StringUtils.EMPTY, Sort.Direction.ASC);
                             this.publishEspflowMessageListItemEvent.tryEmitNext(new EspflowMessageListItemEvent("Loaded .bin successfully", "Hex dump viewer", TABLE_SVG));
                             this.progressBarHexDump.setVisible(false);
                             ConfirmDialogBuilder.showInformationUI("Generated hexdump completed.", transferContext.getUI());
@@ -172,7 +210,6 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         final HorizontalLayout row = new HorizontalLayout();
         final ProgressBar deleteItemsGridProgressBar = this.buildProgressBar("Deleting in progress...");
         final Button buttonClearGrid = new Button(VaadinIcon.TRASH.create());
-        buttonClearGrid.addClassName(BOX_SHADOW_VAADIN_BUTTON);
         buttonClearGrid.setTooltipText("Clear grid");
         buttonClearGrid.addThemeVariants(ButtonVariant.LUMO_ERROR);
         buttonClearGrid.addClickListener(event -> {
@@ -194,7 +231,11 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
             }
         });
         final TextField searchTextField = this.buildSearchTextField();
-        row.add(deleteItemsGridProgressBar, buttonClearGrid, searchTextField);
+        searchTextField.addThemeName("outline");
+
+        InputGroup inputGroup = new InputGroup(buttonClearGrid, searchTextField);
+
+        row.add(deleteItemsGridProgressBar, inputGroup);
         row.setAlignSelf(Alignment.CENTER, searchTextField, buttonClearGrid, deleteItemsGridProgressBar);
         return row;
     }
@@ -250,7 +291,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
         searchTextField.setClearButtonVisible(true);
         searchTextField.getStyle().set("max-width", "100%");
-        searchTextField.addValueChangeListener(valueChangeEvent -> this.addPaginationOnGrid(valueChangeEvent.getValue()));
+        searchTextField.addValueChangeListener(valueChangeEvent -> this.addPaginationOnGrid(valueChangeEvent.getValue(), Sort.Direction.ASC));
 
         setRowNumbersField.setLabel("Row numbers per page");
         setRowNumbersField.setStepButtonsVisible(true);
@@ -262,7 +303,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
             if (event.isFromClient() && event.getValue() != null && gridListDataView.getItems().findAny().isPresent()) {
                 final Integer reconfigureNumberOfRecords = event.getValue();
                 this.grid.setPageSize(reconfigureNumberOfRecords);
-                this.addPaginationOnGrid(StringUtils.EMPTY);
+                this.addPaginationOnGrid(StringUtils.EMPTY, Sort.Direction.ASC);
             }
         });
         return searchTextField;
@@ -368,13 +409,14 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         });
     }
 
-    private void addPaginationOnGrid(String filterText) {
-
+    private void addPaginationOnGrid(String filterText, Sort.Direction direction) {
         this.grid.setPagingDataProvider((page, pageSize) -> {
-            int start = (int) (page * this.grid.getPageSize());
-            return this.hexDumpService.findByFilterText(filterText, PageRequest.of(start, pageSize));
+            Sort sort = Sort.by(direction, "ascii");
+            Pageable pageable = PageRequest.of((int) page, pageSize, sort);
+            Page<HexDumpDto> resultPage = this.hexDumpService.findByFilterText(filterText, pageable);
+            grid.setTotalResults(resultPage.getTotalElements());
+            return resultPage.getContent();
         });
-
     }
 
     /**

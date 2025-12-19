@@ -5,10 +5,9 @@ import com.esp.espflow.mappers.HexDumpMapper;
 import com.esp.espflow.service.respository.HexDumpRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author rubn
@@ -25,11 +24,9 @@ public class HexDumpService {
         this.hexDumpRepository.save(entity);
     }
 
-    public List<HexDumpDto> findByFilterText(String filterText, Pageable pageRequest) {
+    public Page<HexDumpDto> findByFilterText(String filterText, Pageable pageRequest) {
         return this.hexDumpRepository.findByFilterText(filterText, pageRequest)
-                .stream()
-                .map(HexDumpMapper.INSTANCE::entityToDto)
-                .toList();
+                .map(HexDumpMapper.INSTANCE::entityToDto);
     }
 
     public void deleteAll() {

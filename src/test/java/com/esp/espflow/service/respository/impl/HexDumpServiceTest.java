@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -68,14 +69,15 @@ class HexDumpServiceTest {
 
         when(hexDumpRepository.findByFilterText(filter, pageable)).thenReturn(new PageImpl<>(List.of(entity)));
 
-        List<HexDumpDto> result = hexDumpService.findByFilterText(filter, pageable);
+        Page<HexDumpDto> result = hexDumpService.findByFilterText(filter, pageable);
 
         assertAll("findByFilterText()",
                 () -> assertThat(result).isNotEmpty(),
                 () -> assertThat(result).hasSize(1),
-                () -> assertThat(result.getFirst()).isNotNull(),
-                () -> assertThat(result.getFirst().getOffset()).isEqualTo("0000:"),
-                () -> assertThat(result.getFirst().getAscii()).isEqualTo("ABC"));
+                () -> assertThat(result.getContent()).isNotNull(),
+                () -> assertThat(result.getContent().getFirst()).isNotNull(),
+                () -> assertThat(result.getContent().getFirst().getOffset()).isEqualTo("0000:"),
+                () -> assertThat(result.getContent().getFirst().getAscii()).isEqualTo("ABC"));
 
         verify(hexDumpRepository).findByFilterText(filter, pageable);
         verifyNoMoreInteractions(hexDumpRepository);
