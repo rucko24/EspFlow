@@ -22,7 +22,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
-import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
@@ -109,7 +108,6 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
     /**
      * Only to use the icon, when the Grid is empty.
      */
-    private GridListDataView<HexDumpDto> gridListDataView;
     private ProgressBar progressBarHexDump;
 
     @PostConstruct
@@ -213,7 +211,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         buttonClearGrid.setTooltipText("Clear grid");
         buttonClearGrid.addThemeVariants(ButtonVariant.LUMO_ERROR);
         buttonClearGrid.addClickListener(event -> {
-            if (event.isFromClient() && this.gridListDataView.getItems().findAny().isPresent()) {
+            if (event.isFromClient() && this.grid.getListDataView().getItems().findAny().isPresent()) {
                 getUI().ifPresent(ui -> {
                     ConfirmDialog confirmDialog = ConfirmDialogBuilder.showConfirmInformation("You want to delete this hexdump ?", ui);
                     confirmDialog.addConfirmListener(e -> {
@@ -300,7 +298,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         setRowNumbersField.setValue(DEFAULT_GRID_PAGE_SIZE);
         searchTextField.setValueChangeMode(ValueChangeMode.EAGER);
         setRowNumbersField.addValueChangeListener(event -> {
-            if (event.isFromClient() && event.getValue() != null && gridListDataView.getItems().findAny().isPresent()) {
+            if (event.isFromClient() && event.getValue() != null && this.grid.getListDataView().getItems().findAny().isPresent()) {
                 final Integer reconfigureNumberOfRecords = event.getValue();
                 this.grid.setPageSize(reconfigureNumberOfRecords);
                 this.addPaginationOnGrid(StringUtils.EMPTY, Sort.Direction.ASC);
@@ -335,7 +333,6 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         this.grid.setColumnReorderingAllowed(true);
         this.grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         this.grid.setPageSize(DEFAULT_GRID_PAGE_SIZE);
-        this.gridListDataView = this.grid.setItems(List.of());
         this.grid.getColumns().forEach(e -> e.setResizable(Boolean.TRUE));
         this.grid.setPaginationBarMode(PagingGrid.PaginationBarMode.BOTTOM);
 
@@ -358,7 +355,7 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         final GridMenuItem<HexDumpDto> gridContextMenuRow = contextMenu.addItem("Copy entire row");
 
         /*Only enable the context menu when there are records*/
-        this.gridListDataView.addItemCountChangeListener(itemCountChangeEvent -> {
+        this.grid.getListDataView().addItemCountChangeListener(itemCountChangeEvent -> {
             contextMenu.setEnabled(itemCountChangeEvent.getItemCount() != 0);
             if (itemCountChangeEvent.getItemCount() == 0) {
                 warning.removeClassName("hidden");
