@@ -31,6 +31,7 @@ public class FileUploadHandler extends TransferProgressAwareHandler<UploadEvent,
 
     @Override
     public void handleUploadRequest(UploadEvent event) {
+        event.getUI().access(upload::clearFileList);
         Mono.just(Path.of(fixedDir))
                 .flatMap(this.validateAndPreparePath(event))
                 .flatMap(this.transferFile(event))
