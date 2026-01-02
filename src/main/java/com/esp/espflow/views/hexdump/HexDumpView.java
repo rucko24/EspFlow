@@ -23,7 +23,6 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -31,13 +30,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -45,7 +42,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
@@ -133,46 +129,17 @@ public class HexDumpView extends VerticalLayout implements BeforeEnterObserver {
         upload.setDropAllowed(true);
         upload.setMaxFiles(1);
         upload.setAcceptedFileTypes(MediaType.APPLICATION_OCTET_STREAM_VALUE, ".bin");
+        upload.addFileRejectedListener(event -> ConfirmDialogBuilder.showWarning("Incorrect file type, only .bin"));
         Tooltip.forComponent(upload).setText("Drop .bin here!");
         this.i18N(upload);
 
         final HorizontalLayout filterRow = this.buildFilterRow();
-
-        extracted();
 
         final HorizontalLayout row = new HorizontalLayout(upload, filterRow);
         row.addClassNames("row-header-hexdump");
         row.setWidthFull();
         row.setJustifyContentMode(JustifyContentMode.BETWEEN);
         return row;
-    }
-
-    private RadioButtonGroup extracted() {
-        RadioButtonGroup<String> viewMode = new RadioButtonGroup<>();
-        viewMode.addClassNames(LumoUtility.Padding.NONE, LumoUtility.Width.FULL, "md:w-auto");
-        viewMode.addThemeNames(RadioButtonTheme.EQUAL_WIDTH, RadioButtonTheme.TOGGLE);
-
-        viewMode.setAriaLabel("View mode");
-        viewMode.setTooltipText("View mode");
-
-        viewMode.setItems("List", "Columns", "Gallery");
-        viewMode.setRenderer(new ComponentRenderer<>(item -> {
-            Span span = new Span(item);
-            span.addClassNames(LumoUtility.FontWeight.MEDIUM, LumoUtility.Margin.Horizontal.AUTO, LumoUtility.Padding.Horizontal.SMALL, LumoUtility.Whitespace.NOWRAP);
-            return span;
-        }));
-        viewMode.setValue("List");
-        return viewMode;
-    }
-
-    public class RadioButtonTheme {
-
-        public static final String DIVIDERS = "dividers";
-        public static final String EQUAL_WIDTH = "equal-width";
-        public static final String PRIMARY = "primary";
-        public static final String SEGMENTED = "segmented";
-        public static final String TOGGLE = "toggle";
-
     }
 
     private FileUploadHandler buildFileUploadHandler() {
