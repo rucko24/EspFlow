@@ -9,6 +9,7 @@ import vaadinAppLayoutCss from 'themes/espflow/components/vaadin-app-layout.css?
 import stepperCss from 'themes/espflow/components/stepper.css?inline';
 import listCss from 'themes/espflow/components/list.css?inline';
 import layoutCss from 'themes/espflow/components/layout.css?inline';
+import inputGroupCss from 'themes/espflow/components/input-group.css?inline';
 import inputFieldCss from 'themes/espflow/components/input-field.css?inline';
 import borderCss from 'themes/espflow/components/border.css?inline';
 
@@ -49,6 +50,10 @@ if (!document['_vaadintheme_espflow_componentCss']) {
       registerStyles(
         'layout',
         unsafeCSS(layoutCss.toString())
+      );
+      registerStyles(
+        'input-group',
+        unsafeCSS(inputGroupCss.toString())
       );
       registerStyles(
         'input-field',

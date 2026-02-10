@@ -31,7 +31,7 @@ vaadin:
 
 login:
   access-name: ${ADMIN_ESPFLOW_USER}
-  access-password: ${ESPFLOW_PASSWORD}
+  access-password: 1234
 
 compute:
   digest-algorithm: SHA-256

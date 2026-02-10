@@ -6,6 +6,7 @@ import com.esp.espflow.enums.FlashModeEnum;
 import com.esp.espflow.event.EsptoolFRWMessageListItemEvent;
 import com.esp.espflow.mappers.ExtractChipIsFromStringMapper;
 import com.esp.espflow.service.DebugSerialPortService;
+import com.esp.espflow.service.EsptoolJsComponent;
 import com.esp.espflow.service.EsptoolPathService;
 import com.esp.espflow.service.EsptoolService;
 import com.esp.espflow.service.respository.impl.WizardEspService;
@@ -106,6 +107,7 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
     private final ToggleButton toggleButtonEnableWebSerial = new ToggleButton();
     private final SvgIcon iconWebSerial = SvgFactory.createIconFromSvg(WEB_SERIAL_ICON_SVG, SIZE_30_PX, null);
     private final HorizontalLayout rowForWebSerialIcon = new HorizontalLayout();
+    private final EsptoolJsComponent esptoolJsComponent = new EsptoolJsComponent();
     /**
      * Services
      */
@@ -425,6 +427,8 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
         this.shoWizardIcon.getStyle().setColor("var(--lumo-contrast-60pct)");
         this.shoWizardIcon.setTooltipText("Show dialog");
         this.toggleButtonEnableWebSerial.setTooltipText("Enable WebSerial");
+        this.add(esptoolJsComponent);
+        this.toggleButtonEnableWebSerial.addValueChangeListener(event -> esptoolJsComponent.connect());
         this.iconWebSerial.setTooltipText("WebSerial API");
         this.rowForWebSerialIcon.add(toggleButtonEnableWebSerial, iconWebSerial);
         this.rowForWebSerialIcon.getStyle().setBorder("1px solid lightgray");

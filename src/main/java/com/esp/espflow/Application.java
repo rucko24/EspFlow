@@ -1,11 +1,8 @@
 package com.esp.espflow;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.component.page.LoadingIndicatorConfiguration;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.server.ServiceInitEvent;
-import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,17 +17,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @Theme(value = "espflow")
 @PWA(name = "EspFlow", shortName = "EspFlow", offlineResources = {})
-public class Application implements AppShellConfigurator, VaadinServiceInitListener {
+public class Application implements AppShellConfigurator {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
-    @Override
-    public void serviceInit(ServiceInitEvent event) {
-        event.getSource().addUIInitListener(ui -> {
-            LoadingIndicatorConfiguration conf = ui.getUI().getLoadingIndicatorConfiguration();
-            conf.setApplyDefaultTheme(false);
-        });
-    }
+//    @Override
+//    public void serviceInit(ServiceInitEvent event) {
+//        event.getSource().addUIInitListener(ui -> {
+//            LoadingIndicatorConfiguration conf = ui.getUI().getLoadingIndicatorConfiguration();
+//            conf.setApplyDefaultTheme(false);
+//        });
+//    }
 }

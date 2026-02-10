@@ -104,7 +104,6 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
     private final Button buttonExecuteFlashId = new Button(VaadinIcon.PLAY.create());
     private final SvgIcon svgIconUnlock = SvgFactory.createIconFromSvg("unlock-gray.svg", SIZE_30_PX, null);
     private final Button unlockPort = new Button(svgIconUnlock);
-    private final ContextMenu contextMenu = new ContextMenu(h2EsptoolVersion);
     private final ProgressBar progressBarForShowEsptoolVersion = new ProgressBar();
     private final AtomicBoolean esptoolVersionCounter = new AtomicBoolean(Boolean.FALSE);
     /**
@@ -123,6 +122,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
      * Mutable fields
      */
     private Disposable disposableSubscriberEsptoolVersionEvent;
+    private ContextMenu contextMenu;
 
     @PostConstruct
     public void constructDiv() {
@@ -202,6 +202,7 @@ public class DivHeaderPorts extends Div implements ResponsiveHeaderDiv {
         this.progressBarForShowEsptoolVersion.setWidth("200px");
         this.h2EsptoolVersion.getStyle().setCursor(CURSOR_POINTER);
         final Div divH2espToolVersion = new Div(h2EsptoolVersion, this.progressBarForShowEsptoolVersion, hr);
+        contextMenu = new ContextMenu(divH2espToolVersion);
         divH2espToolVersion.getStyle().set(MARGIN_TOP, AUTO);
 
         final Div divEndForH2EspToolVersion = new Div(divH2espToolVersion);
