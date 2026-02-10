@@ -29,6 +29,8 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -428,7 +430,21 @@ public class FlashEspView extends Div implements ResponsiveHeaderDiv, BeforeLeav
         this.shoWizardIcon.setTooltipText("Show dialog");
         this.toggleButtonEnableWebSerial.setTooltipText("Enable WebSerial");
         this.add(esptoolJsComponent);
-        this.toggleButtonEnableWebSerial.addValueChangeListener(event -> esptoolJsComponent.connect());
+        this.toggleButtonEnableWebSerial.addValueChangeListener(event -> {
+            if (event.getValue()) {
+                esptoolJsComponent.connect();
+            } else {
+                esptoolJsComponent.disconnect();
+                Notification.show("WebSerial disconnected", 2000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            }
+        });
+
+        esptoolJsComponent.addLogListener(texto -> {
+            log.info("Conect to");
+            outPutConsole.writeln(texto);
+        });
+
         this.iconWebSerial.setTooltipText("WebSerial API");
         this.rowForWebSerialIcon.add(toggleButtonEnableWebSerial, iconWebSerial);
         this.rowForWebSerialIcon.getStyle().setBorder("1px solid lightgray");

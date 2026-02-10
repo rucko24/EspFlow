@@ -15,15 +15,11 @@ public class EsptoolJsComponent extends ReactAdapterComponent {
     private int commandCounter = 0;
 
     public EsptoolJsComponent() {
-        super();
+        // Configuración por defecto al iniciar
         setBaudRate(115200);
         setDebugLogging(false);
     }
 
-    /**
-     * Define la velocidad en baudios.
-     * Ejemplo: 115200, 921600, etc.
-     */
     public void setBaudRate(int baudRate) {
         setState("baudRate", baudRate);
     }
@@ -46,7 +42,18 @@ public class EsptoolJsComponent extends ReactAdapterComponent {
         setState("commandId", commandCounter);
     }
 
+
+    /**
+     * Recibe cambios de estado (connected, disconnected, flashing...)
+     */
     public Registration addStatusChangeListener(SerializableConsumer<String> listener) {
         return addStateChangeListener("status", String.class, listener);
+    }
+
+    /**
+     * Recibe el TEXTO del serial línea a línea.
+     */
+    public Registration addLogListener(SerializableConsumer<String> listener) {
+        return addStateChangeListener("lastLog", String.class, listener);
     }
 }

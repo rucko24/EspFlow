@@ -2,25 +2,50 @@ import React, { useEffect, useRef } from 'react';
 import { ReactAdapterElement, RenderHooks } from 'Frontend/generated/flow/ReactAdapter';
 import { ESPLoaderProvider, useEspLoader } from 'esptool-react';
 
-const Engine = ({ command, commandId, onStatusUpdate }: any) => {
+const SyncEngine = ({
+    command,
+    commandId,
+    setStatus,
+    setLastLog
+}: any) => {
     const { state, actions } = useEspLoader();
-    const lastProcessedId = useRef<number>(0);
+    const lastProcessedCommandId = useRef<number>(0);
+    const lastLogLength = useRef<number>(0);
 
     useEffect(() => {
-        if (onStatusUpdate) onStatusUpdate(state.status);
-    }, [state.status, onStatusUpdate]);
+        if (setStatus) {
+            setStatus(state.status);
+        }
+    }, [state.status, setStatus]);
 
     useEffect(() => {
-        if (commandId > lastProcessedId.current) {
+        const currentLength = state.terminalOutput.length;
+        if (currentLength > lastLogLength.current) {
+            const newLine = state.terminalOutput[currentLength - 1];
+            if (setLastLog && newLine) {
+                setLastLog(newLine);
+            }
+            lastLogLength.current = currentLength;
+        }
+    }, [state.terminalOutput, setLastLog]);
+
+    useEffect(() => {
+
+        if (commandId > lastProcessedCommandId.current) {
+            console.log(`[Esptool] Ejecutando comando Java: ${command}`);
+
             switch (command) {
                 case 'connect':
-                    actions.connect().catch((e) => console.error("Error:", e));
+                    actions.connect().catch((e) => console.error("Error connecting:", e));
                     break;
                 case 'disconnect':
                     actions.disconnect();
                     break;
+                default:
+                    break;
             }
-            lastProcessedId.current = commandId;
+
+            lastProcessedCommandId.current = commandId;
         }
     }, [command, commandId, actions]);
 
@@ -32,20 +57,23 @@ class EsptoolWrapper extends ReactAdapterElement {
 
         const [command] = hooks.useState<string>("command");
         const [commandId] = hooks.useState<number>("commandId");
-        const [status, setStatus] = hooks.useState<string>("status");
-
         const [baudRate] = hooks.useState<number>("baudRate");
         const [debugLogging] = hooks.useState<boolean>("debugLogging");
 
+        const [status, setStatus] = hooks.useState<string>("status");
+        const [lastLog, setLastLog] = hooks.useState<string>("lastLog");
+
         return (
             <ESPLoaderProvider
+
                 initialBaudrate={baudRate ?? 115200}
                 initialDebugLogging={debugLogging ?? false}
             >
-                <Engine
+                <SyncEngine
                     command={command}
                     commandId={commandId}
-                    onStatusUpdate={setStatus}
+                    setStatus={setStatus}
+                    setLastLog={setLastLog}
                 />
             </ESPLoaderProvider>
         );
